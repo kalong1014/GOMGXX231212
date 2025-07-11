@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="DX7Types" platform="Win32">
+  <variable name="DDraw7Obj" type="IDirectDraw7" visibility="public" file="DX7Types.pas" line="45" />
+  <variable name="D3D7Object" type="IDirect3D7" visibility="public" file="DX7Types.pas" line="46" />
+  <variable name="D3D7Device" type="IDirect3DDevice7" visibility="public" file="DX7Types.pas" line="47" />
+  <function name="DX7FormatToAsphyre" visibility="public" file="DX7Types.pas" line="116">
+    <parameters>
+      <parameter name="Format" type="TDDPixelFormat_DX6" paramflags="const" />
+      <retval type="TAsphyrePixelFormat" />
+    </parameters>
+  </function>
+  <procedure name="AsphyreToDX7Format" visibility="public" file="DX7Types.pas" line="206">
+    <parameters>
+      <parameter name="Format" type="TAsphyrePixelFormat" />
+      <parameter name="Desc" type="TDDPixelFormat_DX6" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="DX7FindBackBufferFormat" visibility="public" file="DX7Types.pas" line="315">
+    <parameters>
+      <parameter name="Width" type="Integer" />
+      <parameter name="Height" type="Integer" />
+      <parameter name="Format" type="TAsphyrePixelFormat" />
+      <retval type="TAsphyrePixelFormat" />
+    </parameters>
+  </function>
+  <function name="DX7FindTextureFormat" visibility="public" file="DX7Types.pas" line="355">
+    <parameters>
+      <parameter name="Format" type="TAsphyrePixelFormat" />
+      <retval type="TAsphyrePixelFormat" />
+    </parameters>
+  </function>
+</namespace>

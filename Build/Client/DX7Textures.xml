@@ -1,0 +1,375 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="DX7Textures" platform="Win32">
+  <class name="TDX7LockableTexture" file="DX7Textures.pas" line="46">
+    <ancestor name="TAsphyreLockableTexture" namespace="AbstractTextures">
+      <methodref name="GetPixel" visibility="private" />
+      <methodref name="SetPixel" visibility="private" />
+      <methodref name="SetDynamicTexture" visibility="private" />
+      <propertyref name="Pixels" visibility="public" />
+      <propertyref name="DynamicTexture" visibility="public" />
+      <methodref name="Lock" visibility="public" procflags="abstract overload virtual" />
+      <methodref name="Lock" visibility="public" procflags="overload virtual" />
+      <methodref name="Unlock" visibility="public" procflags="abstract virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor override" />
+      <ancestor name="TAsphyreCustomTexture" namespace="AbstractTextures">
+        <methodref name="SetSize" visibility="private" />
+        <methodref name="SetMipmapping" visibility="private" />
+        <methodref name="SetFormat" visibility="private" />
+        <methodref name="GetClientRect" visibility="private" />
+        <methodref name="GetBytesPerPixel" visibility="protected" procflags="virtual" />
+        <methodref name="UpdateSize" visibility="protected" procflags="virtual" />
+        <methodref name="CreateTexture" visibility="protected" procflags="virtual" />
+        <methodref name="DestroyTexture" visibility="protected" procflags="virtual" />
+        <propertyref name="Format" visibility="public" />
+        <propertyref name="Width" visibility="public" />
+        <propertyref name="Height" visibility="public" />
+        <propertyref name="Active" visibility="public" />
+        <propertyref name="BytesPerPixel" visibility="public" />
+        <propertyref name="Mipmapping" visibility="public" />
+        <propertyref name="ClientRect" visibility="public" />
+        <methodref name="Initialize" visibility="public" />
+        <methodref name="Finalize" visibility="public" />
+        <methodref name="GetResourceView" visibility="public" procflags="virtual" />
+        <methodref name="Bind" visibility="public" procflags="virtual" />
+        <methodref name="HandleDeviceReset" visibility="public" procflags="virtual" />
+        <methodref name="HandleDeviceLost" visibility="public" procflags="virtual" />
+        <methodref name="PixelToLogical" visibility="public" procflags="overload" />
+        <methodref name="PixelToLogical" visibility="public" procflags="overload" />
+        <methodref name="LogicalToPixel" visibility="public" />
+        <methodref name="UpdateMipmaps" visibility="public" procflags="virtual" />
+        <propertyref name="ISPNGTexture" visibility="public" />
+        <methodref name="Create" visibility="public" procflags="constructor virtual" />
+        <methodref name="Destroy" visibility="public" procflags="destructor override" />
+        <ancestor name="TObject" namespace="System">
+          <methodref name="Create" visibility="public" procflags="constructor">
+          </methodref>
+          <methodref name="Free" visibility="public">
+          </methodref>
+          <methodref name="DisposeOf" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="InitInstance" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="CleanupInstance" visibility="public">
+          </methodref>
+          <methodref name="ClassType" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="ClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassNameIs" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassParent" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassInfo" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InstanceSize" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InheritsFrom" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="QualifiedClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="GetInterface" visibility="public">
+          </methodref>
+          <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="UnitName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="UnitScope" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="Equals" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="GetHashCode" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="ToString" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="SafeCallException" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Dispatch" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="NewInstance" visibility="public" procflags="class virtual">
+          </methodref>
+          <methodref name="FreeInstance" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+          </methodref>
+          <methodref name="GetDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <propertyref name="Disposed" visibility="protected">
+          </propertyref>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FSurface" type="IDirectDrawSurface7" visibility="private" size="4" offset="20" file="DX7Textures.pas" line="48" />
+      <field name="FSurfaceDesc" type="TDDSurfaceDesc2" visibility="private" size="124" offset="24" file="DX7Textures.pas" line="49" />
+      <field name="LockedRect" type="TRect" visibility="private" size="16" offset="148" file="DX7Textures.pas" line="51" />
+      <procedure name="UnlockRect" visibility="private" file="DX7Textures.pas" line="53">
+        <parameters>
+          <parameter name="Rect" type="PRect" />
+          <parameter name="Level" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="InitSurfaceDesc" visibility="private" file="DX7Textures.pas" line="54">
+      </procedure>
+      <function name="CreateTextureSurface" visibility="private" file="DX7Textures.pas" line="55">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DestroyTextureSurface" visibility="private" file="DX7Textures.pas" line="56">
+      </procedure>
+      <function name="GetSurfaceLevel" visibility="private" file="DX7Textures.pas" line="57">
+        <parameters>
+          <parameter name="Level" type="Integer" />
+          <retval type="IDirectDrawSurface7" />
+        </parameters>
+      </function>
+      <function name="GetSizeOfLevel" visibility="private" file="DX7Textures.pas" line="58">
+        <parameters>
+          <parameter name="Level" type="Integer" />
+          <retval type="TPoint2px" />
+        </parameters>
+      </function>
+      <procedure name="LockRect" visibility="private" file="DX7Textures.pas" line="59">
+        <parameters>
+          <parameter name="Rect" type="PRect" />
+          <parameter name="Level" type="Integer" />
+          <parameter name="Bits" type="Pointer" paramflags="out" />
+          <parameter name="Pitch" type="Integer" paramflags="out" />
+        </parameters>
+      </procedure>
+      <function name="GetLockRectPtr" visibility="private" file="DX7Textures.pas" line="61">
+        <parameters>
+          <parameter name="Rect" type="PRect" />
+          <retval type="PRect" />
+        </parameters>
+      </function>
+      <function name="GetPixelData" visibility="private" file="DX7Textures.pas" line="63">
+        <parameters>
+          <parameter name="Level" type="Integer" />
+          <parameter name="Buffer" type="TPixelSurface" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="SetPixelData" visibility="private" file="DX7Textures.pas" line="64">
+        <parameters>
+          <parameter name="Level" type="Integer" />
+          <parameter name="Buffer" type="TPixelSurface" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="UpdateSize" visibility="protected" procflags="override" file="DX7Textures.pas" line="66">
+      </procedure>
+      <function name="CreateTexture" visibility="protected" procflags="override" file="DX7Textures.pas" line="68">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DestroyTexture" visibility="protected" procflags="override" file="DX7Textures.pas" line="69">
+      </procedure>
+      <property name="Surface" visibility="public" read="FSurface" type="IDirectDrawSurface7" file="DX7Textures.pas" line="71" />
+      <property name="SurfaceDesc" visibility="public" read="FSurfaceDesc" type="TDDSurfaceDesc2" file="DX7Textures.pas" line="72" />
+      <procedure name="Bind" visibility="public" procflags="override" file="DX7Textures.pas" line="74">
+        <parameters>
+          <parameter name="Stage" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="UpdateMipmaps" visibility="public" procflags="override" file="DX7Textures.pas" line="76">
+      </procedure>
+      <procedure name="Lock" visibility="public" procflags="overload override" file="DX7Textures.pas" line="78">
+        <parameters>
+          <parameter name="Rect" type="TRect" paramflags="const" />
+          <parameter name="Bits" type="Pointer" paramflags="out" />
+          <parameter name="Pitch" type="Integer" paramflags="out" />
+        </parameters>
+      </procedure>
+      <procedure name="Unlock" visibility="public" procflags="override" file="DX7Textures.pas" line="80">
+      </procedure>
+      <constructor name="Create" visibility="public" file="DX7Textures.pas" line="82">
+        <parameters>
+        </parameters>
+      </constructor>
+    </members>
+  </class>
+  <class name="TDX7RenderTargetTexture" file="DX7Textures.pas" line="86">
+    <ancestor name="TAsphyreRenderTargetTexture" namespace="AbstractTextures">
+      <methodref name="SetDepthStencil" visibility="private" />
+      <methodref name="SetMultisamples" visibility="private" />
+      <propertyref name="DepthStencil" visibility="public" />
+      <propertyref name="Multisamples" visibility="public" />
+      <methodref name="BeginDrawTo" visibility="public" procflags="abstract virtual" />
+      <methodref name="EndDrawTo" visibility="public" procflags="abstract virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor override" />
+      <ancestor name="TAsphyreCustomTexture" namespace="AbstractTextures">
+        <methodref name="SetSize" visibility="private" />
+        <methodref name="SetMipmapping" visibility="private" />
+        <methodref name="SetFormat" visibility="private" />
+        <methodref name="GetClientRect" visibility="private" />
+        <methodref name="GetBytesPerPixel" visibility="protected" procflags="virtual" />
+        <methodref name="UpdateSize" visibility="protected" procflags="virtual" />
+        <methodref name="CreateTexture" visibility="protected" procflags="virtual" />
+        <methodref name="DestroyTexture" visibility="protected" procflags="virtual" />
+        <propertyref name="Format" visibility="public" />
+        <propertyref name="Width" visibility="public" />
+        <propertyref name="Height" visibility="public" />
+        <propertyref name="Active" visibility="public" />
+        <propertyref name="BytesPerPixel" visibility="public" />
+        <propertyref name="Mipmapping" visibility="public" />
+        <propertyref name="ClientRect" visibility="public" />
+        <methodref name="Initialize" visibility="public" />
+        <methodref name="Finalize" visibility="public" />
+        <methodref name="GetResourceView" visibility="public" procflags="virtual" />
+        <methodref name="Bind" visibility="public" procflags="virtual" />
+        <methodref name="HandleDeviceReset" visibility="public" procflags="virtual" />
+        <methodref name="HandleDeviceLost" visibility="public" procflags="virtual" />
+        <methodref name="PixelToLogical" visibility="public" procflags="overload" />
+        <methodref name="PixelToLogical" visibility="public" procflags="overload" />
+        <methodref name="LogicalToPixel" visibility="public" />
+        <methodref name="UpdateMipmaps" visibility="public" procflags="virtual" />
+        <propertyref name="ISPNGTexture" visibility="public" />
+        <methodref name="Create" visibility="public" procflags="constructor virtual" />
+        <methodref name="Destroy" visibility="public" procflags="destructor override" />
+        <ancestor name="TObject" namespace="System">
+          <methodref name="Create" visibility="public" procflags="constructor">
+          </methodref>
+          <methodref name="Free" visibility="public">
+          </methodref>
+          <methodref name="DisposeOf" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="InitInstance" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="CleanupInstance" visibility="public">
+          </methodref>
+          <methodref name="ClassType" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="ClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassNameIs" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassParent" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassInfo" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InstanceSize" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InheritsFrom" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="QualifiedClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="GetInterface" visibility="public">
+          </methodref>
+          <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="UnitName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="UnitScope" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="Equals" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="GetHashCode" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="ToString" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="SafeCallException" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Dispatch" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="NewInstance" visibility="public" procflags="class virtual">
+          </methodref>
+          <methodref name="FreeInstance" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+          </methodref>
+          <methodref name="GetDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <propertyref name="Disposed" visibility="protected">
+          </propertyref>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FSurface" type="IDirectDrawSurface7" visibility="private" size="4" offset="24" file="DX7Textures.pas" line="88" />
+      <field name="FSurfaceDesc" type="TDDSurfaceDesc2" visibility="private" size="124" offset="28" file="DX7Textures.pas" line="89" />
+      <field name="PrevSurface" type="IDirectDrawSurface7" visibility="private" size="4" offset="152" file="DX7Textures.pas" line="90" />
+      <procedure name="InitSurfaceDesc" visibility="private" file="DX7Textures.pas" line="92">
+      </procedure>
+      <function name="CreateTextureSurface" visibility="private" file="DX7Textures.pas" line="93">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DestroyTextureSurface" visibility="private" file="DX7Textures.pas" line="94">
+      </procedure>
+      <procedure name="UpdateSize" visibility="protected" procflags="override" file="DX7Textures.pas" line="96">
+      </procedure>
+      <function name="CreateTexture" visibility="protected" procflags="override" file="DX7Textures.pas" line="98">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DestroyTexture" visibility="protected" procflags="override" file="DX7Textures.pas" line="99">
+      </procedure>
+      <property name="Surface" visibility="public" read="FSurface" type="IDirectDrawSurface7" file="DX7Textures.pas" line="101" />
+      <property name="SurfaceDesc" visibility="public" read="FSurfaceDesc" type="TDDSurfaceDesc2" file="DX7Textures.pas" line="102" />
+      <procedure name="Bind" visibility="public" procflags="override" file="DX7Textures.pas" line="104">
+        <parameters>
+          <parameter name="Stage" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="HandleDeviceReset" visibility="public" procflags="override" file="DX7Textures.pas" line="106">
+      </procedure>
+      <procedure name="HandleDeviceLost" visibility="public" procflags="override" file="DX7Textures.pas" line="107">
+      </procedure>
+      <function name="BeginDrawTo" visibility="public" procflags="override" file="DX7Textures.pas" line="109">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="EndDrawTo" visibility="public" procflags="override" file="DX7Textures.pas" line="110">
+      </procedure>
+      <constructor name="Create" visibility="public" file="DX7Textures.pas" line="112">
+        <parameters>
+        </parameters>
+      </constructor>
+    </members>
+  </class>
+</namespace>

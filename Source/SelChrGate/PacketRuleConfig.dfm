@@ -1,0 +1,878 @@
+object frmPacketRule: TfrmPacketRule
+  Left = 514
+  Top = 399
+  Margins.Left = 0
+  Margins.Top = 0
+  Margins.Right = 0
+  Margins.Bottom = 0
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
+  Caption = #23433#20840#36807#28388#35774#32622
+  ClientHeight = 358
+  ClientWidth = 611
+  Color = clBtnFace
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = #23435#20307
+  Font.Style = []
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 12
+  object Label11: TLabel
+    Left = 253
+    Top = 32
+    Width = 108
+    Height = 12
+    Caption = #35013#22791#21152#36895#24230#36739#27491#22240#25968
+  end
+  object Label13: TLabel
+    Left = 12
+    Top = 329
+    Width = 384
+    Height = 12
+    Margins.Left = 16
+    Margins.Top = 16
+    Margins.Right = 16
+    Margins.Bottom = 16
+    Caption = #27880#24847#65306#20197#19978#21442#25968#35843#33410#21518#23558#31435#21363#29983#25928#65281#40736#26631#31227#21160#21040#25511#20214#19978#65292#21487#20197#26597#30475#25552#31034#12290
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clRed
+    Font.Height = -12
+    Font.Name = #23435#20307
+    Font.Style = []
+    ParentFont = False
+  end
+  object pcProcessPack: TPageControl
+    Left = 0
+    Top = 0
+    Width = 611
+    Height = 313
+    ActivePage = TabSheet3
+    Align = alTop
+    Style = tsFlatButtons
+    TabOrder = 0
+    ExplicitWidth = 613
+    object TabSheet2: TTabSheet
+      Caption = ' '#36830#25509#21015#34920
+      ImageIndex = 1
+      object Label9: TLabel
+        Left = 10
+        Top = 4
+        Width = 54
+        Height = 12
+        Caption = #24403#21069#22312#32447':'
+      end
+      object LabelTempList: TLabel
+        Left = 150
+        Top = 5
+        Width = 66
+        Height = 12
+        Caption = #21160#24577#36807#28388'IP:'
+      end
+      object Label10: TLabel
+        Left = 291
+        Top = 5
+        Width = 66
+        Height = 12
+        Caption = #27704#20037#36807#28388'IP:'
+      end
+      object Label23: TLabel
+        Left = 150
+        Top = 192
+        Width = 114
+        Height = 12
+        Caption = 'IP'#27573#36807#28388' ('#21491#38190#32534#36753')'
+      end
+      object ListBoxActiveList: TListBox
+        Left = 8
+        Top = 21
+        Width = 134
+        Height = 260
+        Hint = #24403#21069#36830#25509#30340'IP'#22320#22336#21015#34920
+        ImeName = #20013#25991'('#31616#20307') - '#24517#24212' Bing '#36755#20837#27861
+        ItemHeight = 12
+        Items.Strings = (
+          '888.888.888.888')
+        ParentShowHint = False
+        PopupMenu = ActiveListPopupMenu
+        ShowHint = True
+        Sorted = True
+        TabOrder = 0
+      end
+      object ListBoxTempList: TListBox
+        Left = 148
+        Top = 21
+        Width = 134
+        Height = 165
+        Hint = #21160#24577#36807#28388#21015#34920#65292#22312#27492#21015#34920#20013#30340'IP'#23558#26080#27861#24314#31435#36830#25509#65292#20294#22312#31243#24207#37325#26032#21551#21160#26102#27492#21015#34920#30340#20449#24687#23558#34987#28165#31354
+        ImeName = #20013#25991'('#31616#20307') - '#24517#24212' Bing '#36755#20837#27861
+        ItemHeight = 12
+        Items.Strings = (
+          '888.888.888.888')
+        ParentShowHint = False
+        PopupMenu = TempBlockListPopupMenu
+        ShowHint = True
+        Sorted = True
+        TabOrder = 1
+      end
+      object ListBoxBlockList: TListBox
+        Left = 288
+        Top = 21
+        Width = 134
+        Height = 165
+        Hint = #27704#20037#36807#28388#21015#34920#65292#22312#27492#21015#34920#20013#30340'IP'#23558#26080#27861#24314#31435#36830#25509#65292#27492#21015#34920#23558#20445#23384#20110#37197#32622#25991#20214#20013#65292#22312#31243#24207#37325#26032#21551#21160#26102#20250#37325#26032#21152#36733#27492#21015#34920
+        ImeName = #20013#25991'('#31616#20307') - '#24517#24212' Bing '#36755#20837#27861
+        ItemHeight = 12
+        Items.Strings = (
+          '888.888.888.888')
+        ParentShowHint = False
+        PopupMenu = BlockListPopupMenu
+        ShowHint = True
+        Sorted = True
+        TabOrder = 2
+      end
+      object ListBoxIPAreaFilter: TListBox
+        Left = 148
+        Top = 210
+        Width = 274
+        Height = 71
+        Hint = 'IP'#27573#36807#28388#21015#34920#65292#22320#22336#30001#23567#21040#22823#65292#26684#24335#22914#65306'127.0.0.1-128.0.0.1'
+        ImeName = #20013#25991'('#31616#20307') - '#24517#24212' Bing '#36755#20837#27861
+        ItemHeight = 12
+        ParentShowHint = False
+        PopupMenu = PopupMenu_IPAreaFilter
+        ShowHint = True
+        TabOrder = 3
+        OnDblClick = ListBoxIPAreaFilterDblClick
+      end
+      object GroupBox1: TGroupBox
+        Left = 428
+        Top = 21
+        Width = 169
+        Height = 97
+        Caption = '                 '
+        TabOrder = 4
+        object Label12: TLabel
+          Left = 8
+          Top = 45
+          Width = 150
+          Height = 12
+          Caption = #36830#25509#38480#21046':         '#36830#25509'/IP'
+        end
+        object Label14: TLabel
+          Left = 8
+          Top = 71
+          Width = 120
+          Height = 12
+          Caption = #36830#25509#36229#26102':         '#31186
+        end
+        object etMaxConnectOfIP: TSpinEdit
+          Tag = 20
+          Left = 63
+          Top = 42
+          Width = 49
+          Height = 21
+          Hint = #21333#20010'IP'#22320#22336#65292#26368#22810#21487#20197#24314#31435#36830#25509#25968#65292#36229#36807#25351#23450#36830#25509#25968#23558#25353#19979#38754#30340#25805#20316#22788#29702
+          EditorEnabled = False
+          MaxValue = 1000
+          MinValue = 1
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          Value = 50
+          OnChange = etMaxConnectOfIPChange
+        end
+        object etClientTimeOutTime: TSpinEdit
+          Tag = 21
+          Left = 63
+          Top = 68
+          Width = 49
+          Height = 21
+          EditorEnabled = False
+          MaxValue = 90
+          MinValue = 10
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 1
+          Value = 10
+          OnChange = etMaxConnectOfIPChange
+        end
+        object cbDefenceCC: TCheckBox
+          Tag = 122
+          Left = 8
+          Top = 19
+          Width = 105
+          Height = 17
+          BiDiMode = bdLeftToRight
+          Caption = #38450#27490'CC'#25915#20987
+          ParentBiDiMode = False
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 2
+          OnClick = cbAllowGetBackChrClick
+        end
+      end
+      object cbCheckNullConnect: TCheckBox
+        Tag = 120
+        Left = 435
+        Top = 19
+        Width = 103
+        Height = 17
+        BiDiMode = bdLeftToRight
+        Caption = #38450#27490#36229#36830#25509#25915#20987
+        ParentBiDiMode = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 5
+        OnClick = cbAllowGetBackChrClick
+      end
+      object GroupBoxNullConnect: TGroupBox
+        Left = 428
+        Top = 126
+        Width = 169
+        Height = 155
+        Caption = #27969#37327#25511#21046
+        TabOrder = 6
+        object Label17: TLabel
+          Left = 8
+          Top = 50
+          Width = 54
+          Height = 12
+          Caption = #25968#37327#38480#21046':'
+        end
+        object Label18: TLabel
+          Left = 8
+          Top = 23
+          Width = 54
+          Height = 12
+          Caption = #20020#30028#22823#23567':'
+        end
+        object etMaxClientMsgCount: TSpinEdit
+          Tag = 24
+          Left = 68
+          Top = 47
+          Width = 69
+          Height = 21
+          Hint = #19968#27425#25509#25910#21040#25968#25454#20449#24687#30340#25968#37327#22810#23569#65292#36229#36807#25351#23450#25968#37327#23558#34987#35270#20026#25915#20987#12290
+          EditorEnabled = False
+          MaxValue = 100
+          MinValue = 1
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          Value = 5
+          OnChange = etMaxConnectOfIPChange
+        end
+        object etNomClientPacketSize: TSpinEdit
+          Tag = 22
+          Left = 68
+          Top = 20
+          Width = 69
+          Height = 21
+          Hint = #25509#25910#21040#30340#25968#25454#20449#24687#20020#30028#22823#23567#65292#22914#26524#36229#36807#27492#22823#23567#65292#13#23558#34987#29305#27530#22788#29702#65292#19968#33324#35774#32622#40664#35748#20540'400'#21363#21487#12290
+          Increment = 10
+          MaxValue = 2000
+          MinValue = 1
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 1
+          Value = 100
+          OnChange = etMaxConnectOfIPChange
+        end
+        object GroupBox7: TGroupBox
+          Left = 8
+          Top = 73
+          Width = 153
+          Height = 74
+          Margins.Left = 8
+          Margins.Top = 8
+          Margins.Right = 8
+          Margins.Bottom = 8
+          Caption = #25915#20987#25805#20316
+          TabOrder = 2
+          object rdAddBlockList: TRadioButton
+            Left = 8
+            Top = 51
+            Width = 129
+            Height = 17
+            Hint = #23558#27492#36830#25509#30340'IP'#21152#20837#27704#20037#36807#28388#21015#34920#65292#24182#23558#27492'IP'#30340#25152#26377#36830#25509#24378#34892#20013#26029
+            Caption = #21152#20837#27704#20037#36807#28388#21015#34920
+            ParentShowHint = False
+            ShowHint = True
+            TabOrder = 0
+            OnClick = rdDisConnectClick
+          end
+          object rdAddTempList: TRadioButton
+            Left = 8
+            Top = 33
+            Width = 129
+            Height = 17
+            Hint = #23558#27492#36830#25509#30340'IP'#21152#20837#21160#24577#36807#28388#21015#34920#65292#24182#23558#27492'IP'#30340#25152#26377#36830#25509#24378#34892#20013#26029
+            Caption = #21152#20837#21160#24577#36807#28388#21015#34920
+            ParentShowHint = False
+            ShowHint = True
+            TabOrder = 1
+            OnClick = rdDisConnectClick
+          end
+          object rdDisConnect: TRadioButton
+            Left = 8
+            Top = 16
+            Width = 129
+            Height = 17
+            Hint = #23558#36830#25509#31616#21333#30340#26029#24320#22788#29702
+            Caption = #26029#24320#36830#25509
+            ParentShowHint = False
+            ShowHint = True
+            TabOrder = 2
+            OnClick = rdDisConnectClick
+          end
+        end
+      end
+      object cbKickOverPacketSize: TCheckBox
+        Tag = 121
+        Left = 436
+        Top = 122
+        Width = 90
+        Height = 17
+        Hint = #25171#24320#27492#21151#33021#21518#65292#22914#26524#23458#25143#31471#30340#21457#36865#30340#25968#25454#36229#36807#25351#23450#38480#21046#23558#20250#30452#25509#23558#20854#25481#32447
+        BiDiMode = bdLeftToRight
+        Caption = #24322#24120#25481#32447#22788#29702
+        ParentBiDiMode = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 7
+        OnClick = cbAllowGetBackChrClick
+      end
+    end
+    object TabSheet3: TTabSheet
+      Caption = #26032#24314#35282#33394#36807#28388
+      ImageIndex = 2
+      object Bevel1: TBevel
+        Left = 171
+        Top = 3
+        Width = 17
+        Height = 280
+        Shape = bsLeftLine
+      end
+      object Label5: TLabel
+        Left = 8
+        Top = 29
+        Width = 138
+        Height = 12
+        Caption = #20005' <-> '#26494' '#31561#32423': ('#24314#35758'5)'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = #23435#20307
+        Font.Style = []
+        ParentFont = False
+      end
+      object cbCheckNewIDOfIP: TCheckBox
+        Tag = 24
+        Left = 8
+        Top = 6
+        Width = 114
+        Height = 17
+        Caption = #38480#21046#26032#35282#33394#36895#24230
+        TabOrder = 0
+        OnClick = cbAllowGetBackChrClick
+      end
+      object TrackBarIDLimitLevel: TTrackBar
+        Left = 3
+        Top = 41
+        Width = 162
+        Height = 25
+        Max = 50
+        Min = 1
+        Position = 1
+        TabOrder = 1
+        OnChange = TrackBarIDLimitLevelChange
+      end
+      object ListBoxCharNameFiltList: TListBox
+        Left = 8
+        Top = 118
+        Width = 149
+        Height = 161
+        ItemHeight = 12
+        ParentShowHint = False
+        ShowHint = True
+        Sorted = True
+        TabOrder = 2
+      end
+      object CheckBox17: TCheckBox
+        Left = 8
+        Top = 72
+        Width = 129
+        Height = 17
+        Caption = #20801#35768#21024#38500#35282#33394
+        TabOrder = 3
+      end
+      object CheckBox1: TCheckBox
+        Left = 8
+        Top = 95
+        Width = 129
+        Height = 17
+        Caption = #26032#27880#20876#35282#33394#23383#31526#36807#28388
+        TabOrder = 4
+      end
+      object pcCharacterFiltering: TPageControl
+        Left = 187
+        Top = 3
+        Width = 406
+        Height = 276
+        ActivePage = tsFiltering1
+        TabOrder = 5
+        object tsFiltering1: TTabSheet
+          Caption = #35282#33394#23383#31526#36807#28388#19968
+          object Label1: TLabel
+            Left = 10
+            Top = 57
+            Width = 360
+            Height = 48
+            Caption = 
+              #12289#12290#183#713#711#168#12291#12293#8212#65374#8214#8230#8216#8217#8220#8221#12308#12309#12296#12297#12298#12299#12300#12301#12302#12303#12310#12311#12304#12305#13#10#177#215#247#8758#8743#8744#8721#8719#8746#8745#8712#8759#8730#8869#8741#8736#8978#8857#8747#8750#8801#8780#8776#8765#8733#8800#8814#8815#8804#8805#13#10 +
+              #8734#8757#8756#9794#9792#176#8242#8243#8451#65284#164#65504#65505#8240#167#8470#9734#9733#9675#9679#9678#9671#9670#9633#9632#9651#9650#8251#8594#8592#13#10#8593#8595#12307
+            Enabled = False
+          end
+          object Label4: TLabel
+            Left = 10
+            Top = 134
+            Width = 360
+            Height = 24
+            Caption = #8560#8561#8562#8563#8564#8565#8566#8567#8568#8569#913#914#915#916#917#918#919#920#921#922#923#924#925#926#927#928#929#931#932#933#13#10#934#935#936#937#945#946#947#948#949#950#951#952#953#954#955#956#957#958#959#960#961#963#964#965#966#967#968#969
+            Enabled = False
+          end
+          object Label6: TLabel
+            Left = 10
+            Top = 187
+            Width = 360
+            Height = 36
+            Caption = 
+              #1040#1041#1042#1043#1044#1045#1025#1046#1047#1048#1049#1050#1051#1052#1053#1054#1055#1056#1057#1058#1059#1060#1061#1062#1063#1064#1065#1066#1067#1068#13#10#1069#1070#1071#1072#1073#1074#1075#1076#1077#1105#1078#1079#1080#1081#1082#1083#1084#1085#1086#1087#1088#1089#1090#1091#1092#1093#1094#1095#1096#1097#13#10 +
+              #1098#1099#1100#1101#1102#1103
+            Enabled = False
+          end
+          object CheckBox2: TCheckBox
+            Left = 10
+            Top = 11
+            Width = 113
+            Height = 17
+            Caption = #31105#27490#20351#29992#31354#26684#23383#31526
+            Checked = True
+            State = cbChecked
+            TabOrder = 0
+          end
+          object CheckBox3: TCheckBox
+            Left = 216
+            Top = 11
+            Width = 129
+            Height = 17
+            Caption = #31105#27490#20351#29992#33521#25991#21644#25968#23383
+            TabOrder = 1
+          end
+          object CheckBox4: TCheckBox
+            Left = 10
+            Top = 34
+            Width = 121
+            Height = 17
+            Caption = #31105#27490#20351#29992#29305#33394#23383#31526#65306
+            TabOrder = 2
+          end
+          object CheckBox5: TCheckBox
+            Left = 10
+            Top = 111
+            Width = 121
+            Height = 17
+            Caption = #31105#27490#20351#29992#24076#33098#23383#31526#65306
+            TabOrder = 3
+          end
+          object CheckBox6: TCheckBox
+            Left = 10
+            Top = 164
+            Width = 137
+            Height = 17
+            Caption = #31105#27490#20351#29992#20420#32599#26031#23383#31526#65306
+            TabOrder = 4
+          end
+        end
+        object tsFiltering2: TTabSheet
+          Caption = #35282#33394#23383#31526#36807#28388#20108
+          ImageIndex = 1
+          object Label8: TLabel
+            Left = 10
+            Top = 34
+            Width = 360
+            Height = 48
+            Caption = 
+              #9472#9473#9474#9475#9476#9477#9478#9479#9480#9481#9482#9483#9484#9485#9486#9487#9488#9489#9490#9491#9492#9493#9494#9495#9496#9497#9498#9499#9500#9501#13#10#9502#9503#9504#9505#9506#9507#9508#9509#9510#9511#9512#9513#9514#9515#9516#9517#9518#9519#9520#9521#9522#9523#9524#9525#9526#9527#9528#9529#9530#9531#13#10 +
+              #9532#9533#9534#9535#9536#9537#9538#9539#9540#9541#9542#9543#9544#9545#9546#9547#65077#65078#65081#65082#65087#65088#65085#65086#65089#65090#65091#65092#65083#65084#13#10#65079#65080#65073#65075#65076
+            Enabled = False
+          end
+          object Label2: TLabel
+            Left = 10
+            Top = 111
+            Width = 240
+            Height = 12
+            Caption = #9352#9353#9354#9355#9356#9357#9358#9359#9360#9361#9362#9363#9364#9365#9366#9367#9368#9369#9370#9371
+            Enabled = False
+          end
+          object Label3: TLabel
+            Left = 10
+            Top = 152
+            Width = 240
+            Height = 12
+            Caption = #9332#9333#9334#9335#9336#9337#9338#9339#9340#9341#9342#9343#9344#9345#9346#9347#9348#9349#9350#9351
+            Enabled = False
+          end
+          object Label7: TLabel
+            Left = 10
+            Top = 193
+            Width = 120
+            Height = 12
+            Caption = #9312#9313#9314#9315#9316#9317#9318#9319#9320#9321
+            Enabled = False
+          end
+          object Label15: TLabel
+            Left = 228
+            Top = 193
+            Width = 120
+            Height = 12
+            Caption = #12832#12833#12834#12835#12836#12837#12838#12839#12840#12841
+            Enabled = False
+          end
+          object CheckBox7: TCheckBox
+            Left = 10
+            Top = 11
+            Width = 137
+            Height = 17
+            Caption = #31105#27490#20351#29992#20197#19979#21046#34920#31526#65306
+            Checked = True
+            State = cbChecked
+            TabOrder = 0
+          end
+          object CheckBox8: TCheckBox
+            Left = 10
+            Top = 88
+            Width = 121
+            Height = 17
+            Caption = #31105#27490#20351#29992#20197#19979#25968#23383#65306
+            TabOrder = 1
+          end
+          object CheckBox9: TCheckBox
+            Left = 10
+            Top = 129
+            Width = 121
+            Height = 17
+            Caption = #31105#27490#20351#29992#20197#19979#25968#23383#65306
+            TabOrder = 2
+          end
+          object CheckBox10: TCheckBox
+            Left = 10
+            Top = 170
+            Width = 121
+            Height = 17
+            Caption = #31105#27490#20351#29992#20197#19979#25968#23383#65306
+            TabOrder = 3
+          end
+          object CheckBox11: TCheckBox
+            Left = 228
+            Top = 170
+            Width = 121
+            Height = 17
+            Caption = #31105#27490#20351#29992#20197#19979#25968#23383#65306
+            TabOrder = 4
+          end
+        end
+        object tsFiltering3: TTabSheet
+          Caption = #35282#33394#23383#31526#36807#28388#19977
+          ImageIndex = 2
+          object Label16: TLabel
+            Left = 10
+            Top = 34
+            Width = 144
+            Height = 12
+            Caption = #8544#8545#8546#8547#8548#8549#8550#8551#8552#8553#8554#8555
+            Enabled = False
+          end
+          object Label19: TLabel
+            Left = 10
+            Top = 75
+            Width = 360
+            Height = 60
+            Caption = 
+              #65281#65282#65283#65509#65285#65286#65287#65288#65289#65290#65291#65292#65293#65294#65295#65296#65297#65298#65299#65300#65301#65302#65303#65304#65305#65306#65307#65308#65309#65310#13#10#65311#65312#65313#65314#65315#65316#65317#65318#65319#65320#65321#65322#65323#65324#65325#65326#65327#65328#65329#65330#65331#65332#65333#65334#65335#65336#65337#65338#65339#65340#13#10 +
+              #65341#65342#65343#65344#65345#65346#65347#65348#65349#65350#65351#65352#65353#65354#65355#65356#65357#65358#65359#65360#65361#65362#65363#65364#65365#65366#65367#65368#65369#65370#13#10#65371#65372#65373#13#10#65507
+            Enabled = False
+          end
+          object Label20: TLabel
+            Left = 11
+            Top = 164
+            Width = 360
+            Height = 24
+            Caption = #12549#12550#12551#12552#12553#12554#12555#12556#12557#12558#12559#12560#12561#12562#12563#12564#12565#12566#12567#12568#12569#12570#12571#12572#12573#12574#12575#12576#12577#12578#13#10#12579#12580#12581#12582#12583#12584#12585
+            Enabled = False
+          end
+          object Label21: TLabel
+            Left = 11
+            Top = 217
+            Width = 192
+            Height = 12
+            Caption = #257#225#462#224#275#233#283#232#299#237#464#236#333#243#466#242#363#250#468#249#470#472#474#476#252#234#593#59335#324#328#59336#609
+            Enabled = False
+          end
+          object CheckBox12: TCheckBox
+            Left = 10
+            Top = 11
+            Width = 121
+            Height = 17
+            Caption = #31105#27490#20351#29992#20197#19979#25968#23383#65306
+            TabOrder = 0
+          end
+          object CheckBox13: TCheckBox
+            Left = 10
+            Top = 52
+            Width = 121
+            Height = 17
+            Caption = #31105#27490#20351#29992#20840#35282#23383#31526#65306
+            Checked = True
+            State = cbChecked
+            TabOrder = 1
+          end
+          object CheckBox14: TCheckBox
+            Left = 10
+            Top = 141
+            Width = 153
+            Height = 17
+            Caption = #31105#27490#20351#29992#20197#19979#27880#38899#31526#21495#65306
+            Checked = True
+            State = cbChecked
+            TabOrder = 2
+          end
+          object CheckBox15: TCheckBox
+            Left = 11
+            Top = 194
+            Width = 153
+            Height = 17
+            Caption = #31105#27490#20351#29992#20197#19979#25340#38899#31526#21495#65306
+            Checked = True
+            State = cbChecked
+            TabOrder = 3
+          end
+        end
+        object tsFiltering4: TTabSheet
+          Caption = #35282#33394#23383#31526#36807#28388#22235
+          ImageIndex = 3
+          object Label22: TLabel
+            Left = 10
+            Top = 34
+            Width = 360
+            Height = 36
+            Caption = 
+              #12353#12354#12355#12356#12357#12358#12359#12360#12361#12362#12363#12364#12365#12366#12367#12368#12369#12370#12371#12372#12373#12374#12375#12376#12377#12378#12379#12380#12381#12382#13#10#12383#12384#12385#12386#12387#12388#12389#12390#12391#12392#12393#12394#12395#12396#12397#12398#12399#12400#12401#12402#12403#12404#12405#12406#12407#12408#12409#12410#12411#12412#13#10 +
+              #12413#12414#12415#12416#12417#12418#12419#12420#12421#12422#12423#12424#12425#12426#12427#12428#12429#12430#12431#12432#12433#12434#12435
+            Enabled = False
+          end
+          object Label24: TLabel
+            Left = 10
+            Top = 99
+            Width = 360
+            Height = 36
+            Caption = 
+              #12449#12450#12451#12452#12453#12454#12455#12456#12457#12458#12459#12460#12461#12462#12463#12464#12465#12466#12467#12468#12469#12470#12471#12472#12473#12474#12475#12476#12477#12478#13#10#12479#12480#12481#12482#12483#12484#12485#12486#12487#12488#12489#12490#12491#12492#12493#12494#12495#12496#12497#12498#12499#12500#12501#12502#12503#12504#12505#12506#12507#12508#13#10 +
+              #12509#12510#12511#12512#12513#12514#12515#12516#12517#12518#12519#12520#12521#12522#12523#12524#12525#12526#12527#12528#12529#12530#12531#12532#12533#12534
+            Enabled = False
+          end
+          object CheckBox16: TCheckBox
+            Left = 10
+            Top = 11
+            Width = 113
+            Height = 17
+            Caption = #31105#27490#20351#29992#20551#26085#25991#65306
+            Checked = True
+            State = cbChecked
+            TabOrder = 0
+          end
+          object CheckBox18: TCheckBox
+            Left = 10
+            Top = 76
+            Width = 113
+            Height = 17
+            Caption = #31105#27490#20351#29992#20551#26085#25991#65306
+            Checked = True
+            State = cbChecked
+            TabOrder = 1
+          end
+        end
+      end
+    end
+  end
+  object btnSave: TButton
+    Left = 433
+    Top = 322
+    Width = 81
+    Height = 26
+    Caption = #20445#23384'(&S)'
+    TabOrder = 1
+    OnClick = btnSaveClick
+  end
+  object btnClose: TButton
+    Left = 520
+    Top = 322
+    Width = 81
+    Height = 26
+    Caption = #20851#38381'(&O)'
+    Default = True
+    ModalResult = 1
+    TabOrder = 2
+    OnClick = btnCloseClick
+  end
+  object ActiveListPopupMenu: TPopupMenu
+    OnPopup = ActiveListPopupMenuPopup
+    Left = 264
+    Top = 280
+    object APOPMENU_REFLIST: TMenuItem
+      Caption = #21047#26032'(&R)'
+      OnClick = APOPMENU_REFLISTClick
+    end
+    object APOPMENU_SORT: TMenuItem
+      Caption = #25490#24207'(&S)'
+      OnClick = APOPMENU_SORTClick
+    end
+    object N3: TMenuItem
+      Caption = '-'
+    end
+    object APOPMENU_KICK: TMenuItem
+      Caption = #36386#19979#32447'(&K)'
+      OnClick = APOPMENU_KICKClick
+    end
+    object N2: TMenuItem
+      Caption = '-'
+    end
+    object APOPMENU_ADDTEMPLIST: TMenuItem
+      Caption = #21152#20837#21160#24577#36807#28388#21015#34920'(&A)'
+      OnClick = APOPMENU_ADDTEMPLISTClick
+    end
+    object APOPMENU_BLOCKLIST: TMenuItem
+      Caption = #21152#20837#27704#20037#36807#28388#21015#34920'(&D)'
+      OnClick = APOPMENU_BLOCKLISTClick
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object APOPMENU_AllToTempBLOCKLIST: TMenuItem
+      Caption = #20840#37096#21152#20837#21160#24577#36807#28388#21015#34920'(&T)'
+      OnClick = APOPMENU_AllToTempBLOCKLISTClick
+    end
+    object APOPMENU_AllToBLOCKLIST: TMenuItem
+      Caption = #20840#37096#21152#20837#27704#20037#36807#28388#21015#34920'(&B)'
+      OnClick = APOPMENU_AllToBLOCKLISTClick
+    end
+  end
+  object TempBlockListPopupMenu: TPopupMenu
+    OnPopup = TempBlockListPopupMenuPopup
+    Left = 296
+    Top = 280
+    object TPOPMENU_REFLIST: TMenuItem
+      Caption = #21047#26032'(&R)'
+      OnClick = TPOPMENU_REFLISTClick
+    end
+    object TPOPMENU_SORT: TMenuItem
+      Caption = #25490#24207'(&S)'
+      OnClick = TPOPMENU_SORTClick
+    end
+    object N5: TMenuItem
+      Caption = '-'
+    end
+    object TPOPMENU_ADD: TMenuItem
+      Caption = #22686#21152'(&A)'
+      OnClick = TPOPMENU_ADDClick
+    end
+    object TPOPMENU_DELETE: TMenuItem
+      Caption = #21024#38500'(&D)'
+      OnClick = TPOPMENU_DELETEClick
+    end
+    object TPOPMENU_DELETE_ALL: TMenuItem
+      Caption = #20840#37096#21024#38500'(&C)'
+      OnClick = TPOPMENU_DELETE_ALLClick
+    end
+    object N4: TMenuItem
+      Caption = '-'
+    end
+    object TPOPMENU_AddtoBLOCKLIST: TMenuItem
+      Caption = #21152#20837#27704#20037#36807#28388#21015#34920'(&A)'
+      OnClick = TPOPMENU_AddtoBLOCKLISTClick
+    end
+    object TPOPMENU_ALLTOBLOCKLIST: TMenuItem
+      Caption = #20840#37096#21152#20837#27704#20037#36807#28388#21015#34920'(&B)'
+      OnClick = TPOPMENU_ALLTOBLOCKLISTClick
+    end
+  end
+  object BlockListPopupMenu: TPopupMenu
+    OnPopup = BlockListPopupMenuPopup
+    Left = 328
+    Top = 280
+    object BPOPMENU_REFLIST: TMenuItem
+      Caption = #21047#26032'(&R)'
+      OnClick = BPOPMENU_REFLISTClick
+    end
+    object BPOPMENU_SORT: TMenuItem
+      Caption = #25490#24207'(&S)'
+      OnClick = BPOPMENU_SORTClick
+    end
+    object N7: TMenuItem
+      Caption = '-'
+    end
+    object BPOPMENU_ADD: TMenuItem
+      Caption = #22686#21152'(&A)'
+      OnClick = BPOPMENU_ADDClick
+    end
+    object BPOPMENU_DELETE: TMenuItem
+      Caption = #21024#38500'(&D)'
+      OnClick = BPOPMENU_DELETEClick
+    end
+    object BPOPMENU_DELETE_ALL: TMenuItem
+      Caption = #20840#37096#21024#38500'(&C)'
+      OnClick = BPOPMENU_DELETE_ALLClick
+    end
+    object N6: TMenuItem
+      Caption = '-'
+    end
+    object BPOPMENU_ADDTEMPLIST: TMenuItem
+      Caption = #21152#20837#21160#24577#36807#28388#21015#34920'(&A)'
+      OnClick = BPOPMENU_ADDTEMPLISTClick
+    end
+    object BPOPMENU_ALLTOTEMPLIST: TMenuItem
+      Caption = #20840#37096#21152#20837#21160#24577#36807#28388#21015#34920'(&T)'
+      OnClick = BPOPMENU_ALLTOTEMPLISTClick
+    end
+  end
+  object PopupMenu_IPAreaFilter: TPopupMenu
+    OnPopup = PopupMenu_IPAreaFilterPopup
+    Left = 360
+    Top = 280
+    object MenuItem_IPAreaMod: TMenuItem
+      Caption = #20462#25913'(&M)'
+      OnClick = MenuItem_IPAreaModClick
+    end
+    object N8: TMenuItem
+      Caption = '-'
+    end
+    object MenuItem_IPAreaAdd: TMenuItem
+      Caption = #22686#21152'(&A)'
+      OnClick = MenuItem_IPAreaAddClick
+    end
+    object MenuItem_IPAreaDel: TMenuItem
+      Caption = #21024#38500'(&D)'
+      OnClick = MenuItem_IPAreaDelClick
+    end
+    object N9: TMenuItem
+      Caption = '-'
+    end
+    object MenuItem_IPAreaDelAll: TMenuItem
+      Caption = #20840#37096#21024#38500'(&C)'
+      OnClick = MenuItem_IPAreaDelAllClick
+    end
+  end
+end

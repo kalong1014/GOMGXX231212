@@ -1,0 +1,1767 @@
+unit magiceff;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Grobal2, AbstractCanvas, AbstractTextures, CliUtil, ClFunc, HUtil32, WIl,
+  uGameEngine;
+
+const
+   MG_READY       = 10;
+   MG_FLY         = 6;
+   MG_EXPLOSION   = 10;
+   READYTIME  = 120;
+   EXPLOSIONTIME = 100;
+   FLYBASE = 10;
+   EXPLOSIONBASE = 170;
+   //EFFECTFRAME = 260;
+   MAXMAGIC = 10;
+   FLYOMAAXEBASE = 447;
+   THORNBASE = 2967;
+   ARCHERBASE = 2607;
+   ARCHERBASE2 = 272; //2609;
+
+   FLYFORSEC = 500;
+   FIREGUNFRAME = 6;
+
+   // 2003/03/15 ½Å±Ô¹«°ø Ãß°¡
+   MAXEFFECT = 112;
+   EffectBase: array[0..MAXEFFECT-1] of integer = (
+      0,             //0  È­¿°Àå
+      200,           //1  È¸º¹¼ú
+      400,           //2  ±Ý°­È­¿°Àå
+      600,           //3  ¾Ï¿¬¼ú
+      0,             //4  °Ë±¤
+      900,           //5  È­¿°Ç³
+      920,           //6  È­¿°¹æ»ç
+      940,           //7  ·ÚÀÎÀå //½ÃÀüÈ¿°ú¾øÀ½
+      20,            //8  °­°Ý,  Magic2
+      940,           //9  Æø»ì°è //½ÃÀüÈ¿°ú¾øÀ½
+      940,           //10 ´ëÁö¿øÈ£ //½ÃÀüÈ¿°ú¾øÀ½
+      940,           //11 ´ëÁö¿øÈ£¸¶ //½ÃÀüÈ¿°ú¾øÀ½
+      0,             //12 ¾î°Ë¼ú
+      1380,          //13 °á°è
+      1500,          //14 ¹é°ñÅõÀÚ¼ÒÈ¯, ¼ÒÈ¯¼ú
+      1520,          //15 Àº½Å¼ú
+      940,           //16 ´ëÀº½Å
+      1560,          //17 Àü±âÃæ°Ý
+      1590,          //18 ¼ø°£ÀÌµ¿
+      1620,          //19 Áö¿­Àå
+      1650,          //20 È­¿°Æø¹ß
+      1680,          //21 ´ëÀºÇÏ(Àü±âÆÛÁü)
+      0,             //22 ¹Ý¿ù°Ë¹ý
+      0,             //23 ¿°È­°á
+      0,             //24 ¹«ÅÂº¸
+      3960,          //25 Å½±âÆÄ¿¬
+      1790,          //26 ´ëÈ¸º¹¼ú
+      0,             //27 ½Å¼ö¼ÒÈ¯  Magic2
+      3880,          //28 ÁÖ¼úÀÇ¸·
+      3920,          //29 »çÀÚÀ±È¸
+      3840,          //30 ºù¼³Ç³
+      0,             //31 ¸¶¹ýÁø
+      40,            //32 ±¤Ç³Âü     (Magic2)
+      130,           //33 ÃðÌì»ð     (Magic2)
+      160,           //34 ¹«±ØÁø±â   (Magic2)
+      190,           //35 ±â°øÆÄ     (Magic2)
+      0,             //36 ¸¶¹ýÁø2
+      // 2003/07/15 ½Å±Ô¹«°ø
+      210,           //37 ½Ö·æÂü     (Magic2)  //210
+      400,           //38 °áºùÀå     (Magic2)
+      600,           //39 Á¤È­¼ú     (Magic2)
+      1500,          //40 Á¤È¥¼ÒÈ¯¼ú (Magic2)
+      650,           //41 ºÐ½Å¼ú     (Magic2)
+      710,           //42 »çÀÚÈÄ     (Magic2)
+      740,           //43 °øÆÄ¼¶     (Magic2)
+      900,           //44 »ðÁúÆøÑæ   (Magic2)
+      940,           //45 ÀúÁÖ¼ú     (Magic2)
+      990,           //46 Æ÷½Â°Ë     (Magic2)
+      1040,          //47 ÈíÇ÷¼ú     (Magic2)
+      1100,          //48 ¸Í¾È¼ú    ( Magic2)
+      // add 2015
+      1510, {50}
+      1520, {51}
+      1540, {52}
+      1590, {53}
+      1680, {54}
+      940,  {55}
+      1700, {56}
+      1790, {57}
+      1880, {58}
+      0,             //58 ¾øÃü½£·¨   (Magic2)
+      0,             //59 ·ç½£Êõ     (Magic2)
+      2140,          //60 ÌæÉí·ç     (Magic2)
+      0,             //61 °Îµ¶Êõ
+      2230,          //62 Ç§Àï½£     (Magic2)
+      2320,          //63 ÁÒ·ç»÷     (Magic2)
+      2340,          //64 ²¶¸¿Êõ     (Magic2)
+      2380,          //65 ÔÂÓ°Êõ     (Magic2)
+      0,             //66 ÎüÆø       (Magic2)
+      2440,          //67 ÇáÉí²½     (Magic2)
+      2470,          //68 ·çÉíÊõ     (Magic2)
+      2490,          //69 ÃÍ¶¾½£Æø   (Magic2)
+      2580,          //70 ÁÒ»¯Éí     (Magic2)
+      2620,          //71 ÔÂÏÂÂÒÎè   (Magic2)
+      130,           //72 ÌìÎñ       (Magic3)
+      80,            //73 ÉîÑÓÊõ     (Magic3)
+      940,           //74 ÎÁÒß       (Magic3)
+      0,             //75 Ñª·ç»÷     (Magic3)
+      130,           //76 ÑªÁú½£·¨   (Magic3)
+      200,           //77 ÌìÉÏÃØÊõ   (Magic3)
+      940,           //78 ÑªÁúË®     (Magic3)
+      250,           //79 Ã¨ÉàÀ¼     (Magic3)
+      550,           //80 ½ð¸Õ²»»µ   (Magic3)
+      590,           //81 À×ÏÉ·ç     (Magic3)
+      940,           //82 ÒõÑôÎåÐÐÕó (Magic3)
+      680,           //83 ÔÂÓ°Îí     (Magic3)
+      550,           //84 ½ð¸Õ²»»µ-ÃØóÅ     (Magic3)
+      590,           //85 À×ÏÉ·ç-ÃØóÅ       (Magic3)
+      940,           //86 ÒõÑôÎåÐÐÕó-ÃØóÅ   (Magic3)
+      680,           //87 ÔÂÓ°Îí-ÃØóÅ       (Magic3)
+      2730,          //88 ±ØÖÐÉÁ     (Magic3)
+      0,             //89 ÌìÈÕÉÁ     (Magic3)
+      0,             //90 ÎÞÎÒÉÁ     (Magic3)
+      1560,          //91 ±¬Úå       (Magic3)
+      1590,          //92 ±¬ÉÁ       (Magic3)
+      1630,          //93 Æø¹¦Êõ     (Magic3)
+      0,             //94 Íò½ïÉÁ     (Magic3)
+      0,             //95 ·çµ¯²½     (Magic3)
+      1880,          //96 ÆøÁ÷Êõ     (Magic3)
+      0,             //97 µØÖù¶¤     (Magic3)
+      0,             //98 ½ð¸ÕÊõ     (Magic3)
+      0,             //99 ÎüÑªµØ¾«   (Magic3)
+      0,             //100 ÎüÑªµØÉÁ  (Magic3)
+      0,             //101 ±ÔÄ§Úå    (Magic3)
+      0,             //102 ¶¾Ä§ÉÁ    (Magic3)
+      0,             //103 Ð°±¬ÉÁ    (Magic3)
+      0,             //104 ÉßÖùÚå    (Magic3)
+      0,             //105 ÑªÁúÉÁ    (Magic3)
+      0,             //106 ÑªÁúÉÁ-ÃØóÅ     (Magic3)
+      4370,          //107 ²¶Éþ½£-ÃØóÅ     (Magic3)
+      4420,          //108 ½ð¸Õ»ðÑæÕÆ-ÃØóÅ (Magic3)
+      0,             //109 »Ø¸´Êõ-ÃØóÅ     (Magic3)
+      0,             //110 °Îµ¶Êõ-ÃØóÅ     (Magic3)
+      0              //111 ±¬ÉÁ-ÃØóÅ       (Magic3)
+
+   );
+   MAXHITEFFECT = 14;
+   HitEffectBase: array[0..MAXHITEFFECT-1] of integer = (
+      800,           //0, ¾î°Ë¼ú
+      1410,          //1  ¾î°Ë¼ú
+      1700,          //2  ¹Ý¿ù°Ë¹ý
+      3480,          //3  ¿°È­°á, ½ÃÀÛ
+      3390,          //4  ¿°È­°á ¹ÝÂ¦ÀÓ
+      40,            //5  ±¤Ç³Âü
+      220,           //6  ½Ö·æÂü
+      740,            //7  °øÆÄ¼¶
+      1700,          //8  ÈÕÕ¶
+      1960,          //9  ·ç½£ÊõÓÒ
+      2050,          //10 ·ç½£Êõ×ó
+      2230,          //11 Ç§Àï½£
+      2620,           //12 ÔÂÏÂÂÒÎè
+      420 {57}   //ºù¿°¼ú
+
+   );
+
+
+   MAXMAGICTYPE = 17;
+
+type
+   TMagicType = (mtReady,           mtFly,            mtExplosion,
+                 mtFlyAxe,          mtFireWind,       mtFireGun,
+                 mtLightingThunder, mtThunder,        mtExploBujauk,
+                 mtBujaukGroundEffect, mtKyulKai,     mtFlyArrow,
+                 mtFireBall,        mtGroundEffect,   mtFireThunder,
+                 mtFlyBug,          mtFlyBolt,        mtIceSickle);
+
+   TUseMagicInfo = record
+      ServerMagicCode: integer;
+      MagicSerial: integer;
+      Target: integer; //recogcode
+      EffectType: TMagicType;
+      EffectNumber: integer;
+      TargX: integer;
+      TargY: integer;
+      Recusion: Boolean;
+      AniTime: integer;
+   end;
+   PTUseMagicInfo = ^TUseMagicInfo;
+
+   TMagicEff = class
+      Active: Boolean;
+      Blend: Boolean;
+      ServerMagicId: integer;
+      MagOwner: TObject;
+      TargetActor: TObject;
+
+      ImgLib: TWMImages;
+      EffectBase: integer;
+
+      MagExplosionBase: integer;
+      px, py: integer;
+      RX, RY: integer;  // ¸ÊÀÇ ÁÂÇ¥·Î È¯»êÇÑ ÁÂÇ¥
+      Dir16, OldDir16: byte;
+      TargetX, TargetY: integer;   //Å¸°ÙÀÇ ½ºÅ©¸° ÁÂÇ¥
+      TargetRx, TargetRy: integer; //Å¸°ÙÀÇ ¸Ê ÁÂÇ¥
+      FlyX, FlyY, OldFlyX, OldFlyY: integer; //ÇöÀç ÁÂÇ¥
+      FlyXf, FlyYf: Real;
+      Repetition: Boolean; //¾Ö´Ï¸ÞÀÌ¼Ç ¹Ýº¹
+      FixedEffect: Boolean;  //°íÁ¤ ¾Ö´Ï¸Þ½Ã¼Ç
+      MagicType: integer;
+      NextEffect: TMagicEff;
+      ExplosionFrame: integer;
+      NextFrameTime: integer;
+      Light: integer;
+      //2003/07/15 ½Ã°£Á¦ ÀÌÆåÆ®
+      RepeatUntil: longword;
+      ExCase : Byte; // 0: ÀÏ¹Ý, 1,2..:¿¹¿Ü»çÇ×
+      FireDir : Byte; // ºÒ°ø°Ý ¹æÇâ
+      Blizzard: Boolean;
+      SoundIndex: Integer;
+   private
+      start, curframe, frame: integer;
+      framesteptime: longword;
+      starttime:  longword;
+      repeattime: longword; //¹Ýº¹ ¾Ö´Ï¸ÞÀÌ¼Ç ½Ã°£ (-1: °è¼Ó)
+      steptime: longword;
+      fireX, fireY: integer;
+      firedisX, firedisY, newfiredisX, newfiredisY: integer;
+      FireMyselfX, FireMyselfY: integer;
+      prevdisx, prevdisy: integer; //³¯¾Æ°¡´Â È¿°úÀÇ ¸ñÇ¥¿ÍÀÇ °Å¸®
+   protected
+      procedure GetFlyXY (ms: integer; var fx, fy: integer);
+   public
+      constructor Create (id, effnum, sx, sy, tx, ty: integer; mtype: TMagicType; Recusion: Boolean; anitime: integer);
+      destructor Destroy; override;
+      function  Run: Boolean; dynamic; //false:³¡³µÀ½.
+      function  Shift: Boolean; dynamic;
+      procedure DrawEff (surface: TAsphyreCanvas); dynamic;
+   end;
+
+   TFlyingAxe = class (TMagicEff)
+      FlyImageBase: integer;
+      ReadyFrame: integer;
+   public
+      constructor Create (id, effnum, sx, sy, tx, ty: integer; mtype: TMagicType; Recusion: Boolean; anitime: integer);
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   TFlyingBug = class (TMagicEff)
+      FlyImageBase: integer;
+      ReadyFrame: integer;
+   public
+      constructor Create (id, effnum, sx, sy, tx, ty: integer; mtype: TMagicType; Recusion: Boolean; anitime: integer);
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   TFlyingArrow = class (TFlyingAxe)
+   public
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   // 2003/02/11
+   TFlyingFireBall = class (TFlyingAxe)
+   public
+      constructor Create (id, effnum, sx, sy, tx, ty: integer; mtype: TMagicType; Recusion: Boolean; anitime: integer);
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   TCharEffect = class (TMagicEff)
+   public
+      constructor Create (effbase, effframe: integer; target: TObject);
+      function  Run: Boolean; override; //false:³¡³µÀ½.
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   TMapEffect = class (TMagicEff)
+   public
+      RepeatCount: integer;
+      constructor Create (effbase, effframe: integer; x, y: integer);
+      function  Run: Boolean; override; //false:³¡³µÀ½.
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   TScrollHideEffect = class (TMapEffect)
+   public
+      constructor Create (effbase, effframe: integer; x, y: integer; target: TObject);
+      function  Run: Boolean; override;
+   end;
+
+   TLightingEffect = class (TMagicEff)
+   public
+      constructor Create (effbase, effframe: integer; x, y: integer);
+      function  Run: Boolean; override;
+   end;
+
+   TFireNode = record
+      x: integer;
+      y: integer;
+      firenumber: integer;
+   end;
+
+   TFireGunEffect = class (TMagicEff)
+   public
+      OutofOil: Boolean;
+      firetime: longword;
+      FireNodes: array[0..FIREGUNFRAME-1] of TFireNode;
+      constructor Create (effbase, sx, sy, tx, ty: integer);
+      function  Run: Boolean; override;
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   TThuderEffect = class (TMagicEff)
+   public
+      ExCheckMag: Boolean;
+      constructor Create (effbase, tx, ty: integer; target: TObject);
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   TThuderEffectEx = class (TMagicEff)
+   public
+      constructor Create (effbase, tx, ty: integer; target: TObject; magnum:integer);
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   TLightingThunder = class (TMagicEff)
+   public
+      constructor Create (effbase, sx, sy, tx, ty: integer; target: TObject);
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   TExploBujaukEffect = class (TMagicEff)
+   public
+      MagicNumber: integer;
+      constructor Create (effbase, magicnumb, sx, sy, tx, ty: integer; target: TObject);
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   TBujaukGroundEffect = class (TMagicEff)
+   public
+      MagicNumber: integer;
+      BoGroundEffect: Boolean;
+      constructor Create (effbase, magicnumb, sx, sy, tx, ty: integer);
+      function  Run: Boolean; override;
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   //ÇÑ¹ø »ý°å´Ù »ç¸®Áö´Â È¿°ú, ºí·£µî ¾ÈÇÔ
+   TNormalDrawEffect = class (TMagicEff)
+   private
+      BoBlending: Boolean;
+   public
+    constructor Create(xx, yy: integer; iLib: TWMImages; eff_base: integer; eff_frame: integer; eff_time: integer; blending: Boolean);
+      function Run: Boolean; override;
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+      TIceSickle = class (TMagicEff)    //ºù¿°¼ú
+   public
+      constructor Create (effbase, sx, sy, tx, ty: integer; target: TObject);
+      procedure DrawEff (surface: TAsphyreCanvas); override;
+   end;
+
+   procedure GetEffectBase (mag, mtype: integer; var wimg: TWMImages; var idx: integer);
+
+
+
+implementation
+
+uses
+   ClMain, Actor, SoundUtil, MShare;
+
+
+procedure GetEffectBase (mag, mtype: integer; var wimg: TWMImages; var idx: integer);
+//function  GetEffectBase (mag, mtype: integer): integer;
+begin
+   wimg := nil;
+   idx := 0;
+//   if Not BoViewEffect then Exit;  //@@@@
+   case mtype of
+      0:  //ÀÏ¹ÝÀûÀÎ ¸¶¹ý ½ÃÀÛ ÇÁ·¡ÀÓ
+         begin
+            case mag of
+               // 2003/03/15 ½Å±Ô¹«°ø Ãß°¡
+               33, // ¸êÃµÈ­
+               34, // ¹«±ØÁø±â
+               35, // ±â°øÆÄ
+               8,  // °­°Ý
+               // 2003/07/15 ½Å±Ô¹«°ø Ãß°¡
+               37, // ½Ö·æÂü
+               38, // °áºùÀå
+               39, // Á¤È­¼ú
+               41, // ºÐ½Å¼ÒÈ¯¼ú
+               42, // »çÀÚÈÄ
+               44, // È­·æ±â¿°
+               46, // Æ÷½Â°Ë
+               47, // ÈíÇ÷¼ú
+               48, // ¸Í¾È¼ú
+               49,
+               50, // ProtectionField
+               51, // Blizzard
+               52, // MeteorStrike
+               53, // Reincarnation
+               55,
+               56,
+               57,
+               60: // Assassin Skill 3
+                  begin
+                     wimg := WMagic2;
+                     if mag in [0..MAXEFFECT-1] then
+                        idx := EffectBase[mag];
+                  end;
+
+                  72,73,76,79{,80,83},84,107,108:
+                  begin
+                     wimg := WMagic3;
+                     if mag in [0..MAXEFFECT-1] then
+                        idx := EffectBase[mag];
+                  end;
+
+               27: // ½Å¼ö¼ÒÈ¯
+                  begin
+                     wimg := WMagic2;
+                     if mag in [0..MAXEFFECT-1] then
+                        idx := EffectBase[mag];
+                  end;
+               // 2003/03/04
+               31: //¸¶¹ýÁø
+                  begin
+                     wimg := WMon21Img;
+                     if mag in [0..MAXEFFECT-1] then
+                        idx := EffectBase[mag];
+                  end;
+               36: //¸¶¹ýÁø2
+                  begin
+                     wimg := WMon22Img;
+                     if mag in [0..MAXEFFECT-1] then
+                        idx := EffectBase[mag];
+                  end;
+               (SM_DRAGON_FIRE1-1), (SM_DRAGON_FIRE2-1), (SM_DRAGON_FIRE3-1): // FireDragon
+                  begin
+                     wimg := WDragonImg;
+                     if mag = SM_DRAGON_FIRE1-1 then begin
+                        if Myself.XX >= 84 then idx := 130
+                        else idx := 140;
+                     end else if mag = SM_DRAGON_FIRE2-1 then begin
+                        if (Myself.XX >= 78) and (Myself.YY >= 48) then idx := 150
+                        else idx := 160;
+                     end
+                     else if mag = SM_DRAGON_FIRE3-1 then idx := 180;
+                  end;
+               89: // ¿ë¼®»ó Áö¿°
+                  begin
+                     wimg := WDragonImg;
+                     idx := 350
+//                     if mag = 89 then idx := 310
+//                     else if mag = 90 then idx := 330;
+                  end;
+               MAGIC_TURTLE_WARTERATT-1:
+                  begin
+                     wimg := WMon25Img;
+                     idx := 1460;
+                  end;
+
+               else
+                  begin
+                     wimg := WMagic;
+                     if mag in [0..MAXEFFECT-1] then
+                        idx := EffectBase[mag];
+                  end;
+            end;
+         end;
+      1: //°Ë¹ý È¿°ú
+         begin
+            wimg := WMagic;
+            if mag in [0..MAXHITEFFECT-1] then begin
+               idx := HitEffectBase[mag];
+            end;
+            // 2003/03/15 ½Å±Ô¹«°ø
+            // 2003/07/15 ½Å±Ô¹«°ø
+            if (mag >= 5) then wimg := WMagic2;
+         end;
+   end;
+end;
+
+constructor TMagicEff.Create (id, effnum, sx, sy, tx, ty: integer; mtype: TMagicType; Recusion: Boolean; anitime: integer);
+var
+   tax, tay: integer;
+begin
+
+   ExCase := 0;
+   FireDir := 2;
+   Blizzard := False;
+   ImgLib := WMagic;  //±âº»
+   Blend := True;
+
+   if (not BoViewEffect) and (mtype <> mtThunder) then begin
+      ImgLib := WMagic2;
+      EffectBase := 30;
+      Exit;
+   end;
+
+   case mtype of
+      mtReady:
+         begin
+         end;
+      mtFly,
+      mtBujaukGroundEffect,
+      mtExploBujauk:
+         begin
+            start := 0;
+            frame := 6;
+            curframe := start;
+            FixedEffect := FALSE;
+            Repetition := Recusion;
+            ExplosionFrame := 10;
+
+            if id = 38 then begin // ½Ö·æÂü
+               frame := 10;
+            end
+            else if id = 39 then begin // °áºùÀå
+               frame := 4;
+               ExplosionFrame := 8;
+            end;
+
+            if id in [SM_DRAGON_FIRE1, SM_DRAGON_FIRE2, SM_DRAGON_FIRE3] then begin // FireDragon
+               ExCase := 1;
+               Repetition := True;
+               if id = SM_DRAGON_FIRE1 then begin
+                  if Myself.XX >= 84 then EffectBase := 130
+                  else EffectBase := 140;
+                  FireDir := 1;
+               end
+               else if id = SM_DRAGON_FIRE2 then begin
+                  if (Myself.XX >= 78) and (Myself.YY >= 48) then EffectBase := 150
+                  else EffectBase := 160;
+                  FireDir := 2;
+               end
+               else if id = SM_DRAGON_FIRE3 then begin
+                  EffectBase := 180;
+                  FireDir := 3;
+               end;
+//            DScreen.AddChatBoardString (IntToStr(FireDir)+'%%Myself.XX=> '+IntToStr(Myself.XX), clYellow, clRed);
+//            DScreen.AddChatBoardString (IntToStr(FireDir)+'%%Myself.YY=> '+IntToStr(Myself.YY), clYellow, clRed);
+//            DScreen.AddChatBoardString ('EffectBase=> '+IntToStr(EffectBase), clYellow, clRed);
+
+               start := 0;
+               frame := 10;
+               MagExplosionBase := 190;
+               ExplosionFrame := 10;
+            end
+            else if id = MAGIC_TURTLE_WARTERATT then begin //°©Ã¶±Í¼ö ¹°°ø°Ý
+               frame := 3;
+            end;
+
+         end;
+      // 2003/02/11
+      mtFireBall:
+         begin
+            start := 0;
+            frame := 6;
+            curframe := start;
+            FixedEffect := FALSE;
+            Repetition  := Recusion;
+            ExplosionFrame := 1;
+         end;
+      // 2003/03/04
+      mtGroundEffect:
+         begin
+            start := 0;
+            frame := 20;
+            if id = MAGIC_SIDESTONE_ATT1 then frame := 10;
+            curframe := start;
+            FixedEffect := TRUE;
+            Repetition  := FALSE;
+//            ExplosionFrame := 20;
+            ImgLib := WMon21Img;  //±âº»
+         end;
+      mtExplosion,
+      mtThunder,
+      mtLightingThunder,
+      mtIceSickle:
+         begin
+            start := 0;
+            frame := -1;
+            ExplosionFrame := 10;
+            curframe := start;
+            FixedEffect := TRUE;
+            Repetition := FALSE;
+            if id = SM_DRAGON_LIGHTING then begin // FireDragon
+               ExCase := 2;
+               Randomize;
+               case random(6) of
+                  0 : EffectBase := 230;
+                  1 : EffectBase := 240;
+                  2 : EffectBase := 250;
+                  3 : EffectBase := 260;//230
+                  4 : EffectBase := 270;//240
+                  5 : EffectBase := 280;//250
+               end;
+               Light := 4;
+               ExplosionFrame := 5;
+            end
+            else if id = MAGIC_DUN_THUNDER then begin // FireDragon
+               ExCase := 3;
+               Randomize;
+               case random(3) of
+                  0 : EffectBase := 400;
+                  1 : EffectBase := 410;
+                  2 : EffectBase := 420;
+               end;
+               Light := 4;
+               ExplosionFrame := 5;
+            end
+            else if id = MAGIC_DUN_FIRE1 then begin
+               ExCase := 3;
+               ExplosionFrame := 20;
+            end
+            else if id = MAGIC_DUN_FIRE2 then begin
+               ExCase := 3;
+               Light := 3;
+               ExplosionFrame := 10;
+            end
+            else if id = MAGIC_DRAGONFIRE then begin
+               ExCase := 3;
+               Light := 5;
+               ExplosionFrame := 20;
+            end
+            else if id = MAGIC_FIREBURN then begin
+               ExCase := 3;
+               Light := 4;
+               ExplosionFrame := 35;
+            end
+            else if id = MAGIC_SERPENT_1 then begin //####
+               ExCase := 3;
+               Light := 4;
+               ExplosionFrame := 10;
+            end
+            else if id in [90] then begin
+               EffectBase := 350;
+               MagExplosionBase := 350;
+               ExplosionFrame := 30;
+            end;
+
+         end;
+      // 2003/03/15 ½Å±Ô¹«°ø Ãß°¡
+      mtFireThunder:
+         begin
+            start := 0;
+            frame := -1;
+            ExplosionFrame := 10;
+            curframe := start;
+            FixedEffect := TRUE;
+            Repetition := FALSE;
+            ImgLib := WMagic2;  //±âº»
+         end;
+      mtFlyAxe:
+         begin
+            start := 0;
+            if ImgLib = WMon24Img then frame := 4
+            else frame := 3;
+            curframe := start;
+            FixedEffect := FALSE;
+            Repetition := Recusion;
+            ExplosionFrame := 3;
+         end;
+      mtFlyArrow:
+         begin
+            start := 0;
+            frame := 1;
+            curframe := start;
+            FixedEffect := FALSE;
+            Repetition := Recusion;
+            ExplosionFrame := 1;
+         end;
+      // 2003/07/15 ½Å±Ô¸÷ Ãß°¡
+      mtFlyBug:
+         begin
+            start := 0;
+            frame := 6;
+            curframe := start;
+            FixedEffect := FALSE;
+            Repetition := Recusion;
+            ExplosionFrame := 2;
+         end;
+      mtFlyBolt:
+         begin
+            start := 0;
+            frame := 1;
+            curframe := start;
+            FixedEffect := FALSE;
+            Repetition := Recusion;
+            ExplosionFrame := 1;
+         end;
+   end;
+   RepeatUntil := 0;
+   ServerMagicId := id; //¼­¹öÀÇ ID
+   EffectBase := effnum;
+   TargetX := tx;   // "   target x
+   TargetY := ty;   // "   target y
+
+   if ExCase = 1 then begin
+      if id = SM_DRAGON_FIRE1 then begin
+         sx := sx-14;
+         sy := sy+20;
+      end else if id = SM_DRAGON_FIRE2 then begin
+         sx := sx-70;
+         sy := sy-10;
+      end else if id = SM_DRAGON_FIRE3 then begin
+         sx := sx-60;
+         sy := sy-70;
+      end;
+      PlaySound (8208);
+   end;
+
+   fireX := sx;     //½ð À§Ä¡
+   fireY := sy;     //
+   FlyX := sx;      //³¯¾Æ°¡°í ÀÖ´Â À§Ä¡
+   FlyY := sy;
+   OldFlyX := sx;
+   OldFlyY := sy;
+   FlyXf := sx;
+   FlyYf := sy;
+   FireMyselfX := Myself.RX*UNITX + Myself.ShiftX;
+   FireMyselfY := Myself.RY*UNITY + Myself.ShiftY;
+
+   if ExCase = 0  then  // ExCase = 0 ÀÏ¹Ý
+      MagExplosionBase := EffectBase + EXPLOSIONBASE;
+   light := 1;
+
+   if fireX <> TargetX then tax := abs(TargetX-fireX)
+   else tax := 1;
+   if fireY <> TargetY then tay := abs(TargetY-fireY)
+   else tay := 1;
+   if abs(fireX-TargetX) > abs(fireY-TargetY) then begin
+      firedisX := Round((TargetX-fireX) * (500 / tax));
+      firedisY := Round((TargetY-fireY) * (500 / tax));
+   end else begin
+      firedisX := Round((TargetX-fireX) * (500 / tay));
+      firedisY := Round((TargetY-fireY) * (500 / tay));
+   end;
+
+   NextFrameTime := 50;
+   framesteptime := GetTickCount;
+   starttime := GetTickCount;
+   steptime := GetTickCount;
+   RepeatTime := anitime;
+   Dir16 := GetFlyDirection16 (sx, sy, tx, ty);
+   OldDir16 := Dir16;
+   NextEffect := nil;
+   Active := TRUE;
+   prevdisx := 99999;
+   prevdisy := 99999;
+end;
+
+destructor TMagicEff.Destroy;
+begin
+   inherited Destroy;
+end;
+
+function  TMagicEff.Shift: Boolean;
+   function OverThrough (olddir, newdir: integer): Boolean;
+   begin
+      Result := FALSE;
+      if abs(olddir-newdir) >= 2 then begin
+         Result := TRUE;
+         if ((olddir=0) and (newdir=15)) or ((olddir=15) and (newdir=0)) then
+            Result := FALSE;
+      end;
+   end;
+var
+   i, rrx, rry, ms, stepx, stepy, newstepx, newstepy, nn: integer;
+   tax, tay, shx, shy, passdir16: integer;
+   crash: Boolean;
+   stepxf, stepyf: Real;
+   bofly: Boolean;
+begin
+   Result := TRUE;
+   if Repetition then begin
+      if GetTickCount - steptime > longword(NextFrameTime) then begin
+         steptime := GetTickCount;
+         Inc (curframe);
+         if curframe > start+frame-1 then
+            curframe := start;
+      end;
+   end else begin
+      if (frame > 0) and (GetTickCount - steptime > longword(NextFrameTime)) then begin
+         steptime := GetTickCount;
+         Inc (curframe);
+         if curframe > start+frame-1 then begin
+            curframe := start+frame-1;
+            Result := FALSE;
+         end;
+      end;
+   end;
+   if (not FixedEffect) then begin
+
+      crash := FALSE;
+      if TargetActor <> nil then begin
+         ms := GetTickCount - framesteptime;  //ÒÔÇ°µÄÐ§¹û£¬È»ºó?
+         framesteptime := GetTickCount;
+         //TargetX, TargetY ÔÚÉèÖÃ
+         PlayScene.ScreenXYfromMCXY (TActor(TargetActor).RX,
+                                     TActor(TargetActor).RY,
+                                     TargetX,
+                                     TargetY);
+         shx := (Myself.RX*UNITX + Myself.ShiftX) - FireMyselfX;
+         shy := (Myself.RY*UNITY + Myself.ShiftY) - FireMyselfY;
+         TargetX := TargetX + shx;
+         TargetY := TargetY + shy;
+
+         //ÐÂµÄÄ¿±êÊ±£¬×ø±êÎª
+         if FlyX <> TargetX then tax := abs(TargetX-FlyX)
+         else tax := 1;
+         if FlyY <> TargetY then tay := abs(TargetY-FlyY)
+         else tay := 1;
+         if abs(FlyX-TargetX) > abs(FlyY-TargetY) then begin
+            newfiredisX := Round((TargetX-FlyX) * (500 / tax));
+            newfiredisY := Round((TargetY-FlyY) * (500 / tax));
+         end else begin
+            newfiredisX := Round((TargetX-FlyX) * (500 / tay));
+            newfiredisY := Round((TargetY-FlyY) * (500 / tay));
+         end;
+
+         if firedisX < newfiredisX then firedisX := firedisX + _MAX(1, (newfiredisX - firedisX) div 10);
+         if firedisX > newfiredisX then firedisX := firedisX - _MAX(1, (firedisX - newfiredisX) div 10);
+         if firedisY < newfiredisY then firedisY := firedisY + _MAX(1, (newfiredisY - firedisY) div 10);
+         if firedisY > newfiredisY then firedisY := firedisY - _MAX(1, (firedisY - newfiredisY) div 10);
+
+         stepxf := (firedisX/700) * ms;
+         stepyf := (firedisY/700) * ms;
+         FlyXf := FlyXf + stepxf;
+         FlyYf := FlyYf + stepyf;
+         FlyX := Round (FlyXf);
+         FlyY := Round (FlyYf);
+
+         //¹æÇâ Àç¼³Á¤
+       //  Dir16 := GetFlyDirection16 (OldFlyX, OldFlyY, FlyX, FlyY);
+         OldFlyX := FlyX;
+         OldFlyY := FlyY;
+         //Åë°ú¿©ºÎ¸¦ È®ÀÎÇÏ±â À§ÇÏ¿©
+         passdir16 := GetFlyDirection16 (FlyX, FlyY, TargetX, TargetY);
+
+         //DebugOutStr (IntToStr(prevdisx) + ' ' + IntToStr(prevdisy) + ' / ' + IntToStr(abs(TargetX-FlyX)) + ' ' + IntToStr(abs(TargetY-FlyY)) + '   ' +
+         //             IntToStr(firedisX) + '.' + IntToStr(firedisY) + ' ' +
+         //             IntToStr(FlyX) + '.' + IntToStr(FlyY) + ' ' +
+         //             IntToStr(TargetX) + '.' + IntToStr(TargetY));
+         if ((abs(TargetX-FlyX) <= 15) and (abs(TargetY-FlyY) <= 15)) or
+            ((abs(TargetX-FlyX) >= prevdisx) and (abs(TargetY-FlyY) >= prevdisy)) or
+            OverThrough(OldDir16, passdir16) then begin
+            crash := TRUE;
+         end else begin
+            prevdisx := abs(TargetX-FlyX);
+            prevdisy := abs(TargetY-FlyY);
+            //if (prevdisx <= 5) and (prevdisy <= 5) then crash := TRUE;
+         end;
+         OldDir16 := passdir16;
+
+      end else begin
+         ms := GetTickCount - framesteptime;  //È¿°úÀÇ ½ÃÀÛÈÄ ¾ó¸¶³ª ½Ã°£ÀÌ Èê·¶´ÂÁö?
+
+         rrx := TargetX - fireX;
+         rry := TargetY - fireY;
+
+         stepx := Round ((firedisX/900) * ms);
+         stepy := Round ((firedisY/900) * ms);
+         FlyX := fireX + stepx;
+         FlyY := fireY + stepy;
+      end;
+
+      PlayScene.CXYfromMouseXY (FlyX, FlyY, Rx, Ry);
+
+      if crash and (TargetActor <> nil) then begin
+         FixedEffect := TRUE;  //Æø¹ß
+         Repetition := FALSE;
+         if ExCase = 1 then begin
+            PlayScene.NewMagic (nil, MAGIC_DRAGONFIRE, MAGIC_DRAGONFIRE,
+                                TActor(TargetActor).Rx, TActor(TargetActor).Ry, TActor(TargetActor).Rx, TActor(TargetActor).Ry, 0, mtThunder, FALSE, 30, bofly);
+            PlaySound (8207);
+         end
+         else begin
+            start := 0;
+            frame := ExplosionFrame;
+            curframe := start;
+            //ÅÍÁö´Â »ç¿îµå
+            PlaySound (TActor(MagOwner).magicexplosionsound);
+         end;
+      end;
+      //if not Map.CanFly (Rx, Ry) then
+      //   Result := FALSE;
+   end;
+   if FixedEffect then begin
+      if frame = -1 then frame := ExplosionFrame;
+      if TargetActor = nil then begin
+         FlyX := TargetX - ((Myself.RX*UNITX + Myself.ShiftX) - FireMyselfX);
+         FlyY := TargetY - ((Myself.RY*UNITY + Myself.ShiftY) - FireMyselfY);
+         PlayScene.CXYfromMouseXY (FlyX, FlyY, Rx, Ry);
+      end else begin
+         Rx := TActor(TargetActor).Rx;
+         Ry := TActor(TargetActor).Ry;
+         PlayScene.ScreenXYfromMCXY (Rx, Ry, FlyX, FlyY);
+         FlyX := FlyX + TActor(TargetActor).ShiftX;
+         FlyY := FlyY + TActor(TargetActor).ShiftY;
+      end;
+   end;
+end;
+
+procedure TMagicEff.GetFlyXY (ms: integer; var fx, fy: integer);
+var
+   rrx, rry, stepx, stepy: integer;
+begin
+   rrx := TargetX - fireX;
+   rry := TargetY - fireY;
+
+   stepx := Round ((firedisX/900) * ms);
+   stepy := Round ((firedisY/900) * ms);
+   fx := fireX + stepx;
+   fy := fireY + stepy;
+end;
+
+function  TMagicEff.Run: Boolean;
+begin
+   Result := Shift;
+   if Result then
+      if GetTickCount - starttime > 10000 then //2000 then
+         Result := FALSE
+      else Result := TRUE;
+end;
+
+procedure TMagicEff.DrawEff (surface: TAsphyreCanvas);
+var
+   img: integer;
+   d: TAsphyreLockableTexture;
+   shx, shy, Tempcurframe: integer;
+begin
+//   if not BoViewEffect then Exit; //@@@@
+   if Active and ((Abs(FlyX-fireX) > 15) or (Abs(FlyY-fireY) > 15) or FixedEffect) then begin
+
+      shx := (Myself.RX*UNITX + Myself.ShiftX) - FireMyselfX;
+      shy := (Myself.RY*UNITY + Myself.ShiftY) - FireMyselfY;
+
+      if not FixedEffect then begin
+         //³¯¾Æ°¡´Â°Å
+         if ExCase = 1 then img := EffectBase // FireDragon
+         else img := EffectBase + FLYBASE + Dir16 * 10;
+//         DScreen.AddChatBoardString ('img + curframe=> '+IntToStr(img + curframe), clYellow, clRed); // FireDragon
+         d := ImgLib.GetCachedImage (img + curframe, px, py);
+         if d <> nil then begin
+            surface.DrawBlend (
+                       FlyX + px - UNITX div 2 - shx,
+                       FlyY + py - UNITY div 2 - shy,
+                       d, 1);
+         end;
+      end else begin
+         //ÅÍÁö´Â°Å
+               if Blizzard then
+      begin
+        Tempcurframe := curframe mod 30;
+        if Tempcurframe = 1 then
+          PlaySound(SoundIndex);
+      end
+      else
+      Tempcurframe := curframe;
+         img := MagExplosionBase + Tempcurframe; //EXPLOSIONBASE;
+         d := ImgLib.GetCachedImage (img, px, py);
+         if d <> nil then begin
+            surface.DrawBlend (
+                       FlyX + px - UNITX div 2,
+                       FlyY + py - UNITY div 2,
+                       d, 1);
+         end;
+      end;
+   end;
+end;
+
+
+{------------------------------------------------------------}
+//      TFlyingAxe : ³¯¾Æ°¡´Â µµ³¢
+{------------------------------------------------------------}
+
+constructor TFlyingAxe.Create (id, effnum, sx, sy, tx, ty: integer; mtype: TMagicType; Recusion: Boolean; anitime: integer);
+begin
+   inherited Create (id, effnum, sx, sy, tx, ty, mtype, Recusion, anitime);
+   FlyImageBase := FLYOMAAXEBASE;
+   ReadyFrame := 65;
+end;
+
+procedure TFlyingAxe.DrawEff (surface: TAsphyreCanvas);
+var
+   img: integer;
+   d: TAsphyreLockableTexture;
+   shx, shy: integer;
+begin
+   if Active and ((Abs(FlyX-fireX) > ReadyFrame) or (Abs(FlyY-fireY) > ReadyFrame)) then begin
+
+      shx := (Myself.RX*UNITX + Myself.ShiftX) - FireMyselfX;
+      shy := (Myself.RY*UNITY + Myself.ShiftY) - FireMyselfY;
+
+      if not FixedEffect then begin
+         //³¯¾Æ°¡´Â°Å
+         img := FlyImageBase + Dir16 * 10;
+         d := ImgLib.GetCachedImage (img + curframe, px, py);
+         if d <> nil then begin
+            //¾ËÆÄºí·©µùÇÏÁö ¾ÊÀ½
+            surface.Draw (FlyX + px - UNITX div 2 - shx,
+                          FlyY + py - UNITY div 2 - shy,
+                          d.ClientRect, d, TRUE);
+         end;
+      end else begin
+         {//Á¤Áö, µµ³¢¿¡ ÂïÈù ¸ð½À.
+         img := FlyImageBase + Dir16 * 10;
+         d := ImgLib.GetCachedImage (img, px, py);
+         if d <> nil then begin
+            //¾ËÆÄºí·©µùÇÏÁö ¾ÊÀ½
+            surface.Draw (FlyX + px - UNITX div 2,
+                          FlyY + py - UNITY div 2,
+                          d.ClientRect, d, TRUE);
+         end;  }
+      end;
+   end;
+end;
+
+{------------------------------------------------------------}
+//      TFlyingBug : ³¯¾Æ°¡´Â ¹ú·¹
+{------------------------------------------------------------}
+
+constructor TFlyingBug.Create (id, effnum, sx, sy, tx, ty: integer; mtype: TMagicType; Recusion: Boolean; anitime: integer);
+begin
+   inherited Create (id, effnum, sx, sy, tx, ty, mtype, Recusion, anitime);
+   FlyImageBase := FLYOMAAXEBASE;
+   ReadyFrame := 65;
+end;
+
+procedure TFlyingBug.DrawEff (surface: TAsphyreCanvas);
+var
+   img: integer;
+   d: TAsphyreLockableTexture;
+   shx, shy: integer;
+begin
+//   if not BoViewEffect then Exit;
+   if Active and ((Abs(FlyX-fireX) > ReadyFrame) or (Abs(FlyY-fireY) > ReadyFrame)) then begin
+
+      shx := (Myself.RX*UNITX + Myself.ShiftX) - FireMyselfX;
+      shy := (Myself.RY*UNITY + Myself.ShiftY) - FireMyselfY;
+
+      if not FixedEffect then begin
+         //³¯¾Æ°¡´Â°Å          // 8 ¹æÇâÀÌ´Ù ÀÌ·± ...
+         img := FlyImageBase + ( Dir16 div 2 )* 10;
+         d := ImgLib.GetCachedImage (img + curframe, px, py);
+         if d <> nil then begin
+            //¾ËÆÄºí·©µùÇÏÁö ¾ÊÀ½
+            surface.Draw (FlyX + px - UNITX div 2 - shx,
+                          FlyY + py - UNITY div 2 - shy,
+                          d.ClientRect, d, TRUE);
+         end;
+      end else begin
+         //ÅÍÁö´Â°Å
+         img := MagExplosionBase + curframe; //EXPLOSIONBASE;
+         d := ImgLib.GetCachedImage (img, px, py);
+         if d <> nil then begin
+            //¾ËÆÄºí·©µùÇÏÁö ¾ÊÀ½
+            surface.Draw (FlyX + px - UNITX div 2 - shx,
+                          FlyY + py - UNITY div 2 - shy,
+                          d.ClientRect, d, TRUE);
+         end;
+      end;
+   end;
+end;
+
+
+{------------------------------------------------------------}
+//      TFlyingArrow : ³¯¾Æ°¡´Â È­»ì
+{------------------------------------------------------------}
+
+
+procedure TFlyingArrow.DrawEff (surface: TAsphyreCanvas);
+var
+   img: integer;
+   d: TAsphyreLockableTexture;
+   shx, shy: integer;
+begin
+//(**6¿ùÆÐÄ¡
+   if Active and ((Abs(FlyX-fireX) > 40) or (Abs(FlyY-fireY) > 40)) then begin
+//*)
+(**ÀÌÀü
+   if Active then begin //and ((Abs(FlyX-fireX) > 65) or (Abs(FlyY-fireY) > 65)) then begin
+//*)
+      shx := (Myself.RX*UNITX + Myself.ShiftX) - FireMyselfX;
+      shy := (Myself.RY*UNITY + Myself.ShiftY) - FireMyselfY;
+
+      if not FixedEffect then begin
+         //³¯¾Æ°¡´Â°Å
+         img := FlyImageBase + Dir16; // * 10;
+         d := ImgLib.GetCachedImage (img + curframe, px, py);
+//(**6¿ùÆÐÄ¡
+         if d <> nil then begin
+            //¾ËÆÄºí·©µùÇÏÁö ¾ÊÀ½
+            surface.Draw (FlyX + px - UNITX div 2 - shx,
+                          FlyY + py - UNITY div 2 - shy - 46,
+                          d.ClientRect, d, TRUE);
+         end;
+//**)
+(***ÀÌÀü
+         if d <> nil then begin
+            //¾ËÆÄºí·©µùÇÏÁö ¾ÊÀ½
+            surface.Draw (FlyX + px - UNITX div 2 - shx,
+                          FlyY + py - UNITY div 2 - shy,
+                          d.ClientRect, d, TRUE);
+         end;
+//**)
+      end;
+   end;
+end;
+
+
+{--------------------------------------------------------}
+
+constructor TCharEffect.Create (effbase, effframe: integer; target: TObject);
+begin
+   inherited Create (111, effbase,
+                     TActor(target).XX, TActor(target).YY,
+                     TActor(target).XX, TActor(target).YY,
+                     mtExplosion,
+                     FALSE,
+                     0);
+   TargetActor := target;
+   frame := effframe;
+   NextFrameTime := 30;
+end;
+
+function  TCharEffect.Run: Boolean;
+begin
+   Result := TRUE;
+   if GetTickCount - steptime > longword(NextFrameTime) then begin
+      steptime := GetTickCount;
+      Inc (curframe);
+      if curframe > start+frame-1 then begin
+         if RepeatUntil = 0 then begin
+            curframe := start+frame-1;
+            Result := FALSE;
+         end else begin
+            curframe := start;
+            if GetTickCount > RepeatUntil then Result := FALSE;
+         end;
+      end;
+   end;
+end;
+
+procedure TCharEffect.DrawEff (surface: TAsphyreCanvas);
+var
+   d: TAsphyreLockableTexture;
+begin
+//   if not BoViewEffect then Exit;
+   if TargetActor <> nil then begin
+      if TActor(TargetActor).Death then RepeatUntil := 0;
+      Rx := TActor(TargetActor).Rx;
+      Ry := TActor(TargetActor).Ry;
+      PlayScene.ScreenXYfromMCXY (Rx, Ry, FlyX, FlyY);
+      FlyX := FlyX + TActor(TargetActor).ShiftX;
+      FlyY := FlyY + TActor(TargetActor).ShiftY;
+      d := ImgLib.GetCachedImage (EffectBase + curframe, px, py);
+      if d <> nil then begin
+         if Blend then
+            surface.DrawBlend (
+                       FlyX + px - UNITX div 2,
+                       FlyY + py - UNITY div 2,
+                       d, 1)
+         else
+            surface.Draw (FlyX + px - UNITX div 2, FlyY + py - UNITY div 2, d.ClientRect, d, True);
+      end;
+   end;
+end;
+
+
+{--------------------------------------------------------}
+
+constructor TMapEffect.Create (effbase, effframe: integer; x, y: integer);
+begin
+   inherited Create (111, effbase,
+                     x, y,
+                     x, y,
+                     mtExplosion,
+                     FALSE,
+                     0);
+   TargetActor := nil;
+   frame := effframe;
+   NextFrameTime := 30;
+   RepeatCount := 0;
+end;
+
+function  TMapEffect.Run: Boolean;
+begin
+   Result := TRUE;
+   if GetTickCount - steptime > longword(NextFrameTime) then begin
+      steptime := GetTickCount;
+      Inc (curframe);
+      if curframe > start+frame-1 then begin
+         curframe := start+frame-1;
+         if RepeatCount > 0 then begin
+            Dec (RepeatCount);
+            curframe := start;
+         end else
+            Result := FALSE;
+      end;
+   end;
+end;
+
+procedure TMapEffect.DrawEff (surface: TAsphyreCanvas);
+var
+   d: TAsphyreLockableTexture;
+begin
+   Rx := TargetX;
+   Ry := TargetY;
+   PlayScene.ScreenXYfromMCXY (Rx, Ry, FlyX, FlyY);
+   d := ImgLib.GetCachedImage (EffectBase + curframe, px, py);
+   if d <> nil then begin
+      surface.DrawBlend (
+                 FlyX + px - UNITX div 2,
+                 FlyY + py - UNITY div 2,
+                 d, 1);
+   end;
+end;
+
+
+{--------------------------------------------------------}
+
+constructor TScrollHideEffect.Create (effbase, effframe: integer; x, y: integer; target: TObject);
+begin
+   inherited Create (effbase, effframe, x, y);
+   TargetActor := target;
+end;
+
+function  TScrollHideEffect.Run: Boolean;
+begin
+   Result := inherited Run;
+   if frame = 7 then
+      if TargetActor <> nil then
+         PlayScene.DeleteActor (TActor(TargetActor).RecogId);
+
+end;
+
+
+{--------------------------------------------------------}
+
+
+constructor TLightingEffect.Create (effbase, effframe: integer; x, y: integer);
+begin
+
+end;
+
+function  TLightingEffect.Run: Boolean;
+begin
+end;
+
+
+{--------------------------------------------------------}
+
+
+constructor TFireGunEffect.Create (effbase, sx, sy, tx, ty: integer);
+begin
+   inherited Create (111, effbase,
+                     sx, sy,
+                     tx, ty, //TActor(target).XX, TActor(target).YY,
+                     mtFireGun,
+                     TRUE,
+                     0);
+   NextFrameTime := 50;
+   FillChar (FireNodes, sizeof(TFireNode)*FIREGUNFRAME, #0);
+   OutofOil := FALSE;
+   firetime := GetTickCount;
+end;
+function  TFireGunEffect.Run: Boolean;
+var
+   i, fx, fy: integer;
+   allgone: Boolean;
+begin
+   Result := TRUE;
+   if GetTickCount - steptime > longword(NextFrameTime) then begin
+      Shift;
+      steptime := GetTickCount;
+      //if not FixedEffect then begin  //¸ñÇ¥¿¡ ¸ÂÁö ¾Ê¾ÒÀ¸¸é
+      if not OutofOil then begin
+         if (abs(RX-TActor(MagOwner).RX) >= 5) or (abs(RY-TActor(MagOwner).RY) >= 5) or (GetTickCount - firetime > 800) then
+            OutofOil := TRUE;
+         for i:=FIREGUNFRAME-2 downto 0 do begin
+            FireNodes[i].FireNumber := FireNodes[i].FireNumber + 1;
+            FireNodes[i+1] := FireNodes[i];
+         end;
+         FireNodes[0].FireNumber := 1;
+         FireNodes[0].x := FlyX;
+         FireNodes[0].y := FlyY;
+      end else begin
+         allgone := TRUE;
+         for i:=FIREGUNFRAME-2 downto 0 do begin
+            if FireNodes[i].FireNumber <= FIREGUNFRAME then begin
+               FireNodes[i].FireNumber := FireNodes[i].FireNumber + 1;
+               FireNodes[i+1] := FireNodes[i];
+               allgone := FALSE;
+            end;
+         end;
+         if allgone then Result := FALSE;
+      end;
+   end;
+end;
+
+procedure TFireGunEffect.DrawEff (surface: TAsphyreCanvas);
+var
+   i, num, shx, shy, firex, firey, prx, pry, img: integer;
+   d: TAsphyreLockableTexture;
+begin
+   if not BoViewEffect then Exit;
+   prx := -1;
+   pry := -1;
+   for i:=0 to FIREGUNFRAME-1 do begin
+      if (FireNodes[i].FireNumber < FIREGUNFRAME) and (FireNodes[i].FireNumber > 0)//
+         and (FireNodes[i].x > 0) and (FireNodes[i].y > 0)//
+         then begin
+         shx := (Myself.RX*UNITX + Myself.ShiftX) - FireMyselfX;
+         shy := (Myself.RY*UNITY + Myself.ShiftY) - FireMyselfY;
+
+         img := EffectBase + (FireNodes[i].FireNumber - 1);
+         d := ImgLib.GetCachedImage (img, px, py);
+         if d <> nil then begin
+            firex := FireNodes[i].x + px - UNITX div 2 - shx;
+            firey := FireNodes[i].y + py - UNITY div 2 - shy;
+            if (firex <> prx) or (firey <> pry) then begin
+               prx := firex;
+               pry := firey;
+               surface.DrawBlend ( firex, firey, d, 1);
+            end;
+         end;
+      end;
+   end;
+end;
+
+{--------------------------------------------------------}
+
+constructor TThuderEffect.Create (effbase, tx, ty: integer; target: TObject);
+begin
+   ExCheckMag := False;
+   if (effbase = 10) then begin
+     ExCheckMag := True;
+     inherited Create (111, effbase,
+                       tx, ty,
+                       tx, ty, //TActor(target).XX, TActor(target).YY,
+                       mtThunder,
+                       FALSE,
+                       0);
+   end else begin
+     inherited Create (111, effbase,
+                       tx, ty,
+                       tx, ty, //TActor(target).XX, TActor(target).YY,
+                       mtFireThunder,
+                       FALSE,
+                       0);
+   end;
+   TargetActor := target;
+
+end;
+
+procedure TThuderEffect.DrawEff (surface: TAsphyreCanvas);
+var
+   img, px, py: integer;
+   d: TAsphyreLockableTexture;
+begin
+   if (not BoViewEffect) and (not ExCheckMag) then Exit;
+   img := EffectBase;
+   d := ImgLib.GetCachedImage (img + curframe, px, py);
+   if d <> nil then begin
+      surface.DrawBlend (
+                 FlyX + px - UNITX div 2,
+                 FlyY + py - UNITY div 2,
+                 d, 1);
+   end;
+end;
+
+// TThuderEffectEx ---------------
+
+constructor TThuderEffectEx.Create (effbase, tx, ty: integer; target: TObject; magnum:integer);
+begin
+
+//  inherited Create (SM_DRAGON_LIGHTING, effbase,
+  inherited Create (magnum, effbase,
+                    tx, ty,
+                    tx, ty, //TActor(target).XX, TActor(target).YY,
+                    mtThunder,
+                    FALSE,
+                    0);
+   TargetActor := target;
+
+end;
+
+
+procedure TThuderEffectEx.DrawEff (surface: TAsphyreCanvas);
+var
+   img, px, py: integer;
+   d: TAsphyreLockableTexture;
+begin
+   if not BoViewEffect then Exit;
+   img := EffectBase;
+   d := ImgLib.GetCachedImage (img + curframe, px, py);
+   if d <> nil then begin
+      surface.DrawBlend (
+                 FlyX + px - UNITX div 2,
+                 FlyY + py - UNITY div 2,
+                 d, 1);
+   end;
+end;
+
+
+{--------------------------------------------------------}
+
+constructor TLightingThunder.Create (effbase, sx, sy, tx, ty: integer; target: TObject);
+begin
+   inherited Create (111, effbase,
+                     sx, sy,
+                     tx, ty, //TActor(target).XX, TActor(target).YY,
+                     mtLightingThunder,
+                     FALSE,
+                     0);
+   TargetActor := target;
+end;
+
+procedure TLightingThunder.DrawEff (surface: TAsphyreCanvas);
+var
+   img, sx, sy, px, py, shx, shy: integer;
+   d: TAsphyreLockableTexture;
+begin
+   if not BoViewEffect then Exit;
+   img := EffectBase + Dir16 * 10;
+   if curframe < 6 then begin
+
+      shx := (Myself.RX*UNITX + Myself.ShiftX) - FireMyselfX;
+      shy := (Myself.RY*UNITY + Myself.ShiftY) - FireMyselfY;
+
+      d := ImgLib.GetCachedImage (img + curframe, px, py);
+      if d <> nil then begin
+         PlayScene.ScreenXYfromMCXY (TActor(MagOwner).RX,
+                                     TActor(MagOwner).RY,
+                                     sx,
+                                     sy);
+         surface.DrawBlend (
+                    sx + px - UNITX div 2,
+                    sy + py - UNITY div 2,
+                    d, 1);
+      end;
+   end;
+   {if (curframe < 10) and (TargetActor <> nil) then begin
+      d := ImgLib.GetCachedImage (EffectBase + 17*10 + curframe, px, py);
+      if d <> nil then begin
+         PlayScene.ScreenXYfromMCXY (TActor(TargetActor).RX,
+                                     TActor(TargetActor).RY,
+                                     sx,
+                                     sy);
+         DrawBlend (surface,
+                    sx + px - UNITX div 2,
+                    sy + py - UNITY div 2,
+                    d, 1);
+      end;
+   end;}
+end;
+
+
+{--------------------------------------------------------}
+
+constructor TExploBujaukEffect.Create (effbase, magicnumb, sx, sy, tx, ty: integer; target: TObject);
+begin
+   inherited Create (111, effbase,
+                     sx, sy,
+                     tx, ty,
+                     mtExploBujauk,
+                     TRUE,
+                     0);
+   frame := 3;
+   MagicNumber := magicnumb;
+   TargetActor := target;
+   NextFrameTime := 50;
+end;
+
+procedure TExploBujaukEffect.DrawEff (surface: TAsphyreCanvas);
+var
+   img: integer;
+   d: TAsphyreLockableTexture;
+   shx, shy: integer;
+   meff: TMapEffect;
+begin
+   if not BoViewEffect then Exit;
+   if Active and ((Abs(FlyX-fireX) > 30) or (Abs(FlyY-fireY) > 30) or FixedEffect) then begin
+
+      shx := (Myself.RX*UNITX + Myself.ShiftX) - FireMyselfX;
+      shy := (Myself.RY*UNITY + Myself.ShiftY) - FireMyselfY;
+
+      if not FixedEffect then begin
+         //³¯¾Æ°¡´Â°Å
+         img := EffectBase + Dir16 * 10;
+         d := ImgLib.GetCachedImage (img + curframe, px, py);
+         if d <> nil then begin
+            //¾ËÆÄºí·©µùÇÏÁö ¾ÊÀ½
+            surface.Draw (FlyX + px - UNITX div 2 - shx,
+                          FlyY + py - UNITY div 2 - shy,
+                          d.ClientRect, d, TRUE);
+         end;
+      end else begin
+         //Æø¹ß
+         img := MagExplosionBase + curframe;
+
+         if MagicNumber = 49 then begin //¹ÌÈ¥¼ú
+            NextFrameTime := 100;
+            img := 1110 + curframe;
+            ImgLib := WMagic2;
+         end
+         else if MagicNumber = MAGIC_FOX_FIRE2 then begin //µµ»çºñ¿ù¿©¿ì Æø»ì°è
+            NextFrameTime := 100;
+            img := 1320 + curframe;
+            ImgLib := WMon24Img;
+         end
+         else if MagicNumber = MAGIC_FOX_CURSE then begin //µµ»çºñ¿ù¿©¿ì ÀúÁÖ¼ú
+            NextFrameTime := 100;
+            img := 1330 + curframe;
+            ImgLib := WMon24Img;
+         end;
+
+         d := ImgLib.GetCachedImage (img, px, py);
+         if d <> nil then begin
+            surface.DrawBlend (
+                       FLyX + px - UNITX div 2,
+                       FlyY + py - UNITY div 2,
+                       d, 1);
+         end;
+      end;
+   end;
+end;
+
+{--------------------------------------------------------}
+
+constructor TBujaukGroundEffect.Create (effbase, magicnumb, sx, sy, tx, ty: integer);
+begin
+   inherited Create (111, effbase,
+                     sx, sy,
+                     tx, ty,
+                     mtBujaukGroundEffect,
+                     TRUE,
+                     0);
+   frame := 3;
+   MagicNumber := magicnumb;
+   BoGroundEffect := FALSE;
+   NextFrameTime := 50;
+end;
+
+function  TBujaukGroundEffect.Run: Boolean;
+begin
+   Result := inherited Run;
+   if not FixedEffect then begin
+      if ((abs(TargetX-FlyX) <= 15) and (abs(TargetY-FlyY) <= 15)) or
+         ((abs(TargetX-FlyX) >= prevdisx) and (abs(TargetY-FlyY) >= prevdisy)) then begin
+         FixedEffect := TRUE;  //Æø¹ß
+         start := 0;
+         frame := ExplosionFrame;
+         curframe := start;
+         Repetition := FALSE;
+         //ÅÍÁö´Â »ç¿îµå
+         PlaySound (TActor(MagOwner).magicexplosionsound);
+
+         Result := TRUE;
+      end else begin
+         prevdisx := abs(TargetX-FlyX);
+         prevdisy := abs(TargetY-FlyY);
+      end;
+   end;
+end;
+
+procedure TBujaukGroundEffect.DrawEff (surface: TAsphyreCanvas);
+var
+   img: integer;
+   d: TAsphyreLockableTexture;
+   shx, shy: integer;
+   meff: TMapEffect;
+begin
+   if not BoViewEffect then Exit;
+   if Active and ((Abs(FlyX-fireX) > 30) or (Abs(FlyY-fireY) > 30) or FixedEffect) then begin
+
+      shx := (Myself.RX*UNITX + Myself.ShiftX) - FireMyselfX;
+      shy := (Myself.RY*UNITY + Myself.ShiftY) - FireMyselfY;
+
+      if not FixedEffect then begin
+         //³¯¾Æ°¡´Â°Å
+         img := EffectBase + Dir16 * 10;
+         d := ImgLib.GetCachedImage (img + curframe, px, py);
+         if d <> nil then begin
+            //¾ËÆÄºí·©µùÇÏÁö ¾ÊÀ½
+            surface.Draw (FlyX + px - UNITX div 2 - shx,
+                          FlyY + py - UNITY div 2 - shy,
+                          d.ClientRect, d, TRUE);
+         end;
+      end else begin
+         //Æø¹ß
+      if MagicNumber = 11 then       //Ç×¸¶Áø¹ý
+        img := EffectBase + 16 * 10 + curframe
+      else if MagicNumber = 12 then  //´ëÁö¿øÈ£
+        img := EffectBase + 18 * 10 + curframe
+      else if MagicNumber = 46 then
+      begin //ÀúÁÖ¼ú
+        NextFrameTime := 100;
+        img := 950 + curframe;
+        ImgLib := WMagic2;
+      end
+      else if MagicNumber = 55 then
+      begin //PoisonCloud
+        NextFrameTime := 100;
+        img := 1650 + curframe;
+        ImgLib := WMagic2;
+      end
+      else if MagicNumber in [83, 87] then
+      begin
+        NextFrameTime := 100;
+        img := 620 + curframe;
+        ImgLib := WMagic3;
+      end;
+
+         d := ImgLib.GetCachedImage (img, px, py);
+         if d <> nil then begin
+            surface.DrawBlend (
+                       FLyX + px - UNITX div 2, // - shx,
+                       FlyY + py - UNITY div 2, // - shy,
+                       d, 1);
+         end;
+
+         {if not BoGroundEffect and (curframe = 8) then begin
+            BoGroundEffect := TRUE;
+            meff := TMapEffect.Create (img+2, 6, TargetRx, TargetRy);
+            meff.NextFrameTime := 100;
+            //meff.RepeatCount := 1;
+            PlayScene.GroundEffectList.Add (meff);
+         end; }
+      end;
+   end;
+end;
+
+
+
+{--------------------------------------------------------}
+//ºí·£µù ¾ÈÇÏ´Â È¿°ú
+
+constructor TNormalDrawEffect.Create (xx, yy: integer;
+                                       iLib: TWMImages;
+                                       eff_base: integer;
+                                       eff_frame: integer;
+                                       eff_time: integer;
+                                       blending: Boolean);
+begin
+   if not BoViewEffect then Exit;
+   inherited Create (111, eff_base,
+                     xx, yy,
+                     xx, yy,
+                     mtReady,  //»ç¿ë¾ÈÇÔ
+                     TRUE,
+                     0);
+   ImgLib := ilib;          //ÀÌ¹ÌÁö ¶óÀÌºê·¯¸®
+   EffectBase := eff_base;      //±×¸²ÀÇ ½ÃÀÛ ¹øÈ£
+   start := 0;
+   curframe := 0;
+   frame := eff_frame;      //ÇÁ·¡ÀÓ¼ö
+   NextFrameTime := eff_time;  //°£°Ý
+   BoBlending := blending;
+
+end;
+
+function TNormalDrawEffect.Run: Boolean;
+begin
+   if not BoViewEffect then Exit;
+   Result := TRUE;
+   if Active then begin
+      if GetTickCount - steptime > longword(NextFrameTime) then begin
+         steptime := GetTickCount;
+         Inc (curframe);
+         if curframe > start+frame-1 then begin
+            curframe := start;
+            Result := FALSE;
+         end;
+      end;
+   end;
+end;
+
+procedure TNormalDrawEffect.DrawEff (surface: TAsphyreCanvas);
+var
+   img, sx, sy, px, py, shx, shy: integer;
+   d: TAsphyreLockableTexture;
+begin
+   if not BoViewEffect then Exit;
+   img := EffectBase + curframe;
+
+   //shx := (Myself.RX*UNITX + Myself.ShiftX) - FireMyselfX;
+   //shy := (Myself.RY*UNITY + Myself.ShiftY) - FireMyselfY;
+
+   d := ImgLib.GetCachedImage (img, px, py);
+   if d <> nil then begin
+      PlayScene.ScreenXYfromMCXY (FlyX, //TActor(MagOwner).RX,
+                                  FlyY, //TActor(MagOwner).RY,
+                                  sx,
+                                  sy);
+      if BoBlending then begin
+      surface.DrawBlend(sx + px - UNITX div 2, sy + py - UNITY div 2, d, 1);
+      end else begin
+         surface.Draw (
+                    sx + px - UNITX div 2,
+                    sy + py - UNITY div 2,
+                    d.ClientRect,
+                    d,
+                    TRUE);
+      end;
+   end;
+end;
+
+
+constructor TIceSickle.Create (effbase, sx, sy, tx, ty: integer; target: TObject);
+begin
+  inherited Create(111, effbase, sx, sy, tx, ty, //TActor(target).XX, TActor(target).m_nCurrY,
+    mtIceSickle, FALSE, 0);
+  TargetActor := target;
+end;
+
+procedure TIceSickle.DrawEff (surface: TAsphyreCanvas);
+var
+   img, sx, sy, px, py, shx, shy: integer;
+   d: TAsphyreLockableTexture;
+begin
+  img := EffectBase + Dir16 * 10;
+  if curframe < 6 then
+  begin
+
+    shx := (MySelf.Rx * UNITX + MySelf.ShiftX) - FireMyselfX;
+    shy := (MySelf.Ry * UNITY + MySelf.ShiftY) - FireMyselfY;
+
+    d := ImgLib.GetCachedImage(img + curframe, px, py);
+    if d <> nil then
+    begin
+      PlayScene.ScreenXYfromMCXY(TActor(MagOwner).Rx, TActor(MagOwner).Ry, sx, sy);
+      surface.DrawBlend({surface,} sx + px - UNITX div 2, sy + py - UNITY div 2, d, 1);
+    end;
+  end;
+end;
+// 2003/02/11
+// ³¯¾Æ°¡´Â ºÒ°ø
+constructor TFlyingFireBall.Create (id, effnum, sx, sy, tx, ty: integer; mtype: TMagicType; Recusion: Boolean; anitime: integer);
+begin
+   inherited Create (id, effnum, sx, sy, tx, ty, mtype, Recusion, anitime);
+end;
+
+procedure TFlyingFireBall.DrawEff (surface: TAsphyreCanvas);
+var
+   img, tdir : integer;
+   d: TAsphyreLockableTexture;
+begin
+   if not BoViewEffect then Exit;
+   if Active and ((Abs(FlyX-fireX) > ReadyFrame) or (Abs(FlyY-fireY) > ReadyFrame)) then begin
+      tdir := GetFlyDirection(FlyX, FlyY, TargetX, TargetY);
+      img := FlyImageBase + tdir * 10;
+      d := ImgLib.GetCachedImage (img + curframe, px, py);
+      if d <> nil then begin
+         surface.DrawBlend (
+                    FLyX + px - UNITX div 2,
+                    FlyY + py - UNITY div 2,
+                    d, 1);
+      end;
+   end;
+end;
+
+end.

@@ -1,0 +1,33 @@
+﻿XE安装控件：能装上的都装了一遍，有几个安装报错的控件没装；
+
+1.添加XE自带通讯控件,源码控件包的JSocket安装报错， F:\Program Files (x86)\Embarcadero\RAD Studio\8.0\bin\dclsockets150.bpl
+
+2.F:\BOBO小火炬全套源码\Components\DevExpressVCL\DxAutoInstallerBerlin.exe  运行后指向程序所在路径，点install安装至完成；
+
+3.F:\BOBO小火炬全套源码\Components\OverbyteIcsV7\Delphi\Vc32\OverbyteIcsDXeDesign.dpk
+
+
+5.F:\BOBO小火炬全套源码\Components\TMS-Component-Pack\tmsd2011.dpk
+
+6.F:\BOBO小火炬全套源码\Components\uFormDesinger\uFormDesigner.dpk
+
+
+8.F:\BOBO小火炬全套源码\Components\WebBrowserUI\PAKWebBrowserUI.dpk
+
+9.F:\BOBO小火炬全套源码\Source\SceneUI\DXSceneUIComponents.dpk
+
+
+
+
+
+
+
+
+
+xe10.4安装控件
+D:\Mir\GameOfMir_hwmir2\Components\Raize    一键安装
+D:\Mir\GameOfMir_hwmir2\Components\OverbyteIcsV8\OverbyteIcsV8.dpk
+D:\Mir\GameOfMir_hwmir2\Components\uFormDesinger\uFormDesinger.dpk
+D:\Mir\GameOfMir_hwmir2\Components\EmbeddedWB\Source\EmbeddedWebBrowser.dpk
+D:\Mir\GameOfMir_hwmir2\Source\SceneUI\DXSceneUIComponents.dpk
+D:\Mir\GameOfMir_hwmir2\Components\TMS-Component-Pack\tmsd2011.dpk

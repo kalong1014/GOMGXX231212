@@ -1,0 +1,2726 @@
+unit Magic;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs,
+  ScktComp, syncobjs, MudUtil, HUtil32, Grobal2, Envir, EdCode, ObjBase,
+  M2Share, Event;
+
+
+type
+   TMagicManager = class
+   private
+   public
+      constructor Create;
+      function  MPow (pum: PTUserMagic): integer;
+      function  MagPushAround (user: TCreature; pushlevel: integer): integer; //0..3
+      function  MagLightingShock (user, target: TCreature; x, y, shocklevel: integer): Boolean;
+      function  MagTurnUndead (user, target: TCreature; x, y, mlevel: integer): Boolean;
+      function  MagLightingSpaceMove (user: TCreature; slevel: integer): Boolean;
+      function  MagMakeHolyCurtain (user: TCreature; htime, x, y: integer): integer;
+      function  MagMakeFireCross (user: TCreature; dam, htime, x, y: integer): integer;
+      function  MagBigHealing (user: TCreature; pwr, x, y: integer): Boolean;
+      function  MagBigExplosion (user: TCreature; pwr, x, y, wide: integer): Boolean;
+      function  MagBlizzard(user: TCreature; dam, htime, x, y: integer): integer;
+      function  MagMeteor(user: TCreature; dam, htime, x, y: integer): integer;
+      function  MagDragonFire (user: TCreature; pwr, skilllevel: integer): Boolean;
+      function  MagElecBlizzard (user: TCreature; pwr: integer): Boolean;
+      function  MagMakePrivateTransparent (user: TCreature; htime: integer): Boolean;
+      function  MagMakeGroupTransparent (user: TCreature; x, y, htime: integer): Boolean;
+      function  IsSwordSkill (mid: integer): Boolean;
+      function  SpellNow (user: TCreature; pum: PTUserMagic; xx, yy: integer; target: TCreature ; spell : integer): Boolean;
+      // 2003/07/15 ½Å±Ô¹«°ø
+      function  MagMakePrivateClean (user: TCreature; x, y, pct: integer): Boolean;
+      procedure WindCutHit  ( user , target : TCreature ; hitPwr ,magpwr: integer );
+      function  MagWindCut (user: TCreature; skilllevel: integer): Boolean;
+      // 2004/06/23 ½Å±Ô¹«°ø
+      function  MagPullMon (user, target: TCreature; skilllevel: integer): Boolean;
+      function  MagBlindEye (user, target: TCreature; pum: PTUserMagic): Boolean;
+      function MagMakeYinYangMatrix(user: TCreature; dam, htime, x, y: integer): integer;
+      function MagMakePoisonCloud(user: TCreature; dam, htime, x, y: integer): integer;
+
+      function  IceBlaze (user: TCreature; skilllevel: integer): Boolean;
+   end;
+
+
+implementation
+
+uses
+   svMain;
+
+
+constructor TMagicManager.Create;
+begin
+   inherited Create;
+end;
+
+//°Ë¼úÀÎÁö ¾Æ´ÑÁö ±¸ºÐ..
+//°Ë¼úÀº Å°·ê ´­·¯ »ç¿ëÇÏ´Â ¸¶¹ýÀÌ ¾Æ´Ô
+function  TMagicManager.IsSwordSkill (mid: integer): Boolean;
+begin
+   Result := FALSE;
+   //2003/03/15 ½Å±Ô¹«°ø Ãß°¡
+   case mid of
+      3, 4, 7, 12, 25, 26, 27, 34, 38: Result := TRUE;
+   end;
+end;
+
+function  TMagicManager.MPow (pum: PTUserMagic): integer;
+begin
+   Result := pum.pDef.MinPower + Random(pum.pDef.MaxPower - pum.pDef.MinPower);
+end;
+
+//pushlevel = 0..3
+function  TMagicManager.MagPushAround (user: TCreature; pushlevel: integer): integer;
+var
+   i, ndir, levelgap, push: integer;
+   cret: TCreature;
+begin
+   Result := 0;
+   for i:=0 to user.VisibleActors.Count-1 do begin
+      cret := TCreature (PTVisibleActor(user.VisibleActors[i]).cret);
+      if (abs(user.CX-cret.CX) <= 1) and (abs(user.CY-cret.CY) <= 1) then begin
+         if (not cret.Death) and (cret <> user) then begin
+            if (user.Abil.Level > cret.Abil.Level) and (not cret.StickMode) then begin
+               levelgap := user.Abil.Level - cret.Abil.Level;
+               if (Random(20) < 6+pushlevel*3+levelgap) then begin  //¼ö·ÃÁ¤µµ¿¡ µû¶ó¼­
+                  if user.IsProperTarget(cret) then begin
+                     push := 1 + _MAX(0,pushlevel-1) + Random(2);
+                     ndir := GetNextDirection (user.CX, user.CY, cret.CX, cret.CY);
+                     cret.CharPushed (ndir, push);
+                     Inc(cret.PushedCount);
+                     Inc (Result);
+                  end;
+               end;
+            end;
+         end;
+      end;
+   end;
+end;
+
+function  TMagicManager.MagDragonFire( user : TCreature ; pwr, skilllevel : integer ) :Boolean;
+//var               //Ê¢´ó°æ±¾
+//   i: integer;
+//   rlist: TList;
+//   cret: TCreature;
+//begin
+//   Result := FALSE;
+//   rlist := TList.Create;
+//   user.GetMapCreatures (user.PEnvir, x, y, wide, rlist);
+//   for i:=0 to rlist.Count-1 do begin
+//      cret := TCreature (rlist[i]);
+//      if user.IsProperTarget (cret) then begin
+//         user.SelectTarget (cret);
+//         cret.SendMsg (user, RM_MAGSTRUCK, 0, pwr, 0, 0, '');
+//         Result := TRUE;
+//      end;
+//   end;
+//   rlist.Free;
+//end;
+var
+   i: integer;
+   rlist: TList;
+   cret: TCreature;
+   wide : integer;
+   realpwr : integer;
+begin
+   Result := FALSE;
+
+   realpwr := pwr;
+   rlist := TList.Create;
+   wide := 2;
+   user.GetMapCreatures (user.PEnvir, user.CX, user.CY, wide, rlist);
+   for i:=0 to rlist.Count-1 do begin
+      cret := TCreature (rlist[i]);
+      if user.IsProperTarget (cret) then begin
+         user.SelectTarget (cret);
+         //È­·æ±â¿° ¹«°ø¼öÁ¤
+         if (abs(user.CX - cret.CX) >= 2) or (abs(user.CY - cret.CY) >= 2) then begin
+            realpwr := (pwr * 8) div 10;
+         end else begin
+            realpwr := pwr;
+         end;
+         cret.SendMsg (user, RM_MAGSTRUCK, 0, realpwr, 0, 0, '');
+         Result := TRUE;
+      end;
+   end;
+   rlist.Free;
+
+end;
+
+
+function  TMagicManager.MagLightingShock (user, target: TCreature; x, y, shocklevel: integer): Boolean;
+var
+   ran: integer;
+begin
+   Result := FALSE;
+   if (target.RaceServer <> RC_USERHUMAN) and (Random(4-shocklevel) = 0) then begin
+      target.TargetCret := nil;
+      //ÆÁ: ³»ºÎÇÏ¿¡°Ô ·ÚÈ¥°ÝÀ» ¾²¸é ¸ØÃá´Ù.
+      if target.Master = user then begin
+         target.MakeHolySeize ((10 + shocklevel * 5) * 1000);  //Á¤½ÅÀ» ÀÒÀ½, ÀûÀ» ÀÒ¾î¹ö¸²
+         Result := TRUE;
+         exit;
+      end;
+
+      if (Random(2) = 0) then begin
+         if target.Abil.Level <= user.Abil.Level + 2 then begin
+            if Random(3) = 0 then begin        //ÓÕ»ó³É¹¦ÂÊ   Ä¬ÈÏÊÇRandom(3)
+               if ((youhuojilv) + target.Abil.Level) < Random(20 + user.Abil.Level + shocklevel * 5) then begin     //µÚÒ»¸ö5Ä¬ÈÏÊÇ10  ÕâÀïÊÇÓÕ»ó¼¸ÂÊ
+//                  if (not target.NoMaster) and
+//                     (target.LifeAttrib = LA_CREATURE) and
+//                     (target.RaceServer <> RC_CLONE  ) and
+//                     (target.RaceServer <> RC_ANGEL  ) and
+                     //2003/02/11 ÃÖ´ë·¡¹ë º¯°æ
+//                     (target.Abil.Level < MAXKINGLEVEL-1) and     //50
+//                     (user.SlaveList.Count < (2 + shocklevel) and
+                  if user.EnableRecallMob( target , shockLevel ) then begin
+                     //»ý¸íÀÖ´Â¸÷ÀÌ°í, ·¹º§ÀÌ 50¹Ì¸¸ÀÌ¾î¾ß ÇÏ°í, ºÎÇÏ¼ö°¡ 5¸¶¸® ¹Ì¸¸ÀÎ °æ¿ì
+                     ran := target.WAbil.MaxHP div (youhuoxueliang);       //ÓÕ»ó³É¹¦ÂÊ£¬Ä¬ÈÏÊÇ div 100
+
+                     if target.RaceServer = RC_GHOST_TIGER then ran := ran div 4;
+
+                     if ran <= 2 then ran := 2
+                     else ran := ran + ran;
+
+                     if (target.Master <> user) and (Random(ran) = 0) then begin
+                        target.BreakCrazyMode;
+                        if target.Master <> nil then //³²¿¡ ¸÷À» ²¿½É
+                           target.WAbil.HP := target.WAbil.HP div 10;  //
+                        target.Master := user;
+
+                      //target.MasterRoyaltyTime := GetTickCount + longword(20 + shocklevel * 20 + Random(user.Abil.Level * 2))* 60 * 1000; //¹Ù·½Ô­°æÄ¬ÈÏ·¨Ê¦±¦±¦ÅÑ±äµÄ¹«Ê½
+                      target.MasterRoyaltyTime := GetTickCount +longword((Bbpb) * 60) * 60 * 1000;  //±¦±¦ÅÑ±äÊ±¼ä¹Ì¶¨ÎªËÄÐ¡Ê± £¨4*60£©=4x60·ÖÖÓ
+                      //target.MasterRoyaltyTime := GetTickCount +longword(Bbpb) * 1000;  //²âÊÔÓÃ
+
+                        target.SlaveMakeLevel := shocklevel;
+                        if target.SlaveLifeTime = 0 then target.SlaveLifeTime := GetTickCount;
+                        //target.SlaveExpLevel := 0;
+                        target.BreakHolySeize;
+                        if target.NextWalkTime > 1500-(shocklevel*200)  then target.NextWalkTime := 1500-(shocklevel*200);
+                        if target.NextHitTime > 2000-(shocklevel*200) then target.NextHitTime := 2000-(shocklevel*200);
+                        //target.FeatureChanged;
+                        target.UserNameChanged;
+                        user.SlaveList.Add (target);
+                     end else begin
+                        if (Random(20) = 0) then begin
+                           target.WAbil.HP := 0;  //¹Ù·Î Á×´Â´Ù.
+                        end;
+                     end;
+                  end else begin
+                     if (target.LifeAttrib = LA_UNDEAD) and (Random(5) = 0) then begin       //ÓÕ»ó¹ÖÎïËÀÍöÂÊ  Ä¬ÈÏÊÇRandom(2)
+                        target.WAbil.HP := 0;  //¹Ù·Î Á×´Â´Ù.
+                     end;
+                  end;
+               end else begin
+                  if (target.LifeAttrib <> LA_UNDEAD) and (Random(3) = 0) then begin //Çé¿öÊ§¿Ø×´Ì¬
+                     target.MakeCrazyMode (10 + Random(20));
+                  end;
+               end;
+            end else begin
+               if target.LifeAttrib <> LA_UNDEAD then begin
+                  target.MakeCrazyMode (10 + Random(20));     //Çé¿öÊ§¿Ø×´Ì¬£¬±äºì
+               end;
+            end;
+         end;
+      end else begin
+         target.MakeHolySeize ((10 + shocklevel * 5) * 1000);  //¾«ÉñµÄÉ¥Ê§, Ê§È¥ÁÖ
+      end;
+      Result := TRUE;
+   end else
+      if Random(2) = 0 then
+         Result := TRUE;
+end;
+
+function  TMagicManager.MagTurnUndead (user, target: TCreature; x, y, mlevel: integer): Boolean;
+var
+   lvgap: integer;
+begin
+   Result := FALSE;
+   if (not target.NeverDie) and
+      (target.LifeAttrib = LA_UNDEAD)
+   then begin
+      TAnimal(target).Struck (user);
+      if target.TargetCret = nil then begin  //³î°í ÀÖÀ»¶§ ÅÏ¾ðµ¥µå°¡ ¿À¸é Àá½Ã µµ¸Á°¨
+         TAnimal(target).BoRunAwayMode := TRUE;
+         TAnimal(target).RunAwayStart := GetTickCount;
+         TAnimal(target).RunAwayTime := 10 * 1000;
+      end;
+      user.SelectTarget (target);
+      // À¯Àú 52·¹º§ ¹®Á¦ ¼öÁ¤(sonmg 2004/09/08)
+      if (target.Abil.Level < (_MIN(user.Abil.Level, 51) - 1 + Random(4))) and
+         //2003/02/11 ÃÖ´ë·¡¹ë º¯°æ
+         (target.Abil.Level < g_MONLEVELTIAOJIE)   //50 -> 61    //   (target.Abil.Level < MAXKINGLEVEL-1)
+      then begin
+         lvgap := user.Abil.Level - target.Abil.Level;
+         if Random(100) < (15 + mlevel * 7 + lvgap) then begin
+            target.SetLastHiter (user);
+            target.WAbil.HP := 0;  //¹Ù·Î Á×´Â´Ù.
+            Result := TRUE;
+         end;
+      end;
+   end;
+end;
+
+function  TMagicManager.MagLightingSpaceMove (user: TCreature; slevel: integer): Boolean;
+var
+   oldenvir: TEnvirnoment;
+   hum: TUserHuman;
+begin
+   Result := FALSE;
+   if not user.BoTaiwanEventUser then begin
+      if not (user.PEnvir.NoEscapeMove or user.PEnvir.NoTeleportMove) then begin  //¾Æ°øÇà¹ý »ç¿ëºÒ°¡(sonmg)
+         if Random(11) < 4 + slevel*2 then begin
+            user.SendRefMsg (RM_SPACEMOVE_HIDE2, 0, 0, 0, 0, '');
+            if user is TUserHuman then begin
+               oldenvir := user.PEnvir;
+
+               TUserHuman(user).RandomSpaceMove (user.HomeMap, 1);
+
+               if oldenvir <> user.PEnvir then begin  //½ÇÁúÀûÀ¸·Î ´Ù¸¥ ¸ÊÀ¸·Î ÀÌµ¿ ÇÏ¿´À½
+                  if user.RaceServer = RC_USERHUMAN then begin
+//                     hum := TUserHuman (self); //°øÆ÷ÀÇ¹ö±×
+                     hum := TUserHuman (user);   // ¿ÇÀºÄÚµå
+                     hum.BoTimeRecall := FALSE;    //TimeRecall Ãë¼Ò
+                     hum.BoTimeRecallGroup := FALSE;    //TimeRecall Ãë¼Ò
+                  end;
+               end;
+            end;
+            Result := TRUE;
+         end;
+      end;
+   end;
+end;
+
+function  TMagicManager.MagMakeHolyCurtain (user: TCreature; htime, x, y: integer): integer;
+var
+   event: TEvent;
+   i: integer;
+   rlist: TList;
+   cret: TCreature;
+   phs: PTHolySeizeInfo;
+begin
+   Result := 0;
+   if user.PEnvir.CanWalk (x, y, TRUE) then begin
+      rlist := TList.Create;
+      phs := nil;
+      user.GetMapCreatures (user.PEnvir, x, y, 1, rlist);
+      for i:=0 to rlist.Count-1 do begin
+         cret := TCreature (rlist[i]);
+         if (cret.RaceServer >= RC_ANIMAL) and
+            (cret.Abil.Level < (user.Abil.Level - 1 + Random(4))) and
+            //2003/02/11 ÃÖ´ë·¡¹ë º¯°æ
+            (cret.Abil.Level < g_MONLEVELTIAOJIE) and    //50 -> 61 //      (cret.Abil.Level < MAXKINGLEVEL-1) and
+            (cret.Master = nil)
+         then begin  //°á°è¿¡ °É¸°´Ù.
+            cret.MakeHolySeize (htime * 1000);
+            if phs = nil then begin
+               phs := new (PTHolySeizeInfo);    //°á°èÁ¤º¸
+               FillChar (phs^, sizeof(THolySeizeInfo), #0);
+               phs.seizelist := TList.Create;
+               phs.OpenTime := GetTickCount;  //°á°è°¡ ÃÖ¼Ò·Î »ý¼ºµÈ ½Ã°£(°á°èÀÇ ÃÖ´ë½Ã°£Àº 3ºÐ)
+               phs.SeizeTime := htime * 1000; //°á°èÀÇ Áö¼Ó½Ã°£
+            end;
+            phs.seizelist.Add (cret);  //°á°è¿¡ °É¸° ¸÷À» ±â·Ï, ³ªÁß¿¡ °á°è°¡ ÇØÁöµÇ¾ú´ÂÁö¸¦ ¾Ë±âÀ§ÇØ
+            Inc (Result);
+         end else begin
+            Result := 0;  //°á°è¿¡ °É¸®Áö ¾Ê´Â °ÍÀÌ Æ÷ÇÔµÇ¾î ÀÖÀ¸¸é Ãë¼ÒµÊ
+            break;
+         end;
+      end;
+      rlist.Free;
+
+      if (Result > 0) and (phs <> nil) then begin
+         //8°³ÀÇ ºûÀ» Âï´Â´Ù.
+         event := THolyCurtainEvent.Create (user.PEnvir, x-1, y-2, ET_HOLYCURTAIN, htime * 1000);
+         EventMan.AddEvent (event);  phs.earr[0] := event;
+         event := THolyCurtainEvent.Create (user.PEnvir, x+1, y-2, ET_HOLYCURTAIN, htime * 1000);
+         EventMan.AddEvent (event);  phs.earr[1] := event;
+         event := THolyCurtainEvent.Create (user.PEnvir, x-2, y-1, ET_HOLYCURTAIN, htime * 1000);
+         EventMan.AddEvent (event);  phs.earr[2] := event;
+         event := THolyCurtainEvent.Create (user.PEnvir, x+2, y-1, ET_HOLYCURTAIN, htime * 1000);
+         EventMan.AddEvent (event);  phs.earr[3] := event;
+         event := THolyCurtainEvent.Create (user.PEnvir, x-2, y+1, ET_HOLYCURTAIN, htime * 1000);
+         EventMan.AddEvent (event);  phs.earr[4] := event;
+         event := THolyCurtainEvent.Create (user.PEnvir, x+2, y+1, ET_HOLYCURTAIN, htime * 1000);
+         EventMan.AddEvent (event);  phs.earr[5] := event;
+         event := THolyCurtainEvent.Create (user.PEnvir, x-1, y+2, ET_HOLYCURTAIN, htime * 1000);
+         EventMan.AddEvent (event);  phs.earr[6] := event;
+         event := THolyCurtainEvent.Create (user.PEnvir, x+1, y+2, ET_HOLYCURTAIN, htime * 1000);
+         EventMan.AddEvent (event);  phs.earr[7] := event;
+
+         UserEngine.HolySeizeList.Add (phs); //°á°èÃß°¡
+      end else begin
+         if phs <> nil then begin
+            phs.seizelist.Free;
+            Dispose (phs);
+         end;
+      end;
+   end;
+end;
+
+function  TMagicManager.MagMakeFireCross (user: TCreature; dam, htime, x, y: integer): integer;
+var
+   event: TEvent;
+   i: integer;
+   rlist: TList;
+   cret: TCreature;
+begin
+   if user.PEnvir.GetEvent(x, y-1) = nil then begin
+      event := TFireBurnEvent.Create (user, x, y-1, ET_FIRE, htime * 1000, dam);
+      EventMan.AddEvent (event);
+   end;
+   if user.PEnvir.GetEvent(x-1, y) = nil then begin
+      event := TFireBurnEvent.Create (user, x-1, y, ET_FIRE, htime * 1000, dam);
+      EventMan.AddEvent (event);
+   end;
+   if user.PEnvir.GetEvent(x, y) = nil then begin
+      event := TFireBurnEvent.Create (user, x, y, ET_FIRE, htime * 1000, dam);
+      EventMan.AddEvent (event);
+   end;
+   if user.PEnvir.GetEvent(x+1, y) = nil then begin
+      event := TFireBurnEvent.Create (user, x+1, y, ET_FIRE, htime * 1000, dam);
+      EventMan.AddEvent (event);
+   end;
+   if user.PEnvir.GetEvent(x, y+1) = nil then begin
+      event := TFireBurnEvent.Create (user, x, y+1, ET_FIRE, htime * 1000, dam);
+      EventMan.AddEvent (event);
+   end;
+
+   Result := 1;
+end;
+
+function  TMagicManager.MagBigHealing (user: TCreature; pwr, x, y: integer): Boolean;
+var
+   i: integer;
+   rlist: TList;
+   cret: TCreature;
+begin
+   Result := FALSE;
+   rlist := TList.Create;
+   user.GetMapCreatures (user.PEnvir, x, y, 1, rlist);
+   for i:=0 to rlist.Count-1 do begin
+      cret := TCreature (rlist[i]);
+      if user.IsProperFriend (cret) then begin
+         if cret.WAbil.HP < cret.WAbil.MaxHP then begin
+            cret.SendDelayMsg (user, RM_MAGHEALING, 0, pwr, 0, 0, '', 800);
+            Result := TRUE;
+         end;
+         if user.BoAbilSeeHealGauge then begin
+            user.SendMsg (cret, RM_INSTANCEHEALGUAGE, 0, 0, 0, 0, '');
+         end;
+      end;
+   end;
+   rlist.Free;
+end;
+
+function  TMagicManager.MagBigExplosion (user: TCreature; pwr, x, y, wide: integer): Boolean;
+var
+   i: integer;
+   rlist: TList;
+   cret: TCreature;
+begin
+   Result := FALSE;
+   rlist := TList.Create;
+   user.GetMapCreatures (user.PEnvir, x, y, wide, rlist);
+   for i:=0 to rlist.Count-1 do begin
+      cret := TCreature (rlist[i]);
+      if user.IsProperTarget (cret) then begin
+         user.SelectTarget (cret);
+         cret.SendMsg (user, RM_MAGSTRUCK, 0, pwr, 0, 0, '');
+         Result := TRUE;
+      end;
+   end;
+   rlist.Free;
+end;
+
+
+
+
+
+function  TMagicManager.MagElecBlizzard (user: TCreature; pwr: integer): Boolean;
+var
+   i, acpwr: integer;
+   rlist: TList;
+   cret: TCreature;
+begin
+   Result := FALSE;
+   rlist := TList.Create;
+   user.GetMapCreatures (user.PEnvir, user.CX, user.CY, 2, rlist);
+   for i:=0 to rlist.Count-1 do begin
+      cret := TCreature (rlist[i]);
+      if cret.LifeAttrib <> LA_UNDEAD then  //¾ðµ¥µå °è¿­ ¸ó½ºÅÍ¿¡°Ô °ø°Ý·ÂÀÌ ÀÖÀ½
+         acpwr := pwr div 10
+      else acpwr := pwr;
+      if user.IsProperTarget (cret) then begin
+         cret.SendMsg (user, RM_MAGSTRUCK, 0, acpwr, 0, 0, '');
+         Result := TRUE;
+      end;
+   end;
+   rlist.Free;
+end;
+
+
+//¼úÀÚ°¡ Àº½ÅÀÌ µÈ´Ù. ³ª¸¦ °ø°ÝÇÏ°í ÀÖ´Â ¸÷µéÀÌ ³ª¸¦ ¸ô¶óº»´Ù.
+//¼úÀÚ°¡ ¶§¸®¸é °ø°ÝÇÔ.
+//¼úÀÚ°¡ ÀÌµ¿ÇÏ¸é ÇØÁ¦µÈ´Ù.
+function  TMagicManager.MagMakePrivateTransparent (user: TCreature; htime: integer): Boolean;
+var
+   i: integer;
+   rlist: TList;
+   cret: TCreature;
+begin
+   Result := FALSE;
+   if user.StatusArr[STATE_TRANSPARENT] > 0 then exit;  //ÀÌ¹Ì Åõ¸í
+
+   rlist := TList.Create;
+   user.GetMapCreatures (user.PEnvir, user.CX, user.CY, 9, rlist);
+   for i:=0 to rlist.Count-1 do begin
+      cret := TCreature (rlist[i]);
+      if cret.RaceServer >= RC_ANIMAL then begin  //
+         if cret.TargetCret = user then begin
+            //°¡±îÀÌ ÀÖ´Â³ðÀº 1/2 Àº ³Ñ¾î°£´Ù.
+            if (abs(cret.CX-user.CX) > 1) or (abs(cret.CY-user.CY) > 1) or (Random(2) = 0) then begin
+               cret.TargetCret := nil;
+            end;
+         end;
+      end;
+   end;
+   rlist.Free;
+   user.StatusArr[STATE_TRANSPARENT] := htime;
+   user.CharStatus := user.GetCharStatus;
+   user.CharStatusChanged;
+   user.BoHumHideMode := TRUE;
+   user.BoFixedHideMode := TRUE; //ÇÑ ÀÚ¸®¿¡¼­¸¸ Àº½Å°¡´É, ÀÌµ¿ÇÏ¸é Àº½ÅÀÌ Ç®¸°´Ù.
+   Result := TRUE;
+end;
+
+function  TMagicManager.MagMakeGroupTransparent (user: TCreature; x, y, htime: integer): Boolean;
+var
+   i: integer;
+   rlist: TList;
+   cret: TCreature;
+begin
+   Result := FALSE;
+   rlist := TList.Create;
+   user.GetMapCreatures (user.PEnvir, x, y, 1, rlist);
+   for i:=0 to rlist.Count-1 do begin
+      cret := TCreature (rlist[i]);
+      //if cret.RaceServer = RC_USERHUMAN then begin
+      if user.IsProperFriend(cret) then begin  //. or (cret.Master <> nil) then begin  //
+         if cret.StatusArr[STATE_TRANSPARENT] = 0 then begin  //Åõ¸íÀÌ ¾Æ´Ñ »óÅÂ
+            cret.SendDelayMsg (cret, RM_TRANSPARENT, 0, htime, 0, 0, '', 800);
+            //if MagMakePrivateTransparent (cret, htime) then
+            Result := TRUE;
+         end;
+      end;
+   end;
+   rlist.Free;
+end;
+
+function  TMagicManager.MagMakePrivateClean (user: TCreature; x, y, pct: integer): Boolean;
+var
+   i: integer;
+   rlist: TList;
+   cret: TCreature;
+begin
+   Result := FALSE;
+   if Random(100) > pct then exit;
+
+   rlist := TList.Create;
+   user.GetMapCreatures (user.PEnvir, x, y, 0, rlist);
+   for i:=0 to rlist.Count-1 do begin
+      cret := TCreature (rlist[i]);
+      if user.IsProperFriend(cret) then begin
+         cret.StatusArr[POISON_DECHEALTH] := 0;
+         cret.StatusArr[POISON_DAMAGEARMOR] := 0;
+         cret.StatusArr[POISON_ICE] := 0;
+         cret.StatusArr[POISON_STUN] := 0;
+         cret.StatusArr[POISON_DONTMOVE] := 0;
+         cret.StatusArr[POISON_STONE] := 0;
+         cret.StatusArr[POISON_SLOW] := 0;
+         cret.CharStatus := cret.GetCharStatus;
+         cret.CharStatusChanged;
+         Result := TRUE;
+      end;
+   end;
+   rlist.Free;
+end;
+
+procedure TMagicManager.WindCutHit  ( user , target : TCreature ; hitPwr ,magpwr: integer );
+var
+   i, dam: integer;
+//   list: TList;
+//   cret: TCreature;
+begin
+//   list := TList.Create;
+//   user.PEnvir.GetAllCreature (target.CX, target.CY, TRUE, list);
+//   for i:=0 to list.Count-1 do begin
+//      cret := TCreature(list[i]);
+      if user.IsProperTarget (target) then begin
+         dam := 0;
+         dam := dam + target.GetHitStruckDamage (user, hitpwr);
+         dam := dam + target.GetMagStruckDamage (user, magpwr);
+         if dam > 0 then begin
+            target.StruckDamage (dam, user);
+            target.SendDelayMsg (TCreature(RM_STRUCK), RM_REFMESSAGE, dam{wparam},
+                     target.WAbil.HP{lparam1}, target.WAbil.MaxHP{lparam2}, Longint(user){hiter}, '', 200);
+         end;
+      end;
+//   end;
+//   list.Free;
+
+end;
+
+function  TMagicManager.MagWindCut (user: TCreature; skilllevel: integer): Boolean;
+var
+   i    : integer;
+   rlist: TList;
+   cret : TCreature;
+   pwr  : integer;
+   isnear : boolean;
+   xx,yy : integer;
+   f1x,f1y,f2x,f2y : integer;
+   CriticalDamage: Boolean;
+   DcRandom: integer;
+begin
+   Result := FALSE;
+   pwr := 0;
+   isnear := FALSE;
+   rlist := TList.Create;
+
+   // ¹üÀ§ÀÇ ÁÜ½ÉÀÌ µÇ´Â ÁÂÇ¥ º¯°æ
+   xx := user.CX;
+   yy := user.CY;
+   f1x := xx;
+   f1y := yy;
+   f2x := xx;
+   f2y := yy;
+
+   case user.dir of
+   0 :  begin
+            // °­ÇÏ°Ô Å¸°ÝÀÌ µé¾î°¡´Â ÁÂÇ¥ ¼³Á¤
+            f1x := xx;
+            f1y := yy - 1;
+            f2x := xx;
+            f2y := yy - 2;
+
+            //Áß¾ÓÁÂÇ¥ ¼³Á¤
+            yy := yy - 2;
+
+            user.GetMapCreatures (user.PEnvir, xx, yy, 1, rlist);
+        end;
+   1 :  begin
+
+            // °­ÇÏ°Ô Å¸°ÝÀÌ µé¾î°¡´Â ÁÂÇ¥ ¼³Á¤
+            f1x := xx + 1;
+            f1y := yy - 1;
+            f2x := xx + 2;
+            f2y := yy - 2;
+
+            //Áß¾ÓÁÂÇ¥ ¼³Á¤
+//            xx := xx + 1;
+//            yy := yy - 1;
+            xx := xx + 2;
+            yy := yy - 2;
+
+            user.GetObliqueMapCreatures (user.PEnvir, xx, yy, 1, user.dir, rlist);
+        end;
+   2 :  begin
+            // °­ÇÏ°Ô Å¸°ÝÀÌ µé¾î°¡´Â ÁÂÇ¥ ¼³Á¤
+            f1x := xx + 1;
+            f1y := yy ;
+            f2x := xx + 2;
+            f2y := yy;
+
+            //Áß¾ÓÁÂÇ¥ ¼³Á¤
+            xx  := xx + 2;
+
+            user.GetMapCreatures (user.PEnvir, xx, yy, 1, rlist);
+        end;
+   3 :  begin
+            // °­ÇÏ°Ô Å¸°ÝÀÌ µé¾î°¡´Â ÁÂÇ¥ ¼³Á¤
+            f1x := xx + 1;
+            f1y := yy + 1;
+            f2x := xx + 2;
+            f2y := yy + 2;
+
+            //Áß¾ÓÁÂÇ¥ ¼³Á¤
+//            xx := xx + 1;
+//            yy := yy + 1;
+            xx := xx + 2;
+            yy := yy + 2;
+
+            user.GetObliqueMapCreatures (user.PEnvir, xx, yy, 1, user.dir, rlist);
+        end;
+   4 :  begin
+            // °­ÇÏ°Ô Å¸°ÝÀÌ µé¾î°¡´Â ÁÂÇ¥ ¼³Á¤
+            f1x := xx ;
+            f1y := yy + 1;
+            f2x := xx ;
+            f2y := yy + 2;
+
+            //Áß¾ÓÁÂÇ¥ ¼³Á¤
+            yy := yy + 2;
+
+            user.GetMapCreatures (user.PEnvir, xx, yy, 1, rlist);
+        end;
+   5 :  begin
+            // °­ÇÏ°Ô Å¸°ÝÀÌ µé¾î°¡´Â ÁÂÇ¥ ¼³Á¤
+            f1x := xx - 1;
+            f1y := yy + 1;
+            f2x := xx - 2;
+            f2y := yy + 2;
+
+            //Áß¾ÓÁÂÇ¥ ¼³Á¤
+//            xx := xx - 1;
+//            yy := yy + 1;
+            xx := xx - 2;
+            yy := yy + 2;
+
+            user.GetObliqueMapCreatures (user.PEnvir, xx, yy, 1, user.dir, rlist);
+        end;
+   6 :  begin
+            // °­ÇÏ°Ô Å¸°ÝÀÌ µé¾î°¡´Â ÁÂÇ¥ ¼³Á¤
+            f1x := xx - 1;
+            f1y := yy ;
+            f2x := xx - 2;
+            f2y := yy ;
+
+            //Áß¾ÓÁÂÇ¥ ¼³Á¤
+            xx := xx - 2;
+
+            user.GetMapCreatures (user.PEnvir, xx, yy, 1, rlist);
+        end;
+   7 :  begin
+            // °­ÇÏ°Ô Å¸°ÝÀÌ µé¾î°¡´Â ÁÂÇ¥ ¼³Á¤
+            f1x := xx - 1;
+            f1y := yy - 1;
+            f2x := xx - 2;
+            f2y := yy - 2;
+
+            //Áß¾ÓÁÂÇ¥ ¼³Á¤
+//            xx := xx - 1;
+//            yy := yy - 1;
+            xx := xx - 2;
+            yy := yy - 2;
+
+            user.GetObliqueMapCreatures (user.PEnvir, xx, yy, 1, user.dir, rlist);
+        end;
+   end;
+
+   // ¸ð¼ÇÀ» ÃëÇÏ°Ô ÇÑ´ÙÀ½¿¡
+//   user.HitMotion( RM_HIT, user.Dir, user.CX, user.CY);
+//   user.SendRefMsg( RM_WINDCUT , user.Dir , user.CX , user.CY , 0, '');
+
+   //Àåºñ Çà¿îÄ¡·Î Å©¸®Æ¼ÄÃ È®·ü °áÁ¤
+   CriticalDamage := FALSE;
+   if Random(100) <= (1 + user.UseItems[U_WEAPON].Desc[3] - user.UseItems[U_WEAPON].Desc[4]) then
+      CriticalDamage := TRUE;
+
+   for i:=0 to rlist.Count-1 do begin
+      cret := TCreature (rlist[i]);
+      if user.IsProperTarget (cret) and ( not cret.Death) and ( not cret.BoGhost ) then
+      begin
+
+         // Å¸°ÝÀÌ °­ÇÏ°Ô µé¾î°¡¾ßµÉ ³Ñ°ú ¾àÇÏ°Ô µé¾î°¡¾ßµÉ ³Ñ ÆÇ´Ü.
+         if ( (cret.CX = f1x) and (cret.CY = f1y) ) or ( (cret.CX = f2x) and (cret.CY = f2y) ) then begin
+            isnear := true;
+         end else begin
+            isnear := false;
+         end;
+
+         //Å©¸®Æ¼ÄÃ µ¥¹ÌÁö
+         if CriticalDamage then begin
+            DcRandom := HIBYTE(user.Wabil.DC);
+         end else begin
+            DcRandom := Random( HIBYTE(user.Wabil.DC) );
+         end;
+
+         //Àü¹æ 1*2ÀÇ ¹üÀ§:
+         //((1.2+0.3*(Lv_S+(LV/20)) * Random(Dcmax)/3+DC
+         //±× ¿Ü ¹üÀ§: ((0.8+0.2*(Lv_S+LV/20)) * Random(Dcmax)/3+DC
+         //Å¸°ÝÄ¡°¡ ´Ù¸¥°Ô Àû¿ëµÊ
+         if isnear then begin
+            pwr := ( (12 + 3 * ( SkillLevel + user.Abil.Level div 20 )) ) * DcRandom div 30 + LOBYTE(user.Wabil.DC);
+         end else begin
+            pwr := ( (8 + 2 * ( SkillLevel + user.Abil.Level div 20 )) ) * DcRandom div 30 + LOBYTE(user.Wabil.DC);
+         end;
+
+         //Å©¸®Æ¼ÄÃ µ¥¹ÌÁö
+         if CriticalDamage then begin
+            pwr := pwr * 2;
+         end;
+
+         if pwr > 0 then begin
+            //Å×½ºÆ®¿ë
+{
+            if isnear then
+               cret.MakePoison( POISON_STONE , 2 ,1 )
+            else
+               cret.MakePoison( POISON_SLOW , 2 ,1 );
+}
+            windcuthit( user, cret, pwr, 0 );
+            Result := TRUE;
+         end;
+      end;
+   end;
+   rlist.Free;
+
+end;
+
+function  TMagicManager.IceBlaze (user: TCreature; skilllevel: integer): Boolean;
+var
+   i    : integer;
+   rlist: TList;
+   cret : TCreature;
+   pwr  : integer;
+   isnear : boolean;
+   xx,yy : integer;
+   f1x,f1y,f2x,f2y : integer;
+   CriticalDamage: Boolean;
+   DcRandom: integer;
+begin
+   Result := FALSE;
+   pwr := 0;
+   isnear := FALSE;
+   rlist := TList.Create;
+
+   xx := user.CX;
+   yy := user.CY;
+   f1x := xx;
+   f1y := yy;
+   f2x := xx;
+   f2y := yy;
+
+   case user.dir of
+   0 :  begin
+            f1x := xx;
+            f1y := yy - 1;
+            f2x := xx;
+            f2y := yy - 2;
+            yy := yy - 2;
+            user.GetMapCreatures (user.PEnvir, xx, yy, 1, rlist);
+        end;
+   1 :  begin
+            f1x := xx + 1;
+            f1y := yy - 1;
+            f2x := xx + 2;
+            f2y := yy - 2;
+            xx := xx + 2;
+            yy := yy - 2;
+            user.GetObliqueMapCreatures (user.PEnvir, xx, yy, 1, user.dir, rlist);
+        end;
+   2 :  begin
+            f1x := xx + 1;
+            f1y := yy ;
+            f2x := xx + 2;
+            f2y := yy;
+            xx  := xx + 2;
+            user.GetMapCreatures (user.PEnvir, xx, yy, 1, rlist);
+        end;
+   3 :  begin
+            f1x := xx + 1;
+            f1y := yy + 1;
+            f2x := xx + 2;
+            f2y := yy + 2;
+            xx := xx + 2;
+            yy := yy + 2;
+            user.GetObliqueMapCreatures (user.PEnvir, xx, yy, 1, user.dir, rlist);
+        end;
+   4 :  begin
+            f1x := xx ;
+            f1y := yy + 1;
+            f2x := xx ;
+            f2y := yy + 2;
+            yy := yy + 2;
+            user.GetMapCreatures (user.PEnvir, xx, yy, 1, rlist);
+        end;
+   5 :  begin
+            f1x := xx - 1;
+            f1y := yy + 1;
+            f2x := xx - 2;
+            f2y := yy + 2;
+            xx := xx - 2;
+            yy := yy + 2;
+            user.GetObliqueMapCreatures (user.PEnvir, xx, yy, 1, user.dir, rlist);
+        end;
+   6 :  begin
+            f1x := xx - 1;
+            f1y := yy ;
+            f2x := xx - 2;
+            f2y := yy ;
+            xx := xx - 2;
+            user.GetMapCreatures (user.PEnvir, xx, yy, 1, rlist);
+        end;
+   7 :  begin
+            f1x := xx - 1;
+            f1y := yy - 1;
+            f2x := xx - 2;
+            f2y := yy - 2;
+            xx := xx - 2;
+            yy := yy - 2;
+            user.GetObliqueMapCreatures (user.PEnvir, xx, yy, 1, user.dir, rlist);
+        end;
+   end;
+
+   CriticalDamage := FALSE;
+   if Random(100) <= (1 + user.UseItems[U_WEAPON].Desc[3] - user.UseItems[U_WEAPON].Desc[4]) then
+      CriticalDamage := TRUE;
+
+   for i:=0 to rlist.Count-1 do begin
+      cret := TCreature (rlist[i]);
+      if user.IsProperTarget (cret) and ( not cret.Death) and ( not cret.BoGhost ) then
+      begin
+         if ( (cret.CX = f1x) and (cret.CY = f1y) ) or ( (cret.CX = f2x) and (cret.CY = f2y) ) then begin
+            isnear := true;
+         end else begin
+            isnear := false;
+         end;
+
+         if CriticalDamage then begin
+            DcRandom := HIBYTE(user.Wabil.MC);
+         end else begin
+            DcRandom := Random( HIBYTE(user.Wabil.MC) );
+         end;
+
+         if isnear then begin
+            pwr := ( (12 + 3 * ( SkillLevel + user.Abil.Level div 20 )) ) * DcRandom div 30 + LOBYTE(user.Wabil.MC);
+         end else begin
+            pwr := ( (8 + 2 * ( SkillLevel + user.Abil.Level div 20 )) ) * DcRandom div 30 + LOBYTE(user.Wabil.MC);
+         end;
+
+         if CriticalDamage then begin
+            pwr := pwr * 2;
+         end;
+
+         if pwr > 0 then begin
+            if (Random(10) = 0) then cret.MakePoison( POISON_SLOW , 2 ,1 );
+            windcuthit( user, cret, pwr, 0 );
+            Result := TRUE;
+         end;
+      end;
+   end;
+   rlist.Free;
+end;
+//Æ÷½Â°Ë
+function  TMagicManager.MagPullMon (user, target: TCreature; skilllevel: integer): Boolean;
+var
+   levelgap, rush, rushdir, rushDist, Dur: integer;
+   SuccessFlag : Boolean;
+begin
+   Result := FALSE;
+   SuccessFlag := FALSE;
+   if user = nil then exit;
+
+   if target <> nil then begin
+      //»ç¶÷ÇÑÅ× ¾µ ¼ö ¾øÀ½.
+      if target.RaceServer = RC_USERHUMAN then exit;
+
+      //¿òÁ÷ÀÌÁö ¾Ê´Â ¸ó½ºÅÍ´Â ²ø¾î¿Ã ¼ö ¾øÀ½(2004/12/01)
+      if target.StickMode then exit;
+
+      // ³Ê¹« °¡±îÀÌ ÀÖÀ¸¸é ±â¼úÀ» ¾µ ¼ö ¾øÀ½.
+      if (abs(user.CX - target.CX) < 3) and (abs(user.CY - target.CY) < 3) then begin
+         {$IFDEF KOREA} user.SysMsg('Ä¿±êÌ«½ü', 0);
+         {$ELSE}        user.SysMsg('Target is too close.', 0);
+         {$ENDIF}
+         exit;
+      end else if (abs(user.CX - target.CX) > 7) and (abs(user.CY - target.CY) > 7) then begin
+//         {$IFDEF KOREA} user.SysMsg('»ó´ë°¡ ³Ê¹« ¸Ö¸® ÀÖ½À´Ï´Ù.', 0)
+//         {$ELSE}        user.SysMsg('Target is too far.', 0);
+//         {$ENDIF}
+         exit;
+      end;
+
+      // ¸Ö¸®ÀÖ´Â ÀûÀ» ²ø¾î´ç±ä´Ù.
+      user.Dir := GetNextDirectionNew (user.CX, user.CY, target.CX, target.CY);
+//      user.SendRefMsg (RM_LIGHTING, user.Dir, user.CX, user.CY, Integer(target), '');
+
+      // ¹æÇâº° ²ø¾î´ç±â´Â °Å¸® Á¶Àý
+      rushDir := ( (user.Dir + 4) mod 8 );
+      if rushDir in [0,4] then begin
+         rushDist := abs(user.CY - target.CY) -3;
+      end else if rushDir in [2,6] then begin
+         rushDist := abs(user.CX - target.CX) -3;
+      end else begin
+         rushDist := _MAX( 0, _MIN( abs(user.CX - target.CX) -2, abs(user.CY - target.CY) -2 ) );
+      end;
+
+      if user.IsProperTarget (target) then begin
+         // ½ÃÃ¼°¡ ¾Æ´Ï°í ²¿ºÀ¸÷ÀÌ ¾Æ´Ï¾î¾ß ÇÔ.
+//         if (not target.Death) and (target.Master = nil) then begin
+         // ½ÃÃ¼°¡ ¾Æ´Ï¾î¾ß ÇÔ. ²¿ºÀ¸÷Àº °¡´ÉÇÏ°Ô ¼öÁ¤(sonmg 2005/11/2)
+         if (not target.Death) then begin
+            if (target.Abil.Level < user.Abil.Level + 5 + Random(8)) and (target.Abil.Level < 60) then begin
+               levelgap := user.Abil.Level - target.Abil.Level;
+               if target.RaceServer = RC_USERHUMAN then begin
+                  if (Random(30) < ((skilllevel+1) * 2) + levelgap + 4) then
+                     SuccessFlag := TRUE;
+               end else if target.RaceServer >= RC_ANIMAL then begin
+                  if (Random(30) < ((skilllevel+1) * 3) + levelgap + 9) then
+                     SuccessFlag := TRUE;
+               end;
+
+               if SuccessFlag then begin
+                  // Á÷¼±¿¡ ÀÖ´Â³Ñ¸¸ ¶¯±ä´Ù.(1Ä­¾¿ ÁÂ¿ì·Î ÀÖ´Â ³Ñµµ ¶¯±ä´Ù)
+                  if ( user.CX = target.CX ) or ( user.CY = target.CY ) or ( abs (user.CX-target.CX ) = abs (user.CY-target.CY ))
+                        or (user.CX+1 = target.CX) or ( user.CY+1 = target.CY ) or ( abs( abs (user.CX-target.CX ) - abs (user.CY-target.CY ) ) = 1 )
+                        or (user.CX-1 = target.CX) or ( user.CY-1 = target.CY ) then begin
+                     rush := RushDist;
+                     target.CharDrawingRush ( RushDir, rush, false );
+                     if target.RaceServer <> RC_USERHUMAN then begin
+                        Dur := Round((skilllevel+1) * 1.6) + _MAX(1, 10 - target.SpeedPoint);
+                     end else begin
+                        Dur := Round((skilllevel+1) * 0.8) + _MAX(1, 10 - target.SpeedPoint);
+                        if user.RaceServer = RC_USERHUMAN then begin
+                           //Á¤´ç¹æ¾î¸¦ À§ÇÑ ±â·Ï..
+                           target.AddPkHiter (user);
+                        end;
+                     end;
+                     target.MakePoison( POISON_STONE, Dur, 1 );
+                     target.SendRefMsg (RM_LOOPNORMALEFFECT, integer(target), 1500, 0, NE_MONCAPTURE, '');
+                     Result := TRUE;
+                  end else begin
+//                     user.SysMsg('²ø¾î ´ç±æ ¼ö ¾ø´Â À§Ä¡¿¡ ÀÖ½À´Ï´Ù.', 0);
+                  end;
+               end;
+            end;
+         end;
+      end;
+   end;
+end;
+
+function  TMagicManager.MagBlindEye (user, target: TCreature; pum: PTUserMagic): Boolean;
+   function GetRPow (pw: word): byte;
+   begin
+      if Hibyte(pw) > Lobyte(pw) then begin
+         Result := Lobyte(pw) + Random(Hibyte(pw)-Lobyte(pw)+1);
+      end else
+         Result := Lobyte(pw);
+   end;
+   function GetPower (pw: integer): integer;  //¼ö·Ã 0 ´Ü°è¿¡¼­´Â 1/4ÀÇ ÆÄ¿öÀÓ
+   begin
+      Result := Round(pw / (pum.pDef.MaxTrainLevel+1) * (pum.Level+1))
+                      + (pum.pDef.DefMinPower + Random(pum.pDef.DefMaxPower - pum.pDef.DefMinPower));
+   end;
+   function GetPower13 (pw: integer): integer;  //¼ö·Ã 0 ´Ü°è¿¡µµ 1/3ÀÇ ÆÄ¿ö°¡ ³²
+   var
+      p1, p2: Real;
+   begin
+      p1 := pw / 3;
+      p2 := pw - p1;
+      Result := Round(p1 + p2 / (pum.pDef.MaxTrainLevel+1) * (pum.Level+1)
+                      + (pum.pDef.DefMinPower + Random(pum.pDef.DefMaxPower - pum.pDef.DefMinPower)));
+   end;
+var
+   pwr : integer;
+   levelgap : integer;
+//   flag : Boolean;
+begin
+   Result := FALSE;
+//   flag := FALSE;
+   if user.IsProperTarget (target) then begin
+      //¸ó½ºÅÍ¿¡¸¸ °É¸².
+      if target.RaceServer >= RC_ANIMAL then begin
+         //½ºÅ³Á¤µµ¿¡ µû¶ó ¼º°ø¿©ºÎ°¡ °áÁ¤
+         levelgap := user.Abil.Level - target.Abil.Level;
+         if (20 - (pum.Level+1)*2) <= Random(GetRPow(user.WAbil.SC) + (user.Abil.Level div 5) + (levelgap*2)) then begin
+            //(»ó´ë¹æ ·¹º§ < ½ÃÀüÀÚ ·¹º§+1+Random(3)) and (»ó´ë¹æ·¹º§ < 55)
+            if (target.Abil.Level < user.Abil.Level + 1 + Random(3)) and (target.Abil.Level < 55) then begin
+               if (target.BoGoodCrazyMode = FALSE) then begin //Áßº¹ÇØ¼­ °É¸®Áö ¾Ê´Â´Ù.
+                  //pwr = ÆøÁÖ½Ã°£
+                  pwr := GetPower13 (10) + Round(GetRPow(user.WAbil.SC)/3);
+                  pwr := pwr + Random(20);
+                  target.TargetCret := nil;
+                  target.MakeGoodCrazyMode (pwr);
+//                  target.SendRefMsg (RM_LOOPNORMALEFFECT, integer(target), pwr * 1000, 0, NE_BLINDEFFECT, '');
+//                  flag := TRUE;
+//                  user.SysMsg('¶°µµ´Â ¿µÈ¥À» ºùÀÇ½ÃÄ×½À´Ï´Ù.', 1);
+               end;
+            end;
+
+            Result := TRUE;
+         end;
+         user.SelectTarget (target);
+      end;
+   end;
+
+//   if flag = FALSE then
+//      user.SysMsg('¶°µµ´Â ¿µÈ¥À» ºùÀÇ½ÃÅ°Áö ¸øÇß½À´Ï´Ù.', 0);
+end;
+
+function TMagicManager.MagBlizzard(user: TCreature;
+  dam, htime, x, y: integer): integer;
+var
+  event: TEvent;
+  i:     integer;
+  rlist: TList;
+  cret:  TCreature;
+begin
+   User.UseBlizzard := True;
+    event := TBlizzardEvent.Create(user, x, y, ET_BLIZZARD, htime, Round(dam * 1.15));
+    EventMan.AddEvent(event);
+    event := TBlizzardEvent.Create(user, x - 1, y - 1, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TBlizzardEvent.Create(user, x, y - 1, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TBlizzardEvent.Create(user, x + 1, y - 1, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TBlizzardEvent.Create(user, x - 1, y, ET_BLIZZARD, htime, Round(dam * 1.15));
+    EventMan.AddEvent(event);
+    event := TBlizzardEvent.Create(user, x + 1, y, ET_BLIZZARD, htime, Round(dam * 1.15));
+    EventMan.AddEvent(event);
+    event := TBlizzardEvent.Create(user, x - 1, y + 1, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TBlizzardEvent.Create(user, x, y + 1, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TBlizzardEvent.Create(user, x + 1, y + 1, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TBlizzardEvent.Create(user, x - 2, y, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TBlizzardEvent.Create(user, x + 2, y, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TBlizzardEvent.Create(user, x, y - 2, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TBlizzardEvent.Create(user, x, y + 2, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+
+Result := 1;
+
+end;
+
+
+function TMagicManager.MagMeteor(user: TCreature;
+  dam, htime, x, y: integer): integer;
+var
+  event: TEvent;
+  i:     integer;
+  rlist: TList;
+  cret:  TCreature;
+begin
+ User.UseBlizzard := True;
+    event := TMeteorEvent.Create(user, x, y, ET_METEOR, htime, Round(dam * 1.5));
+    EventMan.AddEvent(event);
+    event := TMeteorEvent.Create(user, x - 1, y - 1, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TMeteorEvent.Create(user, x, y - 1, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TMeteorEvent.Create(user, x + 1, y - 1, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TMeteorEvent.Create(user, x - 1, y, ET_BLIZZARD, htime, Round(dam * 1.5));
+    EventMan.AddEvent(event);
+    event := TMeteorEvent.Create(user, x + 1, y, ET_BLIZZARD, htime, Round(dam * 1.5));
+    EventMan.AddEvent(event);
+    event := TMeteorEvent.Create(user, x - 1, y + 1, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TMeteorEvent.Create(user, x, y + 1, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TMeteorEvent.Create(user, x + 1, y + 1, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TMeteorEvent.Create(user, x - 2, y, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TMeteorEvent.Create(user, x + 2, y, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TMeteorEvent.Create(user, x, y - 2, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+    event := TMeteorEvent.Create(user, x, y + 2, ET_BLIZZARD, htime, dam);
+    EventMan.AddEvent(event);
+Result := 1;
+
+end;
+
+
+function TMagicManager.MagMakeYinYangMatrix (user: TCreature; dam, htime, x, y: integer): integer;
+var
+  event: TEvent;
+  i:     integer;
+  rlist: TList;
+  cret:  TCreature;
+begin
+    event := TYinYangEvent.Create(user, x, y, ET_YINYANGFIVE, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x + 1, y, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x + 2, y, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x - 1, y, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x - 2, y, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x, y + 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x, y + 2, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x, y - 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x, y - 2, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x + 1, y + 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x + 2, y + 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x + 1, y + 2, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x + 2, y + 2, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x - 1, y + 2, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x - 2, y + 2, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x + 1, y - 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x + 2, y - 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x - 1, y - 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x - 2, y + 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x + 1, y - 2, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x + 2, y - 2, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x - 1, y - 2, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x - 2, y - 2, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x - 2, y - 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TYinYangEvent.Create(user, x - 1, y + 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    Result := 1;
+end;
+
+function TMagicManager.MagMakePoisonCloud(user: TCreature;
+  dam, htime, x, y: integer): integer;
+var
+  event: TEvent;
+  i:     integer;
+  rlist: TList;
+  cret:  TCreature;
+begin
+    event := TPoisonCloudEvent.Create(user, x, y, ET_POISONCLOUD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TPoisonCloudEvent.Create(user, x - 1, y - 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TPoisonCloudEvent.Create(user, x, y - 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TPoisonCloudEvent.Create(user, x + 1, y - 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TPoisonCloudEvent.Create(user, x - 1, y, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TPoisonCloudEvent.Create(user, x + 1, y, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TPoisonCloudEvent.Create(user, x - 1, y + 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TPoisonCloudEvent.Create(user, x, y + 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+    event := TPoisonCloudEvent.Create(user, x + 1, y + 1, ET_BLIZZARD, htime * 1000, dam);
+    EventMan.AddEvent(event);
+  Result := 1;
+end;
+
+
+function  TMagicManager.SpellNow (user: TCreature; pum: PTUserMagic; xx, yy: integer; target: TCreature ; spell:integer): Boolean;
+   function GetRPow (pw: word): byte;
+   begin
+      if Hibyte(pw) > Lobyte(pw) then begin
+         Result := Lobyte(pw) + Random(Hibyte(pw)-Lobyte(pw)+1);
+      end else
+         Result := Lobyte(pw);
+   end;
+   function GetPower (pw: integer): integer;  //¼ö·Ã 0 ´Ü°è¿¡¼­´Â 1/4ÀÇ ÆÄ¿öÀÓ
+   begin
+      Result := Round(pw / (pum.pDef.MaxTrainLevel+1) * (pum.Level+1))
+                      + (pum.pDef.DefMinPower + Random(pum.pDef.DefMaxPower - pum.pDef.DefMinPower));
+   end;
+   function GetPower13 (pw: integer): integer;  //¼ö·Ã 0 ´Ü°è¿¡µµ 1/3ÀÇ ÆÄ¿ö°¡ ³²
+   var
+      p1, p2: Real;
+   begin
+      p1 := pw / 3;
+      p2 := pw - p1;
+      Result := Round(p1 + p2 / (pum.pDef.MaxTrainLevel+1) * (pum.Level+1)
+                      + (pum.pDef.DefMinPower + Random(pum.pDef.DefMaxPower - pum.pDef.DefMinPower)));
+   end;
+   function CanUseBujuk (user: TCreature; count: integer): integer;
+   var
+      pstd: PTStdItem;
+   begin
+      Result := 0;
+      // 2003/03/15 COPARK ¾ÆÀÌÅÛ ÀÎº¥Åä¸® È®Àå
+      if (user.UseItems[U_BUJUK].Index > 0) then begin   // U_ARMRINGL->U_BUJUK
+         pstd := UserEngine.GetStdItem (user.UseItems[U_BUJUK].Index);
+         if pstd <> nil then begin
+            if (pstd.StdMode = 25) and (pstd.Shape = 5) then begin  //ºÎÀû
+               if Round(user.UseItems[U_BUJUK].Dura / 100) >= (count-1) then begin
+                  Result := 1;
+               end;
+            end;
+         end;
+      end;
+      if (user.UseItems[U_ARMRINGL].Index > 0) and (Result = 0) then begin
+         pstd := UserEngine.GetStdItem (user.UseItems[U_ARMRINGL].Index);
+         if pstd <> nil then begin
+            if (pstd.StdMode = 25) and (pstd.Shape = 5) then begin  //ºÎÀû
+               if Round(user.UseItems[U_ARMRINGL].Dura / 100) >= (count-1) then begin
+                  Result := 2;
+               end;
+            end;
+         end;
+      end;
+   end;
+   procedure UseBujuk (user: TCreature);
+   var
+      hum: TUserHuman;
+      pstd: PTStdItem;
+   begin
+      // 2003/03/15 COPARK ¾ÆÀÌÅÛ ÀÎº¥Åä¸® È®Àå
+      //´Ù ¾´ ºÎÀûÀº »ç¶óÁø´Ù.
+      if user.UseItems[U_BUJUK].Index > 0 then begin
+         if user.UseItems[U_BUJUK].Dura < 100 then begin    // U_ARMRINGL->U_BUJUK
+            user.UseItems[U_BUJUK].Dura := 0;
+            //´Ù ¾´ ºÎÀûÀº »ç¶óÁø´Ù.
+            if user.RaceServer = RC_USERHUMAN then begin
+               hum := TUserHuman(user);
+               hum.SendDelItem (user.UseItems[U_BUJUK]); //Å¬¶óÀÌ¾ðÆ®¿¡ ¾ø¾îÁø°Å º¸³¿
+               //ºÎÀû ´Ù ´â¾ÒÀ» ¶§ ¸Þ½ÃÁö(2004/11/15)
+               {$IFDEF KOREA} hum.SysMsg('ÄãµÄ»¤Éí·ûÒÑ¾­ÓÃ¾¡', 0);
+               {$ELSE}        hum.SysMsg('Your Amulet has been exhausted.', 0);
+               {$ENDIF}
+            end;
+            user.UseItems[U_BUJUK].Index := 0;
+         end;
+      end;
+      if user.UseItems[U_ARMRINGL].Index > 0 then begin
+         pstd := UserEngine.GetStdItem (user.UseItems[U_ARMRINGL].Index);
+         if pstd <> nil then begin
+            if (pstd.StdMode = 25) then begin  //25:ºÎÀû/µ¶ÁÖ¸Ó´Ï
+               if user.UseItems[U_ARMRINGL].Dura < 100 then begin
+                  user.UseItems[U_ARMRINGL].Dura := 0;
+                  //´Ù ¾´ ºÎÀûÀº »ç¶óÁø´Ù.
+                  if user.RaceServer = RC_USERHUMAN then begin
+                     hum := TUserHuman(user);
+                     hum.SendDelItem (user.UseItems[U_ARMRINGL]); //Å¬¶óÀÌ¾ðÆ®¿¡ ¾ø¾îÁø°Å º¸³¿
+                     //ºÎÀû ´Ù ´â¾ÒÀ» ¶§ ¸Þ½ÃÁö(2004/11/15)
+                     {$IFDEF KOREA} hum.SysMsg('ÄãµÄ»¤Éí·ûÒÑ¾­ÓÃ¾¡', 0);
+                     {$ELSE}        hum.SysMsg('Your Amulet has been exhausted.', 0);
+                     {$ENDIF}
+                  end;
+                  user.UseItems[U_ARMRINGL].Index := 0;
+               end;
+            end;
+         end;
+      end;
+   end;
+  function IsNotAllowUseMag(PlayObject: TUserHuman; cMag: PTDefMagic): Boolean;
+  var
+    i                       : Integer;
+  resourcestring
+    sNotAllowUseMag         = '±¾µØÍ¼²»ÔÊÐíÊ¹ÓÃ%s';
+  begin
+    Result := False;
+    if (PlayObject.PEnvir <> nil) and (PlayObject.PEnvir.NoUseMagic) then begin
+      if PlayObject.PEnvir.NoUseMagicList <> nil then begin
+        for i := 0 to PlayObject.PEnvir.NoUseMagicList.Count - 1 do begin
+          if cMag.MagicId = Integer(PlayObject.PEnvir.NoUseMagicList[i]) then begin
+            PlayObject.SysMsg(Format(sNotAllowUseMag, [cMag.MagicName]), 0);
+            Result := True;
+            Break;
+          end;
+        end;
+      end;
+    end;
+  end;
+
+var
+   idx, sx, sy, ndir, pwr,sec, MoC, Dur, Gap, i  : integer;
+   train, nofire, needfire : Boolean;
+   bhasitem : integer;
+   bujuckcount : integer;
+   pstd: PTStdItem;
+   hum: TUserHuman;
+   k : integer;
+   TempCret: TCreature;
+   ResList: TList;
+   waittime: integer;
+begin
+   Result := FALSE;
+   if IsSwordSkill (pum.MagicId) then exit;
+
+  if (user.RaceServer = RC_USERHUMAN) and IsNotAllowUseMag(TUserHuman(user), pum.pDef) then
+    Exit;
+
+   //¸¶¹ý ÁØºñµ¿ÀÛÀ» ¸ÕÀú º¸³¿
+   user.SendRefMsg (RM_SPELL, pum.pDef.Effect, xx, yy, pum.pDef.MagicId, '');
+   if target <> nil then
+      if target.Death then begin  //Å¸°ÙÀÌ Á×Àº°æ¿ì.....
+         target := nil;
+      end;
+
+   train := FALSE;
+   nofire := FALSE;
+   needfire := TRUE;
+   pwr := 0;
+   sec := 0;
+   waittime := 0;
+   case pum.pDef.MagicId of
+      1, //È­¿°Àå
+      5: //±Ý°­È­¿°Àå
+         if user.MagCanHitTarget (user.CX, user.CY, target) then begin
+            if user.IsProperTarget (target) then begin
+               if (target.AntiMagic <= Random(50)) and (abs(target.CX-xx) <= 1) and (abs(target.CY-yy) <= 1) then begin
+                  with user do begin
+                     pwr := GetAttackPower (
+                                 GetPower (MPow(pum)) + Lobyte(WAbil.MC),
+                                 Integer(Hibyte(WAbil.MC)-Lobyte(WAbil.MC)) + 1
+                              ); //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+                     //pwr := GetPower (MPow(pum)) + (Lobyte(WAbil.MC) + Random(Hibyte(WAbil.MC)-Lobyte(WAbil.MC) + 1));
+                     //Å¸°Ù ¸ÂÀ½, ÈÄ¿¡ È¿°ú³ªÅ¸³²
+                     //target.SendDelayMsg (user, RM_MAGSTRUCK, 0, pwr, 0, 0, '', 1200 + _MAX(Abs(CX-xx),Abs(CY-yy)) * 50 );
+                  end;
+                  //rm-delaymagic¿¡¼­ selecttargetÀ» Ã³¸®ÇÑ´Ù.
+                  user.SendDelayMsg (user, RM_DELAYMAGIC, pwr, MakeLong(xx, yy), 2, integer(target), '', 600);
+                  if (target.RaceServer >= RC_ANIMAL) then train := TRUE;
+               end else
+                  target := nil;
+            end else
+               target := nil;
+         end else
+            target := nil;
+      //2003/03/15 ½Å±Ô¹«°ø Ãß°¡
+      37,//±â°øÆÄ...µµ»ç ¹Ð±â ¹«°ø
+      8: //È­¿°Ç³
+         begin
+            if MagPushAround (user, pum.Level) > 0 then //ÁÖÀ§¸¦ ¹Ð¾î³¿
+               train := TRUE;
+         end;
+      9: //¿°»çÀå
+         begin
+            ndir := GetNextDirection (user.CX, user.CY, xx, yy);
+            if GetNextPosition (user.PEnvir, user.CX, user.CY, ndir, 1, sx, sy) then begin
+               GetNextPosition (user.PEnvir, user.CX, user.CY, ndir, 5, xx, yy);
+               with user do begin
+                  pwr := GetAttackPower (
+                           GetPower (MPow(pum)) + Lobyte(WAbil.MC),
+                           Integer(Hibyte(WAbil.MC)-Lobyte(WAbil.MC)) + 1
+                         ); //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+               end;
+               if user.MagPassThroughMagic (sx, sy, xx, yy, ndir, pwr, FALSE) > 0 then
+                  train := TRUE;
+            end;
+         end;
+      10: //·ÚÀÎÀå
+         begin
+            ndir := GetNextDirection (user.CX, user.CY, xx, yy);
+            if GetNextPosition (user.PEnvir, user.CX, user.CY, ndir, 1, sx, sy) then begin
+               GetNextPosition (user.PEnvir, user.CX, user.CY, ndir, 8, xx, yy);
+               with user do begin
+                  pwr := GetAttackPower (
+                              GetPower (MPow(pum)) + Lobyte(WAbil.MC),
+                              Integer(Hibyte(WAbil.MC)-Lobyte(WAbil.MC)) + 1
+                           ); //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+               end;
+               if user.MagPassThroughMagic (sx, sy, xx, yy, ndir, pwr, TRUE) > 0 then
+                  train := TRUE;
+            end;
+         end;
+      //2003/03/15 ½Å±Ô¹«°ø Ãß°¡
+      35, //¸êÃµÈ­
+      11: //°­°Ý
+         if user.IsProperTarget (target) then begin
+            if target.AntiMagic <= Random(50) then begin
+               with user do begin
+                  pwr := GetAttackPower (
+                              GetPower (MPow(pum)) + Lobyte(WAbil.MC),
+                              Integer(Hibyte(WAbil.MC)-Lobyte(WAbil.MC)) + 1
+                           ); //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+               end;
+               //user.SelectTarget (target);
+               if pum.pDef.MagicId = 11 then begin
+                  if target.LifeAttrib = LA_UNDEAD then
+                     pwr := Round (pwr * 1.5);
+               end else begin
+                  if (target.LifeAttrib <> LA_UNDEAD) and (target.RaceServer <> RC_USERHUMAN) then
+                     pwr := Round (pwr * 1.2);
+               end;
+               user.SendDelayMsg (user, RM_DELAYMAGIC, pwr, MakeLong(xx, yy), 2, integer(target), '', 600);
+               if pum.pDef.MagicId = 35 then begin
+                 if target.RaceServer = RC_USERHUMAN then begin
+                   if target.Abil.MP > 0 then begin
+                     target.DamageSpell(Abs(Round(pwr * 0.35)));  //jingdian add ÃðÌì»ð¼õMP
+                   end;
+                 end;
+               end;
+               if (target.RaceServer >= RC_ANIMAL) then train := TRUE;
+            end else
+               target := nil;
+         end else
+            target := nil;
+      20: //·ÚÈ¥°Ý
+         if user.IsProperTarget (target) then begin
+            if MagLightingShock (user, target, xx, yy, pum.Level) then
+               train := TRUE;
+         end;
+      32: //»çÀÚÀ±È¸
+         if user.IsProperTarget (target) then begin
+            if MagTurnUndead (user, target, xx, yy, pum.Level) then
+               train := TRUE;
+         end;
+      21: //¾Æ°øÇà¹ý
+         begin
+            user.SendRefMsg (RM_MAGICFIRE, 0, MakeWord(pum.pDef.EffectType, pum.pDef.Effect), MakeLong(xx, yy), integer(target), '');
+            needfire := FALSE;
+            if MagLightingSpaceMove (user, pum.Level) then
+               train := TRUE;
+         end;
+      22: //Áö¿°¼ú
+         begin
+            if MagMakeFireCross (user,
+                                 user.GetAttackPower (GetPower (MPow(pum)) + Lobyte(user.WAbil.MC),
+                                                 Integer(Hibyte(user.WAbil.MC)-Lobyte(user.WAbil.MC)) + 1), //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+                                 GetPower(10) + GetRPow(user.WAbil.MC) div 2,
+                                 xx,
+                                 yy) > 0 then begin
+               train := TRUE;
+            end;
+         end;
+      23: //Æø¿­ÆÄ
+         begin
+            if MagBigExplosion (user,
+                                user.GetAttackPower (GetPower (MPow(pum)) + Lobyte(user.WAbil.MC),
+                                                 Integer(Hibyte(user.WAbil.MC)-Lobyte(user.WAbil.MC)) + 1), //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+                                xx,
+                                yy,
+                                1) then begin
+               train := TRUE;
+            end;
+         end;
+      45 : // È­·æ±â¿°
+              begin
+            with user do begin
+               // Random(0.8+(0.5*(Lv_S+1)))*Mcmax)+(1.2*Lv_S)*Mc
+               pwr := ( Random(8+(5*(pum.level+1)))*Hibyte(WAbil.MC)+(12*pum.level)*Lobyte(WAbil.MC)) div 10;
+               //È­·æ±â¿° ¹«°ø¼öÁ¤
+               DamageHealth( 10*pum.level, 1 );
+            end;
+
+            if MagDragonFire ( user , pwr , pum.Level ) then
+                train := true;
+         end;
+
+//         begin
+//            with user do begin
+//               // Random(0.8+(0.5*(Lv_S+1)))*Mcmax)+(1.2*Lv_S)*Mc
+//               pwr := ( Random(8+(5*(pum.level+1)))*Hibyte(WAbil.MC)+(12*pum.level)*Lobyte(WAbil.MC)) div 10;
+//               //È­·æ±â¿° ¹«°ø¼öÁ¤
+//               DamageHealth( 10*pum.level, 1 );
+//            end;
+
+//            begin   //Ê¢´ó°æ±¾
+//            if MagDragonFire (user,
+//                                user.GetAttackPower (GetPower (MPow(pum)) + Lobyte(user.WAbil.MC),
+//                                                 Integer(Hibyte(user.WAbil.MC)-Lobyte(user.WAbil.MC)) + 1), //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+//                                xx,
+//                                yy,
+//                                2) then begin
+//                train := true;
+//         end;
+//       end;
+
+      33: //ºù¼³Ç³
+         begin
+            if MagBigExplosion (user,
+                                user.GetAttackPower (GetPower (MPow(pum)) + Lobyte(user.WAbil.MC),
+                                                 Integer(Hibyte(user.WAbil.MC)-Lobyte(user.WAbil.MC)) + 1), //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+                                xx,
+                                yy,
+                                (bingpaoxiao)) then begin //1¸ÄÎª2¾ÍÊÇ±ùÅØÏø·¶Î§*2
+               train := TRUE;
+            end;
+         end;
+      24: //·Ú¼³È­
+         begin
+            if MagElecBlizzard (user,
+                                user.GetAttackPower (GetPower (MPow(pum)) + Lobyte(user.WAbil.MC),
+                                                 Integer(Hibyte(user.WAbil.MC)-Lobyte(user.WAbil.MC)) + 1) //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+                                ) then begin
+               train := TRUE;
+            end;
+         end;
+      31: //ÁÖ¼úÀÇ¸·
+         begin
+            if user.MagBubbleDefenceUp (pum.Level, GetPower (15 + GetRPow(user.WAbil.MC))) then
+               train := TRUE;
+      end;
+    57: //±ùÑæÊõ
+      begin
+//        if IceBlaze(user, pum.Level) then
+        if IceBlaze(user, user.GetAttackPower (GetPower (MPow(pum)) +
+               Lobyte(user.WAbil.MC), Integer(Hibyte(user.WAbil.MC) -
+               Lobyte(user.WAbil.MC)) + 1)) then
+        begin
+          train := true;
+        end;
+      end;
+        58: //ÏÈÌìÆø¹¦
+         begin
+            if target = nil then begin
+               target := user;
+               xx := user.CX;
+               yy := user.CY;
+            end;
+            if user.IsProperFriend (target) then begin
+               with user do begin
+                  pwr := GetAttackPower (
+                              GetPower (MPow(pum)) + Lobyte(WAbil.SC)*2,
+                              Integer(Hibyte(WAbil.SC)-Lobyte(WAbil.SC))*2 + 1
+                           ); //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+                  Gap := pum.Level * Luck;
+               end;
+
+//               if target <> target then begin
+               if target.CelestialUp (Gap, pum.Level, GetPower (15 + pwr)) then
+                  train := TRUE;
+//               end;
+            end;
+         end;
+      77: //ÑªÁú½£·¨
+      begin
+        sec := (pum.Level * 10) + 60;
+        pwr := pum.Level + 1;
+
+        if user.MagBloodDragonSword(pum.Level, sec) then
+        begin
+          if user.MagHitSpeedUp(sec{Ãë}, pwr) then
+            train := TRUE;
+
+        end;
+      end;
+
+      2: //È¸º¹¼ú
+         begin
+            if target = nil then begin
+               target := user;
+               xx := user.CX;
+               yy := user.CY;
+            end;
+            if user.IsProperFriend (target) then begin
+               with user do begin
+                  pwr := GetAttackPower (
+                              GetPower (MPow(pum)) + Lobyte(WAbil.SC)*2,
+                              Integer(Hibyte(WAbil.SC)-Lobyte(WAbil.SC))*2 + 1
+                           ); //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+               end;
+               if target.WAbil.HP < target.WAbil.MaxHP then begin
+                  target.SendDelayMsg (user, RM_MAGHEALING, 0, pwr, 0, 0, '', 800);
+                  train := TRUE;
+               end;
+               if user.BoAbilSeeHealGauge then begin
+                  user.SendMsg (target, RM_INSTANCEHEALGUAGE, 0, 0, 0, 0, '');
+               end;
+            end;
+         end;
+      29: //´ëÈ¸º¹¼ú
+         begin
+            with user do begin
+               pwr := GetAttackPower (
+                           GetPower (MPow(pum)) + Lobyte(WAbil.SC)*2,
+                           Integer(Hibyte(WAbil.SC)-Lobyte(WAbil.SC))*2 + 1
+                        ); //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+            end;
+            if MagBigHealing (user, pwr, xx, yy) then
+               train := TRUE;
+         end;
+
+        50: //Rage
+                 begin
+            sec := 18 + (pum.Level * 6);
+            if user.ExtraAbil[EABIL_MAGICDCUP] > 0 then pwr := user.ExtraAbil[EABIL_MAGICDCUP]
+            else pwr := Round(Hibyte(user.WAbil.DC) * (g_Bloodbreakingcrazykilling / 100 + (pum.Level * 0.03)));
+
+            if user.MagDcUpEx(sec{ÃÊ}, pwr) then begin
+               train := True;
+            end;
+         end;
+
+//          begin
+//          case pum.Level of
+//          0: begin
+//            sec := 18;
+//            pwr := Round(Hibyte(user.WAbil.DC) * 0.12);
+//            end;
+//          1: begin
+//            sec := 24;
+//            pwr := Round(Hibyte(user.WAbil.DC) * 0.15);
+//            end;
+//          2: begin
+//            sec := 30;
+//            pwr := Round(Hibyte(user.WAbil.DC) * 0.18);
+//            end;
+//          3: begin
+//            sec := 36;
+//            pwr := Round(Hibyte(user.WAbil.DC) * 0.21);
+//            end;
+//            end;
+//
+//            if user.MagDcUp(sec{ÃÊ}, pwr) then
+//              train := True;
+//            //Å¸ÄÏÀÇ ´É·ÂÄ¡¸¦ ¿Ã·ÁÁÜ(sonmg 2005/06/07)
+//            if (target <> nil) and (target.RaceServer = RC_USERHUMAN) then
+//            begin
+//              if target.MagDcUp(sec, pwr) then begin
+//           //     target.SendRefMsg(RM_LOOPNORMALEFFECT,
+//           //       integer(target), 0, 0, NE_RAGEEFFECT, '');
+//                train := True;
+//              end;
+//            end;
+//          end;
+        51: //ProtectionField
+//          begin
+//            if GetTickCount - user.PFTime > user.PFUseTime then begin
+//            sec := 2+(pum.Level + 1) + shortint(Hibyte(user.WAbil.AC));
+//            pwr := (LOBYTE(user.WAbil.AC) div 9) + Random(HIBYTE(user.WAbil.AC) div 9);
+//            if user.MagDefenceUp(sec, pwr) then begin
+//            user.PFUseTime := sec;
+//            user.PFTime := GetTickCount;
+//              train := True;
+//          end;
+//          end;
+//          end;
+            begin
+            sec := 45 + (pum.Level * 15);
+            if user.ExtraAbil[EABIL_MAGICACUP] > 0 then pwr := user.ExtraAbil[EABIL_MAGICACUP]
+            else pwr := Round(Hibyte(user.WAbil.AC) * (g_seTIEBUSHAN / 100 + (pum.Level * 0.03)));
+
+            if user.MagAcUpEx(sec{ÃÊ}, pwr) then begin
+               train := True;
+            end;
+         end;
+
+
+
+       52: //Blizzard
+  begin
+          {  if MagBlizzard(user, user.GetAttackPower(GetPower(MPow(pum)) +
+               Lobyte(user.WAbil.MC), shortint(Hibyte(user.WAbil.MC) -
+               Lobyte(user.WAbil.MC)) + 1), 2500, xx, yy) > 0 then begin
+               train := True;
+            end;  }
+
+            if MagBlizzard (user, user.GetAttackPower (GetPower (MPow(pum)) +
+               Lobyte(user.WAbil.MC), Integer(Hibyte(user.WAbil.MC) -
+               Lobyte(user.WAbil.MC)) + 1), 5000, xx, yy) > 0 then begin
+               train := TRUE;
+            end;
+
+         end;
+
+          53: //MeteorStrike
+         begin
+           { if MagMeteor(user, user.GetAttackPower(GetPower(MPow(pum)) +
+               Lobyte(user.WAbil.MC), shortint(Hibyte(user.WAbil.MC) -
+               Lobyte(user.WAbil.MC)) + 1), 2500, xx, yy) > 0 then begin
+               train := True;
+            end; }
+            if MagMeteor (user, user.GetAttackPower (GetPower (MPow(pum)) +
+               Lobyte(user.WAbil.MC), Integer(Hibyte(user.WAbil.MC) -
+               Lobyte(user.WAbil.MC)) + 1), 5000, xx, yy) > 0 then begin
+               train := TRUE;
+            end;
+         end;
+
+     56: //ÈÕÉÁ
+         begin
+            ndir := GetNextDirection (user.CX, user.CY, xx, yy);
+            if GetNextPosition (user.PEnvir, user.CX, user.CY, ndir, 1, sx, sy) then begin
+               GetNextPosition (user.PEnvir, user.CX, user.CY, ndir, 1, xx, yy);
+               user.SendRefMsg (RM_NORMALEFFECTEX, 0, user.CX, user.CY, ndir, '');
+               with user do begin
+                  pwr := GetAttackPower (
+                           GetPower (MPow(pum)) + Lobyte(WAbil.DC),
+                           Integer(Hibyte(WAbil.DC)-Lobyte(WAbil.DC)) + 1
+                         );
+               end;
+
+               if user.SlashingBust (sx, sy, xx, yy, ndir, pwr, FALSE) > 0 then begin
+                  GetNextPosition (user.PEnvir, user.CX, user.CY, ndir, 2, xx, yy);
+                  if user.MagSpaceMoveInRange(xx, yy, 1) then
+                  train := TRUE;
+               end else begin
+                  GetNextPosition (user.PEnvir, user.CX, user.CY, ndir, 2, xx, yy);
+                  if user.MagSpaceMoveInRange(xx, yy, 0) then
+                  train := TRUE;
+               end;
+            end;
+         end;
+
+
+      6: //¾Ï¿¬¼ú
+         begin
+            nofire := TRUE;
+            bhasitem := 0;
+            pstd := nil;
+            if user.IsProperTarget (target) then begin
+               //¾Ï¿¬¼úÀº µ¶°¡·çÁÖ¸Ó´Ï°¡ ÀÖ¾î¾ß ÇÑ´Ù.
+               // 2003/03/15 COPARK ¾ÆÀÌÅÛ ÀÎº¥Åä¸® È®Àå
+               if  g_boÈËÎïËÄ¸ñ then
+               begin
+               if (not g_bochksigedu) and (user.UseItems[U_BUJUK].Index > 0) then begin        // U_ARMRINGL->U_BUJUK
+                  pstd := UserEngine.GetStdItem (user.UseItems[U_BUJUK].Index);
+                  if pstd <> nil then begin
+                     if (pstd.StdMode = 25) and (pstd.Shape <= 2) then begin  //25:µ¶ÁÖ¸Ó´Ï
+                        if user.UseItems[U_BUJUK].Dura >= 100 then begin
+                           user.UseItems[U_BUJUK].Dura := user.UseItems[U_BUJUK].Dura - 100;
+                           //³»±¸¼º º¯°æÀº ¾Ë¸²
+                           user.SendMsg (user, RM_DURACHANGE, U_BUJUK, user.UseItems[U_BUJUK].Dura, user.UseItems[U_BUJUK].DuraMax, 0, '');
+                           bhasItem := 1;
+                        end;
+                     end;
+                  end;
+              // end;
+               end else begin
+               if (user.UseItems[U_CHARM].Index > 0) then begin        // U_ARMRINGL->U_BUJUK
+                  pstd := UserEngine.GetStdItem (user.UseItems[U_CHARM].Index);
+                  if pstd <> nil then begin
+                     if (pstd.StdMode = 25) and (pstd.Shape <= 2) then begin  //25:µ¶ÁÖ¸Ó´Ï
+                        if user.UseItems[U_CHARM].Dura >= 100 then begin
+                           user.UseItems[U_CHARM].Dura := user.UseItems[U_CHARM].Dura - 100;
+                           //³»±¸¼º º¯°æÀº ¾Ë¸²
+                           user.SendMsg (user, RM_DURACHANGE, U_CHARM, user.UseItems[U_CHARM].Dura, user.UseItems[U_CHARM].DuraMax, 0, '');
+                           bhasItem := 1;
+                        end;
+                     end;
+                  end;
+               end;
+               end;
+               end;
+               if (user.UseItems[U_ARMRINGL].Index > 0) and (bhasitem = 0) then begin
+                  pstd := UserEngine.GetStdItem (user.UseItems[U_ARMRINGL].Index);
+                  if pstd <> nil then begin
+                     if (pstd.StdMode = 25) and (pstd.Shape <= 2) then begin  //25:µ¶ÁÖ¸Ó´Ï
+                        if user.UseItems[U_ARMRINGL].Dura >= 100 then begin
+                           user.UseItems[U_ARMRINGL].Dura := user.UseItems[U_ARMRINGL].Dura - 100;
+                           //³»±¸¼º º¯°æÀº ¾Ë¸²
+                           user.SendMsg (user, RM_DURACHANGE, U_ARMRINGL, user.UseItems[U_ARMRINGL].Dura, user.UseItems[U_ARMRINGL].DuraMax, 0, '');
+                           bhasItem := 2;
+                        end;
+                     end;
+                  end;
+               end;
+
+               if pstd <> nil then begin
+                  if bhasItem > 0 then begin
+                     //½ºÅ³Á¤µµ¿¡ µû¶ó ¼º°ø¿©ºÎ°¡ °áÁ¤
+                     if 6 >= Random(7 + target.AntiPoison) then begin
+                        case pstd.Shape of
+                           1: //È¸»öµ¶°¡·ç: Áßµ¶
+                              begin
+                                 //sec = Áßµ¶½Ã°£  60ÃÊ + ¾ËÆÄ
+                                 sec := GetPower13 (20) + 2 * GetRPow(user.WAbil.SC);
+                                 //pwr := pum.Level;
+                                 pwr := Round(pum.Level / 3 * (sec / (lvduweili)));             //ÂÌ¶¾µôÑª¹«Ê½
+                                 target.SendDelayMsg (user, RM_MAKEPOISON, POISON_DECHEALTH{wparam}, sec, integer(user), pwr, '', 1000);
+                              end;
+                           2: //È²»öµ¶°¡·ç: ¹æ¾î·Â°¨¼Ò
+                              begin
+                                 //³ìµ¶À» °Ç »ó´ë°¡ ´©±¸ÀÎÁö ¸ð¸¥ »óÅÂ¿¡¼­ »¡µ¶À» °É¸é ³ìµ¶Àº »ç¶óÁø´Ù.(sonmg 2004/12/27)
+                                 if (target.LastHiter = nil) and (target.StatusArr[POISON_DECHEALTH] > 0) then begin
+                                    target.StatusArr[POISON_DECHEALTH] := 0;
+                                 end;
+                                 //sec = Áßµ¶½Ã°£ 40ÃÊ + ¾ËÆÄ
+                                 sec := GetPower13 (30) + 2 * GetRPow(user.WAbil.SC); //(Lobyte(user.WAbil.SC) + Random(ShortInt(Hibyte(user.WAbil.SC)-Lobyte(user.WAbil.SC)) + 1));
+                                 //pwr := 2{pum.Level};
+                                 pwr := _MAX(2, _MIN(5, HIBYTE(user.WAbil.SC) div (hongduweili)));
+                                 target.SendDelayMsg (user, RM_MAKEPOISON, POISON_DAMAGEARMOR{wparam}, sec, integer(user), pwr, '', 1000);
+                              end;
+                        end;
+
+                        //-----------------------------------------
+                        // °¥ÇÇ Ã¼Å©(sonmg 2005/11/28)
+                        if (target.RaceServer = RC_USERHUMAN) and (user.RaceServer = RC_USERHUMAN) then begin
+                           //Á¤´ç¹æ¾î¸¦ À§ÇÑ ±â·Ï..
+                           target.AddPkHiter (user);
+                           target.SetLastHiter (user);
+                        end else if (target.Master <> nil) then begin
+                           //Áßµ¶µÈ ¼ÒÈ¯¸÷ÀÇ ÁÖÀÎÀÌ ¶§¸°»ç¶÷ÀÌ ¾Æ´Ï¸é
+                           if target.Master <> user then begin
+                              //Á¤´ç¹æ¾î¸¦ À§ÇÑ ±â·Ï..
+                              target.AddPkHiter (user);
+                              target.SetLastHiter (user);
+                           end;
+                        end;
+                        //-----------------------------------------
+
+                        //»ç¶÷,¸ó½ºÅÍ¿¡°Ô °É¾úÀ»¶§ ¼ö·ÃµÈ´Ù.
+                        if (target.RaceServer = RC_USERHUMAN) or (target.RaceServer >= RC_ANIMAL) then
+                           train := TRUE;
+                     end;
+                     user.SelectTarget (target);
+                     nofire := FALSE;
+                  end;
+               end;
+               //ÏûÊ§ÁËµÄÒ©
+               if bhasitem = 1 then begin
+                  if (not g_bochksigedu) and (user.UseItems[U_BUJUK].Dura < 100) then begin
+                     user.UseItems[U_BUJUK].Dura := 0;
+                     //ÏûÊ§ÁËµÄÒ©
+                     if user.RaceServer = RC_USERHUMAN then begin
+                        hum := TUserHuman(user);
+                        hum.SendDelItem (user.UseItems[U_BUJUK]); //¿Í»§¶Ë·¢ËÍµÄ
+                        //Ä¥ËðÊ±µÄÐÅÏ¢(2004/11/15)
+                        {$IFDEF KOREA} hum.SysMsg('ÄãµÄ¶¾ÒÑÓÃ¾¡', 0);
+                        {$ELSE}        hum.SysMsg('The Poison item has been exhausted.', 0);
+                        {$ENDIF}
+                     end;
+                     user.UseItems[U_BUJUK].Index := 0;
+                  end;
+               end;
+                if bhasitem = 1 then begin
+               if (g_bochksigedu) and (user.UseItems[U_CHARM].Dura < 100) then begin
+                     user.UseItems[U_CHARM].Dura := 0;
+                     //´Ù ¾´¾àÀº »ç¶óÁø´Ù.
+                     if user.RaceServer = RC_USERHUMAN then begin
+                        hum := TUserHuman(user);
+                        hum.SendDelItem (user.UseItems[U_CHARM]); //Å¬¶óÀÌ¾ðÆ®¿¡ ¾ø¾îÁø°Å º¸³¿
+                        //µ¶°¡·ç ´Ù ´â¾ÒÀ» ¶§ ¸Þ½ÃÁö(2004/11/15)
+                        {$IFDEF KOREA} hum.SysMsg('ÄãµÄ¶¾ÒÑÓÃ¾¡', 0);
+                        {$ELSE}        hum.SysMsg('The Poison item has been exhausted.', 0);
+                        {$ENDIF}
+                     end;
+                     user.UseItems[U_CHARM].Index := 0;
+                  end;
+              end;
+               if(user.UseItems[U_ARMRINGL].Index > 0) and (bhasitem = 2) and (not g_bochksigedu)  then begin
+                  pstd := UserEngine.GetStdItem (user.UseItems[U_ARMRINGL].Index);
+                  if pstd <> nil then begin
+                     if (pstd.StdMode = 25) then begin  //25:¶¾ÄÒ
+                        if user.UseItems[U_ARMRINGL].Dura < 100 then begin
+                           user.UseItems[U_ARMRINGL].Dura := 0;
+                           //ÏûÊ§ÁËµÄÒ©
+                           if user.RaceServer = RC_USERHUMAN then begin
+                              hum := TUserHuman(user);
+                              hum.SendDelItem (user.UseItems[U_ARMRINGL]); //¿Í»§¶Ë·¢ËÍµÄ
+                              //Ä¥ËðÊ±µÄÐÅÏ¢(2004/11/15)
+                              {$IFDEF KOREA} hum.SysMsg('ÄãµÄ¶¾ÒÑÓÃ¾¡', 0);
+                              {$ELSE}        hum.SysMsg('The Poison item has been exhausted.', 0);
+                              {$ENDIF}
+                           end;
+                           user.UseItems[U_ARMRINGL].Index := 0;
+                        end;
+                     end;
+                  end;
+               end;
+            end;
+         end;
+
+    54: //ËÕÉúÊõ
+      begin
+        needfire := False;
+        bhasitem := 0;
+        pstd := nil;
+        if not user.PEnvir.NoRevive then
+        begin
+          Reslist := TList.Create;
+          user.GetMapCreatures(user.PEnvir, xx, yy, 1, Reslist);
+          if Reslist.Count = 0 then
+          begin
+            user.SendRefMsg(RM_MAGICFIRE, 0, MakeWord(pum.pDef.EffectType, pum.pDef.Effect), MakeLong(xx, yy), 0, '');
+            user.RevivalMode := False;
+          end
+          else
+          begin
+            for i := 0 to Reslist.Count - 1 do
+            begin
+              target := TCreature(Reslist[i]);
+              if not target.Death then
+              begin
+                user.SendRefMsg(RM_MAGICFIRE, 0, MakeWord(pum.pDef.EffectType, pum.pDef.Effect), MakeLong(xx, yy), 0, '');
+                user.RevivalMode := False;
+              end
+              else
+              begin
+                if user.RevivalMode = False then
+                begin
+                  user.SendDelayMsg(user, RM_LOOPNORMALEFFECT, integer(user), 0, 0, NE_REVIVALCHARGE, '', 0); // 1000);
+                 // UserEngine.CryCry(RM_CRY, user.PEnvir, xx, yy, 10000, user.UserName + 'ÕýÔÚ³¢ÊÔ¸´»î' + target.UserName);
+                  user.SysMsg(target.UserName + 'ÕýÔÚÇëÇóÄã¸´»îËû£¨Ëý£©.', 10);
+                  user.RevivalTarget := target;
+                  user.RevivalMode := True;
+                  user.SendRefMsg(RM_MAGICFIRE, 0, MakeWord(pum.pDef.EffectType, pum.pDef.Effect), MakeLong(xx, yy), integer(target), '');
+                end
+                else
+                begin
+                  if target <> user.RevivalTarget then
+                  begin
+                    user.RevivalMode := False;
+                    user.SendRefMsg(RM_MAGICFIRE, 0, MakeWord(pum.pDef.EffectType, pum.pDef.Effect), MakeLong(xx, yy), 0, '');
+                  end
+                  else
+                  begin
+                    user.RevivalMode := False;
+                    user.SendRefMsg(RM_MAGICFIRE, 0, MakeWord(pum.pDef.EffectType, pum.pDef.Effect), MakeLong(xx, yy), integer(target), '');
+                    if (user.UseItems[U_BUJUK].Index > 0) then
+                    begin
+                                  // U_ARMRINGL->U_BUJUK
+                      pstd := UserEngine.GetStdItem(user.UseItems[U_BUJUK].Index);
+                      if pstd <> nil then
+                      begin
+                        if (pstd.StdMode = 25) and (pstd.Shape = 6) then
+                        begin
+                          if user.UseItems[U_BUJUK].Dura >= 100 then
+                          begin
+                            user.UseItems[U_BUJUK].Dura := user.UseItems[U_BUJUK].Dura - 100;
+                            user.SendMsg(user, RM_DURACHANGE, U_BUJUK, user.UseItems[U_BUJUK].Dura, user.UseItems[U_BUJUK].DuraMax, 0, '');
+                            bhasitem := 1;
+                          end;
+                        end
+                        else
+                        begin
+                          hum := TUserHuman(user);
+                          hum.SendDelItem(user.UseItems[U_BUJUK]);
+                          hum.SysMsg('Äã±ØÐëÅä±¸¸´»î·û.', 1);
+                          exit;
+                        end;
+                      end;
+                    end;
+                    if (user.UseItems[U_ARMRINGL].Index > 0) and (bhasitem = 0) then
+                    begin
+                      pstd := UserEngine.GetStdItem(user.UseItems[U_ARMRINGL].Index);
+                      if pstd <> nil then
+                      begin
+                        if (pstd.StdMode = 25) and (pstd.Shape = 6) then
+                        begin
+                          if user.UseItems[U_ARMRINGL].Dura >= 100 then
+                          begin
+                            user.UseItems[U_ARMRINGL].Dura := user.UseItems[U_ARMRINGL].Dura - 100;
+                            user.SendMsg(user, RM_DURACHANGE, U_ARMRINGL, user.UseItems[U_ARMRINGL].Dura, user.UseItems[U_ARMRINGL].DuraMax, 0, '');
+                            bhasitem := 2;
+                          end;
+                        end
+                        else
+                        begin
+                          hum := TUserHuman(user);
+                          hum.SendDelItem(user.UseItems[U_ARMRINGL]);
+                          hum.SysMsg('Äã±ØÐëÅä±¸¸´»î·û.', 1);
+                          exit;
+                        end;
+                      end;
+                    end;
+                  end;
+                end;
+              end;
+            end;
+          end;
+
+          if pstd <> nil then
+          begin
+            if bhasitem > 0 then
+            begin
+              case pstd.Shape of
+                6:
+                  begin
+                    case pum.Level of
+                      0:
+                        begin
+                          target.WAbil.HP := Round(target.WAbil.MaxHP * 0.25);
+                          target.Abil.HP := Round(target.Abil.MaxHP * 0.25);
+                          target.SendMsg(target,RM_ALIVEREQ,0,Integer(Self),0,0,user.UserName+' ¶ÔÄãÊ¹ÓÃ¸´»îÊõ\ÄãÈ·¶¨Òª¸´»îÂð£¿');
+
+                        end;
+                      1:
+                        begin
+                          target.WAbil.HP := Round(target.WAbil.MaxHP * 0.5);
+                          target.Abil.HP := Round(target.Abil.MaxHP * 0.5);
+                          target.SendMsg(target,RM_ALIVEREQ,0,Integer(Self),0,0,user.UserName+' ¶ÔÄãÊ¹ÓÃ¸´»îÊõ\ÄãÈ·¶¨Òª¸´»îÂð£¿');
+
+                        end;
+                      2:
+                        begin
+                          target.WAbil.HP := Round(target.WAbil.MaxHP * 0.75);
+                          target.Abil.HP := Round(target.Abil.MaxHP * 0.75);
+                          target.SendMsg(target,RM_ALIVEREQ,0,Integer(Self),0,0,user.UserName+' ¶ÔÄãÊ¹ÓÃ¸´»îÊõ\ÄãÈ·¶¨Òª¸´»îÂð£¿');
+
+                        end;
+                      3:
+                        begin
+                          target.WAbil.HP := target.WAbil.MaxHP;
+                          target.Abil.HP := target.Abil.MaxHP;
+                          target.SendMsg(target,RM_ALIVEREQ,0,Integer(Self),0,0,user.UserName+' ¶ÔÄãÊ¹ÓÃ¸´»îÊõ\ÄãÈ·¶¨Òª¸´»îÂð£¿');
+
+                        end;
+                    end;
+                   // target.Alive;
+                  end;
+              end;
+
+              if (target.RaceServer = RC_USERHUMAN) or (target.RaceServer >= RC_ANIMAL) then
+                train := True;
+            end;
+            user.SelectTarget(target);
+          end;
+          if bhasitem = 1 then
+          begin
+            if user.UseItems[U_BUJUK].Dura < 100 then
+            begin
+              user.UseItems[U_BUJUK].Dura := 0;
+              if user.RaceServer = RC_USERHUMAN then
+              begin
+                hum := TUserHuman(user);
+                hum.SendDelItem(user.UseItems[U_BUJUK]);
+                hum.SysMsg('ÄãµÄ»¤Éí·ûÒÑ¾­ÓÃÍêÁË.', 0);
+              end;
+              user.UseItems[U_BUJUK].Index := 0;
+            end;
+          end;
+          if (user.UseItems[U_ARMRINGL].Index > 0) and (bhasitem = 2) then
+          begin
+            pstd := UserEngine.GetStdItem(user.UseItems[U_ARMRINGL].Index);
+            if pstd <> nil then
+            begin
+              if (pstd.StdMode = 25) then
+              begin
+                if user.UseItems[U_ARMRINGL].Dura < 100 then
+                begin
+                  user.UseItems[U_ARMRINGL].Dura := 0;
+                  if user.RaceServer = RC_USERHUMAN then
+                  begin
+                    hum := TUserHuman(user);
+                    hum.SendDelItem(user.UseItems[U_ARMRINGL]);
+                    hum.SysMsg('ÄãµÄ»¤Éí·ûÒÑ¾­ÓÃÍêÁË.', 0);
+                  end;
+                  user.UseItems[U_ARMRINGL].Index := 0;
+                end;
+              end;
+            end;
+          end;
+        end
+        else
+        begin
+          if user.RaceServer = RC_USERHUMAN then
+          begin
+            hum := TUserHuman(user);
+            hum.SysMsg('µ±Ç°µØÍ¼½ûÖ¹¸´»î.', 0);
+          end;
+        end;
+      end;
+    55: //PoisonCloud
+      begin
+
+        nofire := False;
+        bhasitem := 0;
+        pstd := nil;
+//            Poilist := TList.Create;
+//            user.GetMapCreatures(user.PEnvir, xx, yy, 3, Poilist);
+//            For i := 0 to Poilist.Count - 1 do begin
+//               target := TCreature(Poilist[i]);
+//               if user.IsProperTarget(target) or (target = nil) then begin
+                  //¾Ï¿¬¼úÀº µ¶°¡·çÁÖ¸Ó´Ï°¡ ÀÖ¾î¾ß ÇÑ´Ù.
+                  // 2003/03/15 COPARK ¾ÆÀÌÅÛ ÀÎº¥Åä¸® È®Àå
+        case pum.Level of
+          0:
+            sec := 16;
+          1:
+            sec := 14;
+          2:
+            sec := 12;
+          3:
+            sec := 10;
+        end;
+        if GetTickCount - hum.LatestHitTime > sec * 1000 then
+        begin
+          if (user.UseItems[U_BUJUK].Index > 0) then
+          begin
+                  // U_ARMRINGL->U_BUJUK
+            pstd := UserEngine.GetStdItem(user.UseItems[U_BUJUK].Index);
+            if pstd <> nil then
+            begin
+              if (pstd.StdMode = 25) and (pstd.Shape = 1) then
+              begin  //25:µ¶ÁÖ¸Ó´Ï
+                if user.UseItems[U_BUJUK].Dura >= 500 then
+                begin
+                  user.UseItems[U_BUJUK].Dura := user.UseItems[U_BUJUK].Dura - 500;
+                              //³»±¸¼º º¯°æÀº ¾Ë¸²
+                  user.SendMsg(user, RM_DURACHANGE, U_BUJUK, user.UseItems[U_BUJUK].Dura, user.UseItems[U_BUJUK].DuraMax, 0, '');
+                  bhasitem := 1;
+                end;
+              end
+              else
+              begin
+                hum := TUserHuman(user);
+                hum.SendDelItem(user.UseItems[U_BUJUK]);
+                hum.SysMsg('Äã±ØÐëÅä±¸»ÒÉ«Ò©·Û.', 1);
+                exit;
+              end;
+            end;
+          end;
+          if (user.UseItems[U_ARMRINGL].Index > 0) and (bhasitem = 0) then
+          begin
+            pstd := UserEngine.GetStdItem(user.UseItems[U_ARMRINGL].Index);
+            if pstd <> nil then
+            begin
+              if (pstd.StdMode = 25) and (pstd.Shape = 1) then
+              begin  //25:µ¶ÁÖ¸Ó´Ï
+                if user.UseItems[U_ARMRINGL].Dura >= 500 then
+                begin
+                  user.UseItems[U_ARMRINGL].Dura := user.UseItems[U_ARMRINGL].Dura - 500;
+                               //³»±¸¼º º¯°æÀº ¾Ë¸²
+                  user.SendMsg(user, RM_DURACHANGE, U_ARMRINGL, user.UseItems[U_ARMRINGL].Dura, user.UseItems[U_ARMRINGL].DuraMax, 0, '');
+                  bhasitem := 2;
+                end;
+
+              end
+              else
+              begin
+                hum := TUserHuman(user);
+                hum.SendDelItem(user.UseItems[U_ARMRINGL]);
+                hum.SysMsg('Äã±ØÐëÅä±¸»ÒÉ«Ò©·Û.', 1);
+                exit;
+              end;
+            end;
+          end;
+
+          if pstd <> nil then
+          begin
+            if bhasitem > 0 then
+            begin
+                        //½ºÅ³Á¤µµ¿¡ µû¶ó ¼º°ø¿©ºÎ°¡ °áÁ¤
+                        //if 6 >= Random(7 + target.AntiPoison) then begin
+              case pstd.Shape of
+                1: //È¸»öµ¶°¡·ç: Áßµ¶
+                  begin
+//                                 sec := GetPower13 (40) + 2 * GetRPow(user.WAbil.SC);
+                    sec := (pum.Level + 1) * 5 + 10;
+                    pwr := _MAX(0, _MIN(HIBYTE(user.WAbil.SC), _MAX(0, (LOBYTE(user.WAbil.SC) + HIBYTE(user.WAbil.SC)) div 2 + (pum.Level + 1))));
+                               //  target.SendDelayMsg(user, RM_MAKEPOISON,
+                              //   POISON_DECHEALTH{wparam}, sec, integer(user), pwr, '', 1000);
+                    if MagMakePoisonCloud(user, pwr, sec, xx, yy) > 0 then
+                    begin
+                      train := TRUE;
+                      hum.LatestHitTime := GetTickCount;
+                    end;
+                  end;
+                2: //È²»öµ¶°¡·ç: ¹æ¾î·Â°¨¼Ò
+                  begin
+                  end;
+              end;
+
+                           //»ç¶÷,¸ó½ºÅÍ¿¡°Ô °É¾úÀ»¶§ ¼ö·ÃµÈ´Ù.
+                         //  if (target.RaceServer = RC_USERHUMAN) or
+                         //  (target.RaceServer >= RC_ANIMAL) then
+                        //   train := True;
+                       // end;
+                      //  User.SelectTarget(nil);
+                      //  target := nil;
+            end;
+          end;
+                  //´Ù ¾´ ¾àÀº »ç¶óÁø´Ù.
+          if bhasitem = 1 then
+          begin
+            if user.UseItems[U_BUJUK].Dura < 500 then
+            begin
+              user.UseItems[U_BUJUK].Dura := 0;
+                        //´Ù ¾´¾àÀº »ç¶óÁø´Ù.
+              if user.RaceServer = RC_USERHUMAN then
+              begin
+                hum := TUserHuman(user);
+                hum.SendDelItem(user.UseItems[U_BUJUK]);
+                           //Å¬¶óÀÌ¾ðÆ®¿¡ ¾ø¾îÁø°Å º¸³¿
+                hum.SysMsg('¶¾Ò©ÒÑ¾­ÓÃÍêÁË.', 0);
+                           //µ¶°¡·ç ´Ù ´â¾ÒÀ» ¶§ ¸Þ½ÃÁö(2004/11/15)
+              end;
+              user.UseItems[U_BUJUK].Index := 0;
+            end;
+          end;
+          if (user.UseItems[U_ARMRINGL].Index > 0) and (bhasitem = 2) then
+          begin
+            pstd := UserEngine.GetStdItem(user.UseItems[U_ARMRINGL].Index);
+            if pstd <> nil then
+            begin
+              if (pstd.StdMode = 25) then
+              begin  //25:µ¶ÁÖ¸Ó´Ï
+                if user.UseItems[U_ARMRINGL].Dura < 500 then
+                begin
+                  user.UseItems[U_ARMRINGL].Dura := 0;
+                              //´Ù ¾´¾àÀº »ç¶óÁø´Ù.
+                  if user.RaceServer = RC_USERHUMAN then
+                  begin
+                    hum := TUserHuman(user);
+                    hum.SendDelItem(user.UseItems[U_ARMRINGL]);
+                                 //Å¬¶óÀÌ¾ðÆ®¿¡ ¾ø¾îÁø°Å º¸³¿
+                    hum.SysMsg('¶¾Ò©ÒÑ¾­ÓÃÍêÁË.', 0);
+                                 //µ¶°¡·ç ´Ù ´â¾ÒÀ» ¶§ ¸Þ½ÃÁö(2004/11/15)
+                  end;
+                  user.UseItems[U_ARMRINGL].Index := 0;
+                end;
+              end;
+            end;
+          end;
+//               end;
+//            end;
+        end
+        else
+        begin
+          waittime := (GetTickCount - hum.LatestHitTime) div 1000;
+          user.SysMsg(IntToStr(sec - waittime) + 'ÃëÒÔºóÔÙ³¢ÊÔÊ¹ÓÃ¶¾Îí', 1);
+          exit;
+        end;
+      end;
+      //2003/03/15 ½Å±Ô¹«°ø Ãß°¡
+      36, //ÎÞ¼«ÕæÆø
+      13, //Æø»ì°è(µµ»ç)
+      83, //ÒõÑôÎåÐÐÕó
+      14, //Ç×¸¶Áø¹ý
+      15, //´ëÁö¿øÈ£
+      16, //°á°è
+      17, //¹é°ñ¼ÒÈ¯¼ú
+      18, //Àº½Å¼ú
+      19, //´ëÀº½Å¼ú
+      41, //Ãµ³à¼ÒÈ¯(Á¤È¥¼ÒÈ¯-¿ù·É)
+      46, //ÀúÁÖ¼ú
+      49: //¸Í¾È¼ú(¹ÌÈ¥¼ú)
+         begin
+            nofire := TRUE;
+            bujuckCount := 1;
+            try
+            // Ãµ³à¼ÒÈ¯(Á¤È¥¼ÒÈ¯-¿ù·É)ÀÏ°æ¿ì¿¡´Â 5°³ ¼Òºñ
+            case pum.pDef.MagicId of
+            41 :
+               begin
+                  TempCret := user.GetExistSlave( __AngelMob );
+                  if TempCret <> nil then
+                  begin
+                     TempCret.forcemovetomaster := true;      // È¡ÏûÔÂÁéÐÄÁéÕÙ»½
+                     exit;
+                  end;
+                  bujuckCount := 5;
+               end;
+            17  :
+               begin
+                  TempCret := user.GetExistSlave( __WhiteSkeleton );
+                  if TempCret <> nil then
+                  begin
+                     TempCret.forcemovetomaster := true;          //È¡ÏûµÀÊ¿÷¼÷ÃÐÄÁéÕÙ»½
+                     exit;
+                  end;
+                  bujuckCount := 1;
+               end;
+            83  :  //ÒõÑôÎåÐÐÕó
+               begin
+                  bujuckCount := 5;
+               end;
+
+            else
+                bujuckcount := 1;
+            end;
+
+
+
+
+            except
+                MainOutMessage('EXCEPTION BUJUCK CALC');
+            end;
+
+
+            bhasItem := 0;
+            if bujuckcount > 0 then bhasItem := CanUseBujuk (user, bujuckcount);
+
+            if bhasItem > 0 then begin
+               if bhasitem = 1 then begin
+                  // 2003/03/15 COPARK ¾ÆÀÌÅÛ ÀÎº¥Åä¸® È®Àå
+                  if user.UseItems[U_BUJUK].Dura >= (bujuckcount * 100) then      // U_ARMRINGL->U_BUJUK
+                     user.UseItems[U_BUJUK].Dura := user.UseItems[U_BUJUK].Dura - (bujuckcount * 100)
+                  else user.UseItems[U_BUJUK].Dura := 0;
+                  user.SendMsg (user, RM_DURACHANGE, U_BUJUK, user.UseItems[U_BUJUK].Dura, user.UseItems[U_BUJUK].DuraMax, 0, '');
+               end;
+               if bhasitem = 2 then begin
+                  if user.UseItems[U_ARMRINGL].Dura >= (bujuckcount * 100) then
+                     user.UseItems[U_ARMRINGL].Dura := user.UseItems[U_ARMRINGL].Dura - ( bujuckcount * 100 )
+                  else user.UseItems[U_ARMRINGL].Dura := 0;
+                  user.SendMsg (user, RM_DURACHANGE, U_ARMRINGL, user.UseItems[U_ARMRINGL].Dura, user.UseItems[U_ARMRINGL].DuraMax, 0, '');
+               end;
+
+               case pum.pDef.MagicId of
+                  13:  //Æø»ì°è
+                     if user.MagCanHitTarget (user.CX, user.CY, target) then begin
+                        if user.IsProperTarget(target) then begin
+                           if (target.AntiMagic <= Random(50)) and (abs(target.CX-xx) <= 1) and (abs(target.CY-yy) <= 1) then begin
+                              with user do begin //ÆÄ¿ö
+                                 pwr := GetAttackPower (
+                                             GetPower (MPow(pum)) + Lobyte(WAbil.SC),
+                                             Integer(Hibyte(WAbil.SC)-Lobyte(WAbil.SC)) + 1
+                                          ); //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+                                 //Å¸°Ù ¸ÂÀ½, ÈÄ¿¡ È¿°ú³ªÅ¸³²
+                                 //target.SendDelayMsg (user, RM_MAGSTRUCK, 0, pwr, 0, 0, '', 1200 + _MAX(Abs(CX-xx),Abs(CY-yy)) * 50 );
+                              end;
+                              //user.SelectTarget (target);
+                              user.SendDelayMsg (user, RM_DELAYMAGIC, pwr, MakeLong(xx, yy), 2, integer(target), '', HFJL);
+                              if (target.RaceServer >= RC_ANIMAL) then train := TRUE;
+                           end;
+                        end;
+                     end else
+                        target := nil;
+                  14: //Ç×¸¶Áø¹ý
+                     begin
+                        pwr := user.GetAttackPower (
+                                    GetPower13 (60) + 5 * Lobyte(user.WAbil.SC),
+                                    5 * (Integer(Hibyte(user.WAbil.SC)-Lobyte(user.WAbil.SC)) + 1)
+                                 ); //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+                        if user.MagMakeDefenceArea (xx, yy, 3, pwr{ÃÊ}, TRUE) > 0 then
+                           train := TRUE;
+                     end;
+                  46: //ÀúÁÖ¼ú
+                     begin
+
+                        sec := ((( pum.level + 1)* 24 ) + Hibyte(user.WAbil.SC) + user.Abil.Level) div 2 ;
+
+                        case pum.Level of
+                        0   : pwr := g_seCurse;
+                        1   : pwr := g_seCurse1;
+                        2   : pwr := g_seCurse2;
+                        3   : pwr := g_seCurse3;
+                        end;
+
+                        if user.MagMakeCurseArea (xx, yy, 2, sec, pwr, pum.level, TRUE) > 0 then
+                           train := TRUE;
+
+                     end;
+                  //2003/03/15 ½Å±Ô¹«°ø Ãß°¡
+                  36: //ÎÞ¼«ÕæÆø
+                  if not g_LIMITLESSQiswitch then
+
+                     begin
+                        sec := (pum.Level + 1) * 3;
+                        //pwr := Round(((Hibyte(user.WAbil.SC) - 2) / 100) * 100);
+                        pwr := Round(Hibyte(user.WAbil.SC)*(pum.Level * 0.2 + 0.4));
+                        if user.MagScUp (sec, pwr) then
+                           train := TRUE;
+                           end else
+//                     end;
+//                  36: //¹«±ØÁø±â
+                     begin
+                        sec := user.GetAttackPower (
+                                    GetPower13 (60) + 5 * Lobyte(user.WAbil.SC),
+                                    5 * (Integer(Hibyte(user.WAbil.SC)-Lobyte(user.WAbil.SC)) + 1));
+                        //Áõ°¡µÇ´Â ÆÄ±«·Â
+                        pwr := ((Hibyte(user.WAbil.SC)-1) div 5) + 1;
+                        if (pwr > 8) then pwr := 8;
+
+{$IFNDEF DEBUG}
+                        if user.MagDcUp (sec{ÃÊ}, pwr) then
+                           train := TRUE;
+{$ELSE} //-----µµ»ç ¹«±ØÁø±â ±×·ìÀû¿ë (µð¹ö±×¸ðµå)------
+                        //±×·ìÀÌ ¾øÀ¸¸é ÀÚ½Å¸¸ Àû¿ë
+                        if user.GroupOwner = nil then begin
+                           if user.MagDcUp (sec{ÃÊ}, pwr) then
+                              train := TRUE;
+                        end else begin
+                           //±×·ìÀÌ ÀÖÀ¸¸é ¸ðµç ±×·ì¿ø¿¡°Ô Àû¿ë
+                           for k:=0 to user.GroupOwner.GroupMembers.Count-1 do begin  //ÀÚ½Å Æ÷ÇÔ.
+                              hum := UserEngine.GetUserHuman (user.GroupOwner.GroupMembers[k]);
+                              if hum <> nil then begin
+                                 if hum.MagDcUp (sec, pwr) then
+                                    train := TRUE;
+                              end;
+                           end;
+                        end;
+{$ENDIF}
+
+                        //Å¸ÄÏÀÇ ´É·ÂÄ¡¸¦ ¿Ã·ÁÁÜ(sonmg 2005/06/07)
+                        if (target <> nil) and (target.RaceServer = RC_USERHUMAN) then begin
+                           if target.MagDcUp (sec{ÃÊ}, pwr) then begin
+                              target.SendRefMsg (RM_LOOPNORMALEFFECT, integer(target), 0, 0, NE_BIGFORCE, '');
+                              train := TRUE;
+                           end;
+                        end;
+                     end;
+                  15: //´ëÁö¿øÈ£
+                     begin
+                        pwr := user.GetAttackPower (
+                                    GetPower13 (60) + 5 * Lobyte(user.WAbil.SC),
+                                    5 * (Integer(Hibyte(user.WAbil.SC)-Lobyte(user.WAbil.SC)) + 1)
+                                 ); //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+                        if user.MagMakeDefenceArea (xx, yy, 3, pwr{ÃÊ}, FALSE) > 0 then
+                           train := TRUE;
+                     end;
+                  16: //°á°è
+                     begin
+                        if MagMakeHolyCurtain (user,
+                                          GetPower13 (40) + 3 * GetRPow(user.WAbil.SC), //Lobyte(user.WAbil.SC),
+                                          xx, yy) > 0 then begin
+                           train := TRUE;
+                        end;
+                     end;
+                  17: //¹é°ñ¼ÒÈ¯¼ú
+                     begin
+                      try
+                        TempCret := user.GetExistSlave( __WhiteSkeleton );
+                        if TempCret = nil  then
+                        begin
+                           if (user.GetExistSlave( __Shinsu  ) = nil) and
+                              (user.GetExistSlave( __Shinsu1 ) = nil) then
+                           if user.MakeSlave (__WhiteSkeleton, pum.Level, 1, 10 * 24 * 60 * 60) <> nil then
+                              train := TRUE;
+                        end;
+                      except
+                        MainOutMessage('EXCEPT WHITE SKELETON');
+                      end;
+                     end;
+                  18: //Àº½Å
+                     begin
+                        if MagMakePrivateTransparent (user, GetPower13 (30) + 3 * GetRPow(user.WAbil.SC)) then begin
+                           train := TRUE;
+                        end;
+                     end;
+                  19: //´ëÀº½Å
+                     begin
+                        if MagMakeGroupTransparent (user, xx, yy, GetPower13 (30) + 3 * GetRPow(user.WAbil.SC)) then begin
+                           train := TRUE;
+                        end;
+                     end;
+                  41: //Ãµ³à¼ÒÈ¯¼ú(Á¤È¥¼ÒÈ¯¼ú)
+                     begin
+                      try
+                        TempCret := user.GetExistSlave( __AngelMob );
+                        if TempCret = nil  then
+                        begin
+                            //Ãµ³à(¿ù·É)°¡ ¾ø´Ù.
+                           if user.MakeSlave (__AngelMob, pum.Level, 1, 10 * 24 * 60 * 60) <> nil then
+                              train := TRUE;
+                        end;
+                       except
+                        MainOutMessage('EXCEPT ALGEL ');
+                       end;
+                     end;
+                  49: //¸Í¾È¼ú(¹ÌÈ¥¼ú)
+                     begin
+                        if MagBlindEye( user, target, pum ) then begin
+                           train := TRUE;
+                        end;
+                     end;
+
+                  83: //ÒõÑôÎåÐÐÕó
+                     begin
+                        pwr := user.GetAttackPower (GetPower (MPow(pum)) + Lobyte(user.WAbil.SC), Integer(Hibyte(user.WAbil.SC)-Lobyte(user.WAbil.SC)) + 1);
+                        if MagMakeYinYangMatrix (user, pwr,
+                                 GetPower(10) + GetRPow(user.WAbil.SC) div 2,
+                                 xx,
+                                 yy) > 0 then begin
+                          train := TRUE;
+                        end;
+                     end;
+
+
+               end;
+
+               nofire := FALSE;
+               UseBujuk (user);
+            end;
+         end;
+      30: //½Å¼ö¼ÒÈ¯
+         begin
+            nofire := TRUE;
+            try
+                     // È¡ÏûµÀÊ¿ÉñÊÞÐÄÁéÕÙ»½
+            TempCret := user.GetExistSlave( __ShinSu );
+            if TempCret = nil then
+                TempCret := user.GetExistSlave( __ShinSu1 );
+
+            if TempCret <> nil then
+            begin
+              TempCret.forcemovetomaster := true;
+              exit;
+            end;
+
+
+            bhasItem := CanUseBujuk (user, 5);
+            if bhasItem > 0 then
+            begin
+               if bhasitem = 1 then begin
+                  // 2003/03/15 COPARK ¾ÆÀÌÅÛ ÀÎº¥Åä¸® È®Àå
+                  if user.UseItems[U_BUJUK].Dura >= 500 then      // U_ARMRINGL->U_BUJUK
+                     user.UseItems[U_BUJUK].Dura := user.UseItems[U_BUJUK].Dura - 500
+                  else user.UseItems[U_BUJUK].Dura := 0;
+                  //³»±¸¼º º¯°æÀº ¾Ë¸²
+                  user.SendMsg (user, RM_DURACHANGE, U_BUJUK, user.UseItems[U_BUJUK].Dura, user.UseItems[U_BUJUK].DuraMax, 0, '');
+               end;
+               if bhasitem = 2 then begin
+                  if user.UseItems[U_ARMRINGL].Dura >= 500 then
+                     user.UseItems[U_ARMRINGL].Dura := user.UseItems[U_ARMRINGL].Dura - 500
+                  else user.UseItems[U_ARMRINGL].Dura := 0;
+                  user.SendMsg (user, RM_DURACHANGE, U_ARMRINGL, user.UseItems[U_ARMRINGL].Dura, user.UseItems[U_ARMRINGL].DuraMax, 0, '');
+               end;
+               case pum.pDef.MagicId of
+                  30: //½Å¼ö¼ÒÈ¯
+                     begin
+                        if (user.GetExistSlave(__WhiteSkeleton) = nil) then
+                           if user.MakeSlave (__ShinSu, pum.Level, 1, 10 * 24 * 60 * 60) <> nil then
+                              train := TRUE;
+                     end;
+               end;
+               nofire := FALSE;
+               UseBujuk (user);  // ¹ö±× ¼öÁ¤(2004/09/01 sonmg)
+            end;
+
+            except
+                MainOutMessage('EXCEPT SHINSU');
+            end;
+
+         end;
+      42: //ºÐ½Å¼ÒÈ¯
+         begin
+          try
+            TempCret :=user.GetExistSlave( __CloneMob );
+            if TempCret <> nil then
+            begin
+                // ºÐ½ÅÇÑ³ÑÀÌ ÀÖ´Ù.
+                TempCret.BoDisapear := true;
+                // MP ´Ù½Ã ´õÇØÁÖÀÚ
+                user.Wabil.MP := user.WAbil.MP + Spell;
+            end
+            else // ºÐ½ÅÇÑ³ÑÀÌ ¾ø´Ù.
+            begin
+
+               TempCret := user.MakeSlave (__CloneMob, pum.Level, 5, 10 * 24 * 60 * 60);
+               if TempCret <> nil then
+               begin
+                  user.SendRefMsg (RM_NORMALEFFECT, 0, TempCret.CX, TempCret.CY, NE_CLONESHOW, '');
+                  train := TRUE;
+               end;
+
+            end;
+
+           except
+                MainOutMessage('EXCET CLONE');
+           end;
+
+         end;
+
+      28:  //Å½±âÆÄ¿¬  ÐÄÁéÆôÊ¾
+         begin
+            if target <> nil then begin
+               if not target.BoOpenHealth then begin
+                  if Random(6) <= 3+pum.Level then begin
+                     target.OpenHealthStart := GetTickCount;
+                     target.OpenHealthTime := GetPower13 (30 + GetRPow(user.WAbil.SC) * 2) * 1000;
+                     target.SendDelayMsg (target, RM_DOOPENHEALTH, 0, 0, 0, 0, '', 1500);
+                     train := TRUE;
+                  end;
+               end;
+            end;
+         end;
+      // 2003/07/15 ½Å±Ô¹«°ø
+      39:   // °áºùÀå
+         if user.MagCanHitTarget (user.CX, user.CY, target) then begin
+            if user.IsProperTarget (target) then begin
+               if (target.AntiMagic <= Random(50)) and (abs(target.CX-xx) <= 1) and (abs(target.CY-yy) <= 1) then begin
+                  with user do begin
+                     //°áºùÀå °ø½Ä ¼öÁ¤(sonmg 2004/10/20)
+//                     Dur := (Round (0.4+pum.Level*0.2) * (Lobyte(WAbil.MC) + Hibyte(WAbil.MC)));
+                     Dur := (Round (0.4+pum.Level*0.2) * (Lobyte(WAbil.MC) + Random(Hibyte(WAbil.MC)) + (Hibyte(WAbil.MC) div 2)));
+                     pwr := pum.pDef.MinPower + Dur;
+                  end;
+                  user.SendDelayMsg (user, RM_DELAYMAGIC, pwr, MakeLong(xx, yy), 2, integer(target), '', 600);
+                  // »óÅÂÀÌ»ó...µÐÈ­ÆÇÁ¤
+                  if (target.Abil.Level < 60) and
+                     (target.StatusArr[POISON_SLOW] = 0) and
+                     (target.StatusArr[POISON_ICE] = 0) and
+                     (Random(50) > target.AntiMagic) then begin    // 100->50
+                     MoC := 1;
+                     Gap := target.Abil.Level - user.Abil.Level;
+                     if Gap > 10 then Gap := 10;
+                     if Gap <-10 then Gap :=-10;
+                     if target.RaceServer = RC_USERHUMAN then MoC := 2;
+                     if Random(100) < (20 + (pum.Level - Gap) div Moc) then begin
+                        Dur := (900 * pum.Level + 3300) div 1000;
+                        if (MoC = 1) and (Random(10) = 0) then target.MakePoison(POISON_ICE, Dur, 1)
+                        else if (MoC = 2) and (Random(100) = 0) then target.MakePoison(POISON_ICE, Dur, 1)
+                        else target.MakePoison(POISON_SLOW, Dur + 1, 1);
+                     end;
+                  end;
+                  if (target.RaceServer >= RC_ANIMAL) then train := TRUE;
+               end else
+                  target := nil;
+            end else
+               target := nil;
+         end else
+            target := nil;
+      40:   // Á¤È­¼ú
+         begin
+            if MagMakePrivateClean (user, xx, yy, pum.Level*15+45) then begin
+               train := TRUE;
+            end;
+         end;
+      43: // »çÀÚÈÄ
+         begin
+            try
+//             nofire := true;   //sonmg(2004/05/19)
+               user._Attack( HM_STONEHIT, nil );
+            except
+               MainOutMessage('EXCEPTION STONEHIT');
+            end;
+            train := FALSE;
+         end;
+      44: // °øÆÄ¼¶
+         begin
+            if MagWindCut ( user , pum.Level ) then begin
+               train := true;
+            end;
+         end;
+      47: // Æ÷½Â°Ë
+         begin
+            if MagPullMon ( user, target, pum.Level ) then begin
+               train := true;
+            end;
+         end;
+      48: // ÈíÇ÷¼ú
+         if user.IsProperTarget (target) then begin
+            if target.AntiMagic <= Random(50) then begin
+               with user do begin
+                  pwr := GetAttackPower (
+                              GetPower (MPow(pum)) + Lobyte(WAbil.MC),
+                              Integer(Hibyte(WAbil.MC)-Lobyte(WAbil.MC)) + 1
+                           ); //¿À¹öÇÃ·Î ¼öÁ¤(sonmg 2005/02/15)
+               end;
+               //user.SelectTarget (target);
+               if (target.LifeAttrib <> LA_UNDEAD) and (target.RaceServer <> RC_USERHUMAN) then
+                  pwr := Round (pwr * 1.2);
+               user.SendDelayMsg (user, RM_DELAYMAGIC, pwr, MakeLong(xx, yy), 2, integer(target), '', 0);
+               if (target.RaceServer >= RC_ANIMAL) then begin
+                  //¸÷¿¡°Ô »ç¿ëÇÑ °æ¿ì »¯¾î¿À´Â HP·®.
+                  user.IncHealth := (pwr * (pum.Level+1)*10 + Random(20)) div 100;
+                  train := TRUE;
+               end else begin
+                  //»ç¶÷¿¡°Ô »ç¿ëÇÑ °æ¿ì »¯¾î¿À´Â HP·®.
+                  user.IncHealth := ((pwr * (pum.Level+1)*10 + Random(10)) div 100) * _MAX(0, 1 - target.AntiMagic div 25);
+               end;
+//               user.SendRefMsg (RM_LOOPNORMALEFFECT, integer(user), 0, 0, NE_BLOODSUCK, '');
+               user.SendDelayMsg (user, RM_LOOPNORMALEFFECT, integer(user), 0, 0, NE_BLOODSUCK, '', 1000);
+            end else
+               target := nil;
+         end else
+            target := nil;
+
+   end;
+
+   if not nofire then begin
+      with user do begin
+         if needfire then
+            SendRefMsg (RM_MAGICFIRE, 0, MakeWord(pum.pDef.EffectType, pum.pDef.Effect), MakeLong(xx, yy), integer(target), '');
+         //2003/03/15 ½Å±Ô¹«°ø Ãß°¡
+         //¸ÂÀº »ó´ë
+         if (pum.Level < 3) and train then
+            if Abil.Level >= pum.pDef.NeedLevel[pum.Level] then begin
+               //¼ö·Ã·¹º§¿¡ µµ´ÞÇÑ °æ¿ì
+               user.TrainSkill (pum, 1 + Random(3));
+               if not CheckMagicLevelup (pum) then
+                  SendDelayMsg (user, RM_MAGIC_LVEXP, 0, pum.pDef.MagicId, pum.Level, pum.CurTrain, '', 1000);
+            end;
+      end;
+      Result := TRUE;
+   end;
+end;
+
+end.
+

@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2020/05/26 20:58:14.000.712,L:\Source\Client\Browser.pas=</Transaction>
+    <Transaction>2020/05/26 20:58:34.000.354,=L:\Source\Client\frmWebBroser.pas</Transaction>
+  </Transactions>
+	<ProjectSortOrder AutoSort="0" SortType="0">
+    <File Path="..\..\Source"/>
+    <File Path="..\Common"/>
+    <File Path="..\Common\EDCode.pas"/>
+    <File Path="..\Common\Grobal2.pas"/>
+    <File Path="..\Common\HUtil32.pas"/>
+    <File Path="..\Common\StallSystem.pas"/>
+    <File Path="..\Common\uEDCode.pas"/>
+    <File Path="..\Common\uFirewall.pas"/>
+    <File Path="..\SceneUI"/>
+    <File Path="..\SceneUI\DWinCtl.pas"/>
+    <File Path="..\SceneUI\WIL.pas"/>
+    <File Path="Light"/>
+    <File Path="Light\lig0a.png"/>
+    <File Path="Light\lig0b.png"/>
+    <File Path="Light\lig0c.png"/>
+    <File Path="Light\lig0d.png"/>
+    <File Path="Light\lig0e.png"/>
+    <File Path="Light\lig0f.png"/>
+    <File Path="Actor.pas"/>
+    <File Path="AxeMon.pas"/>
+    <File Path="bass.dll"/>
+    <File Path="clEvent.pas"/>
+    <File Path="ClFunc.pas"/>
+    <File Path="cliUtil.pas"/>
+    <File Path="ClMain.pas"/>
+    <File Path="ClMain.dfm"/>
+    <File Path="ConfirmDlg.pas"/>
+    <File Path="DlgConfig.pas"/>
+    <File Path="DlgConfig.dfm"/>
+    <File Path="DrawScrn.pas"/>
+    <File Path="frmWebBroser.pas"/>
+    <File Path="frmWebBroser.dfm"/>
+    <File Path="FState.pas"/>
+    <File Path="FState.dfm"/>
+    <File Path="FWeb.pas"/>
+    <File Path="FWeb.dfm"/>
+    <File Path="HerbActor.pas"/>
+    <File Path="IntroScn.pas"/>
+    <File Path="Logo.png"/>
+    <File Path="magiceff.pas"/>
+    <File Path="MagicShar.pas"/>
+    <File Path="MaketSystem.pas"/>
+    <File Path="MapUnit.pas"/>
+    <File Path="MShare.pas"/>
+    <File Path="NgShare.pas"/>
+    <File Path="PlayScn.pas"/>
+    <File Path="RelationShip.pas"/>
+    <File Path="SingleInstance.pas"/>
+    <File Path="SoundUtil.pas"/>
+    <File Path="UHelpStr.pas"/>
+    <File Path="uLocalMessageer.pas"/>
+  </ProjectSortOrder>
+</BorlandProject>

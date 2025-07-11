@@ -1,0 +1,3220 @@
+unit uLogin;
+
+{$I M2.inc}
+
+interface
+
+uses Windows, Messages, Classes, SysUtils, uSocket, uCliTypes, uEDCode, EDCode,
+  Forms, Controls, uServerList, Grobal2, OverbyteIcsHttpProt, ShellAPI,
+  uUpdateTools, ComCtrls, OverbyteIcsPing, ExtCtrls, IOUtils, Graphics,
+  uKernelMonitor, uWil, OverbyteIcsUrl, rtcInfo, uCommon, Math,
+  Generics.Collections, OverbyteIcsWndControl, OverbyteIcsWSocket,
+  OverbyteIcsWSocketS, FastIniFile, uMD5,
+  RAR, RAR_DLL, rtcDataCli, rtcHttpCli, rtcConn, ScktCompSy, Share, uLog,
+  StdCtrls, Dialogs, uMiniResDownloader,ZLib,uSyncObj,StrUtils;
+
+type
+  TClinkStartFunc = function(const cfg:PAnsiChar):integer;cdecl;
+  TMessageType = (mtNormal, mtError, mtWaringin);
+  TuClientApp = class;
+  TMiniResourcesClient = class;
+
+  TResourceRequest = class(TRtcDataRequest)
+  private
+    FTempFileName: String;
+    FFile: TFileStream;
+    FClient: TMiniResourcesClient;
+    FFileList: TStrings;
+    FType: Byte;
+    FStartTime: LongWord;
+    FFileName, FPath: String;
+    FImageIndex: Integer;
+
+    procedure DoBeginRequest(Sender: TRtcConnection);
+    procedure DoResponseAbort(Sender: TRtcConnection);
+    procedure DoDataReceived(Sender: TRtcConnection);
+    procedure RebuildMiniRequest(const AFileName: String; AType: Byte;
+      AImageIndex: Integer; AImportant: Boolean);
+    procedure ExecuteImage(AResponse: TRtcClientResponse);
+    procedure ExecuteRar(AResponse: TRtcClientResponse);
+    procedure DoRARListFile(Sender: TObject;
+      const FileInformation: TRARFileItem);
+  public
+    constructor Create(AResourcesClient: TMiniResourcesClient);
+    destructor Destroy; override;
+  end;
+
+  TMiniResourcesClient = class
+  private
+    FApp: TuClientApp;
+    FClient: TRtcHttpClient;
+    FThreads, FRequests, FFreeThreads: TFixedThreadList;
+    FMiniPwd: String;
+    FMaxThreads: Integer;
+    procedure Clear;
+    procedure Remove(ARequest: TResourceRequest);
+    function CheckNeedDown(ARequest: pTMiniResRequest): Boolean;
+    procedure DoDownload(ARequest: pTMiniResRequest);
+    procedure LoadMiniSrvList;
+  public
+    constructor Create(AApp: TuClientApp);
+    destructor Destroy; override;
+
+    procedure SetServerInfo(const AServerAddr, AServerPort: String);
+    procedure AddDownload(ARequest: pTMiniResRequest);
+    procedure Run;
+
+    property Client: TRtcHttpClient read FClient;
+  end;
+
+  TuClientApp = class(TInterfacedObject, IuApplication)
+  private
+    FAtCheckVer, FTryConnecting: Boolean;
+    FCode: Byte;
+    FMainForm: TForm;
+    FClientSocket: TuClientSocket;
+    FServerInfo: uServerList.TServerInfo;
+    FBufferStr, FNewAccount: String;
+    FMiniUrl: String;
+    FTimer, FMiniTimer, FMiniDownTimer: TTimer;
+    FConnected: Boolean;
+    FImageList: TList;
+    FResManager: TDownLoaderManager;
+    FPackIndex: Integer;
+    FBusy: Boolean;
+    FNeedTokenID: Boolean;
+    FTempBuffer: array[0..16 * 1024 - 1] of AnsiChar;
+    FSendBuffer: array[0..16 * 1024 - 1] of AnsiChar;
+    procedure OnConnected(Sender: TObject; Socket: TCustomWinSocket);
+    procedure OnClosed(Sender: TObject; Socket: TCustomWinSocket);
+    procedure OnDataAvailable(Sender: TObject; Socket: TCustomWinSocket);
+    procedure OnError(Sender: TObject; Socket: TCustomWinSocket;
+      ErrorEvent: TErrorEvent; var ErrorCode: Integer);
+    procedure DoCheckMySelfNeedUpdate(UpdateItem: TUpdateItem;
+      var Need: Boolean);
+
+    procedure LoadServerInfoFromStream(AStram: TStringStream); //读取服务器列表信息
+    procedure LoadServerListFromServerInfo; //根据读取到的服务器列表 设置窗体按钮 的一些点击信息
+    procedure ExtractEmbbedResources(F: TStream);
+    function GetLocalConfigureFileName: String;
+    procedure LoadLocalConfigure;
+    procedure SaveLocalConfigure;
+    procedure SendCSocket(const ASendData: AnsiString);
+    procedure DoFileBegin(Sender: TObject);
+    procedure DoFileEnd(Sender: TObject);
+    procedure DoProgress(UpdateItem: TUpdateItem; AllSize, APosition: Integer);
+    procedure DoBegin(UpdateItem: TUpdateItem; AllSize: Integer);
+    procedure DoEnd(UpdateItem: TUpdateItem; AllSize: Integer);
+    procedure DecodeMessagePacket(const ADatablock: AnsiString);
+    procedure DoTimer(Sender: TObject);
+    procedure DoMiniTimer(Sender: TObject);
+    procedure DoMiniDownTimer(Sender: TObject);
+    function ChooseFastMiniUrl(List:TStrings):String;
+
+    procedure SetButtonEnabled(Value: Boolean);
+
+    function GetTitle: String;
+    procedure SendCloseAllClient;
+    procedure OnKernelEvent(ErrorCode: Integer);
+    function GetMaxClient: Integer;
+  protected
+    procedure StartGame;
+
+    procedure Close;
+    procedure RegisterID;
+    procedure ChangePassWord;
+    procedure OpenURL(const Url: String);
+    procedure GetBackPassWord();
+    procedure Config;
+  public
+    TreeView: TuTreeView;
+    constructor Create;
+    destructor Destroy; override;
+    procedure Open;
+    procedure Print(MessageType: TMessageType; const Message: String);
+    procedure PrintEx(AUpdateItem: TUpdateItem; const Message: String);
+    procedure TreeChangeNode(Sender: TObject; Node: TTreeNode);
+    procedure TreeMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure ServerComboboxChange(Sender: TObject);
+    function CheckServerInfo: Boolean;
+    procedure UpdateFiles;
+    function UpdateMySelf: Boolean;
+    procedure UpdateSysFiles;
+    procedure UpdateBgFiles;
+    procedure ShowMailForm(Show: Boolean);
+    procedure SendGetBackPassword(sAccount, sQuest1, sAnswer1,
+    sQuest2, sAnswer2, sBirthDay: string); //发送找回密码
+     procedure FPLOnChange(Sender: TObject);
+    procedure DownLoadMiniClientVerFile(const Url: String); // 读取微端版本描述文件。
+    property Title: String read GetTitle;
+    property CheckVer: Boolean read FAtCheckVer;
+    property MainForm: TForm read FMainForm write FMainForm;
+    property MaxClient: Integer read GetMaxClient;
+    procedure SendUpdateAccount(ue: TUserEntry); //发送新建账号
+    procedure SendChgPw(sAccount, sPasswd, sNewPasswd: string); //发送修改密码
+    function CheckLisence: Boolean;
+    procedure DisplayComboboxChange(Sender: TObject);//下拉分辨率
+  end;
+
+  // 微端及更新列表需要时更新部分
+  TFileState = (ftNormal, ftDowning, ftDowned);
+
+  TFileItem = class
+    FileName: String;
+    State: TFileState;
+    Url: String;
+    Path: String;
+    Zip: Boolean;
+    MiniServer: Boolean;
+    DownKind: TupDownKind;
+    procedure BeginDown;
+    procedure EndDown;
+  end;
+
+  TFileDownManager = class
+  private
+    FFiles: TObjectDictionary<String, TFileItem>;
+    constructor Create;
+    destructor Destroy; override;
+    function TryGet(const AName: String; out AFileItem: TFileItem): Boolean;
+    procedure AddFile(const AName, AUrl, APath: String; MiniSrv: Boolean;
+      Zip: Boolean; ADownKind: TupDownKind);
+  end;
+
+var
+  boNeedSuicide: Boolean = False;
+  boCreateShortCut: Boolean = False;
+  uClientApp: TuClientApp;
+  uFullScreen: Boolean = False;
+  uWaitVBlank: Boolean = True;
+  u3D: Boolean = True;
+  uHigh: Boolean = False;
+  uDXVer: Byte = 9;
+  uSCREENWIDTH: Integer = 1024;
+  uSCREENHEIGHT: Integer = 768;
+  uServerName: string;
+  uServerKey: AnsiString = '';
+  uServeraddr: string;
+  uServerPort: Integer;
+  uMainStyle: Byte = 0;
+  uClientKind: Byte = 0;
+  uHomePath: string;
+  uRARDLLFile: String = '';
+  uDXDLLFile: string = '';
+  uAPIDLLFile: string = '';
+  m_SafetyDllKey: TStringStream;
+  uPngForm: Boolean = True;
+  uAlphaForm: Boolean = True;
+  FileDownManager: TFileDownManager;
+  uHandles: TStrings;
+  GsFPL : Integer = 1;
+  m_clinkAPIHandle: THandle;
+  AClientFile: string;
+  uUseLisence: Boolean = False;
+  uDateEditLisence: string;
+
+{$IFDEF DEBUG}
+const
+  STR_SERVERLISTURL = 'http://legendofmir.oss-cn-hangzhou.aliyuncs.com/lf170.txt';
+  STR_SHIELDURL = 'http://127.0.0.1/123.txt';
+  STR_MINIURL = 'http://192.168.0.105/ABC/';
+  STR_MINIPWD = '123456';
+{$ENDIF}
+function GetWindowsDirectory: string;
+function LoadExecutableStructure: TuExecutableStructure;
+function GetDisplayBitsoixel: Integer;
+procedure InitLoginData();
+
+var
+  g_PasswordFileName: string;
+
+implementation
+
+//{$R Res\Client.res}
+
+uses  System.Zip,uTypes, Registry, uNewAccount, uGameSetting, uChangPwd, RegularExpressions,
+  uGetBackPwd, uSplashFrm,  ComObj,
+  ActiveX,
+  ShlObj;
+function GetShellFolders(strDir: string): string;
+const
+  regPath = '\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders';
+var
+  Reg: TRegistry;
+  strFolders: string;
+begin
+  Reg := TRegistry.Create;
+  try
+    Reg.RootKey := HKEY_CURRENT_USER;
+    if Reg.OpenKey(regPath, False) then
+    begin
+      strFolders := Reg.ReadString(strDir);
+    end;
+  finally
+    Reg.Free;
+  end;
+  result := strFolders;
+end;
+
+procedure CreateLinkToDesktop(const ExeName, LinkName: String);
+var
+  ATmpObject: IUnknown;
+  ATmpSLink: IShellLink;
+  ATmpPFile: IPersistFile;
+  PIDL: PItemIDList;
+  StartupDirectory: array [0 .. MAX_PATH] of Char;
+  LinkFilename: WideString;
+  DeskTopPath: String;
+begin
+  OleInitialize(nil);
+  try
+    DeskTopPath := GetShellFolders('Desktop') + '\'; // 是取得桌面文件夹的路径
+    if FileExists(DeskTopPath + LinkName + '.lnk') then
+    begin
+      OleUninitialize;
+      Exit;
+    end;
+
+    ATmpObject := CreateComObject(CLSID_ShellLink);
+    ATmpSLink := ATmpObject as IShellLink;
+    ATmpPFile := ATmpObject as IPersistFile;
+    ATmpSLink.SetPath(pChar(ExeName));
+    ATmpSLink.SetWorkingDirectory(pChar(ExtractFilePath(ExeName)));
+    SHGetSpecialFolderLocation(0, CSIDL_DESKTOPDIRECTORY, PIDL);
+    ATmpSLink.SetDescription(PWideChar(LinkName));
+    ATmpSLink.SetIconLocation(pChar(ExeName), 0);
+    SHGetPathFromIDList(PIDL, StartupDirectory);
+    LinkFilename := String(StartupDirectory) + '\' + LinkName + '.lnk';
+    ATmpPFile.Save(PWideChar(LinkFilename), False);
+  finally
+    OleUninitialize;
+  end;
+end;
+
+function GetDisplayBitsoixel: Integer;
+var
+  AScreenDC: THandle;
+begin
+  AScreenDC := CreateDC('DISPLAY', nil, nil, nil);
+  result := GetDeviceCaps(AScreenDC, BITSPIXEL);
+end;
+
+function GetWindowsDirectory: String;
+var
+  WinPath: pChar;
+begin
+  WinPath := StrAlloc(255);
+  try
+    Windows.GetWindowsDirectory(WinPath, 256);
+    result := WinPath;
+    result := SysUtils.IncludeTrailingPathDelimiter(result);
+  finally
+    StrDispose(WinPath);
+  end;
+end;
+
+function GetHttpHeaderValue(Header: TStrings; const Name: String): String;
+var
+  I: Integer;
+begin
+  result := '';
+  for I := 0 to Header.Count - 1 do
+    if Pos(Name + ':', Header[I]) = 1 then
+    begin
+      result := Header[I];
+      Delete(result, 1, Length(Name + ':'));
+      result := Trim(result);
+      Break;
+    end;
+end;
+
+function ISIPAddress(const Address: String): Boolean;
+begin
+  result := TRegEx.Match(Address,
+    '((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))')
+    .Success;
+end;
+
+function GetHostIP(const AHost: String): String;
+var
+  IPPing: TPing;
+begin
+  IPPing := TPing.Create(nil);
+  try
+    IPPing.Address := AHost;
+    IPPing.Ping;
+    result := IPPing.HostIP;
+  finally
+    IPPing.Free;
+  end;
+end;
+
+procedure _ParseURL(const AUrl: String; var AServerAddr, AServerPort: String);
+var
+  AProto, AUser, APass, APath: String;
+begin
+  OverbyteIcsUrl.ParseURL(AUrl, AProto, AUser, APass, AServerAddr,
+    AServerPort, APath);
+  if not ISIPAddress(AServerAddr) then
+    AServerAddr := GetHostIP(AServerAddr);
+end;
+
+function LoadExecutableStructure: TuExecutableStructure;
+var
+  AFile: TFileStream;
+  AExecutableStream, ATmp: TMemoryStream;
+  ABuf: PAnsiChar;
+  DataSize: Integer;
+  ExecutableStreamLen:Int64;
+begin
+  // ShowMessage(IntToStr(SizeOf(TuExecutableStructure)));
+
+  try
+{$IFDEF DEBUG} //这里主要要修改
+    result.Title := uEDCode.DecodeSource
+      ('TT3084f+1s5B/viyVMOM5F6Vg4AkdK98PEI='); //91网络调试登陆器
+    result.ServerListURL := '';
+    result.SkinDataLen := 0;
+    result.Offset := 0;
+{$ELSE}
+    AFile := TFileStream.Create(Application.ExeName, fmOpenRead or fmShareDenyNone);
+    // AFile :=  TFileStream.Create('E:\JONE\trunk\Source\Debug Data\LoginData.dat', fmOpenRead or fmShareDenyNone);
+   //AFile :=  TFileStream.Create('D:\热血传奇\DebugEmResource.exe', fmOpenRead or fmShareDenyNone);
+    AExecutableStream := TMemoryStream.Create;
+    ATmp := TMemoryStream.Create;
+    DataSize := SizeOf(TuExecutableStructure) + 16;
+    GetMem(ABuf, DataSize);
+    try
+      AFile.Position := AFile.Size - DataSize;
+      AFile.ReadBuffer(ABuf^, DataSize);
+      AExecutableStream.WriteBuffer(ABuf^, DataSize);
+
+      uEDCode.DecodeStream(AExecutableStream, ATmp,
+        uEDCode.DecodeSource
+        ('ynzPX3rxRYZNE+HC/cYSMS49UszSY71Yq53qkw23HAUpL32klGBAwHZLr9x4WGaIqL2YGTmj18XxZ5vVHuVjOH2HLb6SaIf3hEDfdzZ9zOQ=')
+        );
+      AExecutableStream.Clear;
+      uEDCode.DecodeStream(ATmp, AExecutableStream,
+        uEDCode.DecodeSource
+        ('gyXzX1z8FbTnvt6GHW1Itzc5DBVImlq4pMFx3wpXbUXs8ZpXFjRoLrlGHOoXnpPZDtKuYl4e8pu/d7Pp7imIJw/BMuOXhtzUbUcCfWdWa10=')
+        );
+      AExecutableStream.Seek(0, soFromBeginning);
+      AExecutableStream.ReadBuffer(result, SizeOf(TuExecutableStructure));
+    finally
+      AFile.Free;
+      AExecutableStream.Free;
+      ATmp.Free;
+      FreeMem(ABuf);
+    end;
+{$ENDIF}
+  except
+    on E: Exception do
+    begin
+      uLog.TLogger.AddLog
+        (uEDCode.DecodeSource
+        ('CJWYNoWrQGKNVBMjBGU8SBA6At2n9GraGnzXW5v1XQVrEw==') + E.Message);
+      // 获取头信息失败,错误信息:
+      Application.Terminate;
+    end;
+  end;
+
+end;
+
+{ TuClientApp }
+function TuClientApp.CheckLisence: Boolean;
+begin
+  Result:= False;
+  if uUseLisence then begin
+    if StrToDate(uEDCode.DecodeSource(uDateEditLisence)) < Now then begin
+      Application.MessageBox
+           (pChar(uEDCode.DecodeSource
+           ('57PXggNvZJ2Bdpg+d55Imk4oFo8uM8rpYIEO4eoE7EBZmlPRi/8=')),
+           pChar(uEDCode.DecodeSource('Lzwm4byCg5BJE0C4')), MB_OK or MB_ICONERROR);
+      if FConnected then
+        FClientSocket.Close;
+      Result:= True;
+    end;
+  end;
+end;
+
+procedure TuClientApp.ChangePassWord;
+begin
+  if CheckLisence then Exit;
+
+  FRMChangePWD.Left := FMainForm.Left +
+    (FMainForm.Width - FRMChangePWD.Width) div 2;
+  FRMChangePWD.Top := FMainForm.Top +
+    (FMainForm.Height - FRMChangePWD.Height) div 2;
+ // FRMChangePWD.Initializa;
+  FRMChangePWD.ShowModal;
+end;
+
+procedure TuClientApp.GetBackPassWord;
+begin
+  if CheckLisence then Exit;
+  frmGetBackPwd.Left := FMainForm.Left +
+    (FMainForm.Width - frmGetBackPwd.Width) div 2;
+  frmGetBackPwd.Top := FMainForm.Top +
+    (FMainForm.Height - frmGetBackPwd.Height) div 2;
+  frmGetBackPwd.ShowModal;
+end;
+
+function TuClientApp.CheckServerInfo: Boolean;
+
+  function TryGetServerInfo(const ALine, AUrl: String): Boolean;
+  var
+    AHttp: THttpCli;
+  begin
+    result := False;
+    if AUrl <> '' then
+    begin
+      AHttp := THttpCli.Create(nil);
+      try
+        AHttp.Agent :=
+          'Mozilla/5.0 (Windows NT 5.1; rv:8.0) Gecko/20100101 Firefox/8.0';
+        AHttp.RcvdStream := TStringStream.Create;
+        AHttp.Url := AUrl;
+        AHttp.NoCache := True;
+        try
+          AHttp.Get;
+          AHttp.RcvdStream.Seek(0, soBeginning);
+          LoadServerInfoFromStream(TStringStream(AHttp.RcvdStream));
+          AHttp.RcvdStream.Seek(0, soBeginning);
+          if not IOUtils.TDirectory.Exists
+            (IncludeTrailingPathDelimiter(uHomePath) +
+            IncludeTrailingPathDelimiter(FServerInfo.ResFolder)) then
+            IOUtils.TDirectory.CreateDirectory
+              (IncludeTrailingPathDelimiter(uHomePath) +
+              IncludeTrailingPathDelimiter(FServerInfo.ResFolder));
+          result := True;
+        except
+          on E: Exception do
+          begin
+            uLog.TLogger.AddLog
+              (Format(uEDCode.DecodeSource
+              ('aSppaPUhmalrplQ1I3xA+PxNy92NqLHm5Nrqm1Q5iz4ty1MEklnOQW2lpaE='),
+              [ALine, E.Message])); // 获取列表失败,错误信息(%s):%s
+
+          end;
+        end;
+      finally
+        if AHttp.RcvdStream <> nil then
+          AHttp.RcvdStream.Free;
+
+        FreeAndNil(AHttp);
+      end;
+    end;
+  end;
+
+  function StreamToString(aStream: TStream): string;
+  var
+    SS: TStringStream;
+  begin
+    if aStream <> nil then
+    begin
+      SS := TStringStream.Create('');
+      try
+        SS.CopyFrom(aStream, 0);  // No need to position at 0 nor provide size
+        Result := SS.DataString;
+      finally
+        SS.Free;
+      end;
+    end else
+    begin
+      Result := '';
+    end;
+  end;
+
+  function TryGetShieldInfo(const ALine, AUrl: String): Boolean;
+  var
+    AHttp: THttpCli;
+  begin
+    result := False;
+    if AUrl <> '' then
+    begin
+      AHttp := THttpCli.Create(nil);
+      try
+        AHttp.Agent :=
+          'Mozilla/5.0 (Windows NT 5.1; rv:8.0) Gecko/20100101 Firefox/8.0';
+        AHttp.RcvdStream := TStringStream.Create;
+        AHttp.Url := AUrl;
+        AHttp.NoCache := True;
+        try
+          AHttp.Get;
+          AHttp.RcvdStream.Seek(0, soBeginning);
+          m_SafetyDllKey := TStringStream.Create('');
+//          m_SafetyDllKey := StreamToString(AHttp.RcvdStream);
+          m_SafetyDllKey.CopyFrom(AHttp.RcvdStream, 0);
+          AHttp.RcvdStream.Seek(0, soBeginning);
+          result := True;
+        except
+          on E: Exception do
+          begin
+            uLog.TLogger.AddLog
+              (Format(uEDCode.DecodeSource
+              ('aSppaPUhmalrplQ1I3xA+PxNy92NqLHm5Nrqm1Q5iz4ty1MEklnOQW2lpaE='),
+              [ALine, E.Message])); // 获取列表失败,错误信息(%s):%s
+
+          end;
+        end;
+      finally
+        if AHttp.RcvdStream <> nil then
+          AHttp.RcvdStream.Free;
+
+        FreeAndNil(AHttp);
+      end;
+    end;
+  end;
+
+  procedure RunSafetyDll;
+  var
+    DllResult: Integer;
+//    ClinkStart: TClinkStartFunc;
+    ClinkStart :function(const cfg:TStringStream):integer;stdcall;
+  begin
+    if m_clinkAPIHandle = 0 then
+    begin
+      If FileExists(ExtractFilePath(ParamStr(0)) + 'clinkAPI.dll') then
+      begin
+        m_clinkAPIHandle := LoadLibrary(PChar(ExtractFilePath(ParamStr(0)) + 'clinkAPI.dll'));
+        if m_clinkAPIHandle > 0 then
+        begin
+          ClinkStart := GetProcAddress(m_clinkAPIHandle, PAnsiChar(AnsiString('clinkStart')));
+          if @ClinkStart  <>  nil then
+          begin
+            DllResult := ClinkStart(m_SafetyDllKey.Memory);
+//            if DllResult <> 150 then
+//            begin
+//              ShowMessage('安全盾连接失败，返回代码为：' + IntToStr(DllResult));
+//            end
+//            else
+//            begin
+//              ShowMessage('安全盾连接成功，返回代码为：' + IntToStr(DllResult));
+//            end;
+          end;
+        end;
+      end;
+    end
+    else
+    begin
+      ClinkStart := GetProcAddress(m_clinkAPIHandle, 'clinkStart');
+      if @ClinkStart  <>  nil then
+      begin
+        DllResult := ClinkStart(m_SafetyDllKey);
+//        if DllResult <> 150 then
+//        begin
+//          //ShowMessage('安全盾连接失败，返回代码为：' + IntToStr(DllResult));
+//        end;
+      end;
+    end;
+  end;
+
+  function CheckServerInfoDone: Boolean;
+  begin
+    result := False;
+    if FServerInfo.ServerList.Count > 0 then
+    begin
+      Print(mtNormal, uEDCode.DecodeSource
+        ('doujYTE9uoBNuzXWKa+ctV8537kdbYpN0SxfqhqEYr0=')); //更新登陆器列表完成...
+      result := True;
+    end
+    else
+      Print(mtError, uEDCode.DecodeSource
+        ('vw2df3Oe1AaF3FQ5A2l0U4dJ8x6RedXSuWsRuhO6n40='));
+  end;
+
+var
+  AHandled: Boolean;
+  AServerItem: TServerItem;
+{$IFDEF Commercial}
+  AResource: {$IFDEF DEBUG}TMemoryStream{$ELSE}TResourceStream{$ENDIF};
+  ATmp: TMemoryStream;
+  AHeader: TuExecutableHeader;
+{$ELSE}
+  AExecutableStructure: TuExecutableStructure;
+{$ENDIF}
+  AServerAddr, AServerPort: String;
+  S: TResourceStream;
+  H: Integer;
+begin
+  result := False;
+
+{$IFDEF Commercial}
+{$IFDEF DEBUG}
+  AResource := TMemoryStream.Create;
+  ATmp := TMemoryStream.Create;
+  try
+    AResource.LoadFromFile('E:\JONE\trunk\Source\Debug Data\TFORM5.dat');
+    AResource.Position := 0;
+    uEDCode.DecodeStream(AResource, ATmp,
+      '9A34FFEA-A47D-4D3E-9641-618497AF724D');
+    ATmp.Position := 0;
+    ATmp.ReadBuffer(AHeader, SizeOf(TuExecutableHeader));
+    AHandled := TryGetServerInfo(uEDCode.DecodeSource('lCuYDK2DO1JFAfJRUgw='),
+      uEDCode.DecodeString(AnsiString(AHeader.ServerListURL),
+      uEDCode.DecodeSource
+      ('BRWCATA5W+j9FAaUNIzaIyK85jd2X+9LlH5AziQC9jx9oeJPxfjOm9jIfDPiMlhOrqPkaBwlMuTi5q5GgEQrHAHHx/w/3NzlpiUNHpseRhA=')
+      )) or TryGetServerInfo(uEDCode.DecodeSource('4iw0hATTRkEX5EqKGFQ='),
+      uEDCode.DecodeString(AnsiString(AHeader.ServerListURL1),
+      uEDCode.DecodeSource
+      ('uwH6VswQeKAj2bsEr8j2hZDu8FcGRGI2DOvKYY8jXGcjkrUXhxLgFPaiUPIi20pgF/1Hi6ixs5k0FKpbK3QDc2itbrdtjREoU0yo5OGTda0=')
+      )) or TryGetServerInfo(uEDCode.DecodeSource('4BKl1va09J3e/wpNbrE='),
+      uEDCode.DecodeString(AnsiString(AHeader.ServerListURL2),
+      uEDCode.DecodeSource
+      ('YXHBG+4EEM/SJ1gFHCpJPoP980r9OKd1e8wa64yQB+4BkFfkC29f0t7f/ttzy8DB2cZD60jrHRCx2B8xkIc+HfQekc9tkwGVRqh70ICBLVs=')
+      ));
+    result := CheckServerInfoDone;
+  finally
+    AResource.Free;
+    ATmp.Free;
+  end;
+{$ELSE}
+  try
+    AResource := TResourceStream.Create(HInstance,        //TForm5
+      uEDCode.DecodeSource('Dg21oez02F/VSFLd5IW9+Ol0TiE='), RT_RCDATA);
+    ATmp := TMemoryStream.Create;
+    try
+      AResource.Position := 0;
+      uEDCode.DecodeStream(AResource, ATmp,
+        uEDCode.DecodeSource
+        ('dz1z/4fzEjeKlzTANHHTdzQOBuVRDNi0J0MO6MOf9u9h20MlY8mwvbDFV/WjNPDtn3ByI8NO0bq4T1U03HUB2gOBq+Hk6XfchpUqeuMr8xI=')
+        );
+      ATmp.Position := 0;
+      ATmp.ReadBuffer(AHeader, SizeOf(TuExecutableHeader));
+      AHandled := TryGetServerInfo(uEDCode.DecodeSource('7NYCLd9koUtvIu6X0SI='),
+        uEDCode.DecodeString(AHeader.ServerListURL,
+        uEDCode.DecodeSource
+        ('fdt6eYA0sBKrgl5DBohOdbYMMllq6o84Fgc9oz2K0EmteQAcd1j7pl2CFE7yQjSfJJsp5hDV+IX8QQeAwYrGvqSjrPq1WEucq5qAi+deVek='))
+        ) or TryGetServerInfo(uEDCode.DecodeSource('+pc8KX3dNEQQEggETUE='),
+        uEDCode.DecodeString(AHeader.ServerListURL1,
+        uEDCode.DecodeSource
+        ('87yN+8kC3k9OoBgkt4TwGhmBe/YobSFpZ3AU9LShjoJV8VDAq/qBdwJ6y+x7v+L9r8slMIeZ4/CBJYmyBZfH0KrqBd58VTgEsbWGoUbRZlI='))
+        ) or TryGetServerInfo(uEDCode.DecodeSource('uMMVppoBi2Qv/ajO+K8='),
+        uEDCode.DecodeString(AHeader.ServerListURL2,
+        uEDCode.DecodeSource
+        ('Wa8DiLHoIpjwN1mVTSW44abJnF04sc3h3epV37FZfK2fjiSndkMi1ft7cF9XNPIt13iVF/2/735KppDoP1COcmw4xqP9+lIX8yTIHlnxXQk='))
+        );
+      result := CheckServerInfoDone;
+    finally
+      AResource.Free;
+      ATmp.Free;
+    end;
+  except
+    on E: Exception do
+    begin
+      Application.MessageBox
+        (pChar(uEDCode.DecodeSource          //启动登陆器失败，登陆器已损坏
+        ('pvlvN4fiN7Iyh8k5f2/fNEc0oWK8M6p426ts9se2zarO33J3')),
+        pChar(uEDCode.DecodeSource('Lzwm4byCg5BJE0C4')), MB_OK or MB_ICONERROR);
+      Application.Terminate;
+    end;
+  end;
+{$ENDIF}
+{$ELSE}
+  AExecutableStructure := LoadExecutableStructure;
+{$IFDEF DEBUG}
+  AExecutableStructure.ServerListURL := STR_SERVERLISTURL;
+
+  AExecutableStructure.ShieldUrl := STR_SHIELDURL;
+  AExecutableStructure.Shield := True;
+{$ENDIF}
+
+{$IFNDEF DEBUG}
+  //检测盾信息是否开启
+  ResDownLoadLog('检测盾信息是否开启');
+  if AExecutableStructure.Shield then begin
+     //释放盾DLL
+    ResDownLoadLog('释放盾DLL');
+    H := LoadLibrary('clinkAPI.dll');
+    if (H = 0) then
+    begin
+      try
+        S := TResourceStream.Create(HInstance, 'APIDLL', RT_RCDATA);
+        try
+          uAPIDLLFile := ExtractFilePath(ParamStr(0)) + 'clinkAPI.dll';
+          ResDownLoadLog('释放路径:'+uAPIDLLFile);
+          S.SaveToFile(uAPIDLLFile);
+        finally
+          S.Free;
+        end;
+      except
+
+      end;
+    end;
+    if H <> 0 then
+    begin
+      FreeLibrary(0);
+    end;
+
+    if (AExecutableStructure.ShieldUrl <> '') then
+    begin
+      if not TryGetShieldInfo(uEDCode.DecodeSource('ROXuhkd0tAeGyAQp9XO/hg=='),
+      AExecutableStructure.ShieldUrl) then
+      begin
+        Print(mtNormal, '获取主服务器盾信息失败,正在尝试获取备用列表');
+        if not TryGetShieldInfo(uEDCode.DecodeSource('ROXuhkd0tAeGyAQp9XO/hg=='),
+          AExecutableStructure.ShieldUrl2) then
+        begin
+          Print(mtNormal, '无法获取服务器盾信息...');
+        end
+        else
+          AHandled := True;
+      end
+      else
+        AHandled := True;
+    end;
+    if AHandled then RunSafetyDll;
+  end;
+ {$ENDIF}
+  if (AExecutableStructure.ServerListURL <> '') and
+    (AExecutableStructure.ServerListURL <> 'local') then
+  begin
+    if not TryGetServerInfo(uEDCode.DecodeSource('ROXuhkd0tAeGyAQp9XO/hg=='),
+      AExecutableStructure.ServerListURL) then
+    begin
+      Print(mtNormal, '获取主服务器列表信息失败,正在尝试获取1号备用列表');
+      if not TryGetServerInfo(uEDCode.DecodeSource('ROXuhkd0tAeGyAQp9XO/hg=='),
+        AExecutableStructure.ServerListURL2) then
+      begin
+        Print(mtNormal, '获取1号备用服务器列表信息失败,正在尝试获取2号备用列表');
+        if not TryGetServerInfo
+          (uEDCode.DecodeSource('ROXuhkd0tAeGyAQp9XO/hg=='),
+          AExecutableStructure.ServerListURL3) then
+        begin
+          Print(mtNormal, '无法获取服务器列表...');
+        end
+        else
+          AHandled := True;
+      end
+      else
+        AHandled := True;
+    end
+    else
+      AHandled := True;
+    result := CheckServerInfoDone;
+  end
+  else
+  begin
+{$IFDEF DEBUG}
+    FResManager.PassWord := STR_MINIPWD;
+    FResManager.ResURL := STR_MINIURL;
+{$ENDIF}   //本地测试登录器列表
+    FServerInfo.ResFolder := uEDCode.DecodeSource
+      ('PjKQcJn/0qyUDhFDGW0eXc6h4pM68viULio=');
+    AServerItem := FServerInfo.ServerList.Add;
+    AServerItem.GroupName := uEDCode.DecodeSource('KrDDetnG15W/FnEA9v94AiifudLeYBE4POrCYYD6iK0SLTt5DSjbAsTTOoKD1A==');
+    AServerItem.DisplayName := uEDCode.DecodeSource
+      ('KzdtL/Loqm1oRZ58B9hvUY4pct5cFS4+eoy1KF55NGrbotxgWJVGGBqulFUePMHa');
+    AServerItem.Host := uEDCode.DecodeSource
+      ('kAeYZJrNBzfxsjAzkgrdTqHeSflbLLnM1GY=');
+    AServerItem.Port := 7000;
+    AServerItem.ImageIndex := 1;
+
+    AServerItem := FServerInfo.ServerList.Add;
+    AServerItem.GroupName := uEDCode.DecodeSource('Y808qbVjMvX+63qUUD42wa5Dcdb722R6HsowgltNUKUOffPnRYhW6sj6bUxcww==');
+    AServerItem.DisplayName := uEDCode.DecodeSource
+      ('PrGAYcF9ImNEU9H2uPds4eS8qrjfAHbk0AWD/XuI1lAptFoEo0MhAYe0XYIMPeC4swX/0A==');
+    AServerItem.Host := uEDCode.DecodeSource
+      ('5+mijMg+H1VW9XRCjQ66Obu48Bx4vWQpaIXpx6JO');
+    AServerItem.Port := 7000;
+    AServerItem.ImageIndex := 1;
+
+    AServerItem := FServerInfo.ServerList.Add;
+    AServerItem.GroupName := uEDCode.DecodeSource('aDcz2KepEcjzXloOHE+DYRmVXKJg4qEKSJGuSvlCdSVRqc7Jl1sKd1a6rWaafA==');
+    AServerItem.DisplayName := uEDCode.DecodeSource
+      ('bX3289f9dCgZyPJoi/LtTOFyfo4TVRU+A8G+sfasBopfAo3QZOXvoi8myBUh9zFxuEakPw==');
+    AServerItem.Host := uEDCode.DecodeSource
+      ('Kh/+htnc+fpeW8237WochDNEeAFm3gNknnrPcjg1');
+    AServerItem.Port := 7000;
+    AServerItem.ImageIndex := 1;
+    LoadLocalConfigure;
+
+    if CheckLisence then Exit;
+
+    LoadServerListFromServerInfo;
+    result := True;
+  end;
+{$ENDIF}
+end;
+
+function TuClientApp.ChooseFastMiniUrl(List:TStrings):string;
+  function _GetResponse(const AUrl: String): Integer;
+  var
+    AHttp: THttpCli;
+    L: LongWord;
+  begin
+    Result := -1;
+    L := GetTickCount;
+    try
+      AHttp := THttpCli.Create(nil);
+      AHttp.Agent := 'Mozilla/5.0 (Windows NT 5.1; rv:8.0) Gecko/20100101 Firefox/8.0';
+      AHttp.URL := AUrl;
+      try
+        AHttp.Get;
+        if AHttp.StatusCode = 200 then
+          Result := GetTickCount - L;
+      except
+        On E:EHttpException do
+        begin
+          if AHttp.StatusCode = 404 then
+            Result := GetTickCount - L;
+        end;
+        on E:Exception do
+        begin
+           uLog.TLogger.AddLog(uEDCode.DecodeSource('oK3rRYHr9sOUP7C23NVeWL7aiWKvQ9cwW1ZiKIrnpnKNjkomQ4SJqIgaagdfykGImR0=') + E.Message);  //获取最优微端列表服务器信息报错,错误信息:
+        end;
+      end;
+    finally
+      AHttp.Free;
+    end;
+  end;
+
+var
+  I, AMinTime, ATime: Integer;
+  AUrl, APingUrl, AMinUrl, AServerAddr, AServerPort: String;
+begin
+  try
+    AMinTime := High(Integer);
+    AMinUrl := '';
+    for I := 0 to List.Count - 1 do
+    begin
+      AUrl := List[I];
+      if AUrl[Length(AUrl)] <> '/' then
+        AUrl := AUrl + '/';
+      APingUrl := AUrl + 'Resources/Ping';
+      ATime := _GetResponse(APingUrl);
+      if ATime <> -1 then
+      begin
+        AMinTime := Min(AMinTime, ATime);
+        if AMinTime = ATime then
+          AMinUrl := AUrl;
+      end;
+    end;
+    Result := AMinUrl;
+  finally
+    List.Free;
+  end;
+end;
+
+
+procedure TuClientApp.Close;
+begin
+  if (FResManager.ClientCount = 0) or
+    (Application.MessageBox('关闭登陆器的同时客户端也将会被关闭，确定执行吗吗？',
+    pChar(Application.Title), MB_YESNO) = ID_YES) then
+  begin
+    if FConnected then
+      FClientSocket.Close;
+    Application.Terminate;
+  end;
+end;
+  //
+procedure TuClientApp.Config;
+begin
+  FrmSetting.Left := FMainForm.Left +
+    (FMainForm.Width - FrmSetting.Width) div 2;
+  FrmSetting.Top := FMainForm.Top +
+    (FMainForm.Height - FrmSetting.Height) div 2;
+  FrmSetting.LoadConfig;
+  if FrmSetting.ShowModal = mrOK then
+  begin
+    SaveLocalConfigure;
+  end;
+end;
+
+constructor TuClientApp.Create;
+var
+  List: TStringList;
+begin
+  FAtCheckVer := True;
+  FCode := 0;
+  Randomize;
+  FPackIndex := Random(10000);
+  FTimer := TTimer.Create(nil);
+  FMiniTimer := TTimer.Create(nil);
+  FMiniDownTimer := TTimer.Create(nil);
+  FMiniDownTimer.Interval := 10;
+  FTimer.Enabled := False;
+  FMiniTimer.Enabled := False;
+  FMiniDownTimer.Enabled := False;
+  FTimer.OnTimer := DoTimer;
+  FMiniTimer.OnTimer := DoMiniTimer;
+  FMiniDownTimer.OnTimer := DoMiniDownTimer;
+  FMiniUrl := '';
+  FServerInfo := uServerList.TServerInfo.Create;
+  FClientSocket := uSocket.TuClientSocket.Create(nil);
+  FClientSocket.OnRead := OnDataAvailable;
+  FClientSocket.OnConnect := OnConnected;
+  FClientSocket.OnDisconnect := OnClosed;
+  FClientSocket.OnError := OnError;
+
+  FResManager := TDownLoaderManager.Create;
+
+  DMKernelMonitor := TDMKernelMonitor.Create(Application);
+  DMKernelMonitor.OnKernelEvent := OnKernelEvent;
+ // FEmbResRARList := TStringList.Create;
+end;
+
+destructor TuClientApp.Destroy;
+begin
+  SendCloseAllClient;
+  FreeAndNil(FClientSocket);
+  FreeAndNil(FTimer);
+  FreeAndNil(FMiniTimer);
+  FreeAndNil(FMiniDownTimer);
+  FreeAndNil(FServerInfo);
+//  FreeAndNil(FEmbResRARList);
+  FResManager.Free;
+  inherited;
+end;
+
+procedure TuClientApp.DisplayComboboxChange(Sender: TObject); //下拉分辨率
+var
+  Box : TuDisplaySizeCombobox;
+  LS : TStringList;
+begin
+  Box := TuDisplaySizeCombobox(Sender);
+  LS := TStringList.Create;
+  ExtractStrings(['x'], [], PChar(Box.Items[Box.ItemIndex]), ls);
+  uSCREENWIDTH  :=  StrToInt(ls.Strings[0]);
+  uSCREENHEIGHT :=  StrToInt(ls.Strings[1]);
+  LS.Free;
+end;
+
+
+procedure TuClientApp.LoadServerListFromServerInfo;
+
+  function FindGroupNode(ATreeView: TuTreeView; const Name: String): TTreeNode;
+  var
+    I: Integer;
+  begin
+    for I := 0 to ATreeView.Items.Count - 1 do
+      if (ATreeView.Items[I].Level = 0) and SameText(ATreeView.Items[I].Text,
+        Name) then
+      begin
+        result := ATreeView.Items[I];
+        Exit;
+      end;
+
+    result := ATreeView.Items.Add(nil, Name);
+    if (ATreeView.Images <> nil) and (ATreeView.Images.Count > 0) then
+    begin
+      result.ImageIndex := 0;
+      result.SelectedIndex := 0;
+    end;
+  end;
+
+var
+  I, J: Integer;
+  Comp: TComponent;
+  AParentNode, ACurNode: TTreeNode;
+  LS:TStringList;
+  DisplaySizeList : TuDisplaySizeCombobox;
+begin
+  for I := 0 to FMainForm.ComponentCount - 1 do
+  begin
+    Comp := FMainForm.Components[I];
+    if Comp.ClassType = TuWebBrowser then
+      TuWebBrowser(Comp).Navigate(FServerInfo.LoginURL)
+    else if Comp.ClassType = TuURLButton then
+    begin
+      case TuURLButton(Comp).URLKind of
+        ukCustom:
+          ;
+        ukHomePage:
+          TuURLButton(Comp).Url := FServerInfo.HomeURL;
+        ukPayPage:
+          TuURLButton(Comp).Url := FServerInfo.PayURL;
+        ukContactPage:
+          TuURLButton(Comp).Url := FServerInfo.ContactURL;
+      end;
+      TuURLButton(Comp).Enabled := TuURLButton(Comp).Url <> '';
+    end;
+  end;
+
+  for I := 0 to FMainForm.ComponentCount - 1 do
+  begin
+    Comp := FMainForm.Components[I];
+    if Comp.ClassType = TuTreeView then
+    begin
+      TuTreeView(Comp).Items.BeginUpdate;
+      TuTreeView(Comp).Items.Clear;
+      for J := 0 to FServerInfo.ServerList.Count - 1 do
+      begin
+        AParentNode := FindGroupNode(TuTreeView(Comp),
+          FServerInfo.ServerList.Items[J].GroupName);
+        ACurNode := TuTreeView(Comp).Items.AddChildObject(AParentNode,
+          FServerInfo.ServerList.Items[J].DisplayName,
+          FServerInfo.ServerList.Items[J]);
+        if (TuTreeView(Comp).Images <> nil) and
+          (FServerInfo.ServerList.Items[J].ImageIndex > -1) and
+          (TuTreeView(Comp).Images.Count > FServerInfo.ServerList.Items[J]
+          .ImageIndex) then
+        begin
+          ACurNode.ImageIndex := FServerInfo.ServerList.Items[J].ImageIndex;
+          ACurNode.SelectedIndex := FServerInfo.ServerList.Items[J].ImageIndex;
+        end;
+      end;
+      TuTreeView(Comp).FullExpand;
+      TuTreeView(Comp).Items.EndUpdate;
+    end
+    else if Comp.ClassType = TuServerCombobox then
+    begin
+      TuServerCombobox(Comp).Items.BeginUpdate;
+      TuServerCombobox(Comp).Items.Clear;
+      for J := 0 to FServerInfo.ServerList.Count - 1 do
+      begin
+        TuServerCombobox(Comp).Items.AddObject(FServerInfo.ServerList.Items[J]
+          .DisplayName, FServerInfo.ServerList.Items[J]);
+      end;
+      TuServerCombobox(Comp).Items.EndUpdate;
+      TuServerCombobox(Comp).ItemIndex := 0;
+    end
+    else if Comp.ClassType =  TuFplCombobox then
+    begin
+      TuFplCombobox(Comp).Items.BeginUpdate;
+      TuFplCombobox(Comp).Items.Clear;
+      TuFplCombobox(Comp).Items.Add('800*600');
+      TuFplCombobox(Comp).Items.Add('1024*768');
+      TuFplCombobox(Comp).Items.Add('1280*800');
+      TuFplCombobox(Comp).Items.Add('1280*1024');
+      TuFplCombobox(Comp).Items.Add('1366*768');
+      TuFplCombobox(Comp).Items.Add('1440*900');
+      TuFplCombobox(Comp).Items.Add('1660*900');
+      TuFplCombobox(Comp).Items.Add('1680*1050');
+      TuFplCombobox(Comp).Items.Add('1920*1080');
+      TuFplCombobox(Comp).Items.EndUpdate;
+      TuFplCombobox(Comp).ItemIndex := 1;
+    end else if Comp.ClassType = TuDisplaySizeCombobox then begin //下拉分辨率
+      DisplaySizeList := TuDisplaySizeCombobox(Comp);
+      LS := TStringList.Create;
+
+      uGameSetting.EnumDisplayMode(LS);
+      TuDisplaySizeCombobox(Comp).Items.Assign(LS);
+
+      DisplaySizeList.ItemIndex := DisplaySizeList.Items.IndexOf(Format('%dx%d',[uSCREENWIDTH,uSCREENHEIGHT]));
+      if DisplaySizeList.ItemIndex = -1 then
+      begin
+         DisplaySizeList.ItemIndex := DisplaySizeList.Items.IndexOf(Format('%dx%d',[800,600]));
+      end;
+      LS.Free;
+    end;
+
+  end;
+end;
+
+function TuClientApp.GetLocalConfigureFileName: String;
+begin
+  result := IOUtils.TPath.GetTempPath + '\' + Application.Title + '.ini';
+end;
+
+function TuClientApp.GetMaxClient: Integer;
+begin
+  result := FServerInfo.MaxClient;
+end;
+
+procedure TuClientApp.LoadLocalConfigure;
+var
+  S: String;
+  AIni: TFastIniFile;
+  LS: TStrings;
+begin
+  if FileExists(GetLocalConfigureFileName) then
+  begin
+    AIni := TFastIniFile.Create(GetLocalConfigureFileName);
+    try
+      if AIni.ValueExist('客户端', '分辨率') then
+      begin
+        LS := TStringList.Create;
+        try
+          EnumDisplayMode(LS);
+          S := AIni.ReadString('客户端', '分辨率', '');
+          if (S <> '') and (LS.IndexOf(S) <> -1) then
+          begin
+            LS.Clear;
+            ExtractStrings(['x'], [], pChar(S), LS);
+            uSCREENWIDTH := StrToInt(LS.Strings[0]);
+            uSCREENHEIGHT := StrToInt(LS.Strings[1]);
+          end;
+        finally
+          LS.Free;
+        end;
+      end;
+      if AIni.ValueExist('客户端', '窗口化') then
+        uFullScreen := AIni.ReadBoolean('客户端', '窗口化', True);
+      if AIni.ValueExist('客户端', '垂直同步') then
+        uWaitVBlank := AIni.ReadBoolean('客户端', '垂直同步', True);
+      if AIni.ValueExist('客户端', '3D加速') then
+        u3D := AIni.ReadBoolean('客户端', '3D加速', True);
+      if AIni.ValueExist('客户端', '高画质') then
+        uHigh := AIni.ReadBoolean('客户端', '高画质', True);
+    finally
+      AIni.Free;
+    end;
+  end;
+end;
+
+procedure TuClientApp.DownLoadMiniClientVerFile(const Url: String);
+var
+  AHttp: THttpCli;
+  M: TMemoryStream;
+  FileName:String;
+  SaveFileName:String;
+begin
+  //先删除之前的文件。
+  if FileExists(IncludeTrailingPathDelimiter(uHomePath) + IncludeTrailingPathDelimiter(FServerInfo.ResFolder) +'MiniVer.dat') then
+    IOUtils.TFile.Delete(IncludeTrailingPathDelimiter(uHomePath) + IncludeTrailingPathDelimiter(FServerInfo.ResFolder) +'MiniVer.dat');
+  FileName := Url+ 'MiniVer.dat';
+  TThread.CreateAnonymousThread( procedure()
+  begin
+    if Url <> '' then
+    begin AHttp := THttpCli.Create(nil);
+    try
+      AHttp.Agent := 'Mozilla/5.0 (Windows NT 5.1; rv:8.0) Gecko/20100101 Firefox/8.0';
+      AHttp.RcvdStream := TMemoryStream.Create;
+      AHttp.Url := FileName;
+      AHttp.NoCache := True;
+      ResDownLoadLog('开始请求微端版本描述文件,URL:' + FileName);
+      try
+        AHttp.Get;
+        M := TMemoryStream.Create;
+        AHttp.RcvdStream.Seek(0, soBeginning); M.CopyFrom(AHttp.RcvdStream, 0);
+
+        if not IOUtils.TDirectory.Exists(IncludeTrailingPathDelimiter(uHomePath) + IncludeTrailingPathDelimiter(FServerInfo.ResFolder)) then
+           IOUtils.TDirectory.CreateDirectory(IncludeTrailingPathDelimiter(uHomePath) + IncludeTrailingPathDelimiter(FServerInfo.ResFolder));
+        SaveFileName := IncludeTrailingPathDelimiter(uHomePath) + IncludeTrailingPathDelimiter(FServerInfo.ResFolder) +'MiniVer.dat';
+
+
+        ResDownLoadLog('微端版本描述文件下载成功保存路径,URL:' + SaveFileName);
+        M.Position := 0;
+        Self.FResManager.PassWord := FServerInfo.MiniPwd;
+        Self.FResManager.LoadResVerPackFromStream(M);
+        M.SaveToFile(SaveFileName);
+        M.Free;
+      except
+      on E: Exception do
+      begin
+        uLog.TLogger.AddLog(Format('%s, 原因:%s',['下载微端版本描述文件失败', E.Message])); // 获取列表失败,错误信息(%s):%s
+      end;
+      end;
+
+
+    finally
+      if AHttp.RcvdStream <> nil then
+        AHttp.RcvdStream.Free;
+
+      FreeAndNil(AHttp);
+    end;
+    end
+  end).Start;
+end;
+
+procedure TuClientApp.SaveLocalConfigure;
+var
+  AIni: TFastIniFile;
+begin
+  AIni := TFastIniFile.Create(GetLocalConfigureFileName);
+  try
+    AIni.WriteString('客户端', '分辨率',
+      Format('%dx%d', [uSCREENWIDTH, uSCREENHEIGHT]));
+    AIni.WriteBoolean('客户端', '窗口化', uFullScreen);
+    AIni.WriteBoolean('客户端', '垂直同步', uWaitVBlank);
+    AIni.WriteBoolean('客户端', '3D加速', u3D);
+    AIni.WriteBoolean('客户端', '高画质', uHigh);
+  finally
+    AIni.Free;
+  end;
+end;
+
+procedure TuClientApp.LoadServerInfoFromStream(AStram: TStringStream);
+var
+  MiniURList:TStringList;
+  MiniURL:String;
+begin
+  AStram.Seek(0, soFromBeginning);
+  FServerInfo.Clear;
+  FServerInfo.LoadFromString(AStram.DataString);
+
+  if FServerInfo.EnabledMini and (FServerInfo.MiniURL <> '') then
+  begin
+    //根据服务端设置的列表信息设置微端信息。
+    MiniURList := TStringList.Create;
+    MiniURList.Text := FServerInfo.MiniURL;
+    MiniURL := ChooseFastMiniUrl(MiniURList);
+
+    FResManager.PassWord := FServerInfo.MiniPwd;
+    FResManager.ResURL := MiniURL;
+
+    //下载微端描述
+    DownLoadMiniClientVerFile(MiniURL);
+    FResManager.StartWork(12,4);
+    FResManager.StartSocekt;
+  end else
+  begin
+    FResManager.StartSocekt;
+  end;
+
+  uFullScreen := FServerInfo.FullScreen;
+  uWaitVBlank := FServerInfo.VBlank;
+  u3D := FServerInfo.Do3D;
+  uUseLisence := FServerInfo.UseLisence;
+  uDateEditLisence := FServerInfo.DataTimeLisence;
+
+  if CheckLisence then Exit;
+
+  if FServerInfo.ClassicsUI then
+    uMainStyle := 0;
+  case FServerInfo.DisplaySize of
+    ds1024:
+      begin
+        uSCREENWIDTH := 1024;
+        uSCREENHEIGHT := 768;
+      end;
+    ds800:
+      begin
+        uSCREENWIDTH := 800;
+        uSCREENHEIGHT := 600;
+      end;
+  end;
+  LoadLocalConfigure;
+  LoadServerListFromServerInfo;  //下拉分辨率
+
+  g_PasswordFileName := IOUtils.TPath.GetTempFileName;
+  DeleteFile(g_PasswordFileName);
+  g_PasswordFileName := g_PasswordFileName + '.dat';
+  FServerInfo.SecurityFiles.SaveToFile(g_PasswordFileName);
+end;
+
+
+procedure TuClientApp.OnClosed(Sender: TObject; Socket: TCustomWinSocket);
+begin
+  if FConnected then
+    Print(mtError, uEDCode.DecodeSource('1pP/phZEGSQZ2meRqYzQkRg5MWRM7Q=='))
+  else
+    Print(mtError, uEDCode.DecodeSource('nybSuBY8hoYgDtURMaJUT/Wnw6k='));
+  FConnected := False;
+  FTryConnecting := False;
+  FNeedTokenID := True;
+  SetButtonEnabled(False);
+end;
+
+procedure TuClientApp.OnConnected(Sender: TObject; Socket: TCustomWinSocket);
+begin
+  if Socket.Connected then    //服务器状态良好
+  begin
+    FConnected := True;
+    FTryConnecting := False;
+    Print(mtNormal, uEDCode.DecodeSource('9KqkbGkhj5+OKvYAhVVhCsxAfwqraA=='));
+    SetButtonEnabled(True);
+  end;
+end;
+
+function ArrestStringEx(Source: AnsiString; SearchAfter, ArrestBefore: AnsiChar;
+  var ArrestStr: AnsiString): AnsiString;
+var
+  srclen: Integer;
+  GoodData: Boolean;
+  I, n: Integer;
+begin
+  ArrestStr := '';
+  if Source = '' then
+  begin
+    result := '';
+    Exit;
+  end;
+
+  try
+    srclen := Length(Source);
+    GoodData := False;
+    if srclen >= 2 then
+      if Source[1] = SearchAfter then
+      begin
+        Source := Copy(Source, 2, srclen - 1);
+        srclen := Length(Source);
+        GoodData := True;
+      end
+      else
+      begin
+        n := Pos(SearchAfter, Source);
+        if n > 0 then
+        begin
+          Source := Copy(Source, n + 1, srclen - (n));
+          srclen := Length(Source);
+          GoodData := True;
+        end;
+      end;
+
+    if GoodData then
+    begin
+      n := Pos(ArrestBefore, Source);
+      if n > 0 then
+      begin
+        ArrestStr := Copy(Source, 1, n - 1);
+        result := Copy(Source, n + 1, srclen - n);
+      end
+      else
+      begin
+        result := SearchAfter + Source;
+      end;
+    end
+    else
+    begin
+      for I := 1 to srclen do
+      begin
+        if Source[I] = SearchAfter then
+        begin
+          result := Copy(Source, I, srclen - I + 1);
+          Break;
+        end;
+      end;
+    end;
+  except
+    ArrestStr := '';
+    result := '';
+  end;
+end;
+
+procedure TuClientApp.OnDataAvailable(Sender: TObject;
+  Socket: TCustomWinSocket);
+  function __GetTokenID(const V: AnsiString): AnsiString;
+  begin
+    Result := EDCode.DecodeString(V);
+    Result := uEDCode.DecodeString(Result, uEDCode.DecodeSource('0PzMp9gDxmh56aP0Mz0/h4/lEvsPqt99ygwu62pivx0Phc8LnKfWr6lzLjiS/9uA7S0wMSMTJpsFA2ZZFiC+9/inAKbHjrreHOy6Y73TOZYlyg=='));
+  end;
+  function __MakeTokenID(const V: AnsiString): AnsiString;
+  begin
+    Result := uMD5.MD5String(V);
+    Result := uMD5.MD5String(Result);
+    Result := uEDCode.EncodeString(Result, uEDCode.DecodeSource('kaCDFUFecJNS/FI0vw0IdMJew9VbM83z99i56rCQub67UNDs3m8DwTDuk/Q='));
+    Result := EDCode.EncodeString(Result);
+  end;
+var
+  AData: AnsiString;
+begin
+//  if FNeedTokenID then
+//  begin
+//    try
+//      AData := Socket.ReceiveText;
+//      AData := Copy(AData, 2, Length(AData) - 2);
+//      AData := __GetTokenID(AData);
+//      SendCSocket(__MakeTokenID(AData));
+//      FNeedTokenID := False;
+//    except
+//    end;
+//    Exit;
+//  end;
+  FBufferStr := FBufferStr + Socket.ReceiveText;
+  if FBufferStr <> '' then
+  begin
+    while Length(FBufferStr) >= 2 do
+    begin
+      if Pos('!', FBufferStr) <= 0 then
+        Break;
+      FBufferStr := ArrestStringEx(FBufferStr, '#', '!', AData);
+      if AData <> '' then
+        DecodeMessagePacket(AData)
+      else if Pos('!', FBufferStr) = 0 then
+        Break;
+    end;
+  end;
+end;
+
+procedure TuClientApp.OnError(Sender: TObject; Socket: TCustomWinSocket;
+  ErrorEvent: TErrorEvent; var ErrorCode: Integer);
+begin
+  FTryConnecting := False;
+  case ErrorCode of
+    10038:
+      ;
+    10060, 10061:
+      Print(mtError, uEDCode.DecodeSource('5RjFuennb8+e8gdZZLL9hZVztWw3lw=='));
+  else
+    Print(mtError, uEDCode.DecodeSource('QvtH6Jr+vHQD8AEPyy5f527shJpjQw=='));
+  end;
+  SetButtonEnabled(False);
+  ErrorCode := 0;
+end;
+
+procedure TuClientApp.OnKernelEvent(ErrorCode: Integer);
+begin
+  FResManager.BoardCastIdent(ErrorCode);
+  case ErrorCode of
+    10016, 10017:
+      Print(mtError, '发现系统速度不正常，请勿使用加速软件');
+    10018, 10019:
+      Print(mtError, '发现系统内运行有外挂软件');
+  end;
+end;
+
+procedure TuClientApp.Open;
+begin
+  FTimer.Enabled := True;
+end;
+
+procedure TuClientApp.OpenURL(const Url: String);
+var
+  AReg: TRegistry;
+  ACmdStr: String;
+begin
+  AReg := TRegistry.Create;
+  try
+    AReg.RootKey := HKEY_CLASSES_ROOT;
+    AReg.OpenKey(uEDCode.DecodeSource
+      ('m+i2X409qhTWTBz+y77zRuSg6+dOKTfQOv52oIBe6pRQXE3Rxm6SSSie6eBlrDyf4hoekrnE'),
+      False);
+    ACmdStr := AReg.ReadString('');
+    ACmdStr := Copy(ACmdStr, Pos('"', ACmdStr) + 1, Length(ACmdStr));
+    ACmdStr := Copy(ACmdStr, 1, Pos('"', ACmdStr) - 1);
+    if ACmdStr <> '' then
+      ShellExecute(0, 'open', pChar(ACmdStr), pChar(Url), nil, sw_shownormal)
+    else
+      ShellExecute(0, nil, pChar(Url), nil, nil, sw_shownormal);
+  finally
+    AReg.Free;
+  end;
+end;
+
+procedure TuClientApp.Print(MessageType: TMessageType; const Message: String);
+var
+  I: Integer;
+begin
+  if FMainForm <> nil then
+  begin
+    for I := 0 to FMainForm.ComponentCount - 1 do
+      if FMainForm.Components[I] is TuInfLable then
+      begin
+        case MessageType of
+          mtNormal:
+            TuInfLable(FMainForm.Components[I]).Font.Color := clLime;
+          mtError:
+            TuInfLable(FMainForm.Components[I]).Font.Color := clRed;
+          mtWaringin:
+            TuInfLable(FMainForm.Components[I]).Font.Color := clYellow;
+        end;
+        TuInfLable(FMainForm.Components[I]).Caption := Message;
+      end;
+  end;
+end;
+
+procedure TuClientApp.PrintEx(AUpdateItem: TUpdateItem; const Message: String);
+begin
+  Print(mtNormal, Message);
+end;
+
+procedure TuClientApp.RegisterID;
+begin
+  if CheckLisence then Exit;
+
+  FrmNewAccount.Left := FMainForm.Left +
+    (FMainForm.Width - FrmNewAccount.Width) div 2;
+  FrmNewAccount.Top := FMainForm.Top +
+    (FMainForm.Height - FrmNewAccount.Height) div 2;
+  FrmNewAccount.Initializa(FServerInfo);
+  FrmNewAccount.ShowModal;
+end;
+
+
+procedure TuClientApp.SendGetBackPassword(sAccount, sQuest1, sAnswer1,
+  sQuest2, sAnswer2, sBirthDay: string); //发送找回密码
+var
+  Msg: TDefaultMessage;
+begin
+  Msg := MakeDefaultMsg(CM_GETBACKPASSWORD, 0, 0, 0, 0);
+  SendCSocket(EncodeMessage(Msg) + EncodeString(sAccount + #9 + sQuest1 + #9 + sAnswer1 + #9 + sQuest2 + #9 + sAnswer2 + #9 + sBirthDay));
+end;
+
+procedure TuClientApp.SendCloseAllClient;
+begin
+  if FResManager <> nil then
+    FResManager.BoardCastIdent(10020);
+end;
+
+procedure TuClientApp.SendCSocket(const ASendData: AnsiString);
+begin
+  if FClientSocket.Active then
+  begin
+    FClientSocket.SendText(AnsiString('#' + IntToStr(FCode) + ASendData + '!'));
+    Inc(FCode);
+    if FCode >= 10 then
+      FCode := 1;
+  end;
+end;
+
+procedure TuClientApp.SendUpdateAccount(ue: TUserEntry); //发送新建账号
+var
+  Msg: TDefaultMessage;
+begin
+  MakeNewAccount := ue.sAccount;
+  Msg := MakeDefaultMsg (CM_ADDNEWUSER, 0, 0, 0, 0);
+  SendCSocket (EncodeMessage (Msg) + EncodeBuffer(@ue, sizeof(TUserEntry)));
+end;
+
+procedure TuClientApp.SendChgPw(sAccount, sPasswd, sNewPasswd: string); //发送修改密码
+var
+  Msg: TDefaultMessage;
+begin
+  Msg := MakeDefaultMsg(CM_CHANGEPASSWORD, 0, 0, 0, 0);
+  SendCSocket(EncodeMessage(Msg) + EncodeString(sAccount + #9 + sPasswd + #9 + sNewPasswd));
+end;
+
+procedure TuClientApp.SetButtonEnabled(Value: Boolean);
+var
+  I: Integer;
+  Comp: TComponent;
+begin
+  for I := 0 to FMainForm.ComponentCount - 1 do
+  begin
+    Comp := FMainForm.Components[I];
+    if Comp.ClassType = TuStartBtton then
+      TuStartBtton(Comp).Enabled := Value
+    else if Comp.ClassType = TuGetBackPassButton then
+      TuGetBackPassButton(Comp).Enabled := Value
+    else if Comp.ClassType = TuRegisterButton then
+      TuRegisterButton(Comp).Enabled := Value
+    else if Comp.ClassType = TuChangePassButton then
+      TuChangePassButton(Comp).Enabled := Value;
+
+  end;
+end;
+
+procedure TuClientApp.ShowMailForm(Show: Boolean);
+begin
+  if FMainForm <> nil then
+  begin
+    if Show then
+      FMainForm.Show
+    else
+      FMainForm.Hide;
+  end;
+end;
+procedure TuClientApp.FPLOnChange(Sender: TObject);
+begin
+// ShowMessage('微端管理器遇到故障,将以无微端模式进行');
+ //TuFplCombobox(self).
+  ShowMessage(inttostr(TuFplCombobox(Sender).ItemIndex));
+  GsFPL := TuFplCombobox(Sender).ItemIndex;
+ end;
+
+
+
+
+procedure TuClientApp.StartGame;
+  procedure ExtractMIRFILE;
+  var
+    S: TResourceStream;
+    sFile, APath: string;
+  begin
+    try
+      S := TResourceStream.Create(HInstance, 'SOUNDFILE', RT_RCDATA);
+      try
+        APath := uHomePath + IncludeTrailingPathDelimiter('Wav\');
+        APath := StringReplace(APath, '\\', '\', [rfReplaceAll]);
+        if not DirectoryExists(APath) then
+          ForceDirectories(APath);
+
+        sFile := uHomePath + 'Wav\sound2.lst';
+        S.SaveToFile(sFile);
+      finally
+        S.Free;
+      end;
+    except
+    end;
+    try
+      S := TResourceStream.Create(HInstance, 'MIRFILE', RT_RCDATA);
+      try
+        sFile := uHomePath + AClientFile;
+        S.SaveToFile(sFile);
+      finally
+        S.Free;
+      end;
+    except
+    end;
+    try
+      S := TResourceStream.Create(HInstance, 'FILTERDAT', RT_RCDATA);
+      try
+        APath := uHomePath + IncludeTrailingPathDelimiter('Data\');
+        APath := StringReplace(APath, '\\', '\', [rfReplaceAll]);
+        if not DirectoryExists(APath) then
+          ForceDirectories(APath);
+        sFile := uHomePath + 'Data\Filter.dat';
+        S.SaveToFile(sFile);
+      finally
+        S.Free;
+      end;
+    except
+    end;
+    {$IFNDEF Commercial}
+    try
+     // S := TResourceStream.Create(HInstance, 'FILTERDAT', RT_RCDATA);
+      try
+        APath := uHomePath + IncludeTrailingPathDelimiter('Resource\');
+        APath := StringReplace(APath, '\\', '\', [rfReplaceAll]);
+        if not DirectoryExists(APath) then
+          ForceDirectories(APath);
+        sFile := uHomePath + 'Resource\';
+       // S.SaveToFile(sFile);
+      finally
+       // S.Free;
+      end;
+    except
+    end;
+    {$ENDIF}
+  end;
+var
+  StartupInfo: TStartupInfoW;
+  sCommandLine: String;
+  ProcessInfo: TProcessInformation;
+  AStartupInfo: TMirStartupInfo;
+{$IFDEF Commercial}
+  AHeader: TuExecutableHeader;
+  AResource: TResourceStream;
+  AHeadDecStream: TMemoryStream;
+  ALogoFile: String;
+{$ENDIF}
+  AProcessHandle: THandle;
+  ResVerPackFileName:String;
+   MirRes : TResourceStream;
+   S: TResourceStream;
+
+begin
+  if not FResManager.SocketStart then
+  begin
+    FResManager.StartSocekt;
+    if not FResManager.SocketStart then
+    begin
+      Print(mtError,'无法建立与客户端通信的信道！启动失败。');
+    end;
+
+  end;
+
+
+  if CheckLisence then Exit;
+
+  if FServerInfo.ClientFileName <> '' then
+    AClientFile := FServerInfo.ClientFileName;
+
+{$IFDEF DEBUG}
+  AClientFile := 'MirClient.exe';
+{$ENDIF}
+
+  ExtractMIRFILE;
+
+  if FileExists(uHomePath + AClientFile) then
+  begin
+    if uHandles.Count >= FServerInfo.MaxClient then
+    begin
+      Application.MessageBox                    //不可打开更多的客户端！
+        (pChar(uEDCode.DecodeSource('QfPUjrLrlJfXEzz5RF+RibSwy4oGx+LhLBa1R7Zi')
+        ), pChar(uEDCode.DecodeSource('bgHxoNQTSRrs53CY')),
+        MB_OK or MB_ICONERROR);
+      Exit;
+    end;
+    FillChar(AStartupInfo, SizeOf(TMirStartupInfo), #0);
+    AStartupInfo.sServerName  := uServerName;
+    AStartupInfo.sServerKey   := uServerKey;
+    AStartupInfo.sServeraddr  := uServeraddr;
+    AStartupInfo.nServerPort  := uServerPort;
+    AStartupInfo.boFullScreen := uFullScreen;
+    AStartupInfo.boWaitVBlank := uWaitVBlank;
+    AStartupInfo.bo3D := u3D;
+    AStartupInfo.boMini := FServerInfo.EnabledMini;
+
+    AStartupInfo.nScreenWidth := uSCREENWIDTH;
+    AStartupInfo.nScreenHegiht := uSCREENHEIGHT;
+    AStartupInfo.sResourceDir := IncludeTrailingPathDelimiter
+      (FServerInfo.ResFolder);
+    AStartupInfo.nLocalMiniPort := FResManager.Port;
+    AStartupInfo.sLogo := '';
+    AStartupInfo.PassWordFileName := g_PasswordFileName;
+
+    if FResManager <> nil then
+    begin
+      //检查 微端管理器是否加载了微端文件。
+      if not FResManager.IsResVerFileRead then
+      begin                                                          // uHomePath + IncludeTrailingPathDelimiter(FServerInfo.ResFolder) + 'MiniVer.91Ver';
+      //  ResVerPackFileName := 'E:\Shanda\mir2\MiniVer.dat';
+       ResVerPackFileName := uHomePath + IncludeTrailingPathDelimiter(FServerInfo.ResFolder) + 'MiniVer.dat';
+       // ShowMessage(uHomePath + IncludeTrailingPathDelimiter(FServerInfo.ResFolder));
+
+      //  ResVerPackFileName := 'E:\Shanda\mir2\MiniVer.dat';
+
+        FResManager.LoadResVerPackFromFile(ResVerPackFileName);
+      end;
+
+      //没有读取到微端版本配置文件。 关闭微端。
+      if not FResManager.IsResVerFileRead then
+      begin
+        AStartupInfo.boMini := False;
+      end;
+    end else
+    begin
+      ShowMessage('微端管理器遇到故障,将以无微端模式进行');
+    end;
+
+
+
+{$IFDEF Commercial}
+    try
+      FillChar(AHeader, SizeOf(TuExecutableHeader), #0);
+      AResource := TResourceStream.Create(HInstance,
+        uEDCode.DecodeSource('V9IYV0BJwM39euHwuoIyjuNB9D8='), RT_RCDATA);   //TFORM5
+      AHeadDecStream := TMemoryStream.Create;
+      try
+        AResource.Position := 0;
+        uEDCode.DecodeStream(AResource, AHeadDecStream,
+          uEDCode.DecodeSource       //9A34FFEA-A47D-4D3E-9641-618497AF724D
+          ('TCJZ4LPA0LhfLhvilm0ixh3GpwseGbMkhDG+aMAMPmYK+cQN/qm+u5fkQGOnb2wQ21DqR/CIgw2/9ylDpqGEOkqb5UIqRbAPH+Xn62bhjEg=')
+          );
+        AHeadDecStream.Position := 0;
+        AHeadDecStream.ReadBuffer(AHeader, SizeOf(TuExecutableHeader));
+        AStartupInfo.sL := AHeader.RecordID;
+      finally
+        AResource.Free;
+        AHeadDecStream.Free;
+      end;
+    except
+      on E: Exception do
+      begin
+        uLog.TLogger.AddLog
+          (uEDCode.DecodeSource('XbvqLVad/vmc5eAAE5EGe4UvaAnmw3Zh8INqzkw3BMw=')
+          + E.Message); // 启动游戏报错,错误信息:
+        Application.MessageBox
+          (pChar(uEDCode.DecodeSource      //启动登陆器失败，登陆器已损坏
+          ('WhJXLoVl3nfcpfjyHoJ6uKOHq/OR33/6CBIGZFBbfPp6C1aZ')),
+          pChar(uEDCode.DecodeSource('09/KvVi+AOh2ytBn')),
+          MB_OK or MB_ICONERROR);
+        Application.Terminate;
+      end;
+    end;
+    try
+      ALogoFile := IOUtils.TPath.GetTempPath + Common.MakeNewGUID32 + '.png';
+      AResource := TResourceStream.Create(HInstance,   //TFORM7
+        uEDCode.DecodeSource('GAWC616hT1zlNLG+pd1jw6YiXRQ='), RT_RCDATA);
+      try
+        AResource.SaveToFile(ALogoFile);
+        AStartupInfo.sLogo := ALogoFile;
+      finally
+        AResource.Free;
+      end;
+    except
+      on E: Exception do
+        uLog.TLogger.AddLog
+          (uEDCode.DecodeSource
+          ('Oc1Z/ezlhAQF9E9gHEeJyjQuSB//efY+drB/Ibbgu9iz1g011JxcOQ==') +
+          E.Message); // 释放Logo文件报错,错误信息:
+    end;
+{$ENDIF}
+    GetStartupInfoW(StartupInfo);
+    StartupInfo.wShowWindow := SW_SHOW;
+    StartupInfo.dwFlags := STARTF_USEFILLATTRIBUTE;
+    StartupInfo.dwFillAttribute := FOREGROUND_INTENSITY or BACKGROUND_BLUE;
+    sCommandLine := Format('%s%s %s', [uHomePath, AClientFile,
+    uEDCode.EncodeSourceData(AStartupInfo, SizeOf(TMirStartupInfo))]); //默认加密传给 内核  ParamStr(1)  获取
+//  uEDCode.EncodeData(AStartupInfo, SizeOf(TMirStartupInfo), '密钥自己乱写'); //你自定义加密
+
+    if not CreateProcessW(nil, pChar(sCommandLine), nil, nil, True, 0, nil,  //启动游戏
+      pChar(uHomePath), StartupInfo, ProcessInfo) then                       //游戏启动失败.
+      Print(mtError, uEDCode.DecodeSource('BlrFc46B/47yIdkXWRfomlBJEjcHXA==') +
+        'Error:' + IntToStr(GetLastError()))
+    else
+    begin
+      AProcessHandle := OpenProcess(PROCESS_ALL_ACCESS, False,
+        ProcessInfo.dwProcessId);
+      uHandles.Add(IntToStr(AProcessHandle));
+      Application.Minimize;
+      if uHandles.Count >= FServerInfo.MaxClient then
+        Application.MainForm.Hide;
+    end;
+  end
+  else
+    Print(mtError,
+      Format(uEDCode.DecodeSource      //客户端文件“%s”不存在，无法启动游戏
+      ('D83Xbh7125X0ahSBeucUOny9e1ecUWYYIa/tHTMxWtuIl7ngS1ASb8FKRsz0sQ=='),
+      [AClientFile]));
+    SaveLocalConfigure();//下拉分辨率
+end;
+
+procedure TuClientApp.TreeChangeNode(Sender: TObject; Node: TTreeNode);
+var
+  blValue: Boolean;
+  Address: String;
+begin
+  // SetButtonEnabled(False);
+  // blValue :=  (Node<>nil) and Assigned(Node.Data) and (TObject(Node.Data) is TServerItem) and (TServerItem(Node.Data).Host<>'') and (TServerItem(Node.Data).Port>0);
+  // if not blValue then
+  // begin
+  // Print(mtWaringin, uEDCode.DecodeSource('pHxkWHQbA1+5VMYIU4qGOWetLmksQrITEwM='));
+  // Exit;
+  // end;
+  //
+  // if FTryConnecting then
+  // FClientSocket.Close;
+  //
+  // Address :=  TServerItem(Node.Data).Host;
+  // if Address = '' then
+  // Exit;
+  //
+  // if not ISIPAddress(Address) then
+  // Address :=  GetHostIP(Address);
+  // TServerItem(Node.Data).Active :=  True;
+  // uServerName :=  TServerItem(Node.Data).DisplayName;
+  // uServerKey := TServerItem(Node.Data).Key;
+  // SetNetPassWord(uServerKey);
+  // uServeraddr :=  Address;
+  // uServerPort :=  TServerItem(Node.Data).Port;
+  // FTryConnecting  :=  True;
+  // FConnected      :=  False;
+  // FClientSocket.Close;
+  // FClientSocket.Address  :=  Address;
+  // FClientSocket.Port  :=  TServerItem(Node.Data).Port;
+  // FNeedTokenID := True;
+  // Print(mtWaringin, uEDCode.DecodeSource('1UTznp4LeuNig406kS+AAUD3twwKAw=='));
+  // FClientSocket.Open;
+end;
+
+procedure TuClientApp.TreeMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  blValue: Boolean;
+  Address: String;
+  Node: TTreeNode;
+begin
+  Node := TreeView.GetNodeAt(X, Y);
+  if Node = nil then
+    Exit;
+
+  SetButtonEnabled(False);
+  blValue := (Node <> nil) and Assigned(Node.Data) and
+    (TObject(Node.Data) is TServerItem) and (TServerItem(Node.Data).Host <> '')
+    and (TServerItem(Node.Data).Port > 0);
+  if not blValue then
+  begin
+    Print(mtWaringin, uEDCode.DecodeSource       //请选择服务器...
+      ('pHxkWHQbA1+5VMYIU4qGOWetLmksQrITEwM='));
+    Exit;
+  end;
+
+  if FTryConnecting then
+    FClientSocket.Close;
+
+  Address := TServerItem(Node.Data).Host;
+  if Address = '' then
+    Exit;
+
+  if not ISIPAddress(Address) then
+    Address := GetHostIP(Address);
+  TServerItem(Node.Data).Active := True;
+  uServerName := TServerItem(Node.Data).DisplayName;
+  uServerKey := TServerItem(Node.Data).Key;
+//  SetNetPassWord(uServerKey);
+  uServeraddr := Address;
+  uServerPort := TServerItem(Node.Data).Port;
+  FTryConnecting := True;
+  FConnected := False;
+  FClientSocket.Close;
+  FClientSocket.Address := Address;
+  FClientSocket.Port := TServerItem(Node.Data).Port;
+  FNeedTokenID := True;
+  Print(mtWaringin, uEDCode.DecodeSource('1UTznp4LeuNig406kS+AAUD3twwKAw==')); //正在连接服务器
+  FClientSocket.Open;
+end;
+
+procedure TuClientApp.ServerComboboxChange(Sender: TObject);
+var
+  blValue: Boolean;
+  Address: String;
+  AServerItem: TServerItem;
+begin
+  if FAtCheckVer then
+    Exit;
+
+  SetButtonEnabled(False);
+
+  blValue := False;
+  AServerItem := nil;
+  if TuServerCombobox(Sender).ItemIndex <> -1 then
+    AServerItem := TServerItem(TuServerCombobox(Sender).Items.Objects
+      [TuServerCombobox(Sender).ItemIndex]);
+  blValue := (AServerItem <> nil) and (AServerItem.Host <> '') and
+    (AServerItem.Port > 0);
+  if not blValue then
+  begin
+    Print(mtWaringin, uEDCode.DecodeSource
+      ('csTh6zOVfTD6D+49BY26wOWb8mv+42+1XFM='));    //请选择服务器...
+    Exit;
+  end;
+
+  if FTryConnecting then
+    FClientSocket.Close;
+
+  Address := AServerItem.Host;
+  if Address = '' then
+    Exit;
+
+  if not ISIPAddress(Address) then
+    Address := GetHostIP(Address);
+  AServerItem.Active := True;
+  uServerName := AServerItem.DisplayName;
+  uServerKey := AServerItem.Key;
+//  SetNetPassWord(uServerKey);
+  uServeraddr := Address;
+  uServerPort := AServerItem.Port;
+  FTryConnecting := True;
+  FConnected := False;
+  FClientSocket.Close;
+  FClientSocket.Address := Address;
+  FClientSocket.Port := AServerItem.Port;
+  FNeedTokenID := True;
+  Print(mtWaringin, uEDCode.DecodeSource('CxZ+peh8VRK43ZKz7wmJfToIw0qkiw=='));     //正在连接服务器
+  FClientSocket.Open;
+end;
+
+function TuClientApp.UpdateMySelf: Boolean;
+
+  procedure CreateAndExecBatFile(const SelfName, OldExeName, ExeName,
+    UpdateDir: String; SourceFiles, DestFiles: TStrings);
+  var
+    I: Integer;
+    BatchFile: TextFile;
+    BatchFileName: string;
+    ProcessInfo: TProcessInformation;
+    StartupInfo: TStartupInfo;
+  begin
+    BatchFileName := IOUtils.TPath.GetTempPath + uCommon.MakeNewGUID32 + '.bat';
+    AssignFile(BatchFile, BatchFileName);
+    Rewrite(BatchFile);
+
+    if SelfName <> '' then
+    begin
+      WriteLn(BatchFile, ':DelMySelf');
+      WriteLn(BatchFile, 'del "' + SelfName + '"');
+      WriteLn(BatchFile, 'if exist "' + SelfName + '" goto DelMySelf');
+    end;
+
+    if OldExeName <> '' then
+    begin
+      WriteLn(BatchFile, ':DelMyOldExe');
+      WriteLn(BatchFile, 'del "' + OldExeName + '"');
+      WriteLn(BatchFile, 'if exist "' + OldExeName + '" goto DelMyOldExe');
+    end;
+
+    // 依次删除原始文件
+    for I := 0 to DestFiles.Count - 1 do
+    begin
+      WriteLn(BatchFile, ':DeleteDest' + IntToStr(I));
+      WriteLn(BatchFile, 'del "' + DestFiles[I] + '"');
+      WriteLn(BatchFile, 'if exist "' + DestFiles[I] + '" goto DeleteDest' +
+        IntToStr(I));
+    end;
+    // 移动文件
+    for I := 0 to SourceFiles.Count - 1 do
+    begin
+      WriteLn(BatchFile, ':moveFile' + IntToStr(I));
+      WriteLn(BatchFile, 'move "' + SourceFiles[I] + '" "' + DestFiles
+        [I] + '"');
+      WriteLn(BatchFile, 'if exist "' + SourceFiles[I] + '" goto moveFile' +
+        IntToStr(I));
+    end;
+    if (UpdateDir <> '') and (IncludeTrailingPathDelimiter(UpdateDir) <>
+      IncludeTrailingPathDelimiter(IOUtils.TPath.GetTempPath)) then
+      WriteLn(BatchFile, 'rd/s/q "' + UpdateDir + '"'); // 刪除更新文件夾
+    WriteLn(BatchFile, '"' + ExeName + '"'); // 再次启动自己
+    WriteLn(BatchFile, 'del %0');
+    CloseFile(BatchFile);
+
+    FillChar(StartupInfo, SizeOf(StartupInfo), $00);
+    StartupInfo.dwFlags := STARTF_USESHOWWINDOW;
+    StartupInfo.wShowWindow := SW_HIDE;
+    if CreateProcess(nil, PWideChar(BatchFileName), nil, nil, False,
+      IDLE_PRIORITY_CLASS, nil, nil, StartupInfo, ProcessInfo) then
+    begin
+      CloseHandle(ProcessInfo.hThread);
+      CloseHandle(ProcessInfo.hProcess);
+    end;
+  end;
+
+var
+  AUpdateItem: TUpdateItem;
+  ATool: TUpdateTool;
+  ASourceFiles, ADestFiles: TStrings;
+  I: Integer;
+  ASourceFile: String;
+begin
+  result := False;
+  if FServerInfo.LoginVerURL <> '' then
+  begin
+    Print(mtNormal, uEDCode.DecodeSource
+      ('8FSAvNt7L2zxmYSbifRRadW09/E14YQWOC3X0Q==')); //检查登陆器版本...
+    AUpdateItem := TUpdateItem.Create(nil);
+    try
+      AUpdateItem.Url := FServerInfo.LoginVerURL;
+      AUpdateItem.Zip := FServerInfo.LoginVerZip;
+      AUpdateItem.DownKind := FServerInfo.LoginVerKind;
+      AUpdateItem.Path := '\';
+      AUpdateItem.FileName := FServerInfo.LoginVerFile;
+      AUpdateItem.Code := FServerInfo.LoginVerMD5;
+      ATool := TUpdateTool.CreateTool(AUpdateItem);
+      if ATool <> nil then
+      begin
+        ASourceFiles := TStringList.Create;
+        ADestFiles := TStringList.Create;
+        try
+          ATool.HomePath := SysUtils.IncludeTrailingPathDelimiter(uHomePath);
+          ATool.RARDLLFile := uRARDLLFile;
+          ATool.OnProgress := DoProgress;
+          ATool.OnPrint := PrintEx;
+          ATool.OnCheckNeedUpdateEvent := DoCheckMySelfNeedUpdate;
+          ATool.DeleteTempFile := False;
+          if ATool.CheckNeedUpdate then
+          begin
+            try
+              Print(mtNormal,
+                uEDCode.DecodeSource
+                ('Mf5hfDxGGblftHEU8GvC7xvA4pztjF+e2TzmDg=='));    //开始下载登陆器...
+              ATool.Prepare;
+              if ATool.DoDownload then
+              begin
+                ATool.ExtractFiles(ASourceFiles);
+                if not AUpdateItem.Zip then
+                begin
+                  ADestFiles.Add(ATool.HomePath + AUpdateItem.FileName);
+                end
+                else
+                begin
+                  for I := 0 to ASourceFiles.Count - 1 do
+                  begin
+                    ASourceFile := StringReplace(ASourceFiles[I],
+                      ATool.ExtractPath, '', []);
+                    ADestFiles.Add(ATool.HomePath + ASourceFile);
+                  end;
+                end;
+                Print(mtNormal,
+                  uEDCode.DecodeSource          //登陆器更新完成，请重新打开登陆器
+                  ('nv3Y+HI5bHIxA8qW3oW7KtL+BGKqX8gbJb1IyHo7U5dpmDegaWjOFA=='));
+                CreateAndExecBatFile(Application.ExeName,
+                  ATool.HomePath + ExtractFileName(Application.ExeName),
+                  ATool.HomePath + AUpdateItem.FileName, ATool.ExtractPath,
+                  ASourceFiles, ADestFiles);
+                result := True;
+                boNeedSuicide := False;
+              end;
+            except
+              on E: Exception do
+                uLog.TLogger.AddLog
+                  (uEDCode.DecodeSource
+                  ('x/br6AWRLn5hXPzNhwbLYQPsAa4rkEbgpI8NHakzFukdL05Cp10=') +
+                  E.Message); // 登录器自我更新报错,错误信息:
+            end;
+          end;
+        finally
+          ATool.Free;
+          ASourceFiles.Free;
+          ADestFiles.Free;
+        end;
+      end;
+    finally
+      AUpdateItem.Free;
+    end;
+  end;
+end;
+
+procedure TuClientApp.UpdateSysFiles;
+var
+  FUpdateManager: TUpdateManager;
+  I: Integer;
+  Comp: TComponent;
+begin
+  FUpdateManager := TUpdateManager.Create(FServerInfo);
+  try
+    FUpdateManager.HomePath := uHomePath;
+    for I := 0 to FMainForm.ComponentCount - 1 do
+    begin
+      Comp := FMainForm.Components[I];
+      if Comp.ClassType = TuAllProgressBar then
+      begin
+        TuAllProgressBar(Comp).Min := 0;
+        TuAllProgressBar(Comp).Max := FServerInfo.SysFileCount;
+        TuAllProgressBar(Comp).Position := 0;
+      end;
+    end;
+    FUpdateManager.RARDLLFile := uRARDLLFile;
+    FUpdateManager.OnFileBegin := DoFileBegin;
+    FUpdateManager.OnFileEnd := DoFileEnd;
+    FUpdateManager.OnPrint := Self.PrintEx;
+    FUpdateManager.OnProgress := Self.DoProgress;
+    FUpdateManager.OnBeginUpdateItem := Self.DoBegin;
+    FUpdateManager.OnEndUpdateItem := Self.DoEnd;
+    try
+      FUpdateManager.DownloadBy(dtSystem);
+      Print(mtNormal, uEDCode.DecodeSource             //关键更新已完成,可以进入游戏了
+        ('/Bm6tisYX8fVIs2869PlHVzPTdzVCRIeicwNASmmPGrBFPKjB4U='));
+    except
+      on E: Exception do
+      begin
+        uLog.TLogger.AddLog
+          (uEDCode.DecodeSource     //更新必要文件报错,错误信息:
+          ('TZVGYalKnJzClvN6I99T9/3RIq7E4KytzG3Qu3W9dcDhfekO') + E.Message);
+        // 更新必要文件报错,错误信息:
+        Print(mtError,                    //更新异常...
+          uEDCode.DecodeSource('inFK3/hbDOOFvZgBySuCYdMT/mZM9g=='));
+      end;
+    end;
+  finally
+    FreeAndNil(FUpdateManager);
+  end;
+end;
+
+procedure TuClientApp.UpdateBgFiles;
+var
+  FUpdateManager: TUpdateManager;
+  I: Integer;
+  Comp: TComponent;
+begin
+  FUpdateManager := TUpdateManager.Create(FServerInfo);
+  try
+    FUpdateManager.HomePath := uHomePath;
+    for I := 0 to FMainForm.ComponentCount - 1 do
+    begin
+      Comp := FMainForm.Components[I];
+      if Comp.ClassType = TuAllProgressBar then
+      begin
+        TuAllProgressBar(Comp).Min := 0;
+        TuAllProgressBar(Comp).Max := FServerInfo.BgFileCount;
+        TuAllProgressBar(Comp).Position := 0;
+      end;
+    end;
+    FUpdateManager.RARDLLFile := uRARDLLFile;
+    FUpdateManager.OnFileBegin := DoFileBegin;
+    FUpdateManager.OnFileEnd := DoFileEnd;
+    FUpdateManager.OnPrint := Self.PrintEx;
+    FUpdateManager.OnProgress := Self.DoProgress;
+    FUpdateManager.OnBeginUpdateItem := Self.DoBegin;
+    FUpdateManager.OnEndUpdateItem := Self.DoEnd;
+    try
+      FUpdateManager.DownloadBy(dtBackground);
+      Print(mtNormal, uEDCode.DecodeSource        //所有后台文件更新完成...
+        ('Q2u7O9Au6AV0gcTYI/WRmqmxrDDGbeuBeUwFPIiJQjp8Vw=='));
+    except                                                    //更新异常...
+      Print(mtError, uEDCode.DecodeSource('yBcnzPCmWGTQE+MIL9Aaxp2DY3NK+Q=='));
+    end;
+  finally
+    FreeAndNil(FUpdateManager);
+  end;
+end;
+
+procedure TuClientApp.UpdateFiles;
+var
+  FUpdateManager: TUpdateManager;
+  I: Integer;
+  Comp: TComponent;
+begin
+  FUpdateManager := TUpdateManager.Create(FServerInfo);
+  try
+    FUpdateManager.HomePath := uHomePath;
+    for I := 0 to FMainForm.ComponentCount - 1 do
+    begin
+      Comp := FMainForm.Components[I];
+      if Comp.ClassType = TuAllProgressBar then
+      begin
+        TuAllProgressBar(Comp).Min := 0;
+        TuAllProgressBar(Comp).Max := FServerInfo.FileCount;
+        TuAllProgressBar(Comp).Position := 0;
+      end;
+    end;
+    FUpdateManager.RARDLLFile := uRARDLLFile;
+    FUpdateManager.OnFileBegin := DoFileBegin;
+    FUpdateManager.OnFileEnd := DoFileEnd;
+    FUpdateManager.OnPrint := Self.PrintEx;
+    FUpdateManager.OnProgress := Self.DoProgress;
+    FUpdateManager.OnBeginUpdateItem := Self.DoBegin;
+    FUpdateManager.OnEndUpdateItem := Self.DoEnd;
+    try
+      FUpdateManager.Download;
+      Print(mtNormal, uEDCode.DecodeSource
+        ('KWYTf5MJ+7B4CHBhCf9J1CexMtrdTCbwXOdhlKZy7Gc=')); //更新完成,可以进入游戏了
+    except
+      Print(mtError, uEDCode.DecodeSource('Nkz0l8ucNEG+GTpDdAyNIvVyOf6KGQ=='));
+    end;
+  finally
+    FreeAndNil(FUpdateManager);
+  end;
+end;
+
+procedure TuClientApp.DoFileBegin(Sender: TObject);
+var
+  I: Integer;
+  Comp: TComponent;
+begin
+  for I := 0 to FMainForm.ComponentCount - 1 do
+  begin
+    Comp := FMainForm.Components[I];
+    if Comp.ClassType = TuCurProgressBar then
+    begin
+      TuCurProgressBar(Comp).Min := 0;
+      TuCurProgressBar(Comp).Max := 100;
+      TuCurProgressBar(Comp).Position := 0;
+    end;
+  end;
+end;
+
+procedure TuClientApp.DoFileEnd(Sender: TObject);
+var
+  I: Integer;
+  Comp: TComponent;
+begin
+  for I := 0 to FMainForm.ComponentCount - 1 do
+  begin
+    Comp := FMainForm.Components[I];
+    if Comp.ClassType = TuCurProgressBar then
+      TuCurProgressBar(Comp).Position := TuCurProgressBar(Comp).Max
+    else if Comp.ClassType = TuAllProgressBar then
+      TuAllProgressBar(Comp).Position := TuAllProgressBar(Comp).Position + 1;
+  end;
+end;
+
+procedure TuClientApp.DoProgress(UpdateItem: TUpdateItem;
+  AllSize, APosition: Integer);
+var
+  I: Integer;
+  Comp: TComponent;
+begin
+  for I := 0 to FMainForm.ComponentCount - 1 do
+  begin
+    Comp := FMainForm.Components[I];
+    if Comp.ClassType = TuCurProgressBar then
+    begin
+      TuCurProgressBar(Comp).Min := 0;
+      TuCurProgressBar(Comp).Max := AllSize;
+      TuCurProgressBar(Comp).Position := APosition;
+    end;
+  end;
+end;
+
+procedure TuClientApp.DoTimer(Sender: TObject);
+var
+  I: Integer;
+  APosition: Cardinal;
+  AExecutableStructure: TuExecutableStructure;
+  AFile: TFileStream;
+begin
+  FTimer.Enabled := False;
+  if CheckServerInfo then
+  begin
+    if UpdateMySelf then
+    begin
+      Application.Terminate;
+    end
+    else
+    begin
+{$IFDEF RELEASE}
+      AExecutableStructure := LoadExecutableStructure;
+      APosition := AExecutableStructure.Offset +
+        AExecutableStructure.SkinDataLen;
+      AFile := TFileStream.Create(Application.ExeName, fmOpenRead or fmShareDenyNone);
+
+      //AFile :=  TFileStream.Create('D:\热血传奇\DebugEmResource.exe', fmOpenRead or fmShareDenyNone);
+      try
+        AFile.Position := APosition;
+        if AFile.Size - AFile.Position > SizeOf(TuExecutableStructure) + 16 then
+        begin
+          Print(mtNormal,                              //开始释放必备文件...
+            uEDCode.DecodeSource('fy8uS3plT3+o3jtsc1pLsaCob+eaidJgZyfBSDUa'));
+          try
+            ExtractEmbbedResources(AFile);
+          except
+            on E: Exception do
+              uLog.TLogger.AddLog
+                (uEDCode.DecodeSource
+                ('VFqZeRlfXg49lzXD2m0Q0avgiIZoaHxE7Dfm9y/n0DPqW/CL') +
+                E.Message); // 释放内嵌资源报错,错误信息:
+          end;
+          Print(mtNormal,                     //释放必备文件完成...
+            uEDCode.DecodeSource('xYyo9qOYUkB5B0HIhvrUkmLLSsEGUFXS13dYUIwJ'));
+        end;
+      finally
+        AFile.Free;
+      end;
+{$ENDIF}
+      boCreateShortCut := FServerInfo.CreateShortCut;
+      if ExtractFilePath(Application.ExeName) = uHomePath then
+      begin
+        if boCreateShortCut then
+          CreateLinkToDesktop(Application.ExeName, Application.Title);
+      end;
+      for I := 0 to FServerInfo.FileCount - 1 do
+      begin
+        if FServerInfo.UpdateItems[I].Enable then
+        begin
+          // 必要更新
+          if FServerInfo.UpdateItems[I].DownType = dtDownIfNeed then
+            FileDownManager.AddFile(FServerInfo.UpdateItems[I].FileName,
+              FServerInfo.UpdateItems[I].Url, FServerInfo.UpdateItems[I].Path,
+              False, FServerInfo.UpdateItems[I].Zip,
+              FServerInfo.UpdateItems[I].DownKind);
+        end;
+      end;
+
+      if FServerInfo.SysFileCount > 0 then
+        UpdateSysFiles;
+      if FServerInfo.BgFileCount > 0 then
+        UpdateBgFiles;
+      FMiniTimer.Enabled := FServerInfo.EnabledMini;
+      DMKernelMonitor.Speed := True;
+      FAtCheckVer := False;
+    end;
+  end
+  else
+    FAtCheckVer := False;
+end;
+
+procedure TuClientApp.ExtractEmbbedResources(F: TStream);
+
+  function ISValidateFileExt(const AFileName: String): Boolean;
+  var
+    AExt: String;
+  begin
+    AExt := UpperCase(ExtractFileExt(AFileName));
+    result := (AExt = '.DATA') or (AExt <> '.DAT') or (AExt <> '.WZL') or
+      (AExt <> '.WZX') or (AExt <> '.WIL') or (AExt <> '.WIX') or
+      (AExt <> '.MP3') or (AExt <> '.WAV') or (AExt <> '.MAP') or
+      (AExt <> '.LST') or (AExt <> '.TXT') or (AExt <> '.HTML');
+  end;
+var
+  AFileItem: TEmbeddedFile;
+  ATempFileName,FileName: String;
+  ANewFile: TFileStream;
+  APath:String;
+  Extract:Boolean;
+  ATempFileStream:TFileStream;
+begin
+  while F.Position < F.Size - (SizeOf(TuExecutableStructure) + 16) do
+  begin
+    FillChar(AFileItem, SizeOf(TEmbeddedFile), #0);
+    F.Read(AFileItem, SizeOf(TEmbeddedFile));
+    if AFileItem.Size > 0 then
+    begin
+      Extract := True;
+      APath := AFileItem.Path;
+      if (APath <> '') and (APath[1] = '$') then
+      begin
+        Delete(APath, 1, 1);
+        APath := IncludeTrailingPathDelimiter(FServerInfo.ResFolder) + APath;
+      end;
+
+      APath := uHomePath + IncludeTrailingPathDelimiter(APath);
+      APath := StringReplace(APath, '\\', '\', [rfReplaceAll]);
+      if not DirectoryExists(APath) then
+        ForceDirectories(APath);
+
+      FileName := APath + ExtractFileName(AFileItem.FileName);
+      if FileExists(FileName) then
+         Extract := False;
+      if AFileItem.Replace then
+        Extract := True;
+
+      try
+        if Extract then
+        begin
+         //如果要释放的目标文件存在 则删除目标文件
+          if FileExists(FileName) then
+          begin
+            DeleteFile(FileName);
+          end;
+          //检查是否删除成功
+          if not FileExists(FileName) then
+          begin
+            if not AFileItem.ZLib then
+            begin
+              ANewFile := TFileStream.Create(FileName,fmCreate or fmShareDenyNone);
+              try
+                ANewFile.CopyFrom(F, AFileItem.Size);
+              finally
+                ANewFile.Free;
+              end;
+            end else
+            begin
+              ATempFileName := IOUtils.TPath.GetTempFileName;
+              try
+                ATempFileStream := TFileStream.Create(ATempFileName,fmCreate or fmShareDenyNone);
+                try
+                  ATempFileStream.CopyFrom(F, AFileItem.Size);
+                  ATempFileStream.Position := 0;
+                  ANewFile := TFileStream.Create(FileName,fmCreate or fmShareDenyNone);
+                  ZDecompressStream(ATempFileStream,ANewFile);
+                finally
+                  ANewFile.Free;
+                  ATempFileStream.Free;
+                end;
+              finally
+                if FileExists(ATempFileName) then
+                  IOUtils.TFile.Delete(ATempFileName);
+              end;
+            end;
+            if pos('zip',FileName) > 0 then
+            begin
+              //uLog.TLogger.AddLog(FileName + AFileItem.FileName); // 释放内嵌资源报错,错误信息:
+              TZipFile.ExtractZipFile(FileName,APath); //leftstr(FileName,Length(FileName)-4)
+            end;
+
+
+
+
+          end else
+          begin
+            uLog.TLogger.AddLog('释放内嵌资源错误:文件被占用无法操作。' + AFileItem.FileName); // 释放内嵌资源报错,错误信息:
+          end;
+
+        end;
+      except
+        on E: Exception do
+            uLog.TLogger.AddLog
+              (uEDCode.DecodeSource
+              ('onkfZLVICBEgj9XCaGgJqpDhr5h/y35k/4wFeGo2OoO5CiKv') + E.Message +
+              '(' + AFileItem.FileName + ')'); // 释放内嵌资源报错,错误信息:
+      end;
+    end;
+  end;
+end;
+
+
+procedure TuClientApp.DoMiniDownTimer(Sender: TObject);
+begin
+
+end;
+
+procedure TuClientApp.DoMiniTimer(Sender: TObject);
+var
+  AServerAddr, AServerPort: String;
+begin
+
+end;
+
+function TuClientApp.GetTitle: String;
+{$IFDEF Commercial}
+var
+  ARes: {$IFDEF DEBUG}TMemoryStream{$ELSE}TResourceStream{$ENDIF};
+  ATmp: TMemoryStream;
+  AHeader: TuExecutableHeader;
+{$ENDIF}
+begin
+{$IFDEF Commercial}
+{$IFDEF DEBUG}
+  ARes := TMemoryStream.Create;
+  ATmp := TMemoryStream.Create;
+  try
+    ARes.LoadFromFile('E:\JONE\trunk\Source\Debug Data\TFORM5.dat');
+    ARes.Position := 0;
+    uEDCode.DecodeStream(ARes, ATmp, '9A34FFEA-A47D-4D3E-9641-618497AF724D');
+    ATmp.Position := 0;
+    ATmp.ReadBuffer(AHeader, SizeOf(TuExecutableHeader));
+    result := uEDCode.DecodeString(AHeader.Title,
+      uEDCode.DecodeSource //BBCE8402-FD7C-49E1-B8EA-E2073162DEC9
+      ('IeWvw0A2xj/P7Asry4aWHM7j6AO7vqC7mAWMKnHOJEzrk/7mgqMEoNZNiRypeIoaIlhC3gD8dMlZn2bO37GcqJYndqxiGkPgYqsUu5qAlkg=')
+      );
+  finally
+    ARes.Free;
+    ATmp.Free;
+  end;
+{$ELSE}
+  try
+    ARes := TResourceStream.Create(HInstance,         //TForm5
+      uEDCode.DecodeSource('zqXL0KmCSzz51Cy2Rf/Gw9QzRFU='), RT_RCDATA);
+    ATmp := TMemoryStream.Create;
+    try
+      if ARes.Size > 0 then
+      begin
+        ARes.Position := 0;
+        uEDCode.DecodeStream(ARes, ATmp,
+          uEDCode.DecodeSource
+          ('N1fzY2Wv7ZmBcrejCfHGxu40xxHn8xURxVK682U3u7vUf8hf4gTL8jN1s9w3tnah+eIN4xX3GzPtL01hdXqSoLmTC5e0d4hqC6Vr3fqDNI0=')
+          );
+        ATmp.Position := 0;
+        ATmp.ReadBuffer(AHeader, SizeOf(TuExecutableHeader));
+        result := uEDCode.DecodeString(AHeader.Title,
+          uEDCode.DecodeSource
+          ('rJ0NYZlMyCnHoPqPmPQuOMCBDXY4asCpWc+/i3lQf5V6EWVE3dqIj0DKq5Ut+8bDVvxj+SSZJzWLbxxWS+FSzlCOyqqbI5GQU9H//w1ykrE=')
+          );
+      end;
+    finally
+      ARes.Free;
+      ATmp.Free;
+    end;
+  except
+    on E: Exception do
+    begin
+      Application.MessageBox
+        (pChar(uEDCode.DecodeSource
+        ('PQu5pRO9Y+GzxBZvRwjIQRVvqFMqQVi9doQfdcvyjkmF4CKG')),
+        pChar(uEDCode.DecodeSource('ujyblG19gQGtequ7')), MB_OK or MB_ICONERROR);
+      Application.Terminate;
+    end;
+  end;
+{$ENDIF}
+{$ELSE}
+  result := LoadExecutableStructure.Title;
+{$ENDIF}
+end;
+
+procedure TuClientApp.DoBegin(UpdateItem: TUpdateItem; AllSize: Integer);
+var
+  I: Integer;
+  Comp: TComponent;
+begin
+  for I := 0 to FMainForm.ComponentCount - 1 do
+  begin
+    Comp := FMainForm.Components[I];
+    if Comp.ClassType = TuCurProgressBar then
+    begin
+      TuCurProgressBar(Comp).Min := 0;
+      TuCurProgressBar(Comp).Max := AllSize;
+    end;
+  end;
+end;
+
+procedure TuClientApp.DoCheckMySelfNeedUpdate(UpdateItem: TUpdateItem;
+  var Need: Boolean);
+begin
+  Need := UpdateItem.Code <> uMD5.MD5File(Application.ExeName);
+end;
+
+procedure TuClientApp.DoEnd(UpdateItem: TUpdateItem; AllSize: Integer);
+var
+  I: Integer;
+  Comp: TComponent;
+begin
+  for I := 0 to FMainForm.ComponentCount - 1 do
+  begin
+    Comp := FMainForm.Components[I];
+    if Comp.ClassType = TuAllProgressBar then
+      TuAllProgressBar(Comp).Position := TuAllProgressBar(Comp).Position + 1;
+  end;
+end;
+
+procedure TuClientApp.DecodeMessagePacket(const ADatablock: AnsiString);
+var
+  AHead, ABody: string;
+  Msg: TDefaultMessage;
+begin
+  if ADatablock[1] = '+' then
+    Exit;
+  if Length(ADatablock) < DEFBLOCKSIZE then
+    Exit;
+  AHead := Copy(ADatablock, 1, DEFBLOCKSIZE);
+  ABody := Copy(ADatablock, DEFBLOCKSIZE + 1, Length(ADatablock) - DEFBLOCKSIZE);
+  Msg := DecodeMessage(AHead);
+  case Msg.Ident of
+    SM_NEWID_SUCCESS:
+      begin
+        Application.MessageBox
+          (pChar(uEDCode.DecodeSource('s/Krsg/y5kV1GuCAUMpsblbIPg6IBFiqkTc=') +
+          #13 + uEDCode.DecodeSource
+          ('eHbPG/6lCwYQDXrss3slBqYWV95eLw6jNF89/WN3pO4+Mg==') + #13 +
+          uEDCode.DecodeSource
+          ('GVsVY3o350DMxRe4TdT9ZbDQavYOWXJ9vfhuyNez+d8jdrr2OoH0FLu6Ow6kjVfNVgemTTeH')
+          ), pChar(uEDCode.DecodeSource('Zmp/dIlRTu1YuZ5MYwPAWA==')), MB_OK);
+        FrmNewAccount.Close;
+      end;
+    SM_NEWID_FAIL:
+      begin
+        case Msg.Recog of
+          0:
+            begin
+              Application.MessageBox
+                (pChar(uEDCode.DecodeSource('702M5aET43qb1llW07sU3A==') +
+                FNewAccount + uEDCode.DecodeSource
+                ('BERuRCWFmKJBOrEmKNCDgIn3czCp+Aw0JSuMWpxsya77Jw==') + #13 +
+                uEDCode.DecodeSource('tfBzgZI5WNOJVV9p7Lgee8gT2craQt9EHt9+MFm2')
+                ), pChar(uEDCode.DecodeSource
+                ('0hokG7tk2I9oajkrVaEZEw==')), MB_OK);
+            end;
+          1:
+            begin
+              Application.MessageBox
+                (pChar(uEDCode.DecodeSource
+                ('6+Tgoj7qUqtwbUUQuUilEVCmZlIyUlwYX7WH5ESz2Gzs3jyYfeQRVw==')),
+                pChar(uEDCode.DecodeSource('UNLfM/oJq2DdKWBlYQO90w==')), MB_OK);
+            end;
+          -2:
+            Application.MessageBox
+              (pChar(uEDCode.DecodeSource
+              ('Eag9UHy8Jmz9VSij9WCO21d/HNQs70SBLPjTKw==')),
+              pChar(uEDCode.DecodeSource('/vkbj22O5boBLHmxZQ6VzA==')), MB_OK);
+        else
+          Application.MessageBox
+            (pChar(uEDCode.DecodeSource
+            ('p/PF8WYG0mPpNrAt80svekiRZ1JmWyzZsW4et7orl/fNAotX18Ea7Wwy+q6vAa8GsWYIc+fhYh+5UnWiEYJto5hBHf0Ffw==')
+            + IntToStr(Msg.Recog)),
+            pChar(uEDCode.DecodeSource('XK3eF/Gup7JerjeZUsMifA==')), MB_OK);
+        end;
+        FrmNewAccount.ButtonOK.Enabled := True;
+        Exit;
+      end;
+    SM_CHGPASSWD_SUCCESS:
+      begin
+        FRMChangePWD.Close;
+        Application.MessageBox
+          (pChar(DecodeSource('LR2x4HaEKOaCM6+QUGHA31rmxxyl2A==')),
+          pChar(uEDCode.DecodeSource('6nPMswWj6fRLMKwUVnhHNQ==')), MB_OK);
+        Exit;
+      end;
+    SM_CHGPASSWD_FAIL:
+      begin
+        FRMChangePWD.ButtonOK.Enabled := True;
+        case Msg.Recog of
+          0:
+            Application.MessageBox
+              (pChar(uEDCode.DecodeSource
+              ('I3aj9708GR/AVzGUft8lndv4sHrW/H6NskWkIkrq')),
+              pChar(uEDCode.DecodeSource('KCG2xZu0D3r3sTs6pzQ7+Q==')), MB_OK);
+          -1:
+            Application.MessageBox
+              (pChar(uEDCode.DecodeSource
+              ('Cay+R1gf/jKNFyeOWDD87eiXRUrXr3RvMm/E+oDd')),
+              pChar(uEDCode.DecodeSource('lrQZAb58PFsyrMVxGqZ1uA==')), MB_OK);
+          -2:
+            Application.MessageBox
+              (pChar(uEDCode.DecodeSource('XyhpleIriHO9lLs+ME6ukeVgPSH6dA==')),
+              pChar(uEDCode.DecodeSource('tDnOIdfx9peRVg2PdjoxnQ==')), MB_OK);
+        else
+          Application.MessageBox
+            (pChar(uEDCode.DecodeSource
+            ('pXCkRWPX1XoIAKaAdYhQz2sTjYiFNKV8Xo4JJQJYiYKmcg==')),
+            pChar(uEDCode.DecodeSource('AqjSXSeHX9hXnb20VsLzqQ==')), MB_OK);
+        end;
+        Exit;
+      end;
+    SM_GETBACKPASSWD_SUCCESS:
+      begin
+//        frmGetBackPwd.Close;
+        frmGetBackPwd.EditPassword.Text := DecodeString(ABody);
+        Application.MessageBox
+          (pChar(uEDCode.DecodeSource('W4aKYE3fZuVuXFv/kAV9aLOJrQioSw==')),
+          pChar(uEDCode.DecodeSource('AMP35wBOwhfvcIKSfeDDYQ==')), MB_OK);
+        Exit;
+      end;
+    SM_GETBACKPASSWD_FAIL:
+      begin
+        frmGetBackPwd.ButtonOK.Enabled := True;
+        case Msg.Recog of
+          0:
+            Application.MessageBox
+              (pChar(uEDCode.DecodeSource
+              ('AUdKL1UBqNxKj9ilbWBDPKB58DHlsfVDglNu/iAe')),
+              pChar(uEDCode.DecodeSource('LvrcyOuA3B1Cv/wpBd/u1Q==')),
+              MB_OK + MB_ICONERROR);
+          -1:
+            Application.MessageBox
+              (pChar(uEDCode.DecodeSource
+              ('F8y6MxH3bpKFdPsBheUbmW1eZujQ5xfpmdZqgw==')),
+              pChar(uEDCode.DecodeSource('DEl4YApTFFAArlGwK0EC9Q==')),
+              MB_OK + MB_ICONERROR);
+          -2:
+            Application.MessageBox
+              (pChar(uEDCode.DecodeSource
+              ('HctdtXzhAmpYXHuP0fbMB41MRvjL4MjJPgc=') + #13 +
+              uEDCode.DecodeSource
+              ('GhchPeJADdf/TNCc/1v5rYw8s/HP5LrjyKNCtorwJDFj09bX/3w=')),
+              pChar(uEDCode.DecodeSource('k/VoU8jiZ9ZRKE9gRTZGoA==')),
+              MB_OK + MB_ICONERROR);
+          -3:
+            Application.MessageBox
+              (pChar(uEDCode.DecodeSource
+              ('2BfWTW06JqCbgxqKoQF46LOhH7pJlY0ZkEgtEA==')),
+              pChar(uEDCode.DecodeSource('+Vgu5XtsIhuvdaXZi+HD4g==')),
+              MB_OK + MB_ICONERROR);
+        else
+          Application.MessageBox
+            (pChar(uEDCode.DecodeSource('xio2/KGmwPm5V5WXALnVokXF')),
+            pChar(uEDCode.DecodeSource('z7774Z/Dnxug/LVg/ulblA==')),
+            MB_OK + MB_ICONERROR);
+        end;
+        Exit;
+      end;
+  end;
+end;
+
+procedure ExtractRARDll;
+var
+  S: TResourceStream;
+begin
+  try
+    S := TResourceStream.Create(HInstance, 'UNRAR', RT_RCDATA);
+    try
+      uRARDLLFile := TPath.GetTempFileName;
+      S.SaveToFile(uRARDLLFile);
+    finally
+      S.Free;
+    end;
+  except
+    on E: Exception do
+    begin
+      Application.MessageBox
+        (pChar(uEDCode.DecodeSource
+        ('ZDtkH8XO46Ke0C7tunAtS3JDa1YyfwOQS49yf16PxCKni3It')),
+        pChar(uEDCode.DecodeSource('lQxJf8XqibsIv7VR')), MB_OK + MB_ICONERROR);
+      Application.Terminate;
+    end;
+  end;
+end;
+
+{ TFileDownManager }
+
+procedure TFileDownManager.AddFile(const AName, AUrl, APath: String;
+  MiniSrv: Boolean; Zip: Boolean; ADownKind: TupDownKind);
+var
+  AFileItem: TFileItem;
+begin
+  if not TryGet(UpperCase(AName), AFileItem) then
+  begin
+    AFileItem := TFileItem.Create;
+    AFileItem.FileName := UpperCase(AName);
+    AFileItem.State := ftNormal;
+    AFileItem.MiniServer := MiniSrv;
+    AFileItem.Url := AUrl;
+    AFileItem.Path := APath;
+    AFileItem.Zip := Zip;
+    AFileItem.DownKind := ADownKind;
+    FFiles.AddOrSetValue(AFileItem.FileName, AFileItem);
+  end;
+end;
+
+constructor TFileDownManager.Create;
+begin
+  FFiles := TObjectDictionary<String, TFileItem>.Create([doOwnsValues]);
+end;
+
+destructor TFileDownManager.Destroy;
+begin
+  FreeAndNil(FFiles);
+  inherited;
+end;
+
+function TFileDownManager.TryGet(const AName: String;
+  out AFileItem: TFileItem): Boolean;
+begin
+  result := FFiles.TryGetValue(UpperCase(AName), AFileItem);
+end;
+
+{ TFileItem }
+
+procedure TFileItem.BeginDown;
+begin
+  State := ftDowning;
+end;
+
+procedure TFileItem.EndDown;
+begin
+  State := ftDowned;
+end;
+
+{ TResourceRequest }
+
+constructor TResourceRequest.Create(AResourcesClient: TMiniResourcesClient);
+begin
+  inherited Create(nil);
+  Client := AResourcesClient.FClient;
+  FFileList := TStringList.Create;
+  FClient := AResourcesClient;
+  OnDataReceived := DoDataReceived;
+  OnBeginRequest := DoBeginRequest;
+  OnResponseAbort := DoResponseAbort;
+  FTempFileName := IOUtils.TPath.GetTempFileName;
+  FFile := TFileStream.Create(FTempFileName, fmCreate);
+end;
+
+destructor TResourceRequest.Destroy;
+begin
+  if FFile <> nil then
+    FreeAndNil(FFile);
+  FreeAndNil(FFileList);
+  if TFile.Exists(FTempFileName) then
+    TFile.Delete(FTempFileName);
+  inherited;
+end;
+
+procedure TResourceRequest.DoBeginRequest(Sender: TRtcConnection);
+begin
+  TRtcDataClient(Sender).WriteHeader;
+end;
+
+procedure TResourceRequest.DoResponseAbort(Sender: TRtcConnection);
+begin
+  if FType in [0, 1] then
+    RebuildMiniRequest(FFileName, FType, FImageIndex, False);
+end;
+
+procedure TResourceRequest.DoDataReceived(Sender: TRtcConnection);
+var
+  ABytes: RtcByteArray;
+begin
+  with TRtcDataClient(Sender) do
+  begin
+    if not inMainThread then
+      Sync(DoDataReceived)
+    else
+    begin
+      ABytes := Sender.ReadEx;
+      FFile.WriteBuffer(ABytes[0], Length(ABytes));
+      if Response.Done then
+      begin
+        case FType of
+          0:
+            ExecuteImage(Response);
+          1:
+            begin
+              FreeAndNil(FFile);
+              ExecuteRar(Response);
+            end;
+          2:
+            begin
+              FFile.Position := 0;
+              //if Response.StatusCode = 200 then
+
+            end;
+        end;
+        FClient.Remove(Self);
+      end;
+    end;
+  end;
+end;
+
+procedure TResourceRequest.DoRARListFile(Sender: TObject;
+  const FileInformation: TRARFileItem);
+begin
+  FFileList.Add(FileInformation.FileNameW);
+end;
+
+procedure TResourceRequest.RebuildMiniRequest(const AFileName: String;
+  AType: Byte; AImageIndex: Integer; AImportant: Boolean);
+var
+  AMiniRequest: pTMiniResRequest;
+begin
+  New(AMiniRequest);
+  FillChar(AMiniRequest^, SizeOf(TMiniResRequest), #0);
+  AMiniRequest._Type := AType;
+  AMiniRequest.Important := AImportant;
+  AMiniRequest.FileName := AFileName;
+  AMiniRequest.Index := AImageIndex;
+  FClient.FRequests.LockList.Add(AMiniRequest);
+  FClient.FRequests.UnlockList;
+end;
+
+procedure TResourceRequest.ExecuteImage(AResponse: TRtcClientResponse);
+var
+  AImages: TWMImages;
+  ABuff, ZBuf: PAnsiChar;
+  ZBufSize, APosition: Integer;
+begin
+  if AResponse.StatusCode = 200 then
+  begin
+    if ImagesManager.TryGet(UpperCase(FFileName), AImages) then
+    begin
+      try
+        if FFile.Size > 0 then
+        begin
+          FFile.Position := 0;
+          GetMem(ABuff, FFile.Size);
+          try
+            FFile.ReadBuffer(ABuff^, FFile.Size);
+            uCommon.DecompressBufZ(ABuff, FFile.Size, 0, ZBuf, ZBufSize);
+            FFile.Size := 0;
+            FFile.WriteBuffer(ZBuf^, ZBufSize);
+            FFile.Position := 0;
+            ImagesManager.WriteImage(FFileName, FImageIndex, FFile, APosition);
+            if ImagesManager.TryGet(UpperCase(FFileName), AImages) then
+              AImages.EndDownload(FImageIndex);
+           // uClientApp.SendImageLoaded(FFileName, FImageIndex, APosition);
+          finally
+            FreeMem(ABuff);
+            FreeMem(ZBuf);
+          end;
+        end
+        else
+        begin
+          if ImagesManager.TryGet(UpperCase(FFileName), AImages) then
+            AImages.EndDownload(FImageIndex);
+        end;
+      except
+        on E: Exception do
+        begin
+          AImages.ResetDownload(FImageIndex);
+          RebuildMiniRequest(FFileName, FType, FImageIndex, False);
+        end;
+      end;
+    end;
+  end
+  else
+    RebuildMiniRequest(FFileName, FType, FImageIndex, False);
+end;
+
+procedure TResourceRequest.ExecuteRar(AResponse: TRtcClientResponse);
+var
+  ARar: TRar;
+  I: Integer;
+  AExtractPath: String;
+begin
+  ARar := TRar.Create(nil);
+  ARar.DllName := uRARDLLFile;
+  ARar.OnListFile := DoRARListFile;
+  try
+    if ARar.OpenFile(FTempFileName) then
+    begin
+      AExtractPath := IncludeTrailingPathDelimiter(IOUtils.TPath.GetTempPath) +
+        IOUtils.TPath.GetGUIDFileName + '\';
+      IOUtils.TDirectory.CreateDirectory(AExtractPath);
+      ARar.Extract(AExtractPath, True, nil);
+      for I := 0 to FFileList.Count - 1 do
+      begin
+        if IOUtils.TFile.Exists(FPath + FFileList.Strings[I]) then
+          IOUtils.TFile.Delete(FPath + FFileList.Strings[I]);
+        IOUtils.TFile.Copy(AExtractPath + FFileList.Strings[I],
+          FPath + FFileList.Strings[I]);
+      end;
+      IOUtils.TDirectory.Delete(AExtractPath, True);
+    end;
+  finally
+    FreeAndNil(ARar);
+  end;
+  //uClientApp.SendFileDownloaded(FFileName);
+end;
+
+{ TMiniResourcesClient }
+
+constructor TMiniResourcesClient.Create(AApp: TuClientApp);
+begin
+  FApp := AApp;
+  FClient := TRtcHttpClient.Create(nil);
+  FClient.AutoConnect := True;
+  FClient.MultiThreaded := True;
+  FMaxThreads := 10;
+  FThreads := TFixedThreadList.Create;
+  FRequests := TFixedThreadList.Create;
+  FFreeThreads := TFixedThreadList.Create;
+end;
+
+destructor TMiniResourcesClient.Destroy;
+begin
+  Clear;
+  FreeAndNil(FClient);
+  FreeAndNil(FThreads);
+  FreeAndNil(FRequests);
+  FreeAndNil(FFreeThreads);
+  inherited;
+end;
+
+procedure TMiniResourcesClient.AddDownload(ARequest: pTMiniResRequest);
+begin
+  if CheckNeedDown(ARequest) then
+  begin
+    if ARequest.Important then
+      DoDownload(ARequest)
+    else
+    begin
+      FRequests.LockList.Add(ARequest);
+      FRequests.UnlockList;
+    end;
+  end
+  else
+    FreeMem(ARequest);
+end;
+
+function TMiniResourcesClient.CheckNeedDown(ARequest: pTMiniResRequest)
+  : Boolean;
+var
+  AImages: TWMImages;
+  AFileItem: TFileItem;
+begin
+  result := False;
+  case ARequest._Type of
+    0:
+      result := ImagesManager.TryGet(UpperCase(ARequest.FileName), AImages) and
+        AImages.CanDownload(ARequest.Index);
+    1:
+      result := FileDownManager.TryGet(ARequest.FileName, AFileItem) and
+        (AFileItem.State = ftNormal);
+  end;
+end;
+
+procedure TMiniResourcesClient.Clear;
+var
+  I: Integer;
+  AList: TList;
+begin
+  AList := FThreads.LockList;
+  try
+    for I := 0 to AList.Count - 1 do
+      TRtcDataRequest(AList[I]).Free;
+    AList.Clear;
+  finally
+    FThreads.UnlockList;
+  end;
+  AList := FRequests.LockList;
+  try
+    for I := 0 to AList.Count - 1 do
+      FreeMem(AList[I]);
+    AList.Clear;
+  finally
+    FRequests.UnlockList;
+  end;
+end;
+
+procedure TMiniResourcesClient.DoDownload(ARequest: pTMiniResRequest);
+var
+  AImages: TWMImages;
+  AFileItem: TFileItem;
+  AResRequest: TResourceRequest;
+begin
+  case ARequest._Type of
+    0:
+      begin
+        if ImagesManager.TryGet(UpperCase(ARequest.FileName), AImages) and
+          AImages.CanDownload(ARequest.Index) then
+        begin
+          AImages.BeginDownload(ARequest.Index);
+          try
+            AResRequest := TResourceRequest.Create(Self);
+            FThreads.LockList.Add(AResRequest);
+            FThreads.UnlockList;
+            AResRequest.Request.Method := 'Get';
+            AResRequest.Request.FileName := '/Resources/File';
+            AResRequest.Request.Query.Text := 'Params=' +
+              UrlEncode(EncodeData(ARequest^, SizeOf(TMiniResRequest),
+              FMiniPwd));
+            AResRequest.FType := 0;
+            AResRequest.FStartTime := GetTickCount;
+            AResRequest.FFileName := ARequest.FileName;
+            AResRequest.FImageIndex := ARequest.Index;
+            AResRequest.Post;
+            FreeMem(ARequest);
+          except
+            on E: Exception do
+            begin
+              AImages.ResetDownload(ARequest.Index);
+              FRequests.Add(ARequest);
+            end;
+          end;
+        end;
+      end;
+    1:
+      begin
+        if FileDownManager.TryGet(ARequest.FileName, AFileItem) and
+          (AFileItem.State = ftNormal) then
+        begin
+          AFileItem.BeginDown;
+          try
+            AResRequest := TResourceRequest.Create(Self);
+            FThreads.LockList.Add(AResRequest);
+            FThreads.UnlockList;
+            AResRequest.Request.Method := 'Get';
+            AResRequest.Request.FileName := '/Resources/File';
+            AResRequest.Request.Query.Text := 'Params=' +
+              UrlEncode(EncodeData(ARequest^, SizeOf(TMiniResRequest),
+              FMiniPwd));
+            AResRequest.FType := 1;
+            AResRequest.FStartTime := GetTickCount;
+            AResRequest.FFileName := ARequest.FileName;
+            AResRequest.FPath := ExtractFilePath(ARequest.FileName);
+            AResRequest.FImageIndex := 0;
+            AResRequest.Post;
+            FreeMem(ARequest);
+          except
+            on E: Exception do
+              AFileItem.State := ftNormal;
+          end;
+        end;
+      end;
+  end;
+end;
+
+procedure TMiniResourcesClient.LoadMiniSrvList;
+var
+  AResRequest: TResourceRequest;
+begin
+  AResRequest := TResourceRequest.Create(Self);
+  FThreads.LockList.Add(AResRequest);
+  FThreads.UnlockList;
+  AResRequest.Request.Method := 'Get';
+  AResRequest.Request.FileName := '/Resources/List';
+  AResRequest.Request.Query.Text := 'Params=' +
+    UrlEncode(uEDCode.EncodeSource(uClientApp.FServerInfo.MiniPwd));
+  AResRequest.FType := 2;
+  AResRequest.Post;
+end;
+
+procedure TMiniResourcesClient.Remove(ARequest: TResourceRequest);
+var
+  AList: TList;
+begin
+  AList := FThreads.LockList;
+  try
+    AList.Remove(ARequest);
+  finally
+    FThreads.UnlockList;
+  end;
+  FFreeThreads.LockList.Add(ARequest);
+  FFreeThreads.UnlockList;
+end;
+
+procedure TMiniResourcesClient.Run;
+var
+  ARequest: pTMiniResRequest;
+  ACount, I: Integer;
+  AList: TList;
+begin
+  ACount := FThreads.LockList.Count;
+  FThreads.UnlockList;
+  if ACount < FMaxThreads then
+  begin
+    AList := FRequests.LockList;
+    try
+      while (ACount < FMaxThreads) and (AList.Count > 0) do
+      begin
+        ARequest := AList[0];
+        AList.Delete(0);
+        DoDownload(ARequest);
+        Inc(ACount);
+      end;
+    finally
+      FRequests.UnlockList;
+    end;
+  end;
+
+  AList := FFreeThreads.LockList;
+  try
+    for I := 0 to AList.Count - 1 do
+      TResourceRequest(AList[I]).Free;
+    AList.Clear;
+  finally
+    FFreeThreads.UnlockList;
+  end;
+end;
+
+procedure TMiniResourcesClient.SetServerInfo(const AServerAddr,
+  AServerPort: String);
+begin
+  FClient.ServerAddr := AServerAddr;
+  FClient.ServerPort := AServerPort;
+end;
+
+procedure InitLoginData();
+begin
+  uClientApp := TuClientApp.Create;
+  uCliTypes._Application := uClientApp;
+  FileDownManager := TFileDownManager.Create;
+  uHandles := TStringList.Create;
+end;
+
+initialization
+
+ExtractRARDll;
+
+finalization
+
+uCliTypes._Application := nil;
+uClientApp := nil;
+DeleteFile(uRARDLLFile);
+FreeAndNil(FileDownManager);
+FreeAndNil(uHandles);
+
+end.

@@ -1,0 +1,2404 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsWSocketS" platform="Win32">
+  <const name="WSocketServerVersion" type="Integer" file="OverbyteIcsWSocketS.pas" line="160">
+    <value>
+      $2C0
+    </value>
+  </const>
+  <variable name="CopyRight" type="string" visibility="public" file="OverbyteIcsWSocketS.pas" line="161" />
+  <const name="DefaultBanner" type="string" file="OverbyteIcsWSocketS.pas" line="162">
+    <value>
+      Welcome to OverByte ICS TcpSrv
+    </value>
+  </const>
+  <classref name="TWSocketClientClass" ref="TWSocketClient" file="OverbyteIcsWSocketS.pas" line="167" />
+  <struct name="TClientIdRec" size="8" file="OverbyteIcsWSocketS.pas" line="174">
+    <field name="PClient" type="Pointer" visibility="public" size="4" offset="0" file="OverbyteIcsWSocketS.pas" line="175" />
+    <field name="CliId" type="Integer" visibility="public" size="4" offset="4" file="OverbyteIcsWSocketS.pas" line="176" />
+  </struct>
+  <pointer name="PClientIdRec" type="TClientIdRec" indircnt="1" file="OverbyteIcsWSocketS.pas" line="178" />
+  <class name="TWSocketClient" file="OverbyteIcsWSocketS.pas" line="186">
+    <ancestor name="TWSocket" namespace="OverbyteIcsWSocket">
+      <propertyref name="PortNum" visibility="public" />
+      <propertyref name="Handle" visibility="public" />
+      <propertyref name="HSocket" visibility="public" />
+      <propertyref name="BufSize" visibility="public" />
+      <propertyref name="Text" visibility="public" />
+      <propertyref name="AllSent" visibility="public" />
+      <propertyref name="PeerAddr" visibility="public" />
+      <propertyref name="PeerPort" visibility="public" />
+      <propertyref name="State" visibility="public" />
+      <propertyref name="DnsResult" visibility="public" />
+      <propertyref name="DnsResultList" visibility="public" />
+      <propertyref name="ReadCount" visibility="public" />
+      <propertyref name="RcvdCount" visibility="public" />
+      <propertyref name="SocketRcvBufSize" visibility="public" />
+      <propertyref name="SocketSndBufSize" visibility="public" />
+      <propertyref name="OnDebugDisplay" visibility="public" />
+      <propertyref name="Counter" visibility="public" />
+      <propertyref name="HttpTunnelCurrentAuthType" visibility="public" />
+      <propertyref name="HttpTunnelBufferSize" visibility="public" />
+      <propertyref name="HttpTunnelLastResponse" visibility="public" />
+      <propertyref name="HttpTunnelLmCompatLevel" visibility="public" />
+      <propertyref name="Addr" visibility="published" />
+      <propertyref name="Port" visibility="published" />
+      <propertyref name="Proto" visibility="published" />
+      <propertyref name="LocalAddr" visibility="published" />
+      <propertyref name="LocalPort" visibility="published" />
+      <propertyref name="MultiThreaded" visibility="published" />
+      <propertyref name="MultiCast" visibility="published" />
+      <propertyref name="MultiCastAddrStr" visibility="published" />
+      <propertyref name="MultiCastIpTTL" visibility="published" />
+      <propertyref name="FlushTimeout" visibility="published" />
+      <propertyref name="SendFlags" visibility="published" />
+      <propertyref name="LingerOnOff" visibility="published" />
+      <propertyref name="LingerTimeout" visibility="published" />
+      <propertyref name="KeepAliveOnOff" visibility="published" />
+      <propertyref name="KeepAliveTime" visibility="published" />
+      <propertyref name="KeepAliveInterval" visibility="published" />
+      <propertyref name="SocksLevel" visibility="published" />
+      <propertyref name="SocksServer" visibility="published" />
+      <propertyref name="SocksPort" visibility="published" />
+      <propertyref name="SocksUsercode" visibility="published" />
+      <propertyref name="SocksPassword" visibility="published" />
+      <propertyref name="SocksAuthentication" visibility="published" />
+      <propertyref name="LastError" visibility="published" />
+      <propertyref name="ReuseAddr" visibility="published" />
+      <propertyref name="ComponentOptions" visibility="published" />
+      <propertyref name="ListenBacklog" visibility="published" />
+      <propertyref name="ReqVerLow" visibility="published" />
+      <propertyref name="ReqVerHigh" visibility="published" />
+      <propertyref name="HttpTunnelAuthType" visibility="published" />
+      <propertyref name="HttpTunnelPassword" visibility="published" />
+      <propertyref name="HttpTunnelPort" visibility="published" />
+      <propertyref name="HttpTunnelServer" visibility="published" />
+      <propertyref name="HttpTunnelUsercode" visibility="published" />
+      <propertyref name="OnHttpTunnelError" visibility="published" />
+      <propertyref name="OnHttpTunnelConnected" visibility="published" />
+      <propertyref name="OnDataAvailable" visibility="published" />
+      <propertyref name="OnDataSent" visibility="published" />
+      <propertyref name="OnSendData" visibility="published" />
+      <propertyref name="OnSessionClosed" visibility="published" />
+      <propertyref name="OnSessionAvailable" visibility="published" />
+      <propertyref name="OnSessionConnected" visibility="published" />
+      <propertyref name="OnSocksConnected" visibility="published" />
+      <propertyref name="OnChangeState" visibility="published" />
+      <propertyref name="OnDnsLookupDone" visibility="published" />
+      <propertyref name="OnError" visibility="published" />
+      <propertyref name="OnBgException" visibility="published" />
+      <propertyref name="OnSocksError" visibility="published" />
+      <propertyref name="OnSocksAuthState" visibility="published" />
+      <propertyref name="IcsLogger" visibility="published" />
+      <ancestor name="TCustomThrottledWSocket" namespace="OverbyteIcsWSocket">
+        <methodref name="BandwidthHandleTimer" visibility="private" />
+        <methodref name="SetBandwidthControl" visibility="private" />
+        <methodref name="SetBandwidthLimit" visibility="private" />
+        <methodref name="SetBandwidthSampling" visibility="private" />
+        <methodref name="SetBandwidthKeepThreadAlive" visibility="private" />
+        <methodref name="DupConnected" visibility="protected" procflags="override" />
+        <methodref name="RealSend" visibility="protected" procflags="override" />
+        <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="override" />
+        <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+        <methodref name="Create" visibility="public" procflags="constructor override" />
+        <methodref name="Receive" visibility="public" procflags="override" />
+        <methodref name="ThreadAttach" visibility="public" procflags="override" />
+        <methodref name="ThreadDetach" visibility="public" procflags="override" />
+        <propertyref name="TimeoutKeepThreadAlive" visibility="public" />
+        <propertyref name="BandwidthLimit" visibility="public" />
+        <propertyref name="BandwidthSampling" visibility="public" />
+        <ancestor name="TCustomTimeoutWSocket" namespace="OverbyteIcsWSocket">
+          <methodref name="TimeoutHandleTimer" visibility="private" />
+          <methodref name="SetTimeoutSampling" visibility="private" />
+          <methodref name="SetTimeoutKeepThreadAlive" visibility="private" />
+          <methodref name="TriggerTimeout" visibility="protected" procflags="virtual" />
+          <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="override" />
+          <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+          <methodref name="DupConnected" visibility="protected" procflags="override" />
+          <methodref name="Create" visibility="public" procflags="constructor override" />
+          <methodref name="Connect" visibility="public" procflags="override" />
+          <methodref name="TimeoutStartSampling" visibility="public" />
+          <methodref name="TimeoutStopSampling" visibility="public" />
+          <methodref name="ThreadAttach" visibility="public" procflags="override" />
+          <methodref name="ThreadDetach" visibility="public" procflags="override" />
+          <propertyref name="TimeoutKeepThreadAlive" visibility="public" />
+          <propertyref name="TimeoutSampling" visibility="public" />
+          <propertyref name="TimeoutConnect" visibility="public" />
+          <propertyref name="TimeoutIdle" visibility="public" />
+          <eventref name="OnTimeout" visibility="public" />
+          <ancestor name="TCustomSyncWSocket" namespace="OverbyteIcsWSocket">
+            <methodref name="Synchronize" visibility="protected" procflags="virtual" />
+            <methodref name="WaitUntilReady" visibility="protected" procflags="virtual" />
+            <methodref name="InternalDataAvailable" visibility="protected" />
+            <methodref name="ReadLine" visibility="public" symflags="deprecated">
+            </methodref>
+            <ancestor name="TCustomLineWSocket" namespace="OverbyteIcsWSocket">
+              <methodref name="InternalAbort" visibility="protected" procflags="override" />
+              <methodref name="WndProc" visibility="protected" procflags="override" />
+              <methodref name="WMTriggerDataAvailable" visibility="protected" />
+              <methodref name="TriggerDataAvailable" visibility="protected" procflags="override" />
+              <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+              <methodref name="TriggerLineLimitExceeded" visibility="protected" procflags="virtual" />
+              <methodref name="SetLineMode" visibility="protected" procflags="virtual" />
+              <methodref name="EditLine" visibility="protected" procflags="virtual" />
+              <methodref name="GetRcvdCount" visibility="protected" procflags="override" />
+              <methodref name="DoRecv" visibility="protected" procflags="override" />
+              <methodref name="Create" visibility="public" procflags="constructor override" />
+              <methodref name="Destroy" visibility="public" procflags="destructor override" />
+              <methodref name="SendLine" visibility="public" procflags="overload virtual" />
+              <methodref name="SendLine" visibility="public" procflags="overload virtual" />
+              <methodref name="SendLine" visibility="public" procflags="overload virtual" />
+              <propertyref name="LineLength" visibility="public" />
+              <propertyref name="RcvdPtr" visibility="public" />
+              <propertyref name="RcvdCnt" visibility="public" />
+              <propertyref name="LineMode" visibility="published" />
+              <propertyref name="LineLimit" visibility="published" />
+              <propertyref name="LineEnd" visibility="published" />
+              <propertyref name="LineEcho" visibility="published" />
+              <propertyref name="LineEdit" visibility="published" />
+              <eventref name="OnLineLimitExceeded" visibility="published" />
+              <ancestor name="TCustomSocksWSocket" namespace="OverbyteIcsWSocket">
+                <methodref name="AssignDefaultValue" visibility="protected" procflags="override" />
+                <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="override" />
+                <methodref name="TriggerSocksConnected" visibility="protected" procflags="virtual" />
+                <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+                <methodref name="TriggerDataAvailable" visibility="protected" procflags="override" />
+                <methodref name="GetSocksPort" visibility="protected" />
+                <methodref name="SetSocksPort" visibility="protected" procflags="virtual" />
+                <methodref name="GetSocksServer" visibility="protected" />
+                <methodref name="SetSocksServer" visibility="protected" procflags="virtual" />
+                <methodref name="TriggerSocksError" visibility="protected" procflags="virtual" />
+                <methodref name="TriggerSocksAuthState" visibility="protected" />
+                <methodref name="GetRcvdCount" visibility="protected" procflags="override" />
+                <methodref name="SetSocksLevel" visibility="protected" />
+                <methodref name="DoRecv" visibility="protected" procflags="override" />
+                <methodref name="SocksDoConnect" visibility="protected" />
+                <methodref name="SocksDoAuthenticate" visibility="protected" />
+                <methodref name="DataAvailableError" visibility="protected" />
+                <methodref name="Create" visibility="public" procflags="constructor override" />
+                <methodref name="Connect" visibility="public" procflags="override" />
+                <methodref name="Listen" visibility="public" procflags="override" />
+                <propertyref name="SocksServer" visibility="protected" />
+                <propertyref name="SocksLevel" visibility="protected" />
+                <propertyref name="SocksPort" visibility="protected" />
+                <propertyref name="SocksUsercode" visibility="protected" />
+                <propertyref name="SocksPassword" visibility="protected" />
+                <propertyref name="SocksAuthentication" visibility="protected" />
+                <eventref name="OnSocksError" visibility="protected" />
+                <eventref name="OnSocksConnected" visibility="protected" />
+                <eventref name="OnSocksAuthState" visibility="protected" />
+                <ancestor name="TCustomHttpTunnelWSocket" namespace="OverbyteIcsWSocket">
+                  <methodref name="GetHttpTunnelLastResponse" visibility="private" />
+                  <methodref name="GetHttpTunnelServer" visibility="private" />
+                  <methodref name="GetHttpTunnelPort" visibility="private" />
+                  <methodref name="HttpTunnelClear" visibility="private" />
+                  <methodref name="HttpTunnelGetNtlmMessage3" visibility="private" />
+                  <methodref name="HttpTunnelProcessHdrLine" visibility="private" />
+                  <methodref name="HttpTunnelSendAuthBasic" visibility="private" />
+                  <methodref name="HttpTunnelSendAuthDigest" visibility="private" />
+                  <methodref name="HttpTunnelSendAuthNtlm_1" visibility="private" />
+                  <methodref name="HttpTunnelSendAuthNtlm_3" visibility="private" />
+                  <methodref name="HttpTunnelSendPlainConnect" visibility="private" />
+                  <methodref name="HttpTunnelTriggerResultOrContinue" visibility="private" />
+                  <methodref name="SetHttpTunnelAuthType" visibility="private" />
+                  <methodref name="SetHttpTunnelBufferSize" visibility="private" />
+                  <methodref name="SetHttpTunnelServer" visibility="private" />
+                  <methodref name="SetHttpTunnelPassword" visibility="private" />
+                  <methodref name="SetHttpTunnelPort" visibility="private" />
+                  <methodref name="SetHttpTunnelUsercode" visibility="private" />
+                  <methodref name="TriggerHttpTunnelConnected" visibility="private" />
+                  <methodref name="TriggerHttpTunnelError" visibility="private" />
+                  <methodref name="AllocateMsgHandlers" visibility="protected" procflags="override" />
+                  <methodref name="AssignDefaultValue" visibility="protected" procflags="override" />
+                  <methodref name="Do_FD_CLOSE" visibility="protected" procflags="override" />
+                  <methodref name="DoRecv" visibility="protected" procflags="override" />
+                  <methodref name="FreeMsgHandlers" visibility="protected" procflags="override" />
+                  <methodref name="GetRcvdCount" visibility="protected" procflags="override" />
+                  <methodref name="MsgHandlersCount" visibility="protected" procflags="override" />
+                  <methodref name="RaiseException" visibility="protected" procflags="override" />
+                  <methodref name="TriggerDataAvailable" visibility="protected" procflags="override" />
+                  <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+                  <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="override" />
+                  <methodref name="WndProc" visibility="protected" procflags="override" />
+                  <methodref name="WMHttpTunnelReconnect" visibility="protected" />
+                  <propertyref name="HttpTunnelAuthType" visibility="protected" />
+                  <propertyref name="HttpTunnelBufferSize" visibility="protected" />
+                  <propertyref name="HttpTunnelLastResponse" visibility="protected" />
+                  <propertyref name="HttpTunnelLmCompatLevel" visibility="protected" />
+                  <propertyref name="HttpTunnelPassword" visibility="protected" />
+                  <propertyref name="HttpTunnelPort" visibility="protected" />
+                  <propertyref name="HttpTunnelServer" visibility="protected" />
+                  <propertyref name="HttpTunnelUsercode" visibility="protected" />
+                  <propertyref name="HttpTunnelCurrentAuthType" visibility="protected" />
+                  <eventref name="OnHttpTunnelError" visibility="protected" />
+                  <eventref name="OnHttpTunnelConnected" visibility="protected" />
+                  <methodref name="Create" visibility="public" procflags="constructor override" />
+                  <methodref name="Connect" visibility="public" procflags="override" />
+                  <methodref name="Listen" visibility="public" procflags="override" />
+                  <ancestor name="TCustomWSocket" namespace="OverbyteIcsWSocket">
+                    <methodref name="SetIcsLogger" visibility="protected" procflags="virtual" />
+                    <methodref name="DebugLog" visibility="protected" procflags="virtual" />
+                    <methodref name="CheckLogOptions" visibility="protected" procflags="virtual" />
+                    <methodref name="AbortComponent" visibility="protected" procflags="override" />
+                    <methodref name="WndProc" visibility="protected" procflags="override" />
+                    <methodref name="MsgHandlersCount" visibility="protected" procflags="override" />
+                    <methodref name="AllocateMsgHandlers" visibility="protected" procflags="override" />
+                    <methodref name="FreeMsgHandlers" visibility="protected" procflags="override" />
+                    <methodref name="AllocateSocketHWnd" visibility="protected" procflags="virtual" />
+                    <methodref name="DeallocateSocketHWnd" visibility="protected" procflags="virtual" />
+                    <methodref name="SocketError" visibility="protected" />
+                    <methodref name="WMASyncSelect" visibility="protected" />
+                    <methodref name="WMAsyncGetHostByName" visibility="protected" />
+                    <methodref name="WMAsyncGetHostByAddr" visibility="protected" />
+                    <methodref name="WMCloseDelayed" visibility="protected" />
+                    <methodref name="ChangeState" visibility="protected" />
+                    <methodref name="TryToSend" visibility="protected" procflags="virtual" />
+                    <methodref name="ASyncReceive" visibility="protected" />
+                    <methodref name="AssignDefaultValue" visibility="protected" procflags="virtual" />
+                    <methodref name="InternalClose" visibility="protected" procflags="virtual" />
+                    <methodref name="InternalAbort" visibility="protected" procflags="virtual" />
+                    <methodref name="InternalCancelDnsLookup" visibility="protected" />
+                    <methodref name="Notification" visibility="protected" procflags="override" />
+                    <methodref name="SetSendFlags" visibility="protected" />
+                    <methodref name="GetSendFlags" visibility="protected" />
+                    <methodref name="SetAddr" visibility="protected" />
+                    <methodref name="SetCounterClass" visibility="protected" />
+                    <methodref name="SetRemotePort" visibility="protected" procflags="virtual" />
+                    <methodref name="GetRemotePort" visibility="protected" />
+                    <methodref name="SetLocalAddr" visibility="protected" />
+                    <methodref name="SetLocalPort" visibility="protected" />
+                    <methodref name="SetProto" visibility="protected" procflags="virtual" />
+                    <methodref name="GetRcvdCount" visibility="protected" procflags="virtual" />
+                    <methodref name="SetBufSize" visibility="protected" procflags="virtual" />
+                    <methodref name="GetBufSize" visibility="protected" procflags="virtual" />
+                    <methodref name="SetSocketRcvBufSize" visibility="protected" procflags="virtual" />
+                    <methodref name="SetSocketSndBufSize" visibility="protected" procflags="virtual" />
+                    <methodref name="BindSocket" visibility="protected" procflags="virtual" />
+                    <methodref name="SendText" visibility="protected" procflags="overload" />
+                    <methodref name="SendText" visibility="protected" procflags="overload" />
+                    <methodref name="SendText" visibility="protected" procflags="overload" />
+                    <methodref name="RealSend" visibility="protected" procflags="virtual" />
+                    <methodref name="RaiseException" visibility="protected" procflags="virtual" />
+                    <methodref name="GetReqVerLow" visibility="protected" />
+                    <methodref name="SetReqVerLow" visibility="protected" />
+                    <methodref name="GetReqVerHigh" visibility="protected" />
+                    <methodref name="SetReqVerHigh" visibility="protected" />
+                    <methodref name="TriggerDebugDisplay" visibility="protected" />
+                    <methodref name="TriggerSendData" visibility="protected" />
+                    <methodref name="TriggerDataAvailable" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerSessionAvailable" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerSessionConnected" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerSessionClosed" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerDataSent" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerChangeState" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerDNSLookupDone" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerError" visibility="protected" procflags="virtual" />
+                    <methodref name="DoRecv" visibility="protected" procflags="virtual" />
+                    <methodref name="DoRecvFrom" visibility="protected" procflags="virtual" />
+                    <methodref name="Do_FD_CONNECT" visibility="protected" procflags="virtual" />
+                    <methodref name="Do_FD_READ" visibility="protected" procflags="virtual" />
+                    <methodref name="Do_FD_WRITE" visibility="protected" procflags="virtual" />
+                    <methodref name="Do_FD_ACCEPT" visibility="protected" procflags="virtual" />
+                    <methodref name="Do_FD_CLOSE" visibility="protected" procflags="virtual" />
+                    <methodref name="DupConnected" visibility="protected" procflags="virtual" />
+                    <methodref name="Create" visibility="public" procflags="constructor override" />
+                    <methodref name="Destroy" visibility="public" procflags="destructor override" />
+                    <methodref name="Connect" visibility="public" procflags="virtual" />
+                    <methodref name="Close" visibility="public" procflags="virtual" />
+                    <methodref name="CloseDelayed" visibility="public" procflags="virtual" />
+                    <methodref name="Abort" visibility="public" procflags="virtual" />
+                    <methodref name="Flush" visibility="public" procflags="virtual" />
+                    <methodref name="WaitForClose" visibility="public" procflags="virtual" />
+                    <methodref name="Listen" visibility="public" procflags="virtual" />
+                    <methodref name="Accept" visibility="public" procflags="virtual" />
+                    <methodref name="Receive" visibility="public" procflags="virtual" />
+                    <methodref name="ReceiveStr" visibility="public" procflags="virtual" />
+                    <methodref name="ReceiveStrA" visibility="public" procflags="virtual" />
+                    <methodref name="ReceiveStrW" visibility="public" procflags="overload virtual" />
+                    <methodref name="ReceiveStrW" visibility="public" procflags="overload virtual" />
+                    <methodref name="ReceiveFrom" visibility="public" procflags="virtual" />
+                    <methodref name="PeekData" visibility="public" />
+                    <methodref name="Send" visibility="public" procflags="overload virtual" />
+                    <methodref name="Send" visibility="public" procflags="overload virtual" />
+                    <methodref name="SendTo" visibility="public" procflags="virtual" />
+                    <methodref name="SendStr" visibility="public" procflags="overload virtual" />
+                    <methodref name="SendStr" visibility="public" procflags="overload virtual" />
+                    <methodref name="SendStr" visibility="public" procflags="overload virtual" />
+                    <methodref name="DnsLookup" visibility="public" procflags="virtual" />
+                    <methodref name="ReverseDnsLookup" visibility="public" procflags="virtual" />
+                    <methodref name="ReverseDnsLookupSync" visibility="public" procflags="virtual" />
+                    <methodref name="CancelDnsLookup" visibility="public" procflags="virtual" />
+                    <methodref name="GetPeerAddr" visibility="public" procflags="virtual" />
+                    <methodref name="GetPeerPort" visibility="public" procflags="virtual" />
+                    <methodref name="GetPeerName" visibility="public" procflags="virtual" />
+                    <methodref name="GetXPort" visibility="public" procflags="virtual" />
+                    <methodref name="GetXAddr" visibility="public" procflags="virtual" />
+                    <methodref name="TimerIsSet" visibility="public" procflags="virtual" />
+                    <methodref name="TimerClear" visibility="public" procflags="virtual" />
+                    <methodref name="TimerCmp" visibility="public" procflags="virtual" />
+                    <methodref name="GetSockName" visibility="public" procflags="virtual" />
+                    <methodref name="SetLingerOption" visibility="public" />
+                    <methodref name="SetKeepAliveOption" visibility="public" />
+                    <methodref name="SetTcpNoDelayOption" visibility="public" />
+                    <methodref name="Dup" visibility="public" procflags="virtual" />
+                    <methodref name="Shutdown" visibility="public" procflags="virtual" />
+                    <methodref name="Pause" visibility="public" procflags="virtual" />
+                    <methodref name="Resume" visibility="public" procflags="virtual" />
+                    <methodref name="PutDataInSendBuffer" visibility="public" procflags="virtual" />
+                    <methodref name="PutStringInSendBuffer" visibility="public" procflags="overload" />
+                    <methodref name="PutStringInSendBuffer" visibility="public" procflags="overload" />
+                    <methodref name="PutStringInSendBuffer" visibility="public" procflags="overload" />
+                    <methodref name="DeleteBufferedData" visibility="public" />
+                    <methodref name="ThreadAttach" visibility="public" procflags="override" />
+                    <methodref name="ThreadDetach" visibility="public" procflags="override" />
+                    <methodref name="CreateCounter" visibility="public" procflags="virtual" />
+                    <methodref name="DestroyCounter" visibility="public" />
+                    <propertyref name="BufferedByteCount" visibility="public" />
+                    <propertyref name="IcsLogger" visibility="protected" />
+                    <propertyref name="PortNum" visibility="protected" />
+                    <propertyref name="FWindowHandle" visibility="protected" />
+                    <propertyref name="HSocket" visibility="protected" />
+                    <propertyref name="Addr" visibility="protected" />
+                    <propertyref name="Port" visibility="protected" />
+                    <propertyref name="LocalPort" visibility="protected" />
+                    <propertyref name="LocalAddr" visibility="protected" />
+                    <propertyref name="Proto" visibility="protected" />
+                    <propertyref name="MultiCast" visibility="protected" />
+                    <propertyref name="MultiCastAddrStr" visibility="protected" />
+                    <propertyref name="MultiCastIpTTL" visibility="protected" />
+                    <propertyref name="ReuseAddr" visibility="protected" />
+                    <propertyref name="PeerAddr" visibility="protected" />
+                    <propertyref name="PeerPort" visibility="protected" />
+                    <propertyref name="DnsResult" visibility="protected" />
+                    <propertyref name="DnsResultList" visibility="protected" />
+                    <propertyref name="State" visibility="protected" />
+                    <propertyref name="AllSent" visibility="protected" />
+                    <propertyref name="ReadCount" visibility="protected" />
+                    <propertyref name="WriteCount" visibility="protected" />
+                    <propertyref name="RcvdCount" visibility="protected" />
+                    <propertyref name="LastError" visibility="protected" />
+                    <propertyref name="ComponentOptions" visibility="protected" />
+                    <propertyref name="BufSize" visibility="protected" />
+                    <propertyref name="SocketRcvBufSize" visibility="protected" />
+                    <propertyref name="SocketSndBufSize" visibility="protected" />
+                    <propertyref name="ListenBacklog" visibility="protected" />
+                    <propertyref name="ReqVerLow" visibility="protected" />
+                    <propertyref name="ReqVerHigh" visibility="protected" />
+                    <eventref name="OnDataAvailable" visibility="protected" />
+                    <eventref name="OnDataSent" visibility="protected" />
+                    <eventref name="OnSendData" visibility="protected" />
+                    <eventref name="OnSessionClosed" visibility="protected" />
+                    <eventref name="OnSessionAvailable" visibility="protected" />
+                    <eventref name="OnSessionConnected" visibility="protected" />
+                    <eventref name="OnChangeState" visibility="protected" />
+                    <eventref name="OnDnsLookupDone" visibility="protected" />
+                    <eventref name="OnError" visibility="protected" />
+                    <propertyref name="FlushTimeout" visibility="protected" />
+                    <propertyref name="SendFlags" visibility="protected" />
+                    <propertyref name="Text" visibility="protected" />
+                    <propertyref name="LingerOnOff" visibility="protected" />
+                    <propertyref name="LingerTimeout" visibility="protected" />
+                    <propertyref name="KeepAliveOnOff" visibility="protected" />
+                    <propertyref name="KeepAliveTime" visibility="protected" />
+                    <propertyref name="KeepAliveInterval" visibility="protected" />
+                    <eventref name="OnDebugDisplay" visibility="protected" />
+                    <propertyref name="Counter" visibility="protected" />
+                    <propertyref name="CounterClass" visibility="protected" />
+                    <ancestor name="TIcsWndControl" namespace="OverbyteIcsWndControl">
+                      <methodref name="Dispose" visibility="protected" procflags="virtual" />
+                      <methodref name="SetMultiThreaded" visibility="protected" procflags="virtual" />
+                      <methodref name="GetTerminated" visibility="protected" procflags="virtual" />
+                      <methodref name="SetTerminated" visibility="protected" procflags="virtual" />
+                      <methodref name="SetOnMessagePump" visibility="protected" procflags="virtual" />
+                      <methodref name="SetOnBgException" visibility="protected" procflags="virtual" />
+                      <methodref name="WndProc" visibility="protected" procflags="virtual" />
+                      <methodref name="HandleBackGroundException" visibility="protected" procflags="virtual" />
+                      <methodref name="TriggerBgException" visibility="protected" procflags="virtual" />
+                      <methodref name="WMRelease" visibility="protected" procflags="virtual" />
+                      <methodref name="AllocateHWnd" visibility="protected" procflags="virtual" />
+                      <methodref name="DeallocateHWnd" visibility="protected" procflags="virtual" />
+                      <methodref name="GetHandle" visibility="protected" />
+                      <methodref name="MsgHandlersCount" visibility="protected" procflags="virtual" />
+                      <methodref name="AllocateMsgHandlers" visibility="protected" procflags="virtual" />
+                      <methodref name="FreeMsgHandlers" visibility="protected" procflags="virtual" />
+                      <methodref name="AbortComponent" visibility="protected" procflags="virtual" />
+                      <methodref name="Create" visibility="public" procflags="constructor override" />
+                      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+                      <methodref name="Release" visibility="public" procflags="virtual" />
+                      <methodref name="ThreadAttach" visibility="public" procflags="virtual" />
+                      <methodref name="ThreadDetach" visibility="public" procflags="virtual" />
+                      <methodref name="MessageLoop" visibility="public" procflags="virtual" />
+                      <methodref name="ProcessMessage" visibility="public" procflags="virtual" />
+                      <methodref name="ProcessMessages" visibility="public" procflags="virtual" />
+                      <methodref name="MessagePump" visibility="public" procflags="virtual" />
+                      <methodref name="PostQuitMessage" visibility="public" />
+                      <propertyref name="MultiThreaded" visibility="public" />
+                      <propertyref name="Terminated" visibility="public" />
+                      <eventref name="OnMessagePump" visibility="public" />
+                      <propertyref name="Handle" visibility="public" />
+                      <propertyref name="WndHandler" visibility="public" />
+                      <propertyref name="ThreadID" visibility="public" />
+                      <eventref name="OnBgException" visibility="public" />
+                      <eventref name="ExceptAbortProc" visibility="public" />
+                      <ancestor name="TComponent" namespace="System.Classes">
+                        <interfaces>
+                          <implements name="IInterfaceComponentReference" />
+                          <implements name="IInterface" />
+                        </interfaces>
+                        <methodref name="GetComObject" visibility="private">
+                        </methodref>
+                        <methodref name="GetComponent" visibility="private">
+                        </methodref>
+                        <methodref name="GetComponentCount" visibility="private">
+                        </methodref>
+                        <methodref name="GetComponentIndex" visibility="private">
+                        </methodref>
+                        <methodref name="Insert" visibility="private">
+                        </methodref>
+                        <methodref name="ReadLeft" visibility="private">
+                        </methodref>
+                        <methodref name="ReadTop" visibility="private">
+                        </methodref>
+                        <methodref name="Remove" visibility="private">
+                        </methodref>
+                        <methodref name="RemoveNotification" visibility="private">
+                        </methodref>
+                        <methodref name="SetComponentIndex" visibility="private">
+                        </methodref>
+                        <methodref name="SetReference" visibility="private">
+                        </methodref>
+                        <methodref name="WriteLeft" visibility="private">
+                        </methodref>
+                        <methodref name="WriteTop" visibility="private">
+                        </methodref>
+                        <methodref name="IntfGetComponent" visibility="private">
+                        </methodref>
+                        <methodref name="DoGetDeltaStreams" visibility="private">
+                        </methodref>
+                        <methodref name="ReadDeltaStream" visibility="private">
+                        </methodref>
+                        <methodref name="ReadDeltaState" visibility="private">
+                        </methodref>
+                        <methodref name="FindSortedComponent" visibility="private">
+                        </methodref>
+                        <methodref name="AddSortedComponent" visibility="private">
+                        </methodref>
+                        <methodref name="RemoveSortedComponent" visibility="private" procflags="inline">
+                        </methodref>
+                        <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+                        </methodref>
+                        <methodref name="AsyncSchedule" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="ChangeName" visibility="protected">
+                        </methodref>
+                        <methodref name="DefineProperties" visibility="protected" procflags="override">
+                        </methodref>
+                        <methodref name="GetChildren" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="GetChildOwner" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="GetChildParent" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="GetOwner" visibility="protected" procflags="override">
+                        </methodref>
+                        <methodref name="Loaded" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="Notification" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="GetDeltaStreams" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="PaletteCreated" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="ReadState" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="CanObserve" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="ObserverAdded" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="GetObservers" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="SetAncestor" visibility="protected">
+                        </methodref>
+                        <methodref name="SetDesigning" visibility="protected">
+                        </methodref>
+                        <methodref name="SetInline" visibility="protected">
+                        </methodref>
+                        <methodref name="SetDesignInstance" visibility="protected">
+                        </methodref>
+                        <methodref name="SetName" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="SetChildOrder" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="SetParentComponent" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="Updating" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="Updated" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="UpdateRegistry" visibility="protected" procflags="class virtual">
+                        </methodref>
+                        <methodref name="ValidateRename" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="ValidateContainer" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="ValidateInsert" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="WriteState" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="RemoveFreeNotifications" visibility="protected">
+                        </methodref>
+                        <methodref name="QueryInterface" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="_AddRef" visibility="protected">
+                        </methodref>
+                        <methodref name="_Release" visibility="protected">
+                        </methodref>
+                        <methodref name="GetTypeInfoCount" visibility="protected">
+                        </methodref>
+                        <methodref name="GetTypeInfo" visibility="protected">
+                        </methodref>
+                        <methodref name="GetIDsOfNames" visibility="protected">
+                        </methodref>
+                        <methodref name="Invoke" visibility="protected">
+                        </methodref>
+                        <eventref name="OnGetDeltaStreams" visibility="protected">
+                        </eventref>
+                        <methodref name="Create" visibility="public" procflags="constructor virtual">
+                        </methodref>
+                        <methodref name="Destroy" visibility="public" procflags="destructor override">
+                        </methodref>
+                        <methodref name="BeforeDestruction" visibility="public" procflags="override">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="EndInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="EndInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="EndFunctionInvoke" visibility="public">
+                        </methodref>
+                        <methodref name="DestroyComponents" visibility="public">
+                        </methodref>
+                        <methodref name="Destroying" visibility="public">
+                        </methodref>
+                        <methodref name="ExecuteAction" visibility="public" procflags="dynamic">
+                        </methodref>
+                        <methodref name="FindComponent" visibility="public">
+                        </methodref>
+                        <methodref name="FreeNotification" visibility="public">
+                        </methodref>
+                        <methodref name="RemoveFreeNotification" visibility="public">
+                        </methodref>
+                        <methodref name="FreeOnRelease" visibility="public">
+                        </methodref>
+                        <methodref name="GetEnumerator" visibility="public" procflags="inline">
+                        </methodref>
+                        <methodref name="GetParentComponent" visibility="public" procflags="dynamic">
+                        </methodref>
+                        <methodref name="GetNamePath" visibility="public" procflags="override">
+                        </methodref>
+                        <methodref name="HasParent" visibility="public" procflags="dynamic">
+                        </methodref>
+                        <methodref name="InsertComponent" visibility="public">
+                        </methodref>
+                        <methodref name="RemoveComponent" visibility="public">
+                        </methodref>
+                        <methodref name="SetSubComponent" visibility="public">
+                        </methodref>
+                        <methodref name="SafeCallException" visibility="public" procflags="override">
+                        </methodref>
+                        <methodref name="UpdateAction" visibility="public" procflags="virtual">
+                        </methodref>
+                        <methodref name="IsImplementorOf" visibility="public">
+                        </methodref>
+                        <methodref name="ReferenceInterface" visibility="public">
+                        </methodref>
+                        <propertyref name="ComObject" visibility="public">
+                        </propertyref>
+                        <propertyref name="Components" visibility="public">
+                        </propertyref>
+                        <propertyref name="ComponentCount" visibility="public">
+                        </propertyref>
+                        <propertyref name="ComponentIndex" visibility="public">
+                        </propertyref>
+                        <propertyref name="ComponentState" visibility="public">
+                        </propertyref>
+                        <propertyref name="ComponentStyle" visibility="public">
+                        </propertyref>
+                        <propertyref name="DesignInfo" visibility="public">
+                        </propertyref>
+                        <propertyref name="Owner" visibility="public">
+                        </propertyref>
+                        <propertyref name="VCLComObject" visibility="public">
+                        </propertyref>
+                        <propertyref name="Observers" visibility="public">
+                        </propertyref>
+                        <propertyref name="Name" visibility="published">
+                        </propertyref>
+                        <propertyref name="Tag" visibility="published">
+                        </propertyref>
+                        <ancestor name="TPersistent" namespace="System.Classes">
+                          <methodref name="AssignError" visibility="private">
+                          </methodref>
+                          <methodref name="AssignTo" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="DefineProperties" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="GetOwner" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="Destroy" visibility="public" procflags="destructor override">
+                          </methodref>
+                          <methodref name="Assign" visibility="public" procflags="virtual">
+                          </methodref>
+                          <methodref name="GetNamePath" visibility="public" procflags="dynamic">
+                          </methodref>
+                          <ancestor name="TObject" namespace="System">
+                            <methodref name="Create" visibility="public" procflags="constructor">
+                            </methodref>
+                            <methodref name="Free" visibility="public">
+                            </methodref>
+                            <methodref name="DisposeOf" visibility="public" procflags="inline">
+                            </methodref>
+                            <methodref name="InitInstance" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="CleanupInstance" visibility="public">
+                            </methodref>
+                            <methodref name="ClassType" visibility="public" procflags="inline">
+                            </methodref>
+                            <methodref name="ClassName" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="ClassNameIs" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="ClassParent" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="ClassInfo" visibility="public" procflags="class inline">
+                            </methodref>
+                            <methodref name="InstanceSize" visibility="public" procflags="class inline">
+                            </methodref>
+                            <methodref name="InheritsFrom" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="MethodAddress" visibility="public" procflags="class overload">
+                            </methodref>
+                            <methodref name="MethodAddress" visibility="public" procflags="class overload">
+                            </methodref>
+                            <methodref name="MethodName" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="QualifiedClassName" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="FieldAddress" visibility="public" procflags="overload">
+                            </methodref>
+                            <methodref name="FieldAddress" visibility="public" procflags="overload">
+                            </methodref>
+                            <methodref name="GetInterface" visibility="public">
+                            </methodref>
+                            <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+                            </methodref>
+                            <methodref name="UnitName" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="UnitScope" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="Equals" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="GetHashCode" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="ToString" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="SafeCallException" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="Dispatch" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="NewInstance" visibility="public" procflags="class virtual">
+                            </methodref>
+                            <methodref name="FreeInstance" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+                            </methodref>
+                            <methodref name="GetDisposed" visibility="protected" procflags="inline">
+                            </methodref>
+                            <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+                            </methodref>
+                            <propertyref name="Disposed" visibility="protected">
+                            </propertyref>
+                          </ancestor>
+                        </ancestor>
+                      </ancestor>
+                    </ancestor>
+                  </ancestor>
+                </ancestor>
+              </ancestor>
+            </ancestor>
+          </ancestor>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FBanner" type="string" visibility="protected" size="4" offset="1960" file="OverbyteIcsWSocketS.pas" line="188" />
+      <field name="FServer" type="TCustomWSocketServer" visibility="protected" size="4" offset="1964" file="OverbyteIcsWSocketS.pas" line="189" />
+      <field name="FPeerAddr" type="string" visibility="protected" size="4" offset="1968" file="OverbyteIcsWSocketS.pas" line="190" />
+      <field name="FPeerPort" type="string" visibility="protected" size="4" offset="1972" file="OverbyteIcsWSocketS.pas" line="191" />
+      <field name="FSessionClosedFlag" type="Boolean" visibility="protected" size="1" offset="1976" file="OverbyteIcsWSocketS.pas" line="192" />
+      <field name="FCliId" type="Integer" visibility="protected" size="4" offset="1980" file="OverbyteIcsWSocketS.pas" line="196" />
+      <procedure name="StartConnection" visibility="public" procflags="virtual" file="OverbyteIcsWSocketS.pas" line="199">
+      </procedure>
+      <procedure name="TriggerSessionClosed" visibility="public" procflags="override" file="OverbyteIcsWSocketS.pas" line="200">
+        <parameters>
+          <parameter name="ErrCode" type="Word" />
+        </parameters>
+      </procedure>
+      <procedure name="Dup" visibility="public" procflags="override" file="OverbyteIcsWSocketS.pas" line="201">
+        <parameters>
+          <parameter name="newHSocket" type="NativeInt" />
+        </parameters>
+      </procedure>
+      <function name="GetPeerAddr" visibility="public" procflags="override" file="OverbyteIcsWSocketS.pas" line="202">
+        <parameters>
+          <retval type="string" />
+        </parameters>
+      </function>
+      <function name="GetPeerPort" visibility="public" procflags="override" file="OverbyteIcsWSocketS.pas" line="203">
+        <parameters>
+          <retval type="string" />
+        </parameters>
+      </function>
+      <property name="Server" visibility="public" read="FServer" write="FServer" type="TCustomWSocketServer" file="OverbyteIcsWSocketS.pas" line="204" />
+      <property name="CliId" visibility="public" read="FCliId" write="FCliId" type="Integer" file="OverbyteIcsWSocketS.pas" line="210" />
+      <property name="Banner" visibility="published" read="FBanner" write="FBanner" type="string" default="0" file="OverbyteIcsWSocketS.pas" line="213" />
+    </members>
+  </class>
+  <class name="TCustomWSocketServer" file="OverbyteIcsWSocketS.pas" line="220">
+    <ancestor name="TWSocket" namespace="OverbyteIcsWSocket">
+      <propertyref name="PortNum" visibility="public" />
+      <propertyref name="Handle" visibility="public" />
+      <propertyref name="HSocket" visibility="public" />
+      <propertyref name="BufSize" visibility="public" />
+      <propertyref name="Text" visibility="public" />
+      <propertyref name="AllSent" visibility="public" />
+      <propertyref name="PeerAddr" visibility="public" />
+      <propertyref name="PeerPort" visibility="public" />
+      <propertyref name="State" visibility="public" />
+      <propertyref name="DnsResult" visibility="public" />
+      <propertyref name="DnsResultList" visibility="public" />
+      <propertyref name="ReadCount" visibility="public" />
+      <propertyref name="RcvdCount" visibility="public" />
+      <propertyref name="SocketRcvBufSize" visibility="public" />
+      <propertyref name="SocketSndBufSize" visibility="public" />
+      <propertyref name="OnDebugDisplay" visibility="public" />
+      <propertyref name="Counter" visibility="public" />
+      <propertyref name="HttpTunnelCurrentAuthType" visibility="public" />
+      <propertyref name="HttpTunnelBufferSize" visibility="public" />
+      <propertyref name="HttpTunnelLastResponse" visibility="public" />
+      <propertyref name="HttpTunnelLmCompatLevel" visibility="public" />
+      <propertyref name="Addr" visibility="published" />
+      <propertyref name="Port" visibility="published" />
+      <propertyref name="Proto" visibility="published" />
+      <propertyref name="LocalAddr" visibility="published" />
+      <propertyref name="LocalPort" visibility="published" />
+      <propertyref name="MultiThreaded" visibility="published" />
+      <propertyref name="MultiCast" visibility="published" />
+      <propertyref name="MultiCastAddrStr" visibility="published" />
+      <propertyref name="MultiCastIpTTL" visibility="published" />
+      <propertyref name="FlushTimeout" visibility="published" />
+      <propertyref name="SendFlags" visibility="published" />
+      <propertyref name="LingerOnOff" visibility="published" />
+      <propertyref name="LingerTimeout" visibility="published" />
+      <propertyref name="KeepAliveOnOff" visibility="published" />
+      <propertyref name="KeepAliveTime" visibility="published" />
+      <propertyref name="KeepAliveInterval" visibility="published" />
+      <propertyref name="SocksLevel" visibility="published" />
+      <propertyref name="SocksServer" visibility="published" />
+      <propertyref name="SocksPort" visibility="published" />
+      <propertyref name="SocksUsercode" visibility="published" />
+      <propertyref name="SocksPassword" visibility="published" />
+      <propertyref name="SocksAuthentication" visibility="published" />
+      <propertyref name="LastError" visibility="published" />
+      <propertyref name="ReuseAddr" visibility="published" />
+      <propertyref name="ComponentOptions" visibility="published" />
+      <propertyref name="ListenBacklog" visibility="published" />
+      <propertyref name="ReqVerLow" visibility="published" />
+      <propertyref name="ReqVerHigh" visibility="published" />
+      <propertyref name="HttpTunnelAuthType" visibility="published" />
+      <propertyref name="HttpTunnelPassword" visibility="published" />
+      <propertyref name="HttpTunnelPort" visibility="published" />
+      <propertyref name="HttpTunnelServer" visibility="published" />
+      <propertyref name="HttpTunnelUsercode" visibility="published" />
+      <propertyref name="OnHttpTunnelError" visibility="published" />
+      <propertyref name="OnHttpTunnelConnected" visibility="published" />
+      <propertyref name="OnDataAvailable" visibility="published" />
+      <propertyref name="OnDataSent" visibility="published" />
+      <propertyref name="OnSendData" visibility="published" />
+      <propertyref name="OnSessionClosed" visibility="published" />
+      <propertyref name="OnSessionAvailable" visibility="published" />
+      <propertyref name="OnSessionConnected" visibility="published" />
+      <propertyref name="OnSocksConnected" visibility="published" />
+      <propertyref name="OnChangeState" visibility="published" />
+      <propertyref name="OnDnsLookupDone" visibility="published" />
+      <propertyref name="OnError" visibility="published" />
+      <propertyref name="OnBgException" visibility="published" />
+      <propertyref name="OnSocksError" visibility="published" />
+      <propertyref name="OnSocksAuthState" visibility="published" />
+      <propertyref name="IcsLogger" visibility="published" />
+      <ancestor name="TCustomThrottledWSocket" namespace="OverbyteIcsWSocket">
+        <methodref name="BandwidthHandleTimer" visibility="private" />
+        <methodref name="SetBandwidthControl" visibility="private" />
+        <methodref name="SetBandwidthLimit" visibility="private" />
+        <methodref name="SetBandwidthSampling" visibility="private" />
+        <methodref name="SetBandwidthKeepThreadAlive" visibility="private" />
+        <methodref name="DupConnected" visibility="protected" procflags="override" />
+        <methodref name="RealSend" visibility="protected" procflags="override" />
+        <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="override" />
+        <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+        <methodref name="Create" visibility="public" procflags="constructor override" />
+        <methodref name="Receive" visibility="public" procflags="override" />
+        <methodref name="ThreadAttach" visibility="public" procflags="override" />
+        <methodref name="ThreadDetach" visibility="public" procflags="override" />
+        <propertyref name="TimeoutKeepThreadAlive" visibility="public" />
+        <propertyref name="BandwidthLimit" visibility="public" />
+        <propertyref name="BandwidthSampling" visibility="public" />
+        <ancestor name="TCustomTimeoutWSocket" namespace="OverbyteIcsWSocket">
+          <methodref name="TimeoutHandleTimer" visibility="private" />
+          <methodref name="SetTimeoutSampling" visibility="private" />
+          <methodref name="SetTimeoutKeepThreadAlive" visibility="private" />
+          <methodref name="TriggerTimeout" visibility="protected" procflags="virtual" />
+          <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="override" />
+          <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+          <methodref name="DupConnected" visibility="protected" procflags="override" />
+          <methodref name="Create" visibility="public" procflags="constructor override" />
+          <methodref name="Connect" visibility="public" procflags="override" />
+          <methodref name="TimeoutStartSampling" visibility="public" />
+          <methodref name="TimeoutStopSampling" visibility="public" />
+          <methodref name="ThreadAttach" visibility="public" procflags="override" />
+          <methodref name="ThreadDetach" visibility="public" procflags="override" />
+          <propertyref name="TimeoutKeepThreadAlive" visibility="public" />
+          <propertyref name="TimeoutSampling" visibility="public" />
+          <propertyref name="TimeoutConnect" visibility="public" />
+          <propertyref name="TimeoutIdle" visibility="public" />
+          <eventref name="OnTimeout" visibility="public" />
+          <ancestor name="TCustomSyncWSocket" namespace="OverbyteIcsWSocket">
+            <methodref name="Synchronize" visibility="protected" procflags="virtual" />
+            <methodref name="WaitUntilReady" visibility="protected" procflags="virtual" />
+            <methodref name="InternalDataAvailable" visibility="protected" />
+            <methodref name="ReadLine" visibility="public" symflags="deprecated">
+            </methodref>
+            <ancestor name="TCustomLineWSocket" namespace="OverbyteIcsWSocket">
+              <methodref name="InternalAbort" visibility="protected" procflags="override" />
+              <methodref name="WndProc" visibility="protected" procflags="override" />
+              <methodref name="WMTriggerDataAvailable" visibility="protected" />
+              <methodref name="TriggerDataAvailable" visibility="protected" procflags="override" />
+              <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+              <methodref name="TriggerLineLimitExceeded" visibility="protected" procflags="virtual" />
+              <methodref name="SetLineMode" visibility="protected" procflags="virtual" />
+              <methodref name="EditLine" visibility="protected" procflags="virtual" />
+              <methodref name="GetRcvdCount" visibility="protected" procflags="override" />
+              <methodref name="DoRecv" visibility="protected" procflags="override" />
+              <methodref name="Create" visibility="public" procflags="constructor override" />
+              <methodref name="Destroy" visibility="public" procflags="destructor override" />
+              <methodref name="SendLine" visibility="public" procflags="overload virtual" />
+              <methodref name="SendLine" visibility="public" procflags="overload virtual" />
+              <methodref name="SendLine" visibility="public" procflags="overload virtual" />
+              <propertyref name="LineLength" visibility="public" />
+              <propertyref name="RcvdPtr" visibility="public" />
+              <propertyref name="RcvdCnt" visibility="public" />
+              <propertyref name="LineMode" visibility="published" />
+              <propertyref name="LineLimit" visibility="published" />
+              <propertyref name="LineEnd" visibility="published" />
+              <propertyref name="LineEcho" visibility="published" />
+              <propertyref name="LineEdit" visibility="published" />
+              <eventref name="OnLineLimitExceeded" visibility="published" />
+              <ancestor name="TCustomSocksWSocket" namespace="OverbyteIcsWSocket">
+                <methodref name="AssignDefaultValue" visibility="protected" procflags="override" />
+                <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="override" />
+                <methodref name="TriggerSocksConnected" visibility="protected" procflags="virtual" />
+                <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+                <methodref name="TriggerDataAvailable" visibility="protected" procflags="override" />
+                <methodref name="GetSocksPort" visibility="protected" />
+                <methodref name="SetSocksPort" visibility="protected" procflags="virtual" />
+                <methodref name="GetSocksServer" visibility="protected" />
+                <methodref name="SetSocksServer" visibility="protected" procflags="virtual" />
+                <methodref name="TriggerSocksError" visibility="protected" procflags="virtual" />
+                <methodref name="TriggerSocksAuthState" visibility="protected" />
+                <methodref name="GetRcvdCount" visibility="protected" procflags="override" />
+                <methodref name="SetSocksLevel" visibility="protected" />
+                <methodref name="DoRecv" visibility="protected" procflags="override" />
+                <methodref name="SocksDoConnect" visibility="protected" />
+                <methodref name="SocksDoAuthenticate" visibility="protected" />
+                <methodref name="DataAvailableError" visibility="protected" />
+                <methodref name="Create" visibility="public" procflags="constructor override" />
+                <methodref name="Connect" visibility="public" procflags="override" />
+                <methodref name="Listen" visibility="public" procflags="override" />
+                <propertyref name="SocksServer" visibility="protected" />
+                <propertyref name="SocksLevel" visibility="protected" />
+                <propertyref name="SocksPort" visibility="protected" />
+                <propertyref name="SocksUsercode" visibility="protected" />
+                <propertyref name="SocksPassword" visibility="protected" />
+                <propertyref name="SocksAuthentication" visibility="protected" />
+                <eventref name="OnSocksError" visibility="protected" />
+                <eventref name="OnSocksConnected" visibility="protected" />
+                <eventref name="OnSocksAuthState" visibility="protected" />
+                <ancestor name="TCustomHttpTunnelWSocket" namespace="OverbyteIcsWSocket">
+                  <methodref name="GetHttpTunnelLastResponse" visibility="private" />
+                  <methodref name="GetHttpTunnelServer" visibility="private" />
+                  <methodref name="GetHttpTunnelPort" visibility="private" />
+                  <methodref name="HttpTunnelClear" visibility="private" />
+                  <methodref name="HttpTunnelGetNtlmMessage3" visibility="private" />
+                  <methodref name="HttpTunnelProcessHdrLine" visibility="private" />
+                  <methodref name="HttpTunnelSendAuthBasic" visibility="private" />
+                  <methodref name="HttpTunnelSendAuthDigest" visibility="private" />
+                  <methodref name="HttpTunnelSendAuthNtlm_1" visibility="private" />
+                  <methodref name="HttpTunnelSendAuthNtlm_3" visibility="private" />
+                  <methodref name="HttpTunnelSendPlainConnect" visibility="private" />
+                  <methodref name="HttpTunnelTriggerResultOrContinue" visibility="private" />
+                  <methodref name="SetHttpTunnelAuthType" visibility="private" />
+                  <methodref name="SetHttpTunnelBufferSize" visibility="private" />
+                  <methodref name="SetHttpTunnelServer" visibility="private" />
+                  <methodref name="SetHttpTunnelPassword" visibility="private" />
+                  <methodref name="SetHttpTunnelPort" visibility="private" />
+                  <methodref name="SetHttpTunnelUsercode" visibility="private" />
+                  <methodref name="TriggerHttpTunnelConnected" visibility="private" />
+                  <methodref name="TriggerHttpTunnelError" visibility="private" />
+                  <methodref name="AllocateMsgHandlers" visibility="protected" procflags="override" />
+                  <methodref name="AssignDefaultValue" visibility="protected" procflags="override" />
+                  <methodref name="Do_FD_CLOSE" visibility="protected" procflags="override" />
+                  <methodref name="DoRecv" visibility="protected" procflags="override" />
+                  <methodref name="FreeMsgHandlers" visibility="protected" procflags="override" />
+                  <methodref name="GetRcvdCount" visibility="protected" procflags="override" />
+                  <methodref name="MsgHandlersCount" visibility="protected" procflags="override" />
+                  <methodref name="RaiseException" visibility="protected" procflags="override" />
+                  <methodref name="TriggerDataAvailable" visibility="protected" procflags="override" />
+                  <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+                  <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="override" />
+                  <methodref name="WndProc" visibility="protected" procflags="override" />
+                  <methodref name="WMHttpTunnelReconnect" visibility="protected" />
+                  <propertyref name="HttpTunnelAuthType" visibility="protected" />
+                  <propertyref name="HttpTunnelBufferSize" visibility="protected" />
+                  <propertyref name="HttpTunnelLastResponse" visibility="protected" />
+                  <propertyref name="HttpTunnelLmCompatLevel" visibility="protected" />
+                  <propertyref name="HttpTunnelPassword" visibility="protected" />
+                  <propertyref name="HttpTunnelPort" visibility="protected" />
+                  <propertyref name="HttpTunnelServer" visibility="protected" />
+                  <propertyref name="HttpTunnelUsercode" visibility="protected" />
+                  <propertyref name="HttpTunnelCurrentAuthType" visibility="protected" />
+                  <eventref name="OnHttpTunnelError" visibility="protected" />
+                  <eventref name="OnHttpTunnelConnected" visibility="protected" />
+                  <methodref name="Create" visibility="public" procflags="constructor override" />
+                  <methodref name="Connect" visibility="public" procflags="override" />
+                  <methodref name="Listen" visibility="public" procflags="override" />
+                  <ancestor name="TCustomWSocket" namespace="OverbyteIcsWSocket">
+                    <methodref name="SetIcsLogger" visibility="protected" procflags="virtual" />
+                    <methodref name="DebugLog" visibility="protected" procflags="virtual" />
+                    <methodref name="CheckLogOptions" visibility="protected" procflags="virtual" />
+                    <methodref name="AbortComponent" visibility="protected" procflags="override" />
+                    <methodref name="WndProc" visibility="protected" procflags="override" />
+                    <methodref name="MsgHandlersCount" visibility="protected" procflags="override" />
+                    <methodref name="AllocateMsgHandlers" visibility="protected" procflags="override" />
+                    <methodref name="FreeMsgHandlers" visibility="protected" procflags="override" />
+                    <methodref name="AllocateSocketHWnd" visibility="protected" procflags="virtual" />
+                    <methodref name="DeallocateSocketHWnd" visibility="protected" procflags="virtual" />
+                    <methodref name="SocketError" visibility="protected" />
+                    <methodref name="WMASyncSelect" visibility="protected" />
+                    <methodref name="WMAsyncGetHostByName" visibility="protected" />
+                    <methodref name="WMAsyncGetHostByAddr" visibility="protected" />
+                    <methodref name="WMCloseDelayed" visibility="protected" />
+                    <methodref name="ChangeState" visibility="protected" />
+                    <methodref name="TryToSend" visibility="protected" procflags="virtual" />
+                    <methodref name="ASyncReceive" visibility="protected" />
+                    <methodref name="AssignDefaultValue" visibility="protected" procflags="virtual" />
+                    <methodref name="InternalClose" visibility="protected" procflags="virtual" />
+                    <methodref name="InternalAbort" visibility="protected" procflags="virtual" />
+                    <methodref name="InternalCancelDnsLookup" visibility="protected" />
+                    <methodref name="Notification" visibility="protected" procflags="override" />
+                    <methodref name="SetSendFlags" visibility="protected" />
+                    <methodref name="GetSendFlags" visibility="protected" />
+                    <methodref name="SetAddr" visibility="protected" />
+                    <methodref name="SetCounterClass" visibility="protected" />
+                    <methodref name="SetRemotePort" visibility="protected" procflags="virtual" />
+                    <methodref name="GetRemotePort" visibility="protected" />
+                    <methodref name="SetLocalAddr" visibility="protected" />
+                    <methodref name="SetLocalPort" visibility="protected" />
+                    <methodref name="SetProto" visibility="protected" procflags="virtual" />
+                    <methodref name="GetRcvdCount" visibility="protected" procflags="virtual" />
+                    <methodref name="SetBufSize" visibility="protected" procflags="virtual" />
+                    <methodref name="GetBufSize" visibility="protected" procflags="virtual" />
+                    <methodref name="SetSocketRcvBufSize" visibility="protected" procflags="virtual" />
+                    <methodref name="SetSocketSndBufSize" visibility="protected" procflags="virtual" />
+                    <methodref name="BindSocket" visibility="protected" procflags="virtual" />
+                    <methodref name="SendText" visibility="protected" procflags="overload" />
+                    <methodref name="SendText" visibility="protected" procflags="overload" />
+                    <methodref name="SendText" visibility="protected" procflags="overload" />
+                    <methodref name="RealSend" visibility="protected" procflags="virtual" />
+                    <methodref name="RaiseException" visibility="protected" procflags="virtual" />
+                    <methodref name="GetReqVerLow" visibility="protected" />
+                    <methodref name="SetReqVerLow" visibility="protected" />
+                    <methodref name="GetReqVerHigh" visibility="protected" />
+                    <methodref name="SetReqVerHigh" visibility="protected" />
+                    <methodref name="TriggerDebugDisplay" visibility="protected" />
+                    <methodref name="TriggerSendData" visibility="protected" />
+                    <methodref name="TriggerDataAvailable" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerSessionAvailable" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerSessionConnected" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerSessionClosed" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerDataSent" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerChangeState" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerDNSLookupDone" visibility="protected" procflags="virtual" />
+                    <methodref name="TriggerError" visibility="protected" procflags="virtual" />
+                    <methodref name="DoRecv" visibility="protected" procflags="virtual" />
+                    <methodref name="DoRecvFrom" visibility="protected" procflags="virtual" />
+                    <methodref name="Do_FD_CONNECT" visibility="protected" procflags="virtual" />
+                    <methodref name="Do_FD_READ" visibility="protected" procflags="virtual" />
+                    <methodref name="Do_FD_WRITE" visibility="protected" procflags="virtual" />
+                    <methodref name="Do_FD_ACCEPT" visibility="protected" procflags="virtual" />
+                    <methodref name="Do_FD_CLOSE" visibility="protected" procflags="virtual" />
+                    <methodref name="DupConnected" visibility="protected" procflags="virtual" />
+                    <methodref name="Create" visibility="public" procflags="constructor override" />
+                    <methodref name="Destroy" visibility="public" procflags="destructor override" />
+                    <methodref name="Connect" visibility="public" procflags="virtual" />
+                    <methodref name="Close" visibility="public" procflags="virtual" />
+                    <methodref name="CloseDelayed" visibility="public" procflags="virtual" />
+                    <methodref name="Abort" visibility="public" procflags="virtual" />
+                    <methodref name="Flush" visibility="public" procflags="virtual" />
+                    <methodref name="WaitForClose" visibility="public" procflags="virtual" />
+                    <methodref name="Listen" visibility="public" procflags="virtual" />
+                    <methodref name="Accept" visibility="public" procflags="virtual" />
+                    <methodref name="Receive" visibility="public" procflags="virtual" />
+                    <methodref name="ReceiveStr" visibility="public" procflags="virtual" />
+                    <methodref name="ReceiveStrA" visibility="public" procflags="virtual" />
+                    <methodref name="ReceiveStrW" visibility="public" procflags="overload virtual" />
+                    <methodref name="ReceiveStrW" visibility="public" procflags="overload virtual" />
+                    <methodref name="ReceiveFrom" visibility="public" procflags="virtual" />
+                    <methodref name="PeekData" visibility="public" />
+                    <methodref name="Send" visibility="public" procflags="overload virtual" />
+                    <methodref name="Send" visibility="public" procflags="overload virtual" />
+                    <methodref name="SendTo" visibility="public" procflags="virtual" />
+                    <methodref name="SendStr" visibility="public" procflags="overload virtual" />
+                    <methodref name="SendStr" visibility="public" procflags="overload virtual" />
+                    <methodref name="SendStr" visibility="public" procflags="overload virtual" />
+                    <methodref name="DnsLookup" visibility="public" procflags="virtual" />
+                    <methodref name="ReverseDnsLookup" visibility="public" procflags="virtual" />
+                    <methodref name="ReverseDnsLookupSync" visibility="public" procflags="virtual" />
+                    <methodref name="CancelDnsLookup" visibility="public" procflags="virtual" />
+                    <methodref name="GetPeerAddr" visibility="public" procflags="virtual" />
+                    <methodref name="GetPeerPort" visibility="public" procflags="virtual" />
+                    <methodref name="GetPeerName" visibility="public" procflags="virtual" />
+                    <methodref name="GetXPort" visibility="public" procflags="virtual" />
+                    <methodref name="GetXAddr" visibility="public" procflags="virtual" />
+                    <methodref name="TimerIsSet" visibility="public" procflags="virtual" />
+                    <methodref name="TimerClear" visibility="public" procflags="virtual" />
+                    <methodref name="TimerCmp" visibility="public" procflags="virtual" />
+                    <methodref name="GetSockName" visibility="public" procflags="virtual" />
+                    <methodref name="SetLingerOption" visibility="public" />
+                    <methodref name="SetKeepAliveOption" visibility="public" />
+                    <methodref name="SetTcpNoDelayOption" visibility="public" />
+                    <methodref name="Dup" visibility="public" procflags="virtual" />
+                    <methodref name="Shutdown" visibility="public" procflags="virtual" />
+                    <methodref name="Pause" visibility="public" procflags="virtual" />
+                    <methodref name="Resume" visibility="public" procflags="virtual" />
+                    <methodref name="PutDataInSendBuffer" visibility="public" procflags="virtual" />
+                    <methodref name="PutStringInSendBuffer" visibility="public" procflags="overload" />
+                    <methodref name="PutStringInSendBuffer" visibility="public" procflags="overload" />
+                    <methodref name="PutStringInSendBuffer" visibility="public" procflags="overload" />
+                    <methodref name="DeleteBufferedData" visibility="public" />
+                    <methodref name="ThreadAttach" visibility="public" procflags="override" />
+                    <methodref name="ThreadDetach" visibility="public" procflags="override" />
+                    <methodref name="CreateCounter" visibility="public" procflags="virtual" />
+                    <methodref name="DestroyCounter" visibility="public" />
+                    <propertyref name="BufferedByteCount" visibility="public" />
+                    <propertyref name="IcsLogger" visibility="protected" />
+                    <propertyref name="PortNum" visibility="protected" />
+                    <propertyref name="FWindowHandle" visibility="protected" />
+                    <propertyref name="HSocket" visibility="protected" />
+                    <propertyref name="Addr" visibility="protected" />
+                    <propertyref name="Port" visibility="protected" />
+                    <propertyref name="LocalPort" visibility="protected" />
+                    <propertyref name="LocalAddr" visibility="protected" />
+                    <propertyref name="Proto" visibility="protected" />
+                    <propertyref name="MultiCast" visibility="protected" />
+                    <propertyref name="MultiCastAddrStr" visibility="protected" />
+                    <propertyref name="MultiCastIpTTL" visibility="protected" />
+                    <propertyref name="ReuseAddr" visibility="protected" />
+                    <propertyref name="PeerAddr" visibility="protected" />
+                    <propertyref name="PeerPort" visibility="protected" />
+                    <propertyref name="DnsResult" visibility="protected" />
+                    <propertyref name="DnsResultList" visibility="protected" />
+                    <propertyref name="State" visibility="protected" />
+                    <propertyref name="AllSent" visibility="protected" />
+                    <propertyref name="ReadCount" visibility="protected" />
+                    <propertyref name="WriteCount" visibility="protected" />
+                    <propertyref name="RcvdCount" visibility="protected" />
+                    <propertyref name="LastError" visibility="protected" />
+                    <propertyref name="ComponentOptions" visibility="protected" />
+                    <propertyref name="BufSize" visibility="protected" />
+                    <propertyref name="SocketRcvBufSize" visibility="protected" />
+                    <propertyref name="SocketSndBufSize" visibility="protected" />
+                    <propertyref name="ListenBacklog" visibility="protected" />
+                    <propertyref name="ReqVerLow" visibility="protected" />
+                    <propertyref name="ReqVerHigh" visibility="protected" />
+                    <eventref name="OnDataAvailable" visibility="protected" />
+                    <eventref name="OnDataSent" visibility="protected" />
+                    <eventref name="OnSendData" visibility="protected" />
+                    <eventref name="OnSessionClosed" visibility="protected" />
+                    <eventref name="OnSessionAvailable" visibility="protected" />
+                    <eventref name="OnSessionConnected" visibility="protected" />
+                    <eventref name="OnChangeState" visibility="protected" />
+                    <eventref name="OnDnsLookupDone" visibility="protected" />
+                    <eventref name="OnError" visibility="protected" />
+                    <propertyref name="FlushTimeout" visibility="protected" />
+                    <propertyref name="SendFlags" visibility="protected" />
+                    <propertyref name="Text" visibility="protected" />
+                    <propertyref name="LingerOnOff" visibility="protected" />
+                    <propertyref name="LingerTimeout" visibility="protected" />
+                    <propertyref name="KeepAliveOnOff" visibility="protected" />
+                    <propertyref name="KeepAliveTime" visibility="protected" />
+                    <propertyref name="KeepAliveInterval" visibility="protected" />
+                    <eventref name="OnDebugDisplay" visibility="protected" />
+                    <propertyref name="Counter" visibility="protected" />
+                    <propertyref name="CounterClass" visibility="protected" />
+                    <ancestor name="TIcsWndControl" namespace="OverbyteIcsWndControl">
+                      <methodref name="Dispose" visibility="protected" procflags="virtual" />
+                      <methodref name="SetMultiThreaded" visibility="protected" procflags="virtual" />
+                      <methodref name="GetTerminated" visibility="protected" procflags="virtual" />
+                      <methodref name="SetTerminated" visibility="protected" procflags="virtual" />
+                      <methodref name="SetOnMessagePump" visibility="protected" procflags="virtual" />
+                      <methodref name="SetOnBgException" visibility="protected" procflags="virtual" />
+                      <methodref name="WndProc" visibility="protected" procflags="virtual" />
+                      <methodref name="HandleBackGroundException" visibility="protected" procflags="virtual" />
+                      <methodref name="TriggerBgException" visibility="protected" procflags="virtual" />
+                      <methodref name="WMRelease" visibility="protected" procflags="virtual" />
+                      <methodref name="AllocateHWnd" visibility="protected" procflags="virtual" />
+                      <methodref name="DeallocateHWnd" visibility="protected" procflags="virtual" />
+                      <methodref name="GetHandle" visibility="protected" />
+                      <methodref name="MsgHandlersCount" visibility="protected" procflags="virtual" />
+                      <methodref name="AllocateMsgHandlers" visibility="protected" procflags="virtual" />
+                      <methodref name="FreeMsgHandlers" visibility="protected" procflags="virtual" />
+                      <methodref name="AbortComponent" visibility="protected" procflags="virtual" />
+                      <methodref name="Create" visibility="public" procflags="constructor override" />
+                      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+                      <methodref name="Release" visibility="public" procflags="virtual" />
+                      <methodref name="ThreadAttach" visibility="public" procflags="virtual" />
+                      <methodref name="ThreadDetach" visibility="public" procflags="virtual" />
+                      <methodref name="MessageLoop" visibility="public" procflags="virtual" />
+                      <methodref name="ProcessMessage" visibility="public" procflags="virtual" />
+                      <methodref name="ProcessMessages" visibility="public" procflags="virtual" />
+                      <methodref name="MessagePump" visibility="public" procflags="virtual" />
+                      <methodref name="PostQuitMessage" visibility="public" />
+                      <propertyref name="MultiThreaded" visibility="public" />
+                      <propertyref name="Terminated" visibility="public" />
+                      <eventref name="OnMessagePump" visibility="public" />
+                      <propertyref name="Handle" visibility="public" />
+                      <propertyref name="WndHandler" visibility="public" />
+                      <propertyref name="ThreadID" visibility="public" />
+                      <eventref name="OnBgException" visibility="public" />
+                      <eventref name="ExceptAbortProc" visibility="public" />
+                      <ancestor name="TComponent" namespace="System.Classes">
+                        <interfaces>
+                          <implements name="IInterfaceComponentReference" />
+                          <implements name="IInterface" />
+                        </interfaces>
+                        <methodref name="GetComObject" visibility="private">
+                        </methodref>
+                        <methodref name="GetComponent" visibility="private">
+                        </methodref>
+                        <methodref name="GetComponentCount" visibility="private">
+                        </methodref>
+                        <methodref name="GetComponentIndex" visibility="private">
+                        </methodref>
+                        <methodref name="Insert" visibility="private">
+                        </methodref>
+                        <methodref name="ReadLeft" visibility="private">
+                        </methodref>
+                        <methodref name="ReadTop" visibility="private">
+                        </methodref>
+                        <methodref name="Remove" visibility="private">
+                        </methodref>
+                        <methodref name="RemoveNotification" visibility="private">
+                        </methodref>
+                        <methodref name="SetComponentIndex" visibility="private">
+                        </methodref>
+                        <methodref name="SetReference" visibility="private">
+                        </methodref>
+                        <methodref name="WriteLeft" visibility="private">
+                        </methodref>
+                        <methodref name="WriteTop" visibility="private">
+                        </methodref>
+                        <methodref name="IntfGetComponent" visibility="private">
+                        </methodref>
+                        <methodref name="DoGetDeltaStreams" visibility="private">
+                        </methodref>
+                        <methodref name="ReadDeltaStream" visibility="private">
+                        </methodref>
+                        <methodref name="ReadDeltaState" visibility="private">
+                        </methodref>
+                        <methodref name="FindSortedComponent" visibility="private">
+                        </methodref>
+                        <methodref name="AddSortedComponent" visibility="private">
+                        </methodref>
+                        <methodref name="RemoveSortedComponent" visibility="private" procflags="inline">
+                        </methodref>
+                        <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+                        </methodref>
+                        <methodref name="AsyncSchedule" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="ChangeName" visibility="protected">
+                        </methodref>
+                        <methodref name="DefineProperties" visibility="protected" procflags="override">
+                        </methodref>
+                        <methodref name="GetChildren" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="GetChildOwner" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="GetChildParent" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="GetOwner" visibility="protected" procflags="override">
+                        </methodref>
+                        <methodref name="Loaded" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="Notification" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="GetDeltaStreams" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="PaletteCreated" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="ReadState" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="CanObserve" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="ObserverAdded" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="GetObservers" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="SetAncestor" visibility="protected">
+                        </methodref>
+                        <methodref name="SetDesigning" visibility="protected">
+                        </methodref>
+                        <methodref name="SetInline" visibility="protected">
+                        </methodref>
+                        <methodref name="SetDesignInstance" visibility="protected">
+                        </methodref>
+                        <methodref name="SetName" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="SetChildOrder" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="SetParentComponent" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="Updating" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="Updated" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="UpdateRegistry" visibility="protected" procflags="class virtual">
+                        </methodref>
+                        <methodref name="ValidateRename" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="ValidateContainer" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="ValidateInsert" visibility="protected" procflags="dynamic">
+                        </methodref>
+                        <methodref name="WriteState" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="RemoveFreeNotifications" visibility="protected">
+                        </methodref>
+                        <methodref name="QueryInterface" visibility="protected" procflags="virtual">
+                        </methodref>
+                        <methodref name="_AddRef" visibility="protected">
+                        </methodref>
+                        <methodref name="_Release" visibility="protected">
+                        </methodref>
+                        <methodref name="GetTypeInfoCount" visibility="protected">
+                        </methodref>
+                        <methodref name="GetTypeInfo" visibility="protected">
+                        </methodref>
+                        <methodref name="GetIDsOfNames" visibility="protected">
+                        </methodref>
+                        <methodref name="Invoke" visibility="protected">
+                        </methodref>
+                        <eventref name="OnGetDeltaStreams" visibility="protected">
+                        </eventref>
+                        <methodref name="Create" visibility="public" procflags="constructor virtual">
+                        </methodref>
+                        <methodref name="Destroy" visibility="public" procflags="destructor override">
+                        </methodref>
+                        <methodref name="BeforeDestruction" visibility="public" procflags="override">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="EndInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="EndInvoke" visibility="public" procflags="overload">
+                        </methodref>
+                        <methodref name="EndFunctionInvoke" visibility="public">
+                        </methodref>
+                        <methodref name="DestroyComponents" visibility="public">
+                        </methodref>
+                        <methodref name="Destroying" visibility="public">
+                        </methodref>
+                        <methodref name="ExecuteAction" visibility="public" procflags="dynamic">
+                        </methodref>
+                        <methodref name="FindComponent" visibility="public">
+                        </methodref>
+                        <methodref name="FreeNotification" visibility="public">
+                        </methodref>
+                        <methodref name="RemoveFreeNotification" visibility="public">
+                        </methodref>
+                        <methodref name="FreeOnRelease" visibility="public">
+                        </methodref>
+                        <methodref name="GetEnumerator" visibility="public" procflags="inline">
+                        </methodref>
+                        <methodref name="GetParentComponent" visibility="public" procflags="dynamic">
+                        </methodref>
+                        <methodref name="GetNamePath" visibility="public" procflags="override">
+                        </methodref>
+                        <methodref name="HasParent" visibility="public" procflags="dynamic">
+                        </methodref>
+                        <methodref name="InsertComponent" visibility="public">
+                        </methodref>
+                        <methodref name="RemoveComponent" visibility="public">
+                        </methodref>
+                        <methodref name="SetSubComponent" visibility="public">
+                        </methodref>
+                        <methodref name="SafeCallException" visibility="public" procflags="override">
+                        </methodref>
+                        <methodref name="UpdateAction" visibility="public" procflags="virtual">
+                        </methodref>
+                        <methodref name="IsImplementorOf" visibility="public">
+                        </methodref>
+                        <methodref name="ReferenceInterface" visibility="public">
+                        </methodref>
+                        <propertyref name="ComObject" visibility="public">
+                        </propertyref>
+                        <propertyref name="Components" visibility="public">
+                        </propertyref>
+                        <propertyref name="ComponentCount" visibility="public">
+                        </propertyref>
+                        <propertyref name="ComponentIndex" visibility="public">
+                        </propertyref>
+                        <propertyref name="ComponentState" visibility="public">
+                        </propertyref>
+                        <propertyref name="ComponentStyle" visibility="public">
+                        </propertyref>
+                        <propertyref name="DesignInfo" visibility="public">
+                        </propertyref>
+                        <propertyref name="Owner" visibility="public">
+                        </propertyref>
+                        <propertyref name="VCLComObject" visibility="public">
+                        </propertyref>
+                        <propertyref name="Observers" visibility="public">
+                        </propertyref>
+                        <propertyref name="Name" visibility="published">
+                        </propertyref>
+                        <propertyref name="Tag" visibility="published">
+                        </propertyref>
+                        <ancestor name="TPersistent" namespace="System.Classes">
+                          <methodref name="AssignError" visibility="private">
+                          </methodref>
+                          <methodref name="AssignTo" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="DefineProperties" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="GetOwner" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="Destroy" visibility="public" procflags="destructor override">
+                          </methodref>
+                          <methodref name="Assign" visibility="public" procflags="virtual">
+                          </methodref>
+                          <methodref name="GetNamePath" visibility="public" procflags="dynamic">
+                          </methodref>
+                          <ancestor name="TObject" namespace="System">
+                            <methodref name="Create" visibility="public" procflags="constructor">
+                            </methodref>
+                            <methodref name="Free" visibility="public">
+                            </methodref>
+                            <methodref name="DisposeOf" visibility="public" procflags="inline">
+                            </methodref>
+                            <methodref name="InitInstance" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="CleanupInstance" visibility="public">
+                            </methodref>
+                            <methodref name="ClassType" visibility="public" procflags="inline">
+                            </methodref>
+                            <methodref name="ClassName" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="ClassNameIs" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="ClassParent" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="ClassInfo" visibility="public" procflags="class inline">
+                            </methodref>
+                            <methodref name="InstanceSize" visibility="public" procflags="class inline">
+                            </methodref>
+                            <methodref name="InheritsFrom" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="MethodAddress" visibility="public" procflags="class overload">
+                            </methodref>
+                            <methodref name="MethodAddress" visibility="public" procflags="class overload">
+                            </methodref>
+                            <methodref name="MethodName" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="QualifiedClassName" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="FieldAddress" visibility="public" procflags="overload">
+                            </methodref>
+                            <methodref name="FieldAddress" visibility="public" procflags="overload">
+                            </methodref>
+                            <methodref name="GetInterface" visibility="public">
+                            </methodref>
+                            <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+                            </methodref>
+                            <methodref name="UnitName" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="UnitScope" visibility="public" procflags="class">
+                            </methodref>
+                            <methodref name="Equals" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="GetHashCode" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="ToString" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="SafeCallException" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="Dispatch" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="NewInstance" visibility="public" procflags="class virtual">
+                            </methodref>
+                            <methodref name="FreeInstance" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+                            </methodref>
+                            <methodref name="GetDisposed" visibility="protected" procflags="inline">
+                            </methodref>
+                            <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+                            </methodref>
+                            <propertyref name="Disposed" visibility="protected">
+                            </propertyref>
+                          </ancestor>
+                        </ancestor>
+                      </ancestor>
+                    </ancestor>
+                  </ancestor>
+                </ancestor>
+              </ancestor>
+            </ancestor>
+          </ancestor>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FBanner" type="string" visibility="protected" size="4" offset="1960" file="OverbyteIcsWSocketS.pas" line="222" />
+      <field name="FBannerTooBusy" type="string" visibility="protected" size="4" offset="1964" file="OverbyteIcsWSocketS.pas" line="223" />
+      <field name="FClientClass" type="TWSocketClientClass" visibility="protected" size="4" offset="1968" file="OverbyteIcsWSocketS.pas" line="224" />
+      <field name="FClientList" type="TList" visibility="protected" size="4" offset="1972" file="OverbyteIcsWSocketS.pas" line="225" />
+      <field name="FClientNum" type="Integer" visibility="protected" size="4" offset="1976" file="OverbyteIcsWSocketS.pas" line="226" />
+      <field name="FMaxClients" type="Integer" visibility="protected" size="4" offset="1980" file="OverbyteIcsWSocketS.pas" line="227" />
+      <field name="FMsg_WM_CLIENT_CLOSED" type="Cardinal" visibility="protected" size="4" offset="1984" file="OverbyteIcsWSocketS.pas" line="228" />
+      <field name="FOnClientCreate" type="TWSocketClientCreateEvent" visibility="protected" size="8" offset="1992" file="OverbyteIcsWSocketS.pas" line="229" />
+      <field name="FOnClientConnect" type="TWSocketClientConnectEvent" visibility="protected" size="8" offset="2000" file="OverbyteIcsWSocketS.pas" line="230" />
+      <field name="FOnClientDisconnect" type="TWSocketClientConnectEvent" visibility="protected" size="8" offset="2008" file="OverbyteIcsWSocketS.pas" line="231" />
+      <procedure name="WndProc" visibility="protected" procflags="override" file="OverbyteIcsWSocketS.pas" line="232">
+        <parameters>
+          <parameter name="MsgRec" type="TMessage" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="Notification" visibility="protected" procflags="override" file="OverbyteIcsWSocketS.pas" line="234">
+        <parameters>
+          <parameter name="AComponent" type="TComponent" />
+          <parameter name="operation" type="TOperation" />
+        </parameters>
+      </procedure>
+      <procedure name="TriggerSessionAvailable" visibility="protected" procflags="override" file="OverbyteIcsWSocketS.pas" line="236">
+        <parameters>
+          <parameter name="Error" type="Word" />
+        </parameters>
+      </procedure>
+      <procedure name="TriggerClientCreate" visibility="protected" procflags="virtual" file="OverbyteIcsWSocketS.pas" line="237">
+        <parameters>
+          <parameter name="Client" type="TWSocketClient" />
+        </parameters>
+      </procedure>
+      <procedure name="TriggerClientConnect" visibility="protected" procflags="virtual" file="OverbyteIcsWSocketS.pas" line="238">
+        <parameters>
+          <parameter name="Client" type="TWSocketClient" />
+          <parameter name="Error" type="Word" />
+        </parameters>
+      </procedure>
+      <procedure name="TriggerClientDisconnect" visibility="protected" procflags="virtual" file="OverbyteIcsWSocketS.pas" line="239">
+        <parameters>
+          <parameter name="Client" type="TWSocketClient" />
+          <parameter name="Error" type="Word" />
+        </parameters>
+      </procedure>
+      <function name="GetClientCount" visibility="protected" procflags="virtual" file="OverbyteIcsWSocketS.pas" line="240">
+        <parameters>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetClient" visibility="protected" procflags="virtual" file="OverbyteIcsWSocketS.pas" line="241">
+        <parameters>
+          <parameter name="nIndex" type="Integer" />
+          <retval type="TWSocketClient" />
+        </parameters>
+      </function>
+      <procedure name="WMClientClosed" visibility="protected" procflags="virtual" file="OverbyteIcsWSocketS.pas" line="242">
+        <parameters>
+          <parameter name="msg" type="TMessage" paramflags="var" />
+        </parameters>
+      </procedure>
+      <function name="MsgHandlersCount" visibility="protected" procflags="override" file="OverbyteIcsWSocketS.pas" line="243">
+        <parameters>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <procedure name="AllocateMsgHandlers" visibility="protected" procflags="override" file="OverbyteIcsWSocketS.pas" line="244">
+      </procedure>
+      <procedure name="FreeMsgHandlers" visibility="protected" procflags="override" file="OverbyteIcsWSocketS.pas" line="245">
+      </procedure>
+      <constructor name="Create" visibility="public" file="OverbyteIcsWSocketS.pas" line="250">
+        <parameters>
+          <parameter name="AOwner" type="TComponent" />
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="OverbyteIcsWSocketS.pas" line="252">
+        <parameters>
+        </parameters>
+      </destructor>
+      <function name="IsClient" visibility="public" file="OverbyteIcsWSocketS.pas" line="254">
+        <parameters>
+          <parameter name="SomeThing" type="TObject" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="Disconnect" visibility="public" procflags="virtual" file="OverbyteIcsWSocketS.pas" line="255">
+        <parameters>
+          <parameter name="Client" type="TWSocketClient" />
+        </parameters>
+      </procedure>
+      <procedure name="DisconnectAll" visibility="public" procflags="virtual" file="OverbyteIcsWSocketS.pas" line="256">
+      </procedure>
+      <property name="ClientClass" visibility="protected" read="FClientClass" write="FClientClass" type="TWSocketClientClass" file="OverbyteIcsWSocketS.pas" line="259" />
+      <property name="ClientCount" visibility="protected" read="GetClientCount" type="Integer" file="OverbyteIcsWSocketS.pas" line="263" />
+      <property name="Client[nIndex]" visibility="protected" read="GetClient" type="TWSocketClient" file="OverbyteIcsWSocketS.pas" line="265" />
+      <property name="Banner" visibility="published" read="FBanner" write="FBanner" type="string" default="0" file="OverbyteIcsWSocketS.pas" line="269" />
+      <property name="BannerTooBusy" visibility="published" read="FBannerTooBusy" write="FBannerTooBusy" type="string" default="0" file="OverbyteIcsWSocketS.pas" line="271" />
+      <property name="MaxClients" visibility="published" read="FMaxClients" write="FMaxClients" type="Integer" file="OverbyteIcsWSocketS.pas" line="273" />
+      <event name="OnClientDisconnect" visibility="published" read="FOnClientDisconnect" write="FOnClientDisconnect" type="TWSocketClientConnectEvent" file="OverbyteIcsWSocketS.pas" line="276" />
+      <event name="OnClientConnect" visibility="published" read="FOnClientConnect" write="FOnClientConnect" type="TWSocketClientConnectEvent" file="OverbyteIcsWSocketS.pas" line="280" />
+      <event name="OnClientCreate" visibility="published" read="FOnClientCreate" write="FOnClientCreate" type="TWSocketClientCreateEvent" file="OverbyteIcsWSocketS.pas" line="284" />
+    </members>
+  </class>
+  <class name="TWSocketServer" file="OverbyteIcsWSocketS.pas" line="289">
+    <ancestor name="TCustomWSocketServer" namespace="OverbyteIcsWSocketS">
+      <methodref name="WndProc" visibility="protected" procflags="override" />
+      <methodref name="Notification" visibility="protected" procflags="override" />
+      <methodref name="TriggerSessionAvailable" visibility="protected" procflags="override" />
+      <methodref name="TriggerClientCreate" visibility="protected" procflags="virtual" />
+      <methodref name="TriggerClientConnect" visibility="protected" procflags="virtual" />
+      <methodref name="TriggerClientDisconnect" visibility="protected" procflags="virtual" />
+      <methodref name="GetClientCount" visibility="protected" procflags="virtual" />
+      <methodref name="GetClient" visibility="protected" procflags="virtual" />
+      <methodref name="WMClientClosed" visibility="protected" procflags="virtual" />
+      <methodref name="MsgHandlersCount" visibility="protected" procflags="override" />
+      <methodref name="AllocateMsgHandlers" visibility="protected" procflags="override" />
+      <methodref name="FreeMsgHandlers" visibility="protected" procflags="override" />
+      <methodref name="Create" visibility="public" procflags="constructor override" />
+      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+      <methodref name="IsClient" visibility="public" />
+      <methodref name="Disconnect" visibility="public" procflags="virtual" />
+      <methodref name="DisconnectAll" visibility="public" procflags="virtual" />
+      <propertyref name="ClientClass" visibility="protected" />
+      <propertyref name="ClientCount" visibility="protected" />
+      <propertyref name="Client" visibility="protected" />
+      <propertyref name="Banner" visibility="published" />
+      <propertyref name="BannerTooBusy" visibility="published" />
+      <propertyref name="MaxClients" visibility="published" />
+      <eventref name="OnClientDisconnect" visibility="published" />
+      <eventref name="OnClientConnect" visibility="published" />
+      <eventref name="OnClientCreate" visibility="published" />
+      <ancestor name="TWSocket" namespace="OverbyteIcsWSocket">
+        <propertyref name="PortNum" visibility="public" />
+        <propertyref name="Handle" visibility="public" />
+        <propertyref name="HSocket" visibility="public" />
+        <propertyref name="BufSize" visibility="public" />
+        <propertyref name="Text" visibility="public" />
+        <propertyref name="AllSent" visibility="public" />
+        <propertyref name="PeerAddr" visibility="public" />
+        <propertyref name="PeerPort" visibility="public" />
+        <propertyref name="State" visibility="public" />
+        <propertyref name="DnsResult" visibility="public" />
+        <propertyref name="DnsResultList" visibility="public" />
+        <propertyref name="ReadCount" visibility="public" />
+        <propertyref name="RcvdCount" visibility="public" />
+        <propertyref name="SocketRcvBufSize" visibility="public" />
+        <propertyref name="SocketSndBufSize" visibility="public" />
+        <propertyref name="OnDebugDisplay" visibility="public" />
+        <propertyref name="Counter" visibility="public" />
+        <propertyref name="HttpTunnelCurrentAuthType" visibility="public" />
+        <propertyref name="HttpTunnelBufferSize" visibility="public" />
+        <propertyref name="HttpTunnelLastResponse" visibility="public" />
+        <propertyref name="HttpTunnelLmCompatLevel" visibility="public" />
+        <propertyref name="Addr" visibility="published" />
+        <propertyref name="Port" visibility="published" />
+        <propertyref name="Proto" visibility="published" />
+        <propertyref name="LocalAddr" visibility="published" />
+        <propertyref name="LocalPort" visibility="published" />
+        <propertyref name="MultiThreaded" visibility="published" />
+        <propertyref name="MultiCast" visibility="published" />
+        <propertyref name="MultiCastAddrStr" visibility="published" />
+        <propertyref name="MultiCastIpTTL" visibility="published" />
+        <propertyref name="FlushTimeout" visibility="published" />
+        <propertyref name="SendFlags" visibility="published" />
+        <propertyref name="LingerOnOff" visibility="published" />
+        <propertyref name="LingerTimeout" visibility="published" />
+        <propertyref name="KeepAliveOnOff" visibility="published" />
+        <propertyref name="KeepAliveTime" visibility="published" />
+        <propertyref name="KeepAliveInterval" visibility="published" />
+        <propertyref name="SocksLevel" visibility="published" />
+        <propertyref name="SocksServer" visibility="published" />
+        <propertyref name="SocksPort" visibility="published" />
+        <propertyref name="SocksUsercode" visibility="published" />
+        <propertyref name="SocksPassword" visibility="published" />
+        <propertyref name="SocksAuthentication" visibility="published" />
+        <propertyref name="LastError" visibility="published" />
+        <propertyref name="ReuseAddr" visibility="published" />
+        <propertyref name="ComponentOptions" visibility="published" />
+        <propertyref name="ListenBacklog" visibility="published" />
+        <propertyref name="ReqVerLow" visibility="published" />
+        <propertyref name="ReqVerHigh" visibility="published" />
+        <propertyref name="HttpTunnelAuthType" visibility="published" />
+        <propertyref name="HttpTunnelPassword" visibility="published" />
+        <propertyref name="HttpTunnelPort" visibility="published" />
+        <propertyref name="HttpTunnelServer" visibility="published" />
+        <propertyref name="HttpTunnelUsercode" visibility="published" />
+        <propertyref name="OnHttpTunnelError" visibility="published" />
+        <propertyref name="OnHttpTunnelConnected" visibility="published" />
+        <propertyref name="OnDataAvailable" visibility="published" />
+        <propertyref name="OnDataSent" visibility="published" />
+        <propertyref name="OnSendData" visibility="published" />
+        <propertyref name="OnSessionClosed" visibility="published" />
+        <propertyref name="OnSessionAvailable" visibility="published" />
+        <propertyref name="OnSessionConnected" visibility="published" />
+        <propertyref name="OnSocksConnected" visibility="published" />
+        <propertyref name="OnChangeState" visibility="published" />
+        <propertyref name="OnDnsLookupDone" visibility="published" />
+        <propertyref name="OnError" visibility="published" />
+        <propertyref name="OnBgException" visibility="published" />
+        <propertyref name="OnSocksError" visibility="published" />
+        <propertyref name="OnSocksAuthState" visibility="published" />
+        <propertyref name="IcsLogger" visibility="published" />
+        <ancestor name="TCustomThrottledWSocket" namespace="OverbyteIcsWSocket">
+          <methodref name="BandwidthHandleTimer" visibility="private" />
+          <methodref name="SetBandwidthControl" visibility="private" />
+          <methodref name="SetBandwidthLimit" visibility="private" />
+          <methodref name="SetBandwidthSampling" visibility="private" />
+          <methodref name="SetBandwidthKeepThreadAlive" visibility="private" />
+          <methodref name="DupConnected" visibility="protected" procflags="override" />
+          <methodref name="RealSend" visibility="protected" procflags="override" />
+          <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="override" />
+          <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+          <methodref name="Create" visibility="public" procflags="constructor override" />
+          <methodref name="Receive" visibility="public" procflags="override" />
+          <methodref name="ThreadAttach" visibility="public" procflags="override" />
+          <methodref name="ThreadDetach" visibility="public" procflags="override" />
+          <propertyref name="TimeoutKeepThreadAlive" visibility="public" />
+          <propertyref name="BandwidthLimit" visibility="public" />
+          <propertyref name="BandwidthSampling" visibility="public" />
+          <ancestor name="TCustomTimeoutWSocket" namespace="OverbyteIcsWSocket">
+            <methodref name="TimeoutHandleTimer" visibility="private" />
+            <methodref name="SetTimeoutSampling" visibility="private" />
+            <methodref name="SetTimeoutKeepThreadAlive" visibility="private" />
+            <methodref name="TriggerTimeout" visibility="protected" procflags="virtual" />
+            <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="override" />
+            <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+            <methodref name="DupConnected" visibility="protected" procflags="override" />
+            <methodref name="Create" visibility="public" procflags="constructor override" />
+            <methodref name="Connect" visibility="public" procflags="override" />
+            <methodref name="TimeoutStartSampling" visibility="public" />
+            <methodref name="TimeoutStopSampling" visibility="public" />
+            <methodref name="ThreadAttach" visibility="public" procflags="override" />
+            <methodref name="ThreadDetach" visibility="public" procflags="override" />
+            <propertyref name="TimeoutKeepThreadAlive" visibility="public" />
+            <propertyref name="TimeoutSampling" visibility="public" />
+            <propertyref name="TimeoutConnect" visibility="public" />
+            <propertyref name="TimeoutIdle" visibility="public" />
+            <eventref name="OnTimeout" visibility="public" />
+            <ancestor name="TCustomSyncWSocket" namespace="OverbyteIcsWSocket">
+              <methodref name="Synchronize" visibility="protected" procflags="virtual" />
+              <methodref name="WaitUntilReady" visibility="protected" procflags="virtual" />
+              <methodref name="InternalDataAvailable" visibility="protected" />
+              <methodref name="ReadLine" visibility="public" symflags="deprecated">
+              </methodref>
+              <ancestor name="TCustomLineWSocket" namespace="OverbyteIcsWSocket">
+                <methodref name="InternalAbort" visibility="protected" procflags="override" />
+                <methodref name="WndProc" visibility="protected" procflags="override" />
+                <methodref name="WMTriggerDataAvailable" visibility="protected" />
+                <methodref name="TriggerDataAvailable" visibility="protected" procflags="override" />
+                <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+                <methodref name="TriggerLineLimitExceeded" visibility="protected" procflags="virtual" />
+                <methodref name="SetLineMode" visibility="protected" procflags="virtual" />
+                <methodref name="EditLine" visibility="protected" procflags="virtual" />
+                <methodref name="GetRcvdCount" visibility="protected" procflags="override" />
+                <methodref name="DoRecv" visibility="protected" procflags="override" />
+                <methodref name="Create" visibility="public" procflags="constructor override" />
+                <methodref name="Destroy" visibility="public" procflags="destructor override" />
+                <methodref name="SendLine" visibility="public" procflags="overload virtual" />
+                <methodref name="SendLine" visibility="public" procflags="overload virtual" />
+                <methodref name="SendLine" visibility="public" procflags="overload virtual" />
+                <propertyref name="LineLength" visibility="public" />
+                <propertyref name="RcvdPtr" visibility="public" />
+                <propertyref name="RcvdCnt" visibility="public" />
+                <propertyref name="LineMode" visibility="published" />
+                <propertyref name="LineLimit" visibility="published" />
+                <propertyref name="LineEnd" visibility="published" />
+                <propertyref name="LineEcho" visibility="published" />
+                <propertyref name="LineEdit" visibility="published" />
+                <eventref name="OnLineLimitExceeded" visibility="published" />
+                <ancestor name="TCustomSocksWSocket" namespace="OverbyteIcsWSocket">
+                  <methodref name="AssignDefaultValue" visibility="protected" procflags="override" />
+                  <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="override" />
+                  <methodref name="TriggerSocksConnected" visibility="protected" procflags="virtual" />
+                  <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+                  <methodref name="TriggerDataAvailable" visibility="protected" procflags="override" />
+                  <methodref name="GetSocksPort" visibility="protected" />
+                  <methodref name="SetSocksPort" visibility="protected" procflags="virtual" />
+                  <methodref name="GetSocksServer" visibility="protected" />
+                  <methodref name="SetSocksServer" visibility="protected" procflags="virtual" />
+                  <methodref name="TriggerSocksError" visibility="protected" procflags="virtual" />
+                  <methodref name="TriggerSocksAuthState" visibility="protected" />
+                  <methodref name="GetRcvdCount" visibility="protected" procflags="override" />
+                  <methodref name="SetSocksLevel" visibility="protected" />
+                  <methodref name="DoRecv" visibility="protected" procflags="override" />
+                  <methodref name="SocksDoConnect" visibility="protected" />
+                  <methodref name="SocksDoAuthenticate" visibility="protected" />
+                  <methodref name="DataAvailableError" visibility="protected" />
+                  <methodref name="Create" visibility="public" procflags="constructor override" />
+                  <methodref name="Connect" visibility="public" procflags="override" />
+                  <methodref name="Listen" visibility="public" procflags="override" />
+                  <propertyref name="SocksServer" visibility="protected" />
+                  <propertyref name="SocksLevel" visibility="protected" />
+                  <propertyref name="SocksPort" visibility="protected" />
+                  <propertyref name="SocksUsercode" visibility="protected" />
+                  <propertyref name="SocksPassword" visibility="protected" />
+                  <propertyref name="SocksAuthentication" visibility="protected" />
+                  <eventref name="OnSocksError" visibility="protected" />
+                  <eventref name="OnSocksConnected" visibility="protected" />
+                  <eventref name="OnSocksAuthState" visibility="protected" />
+                  <ancestor name="TCustomHttpTunnelWSocket" namespace="OverbyteIcsWSocket">
+                    <methodref name="GetHttpTunnelLastResponse" visibility="private" />
+                    <methodref name="GetHttpTunnelServer" visibility="private" />
+                    <methodref name="GetHttpTunnelPort" visibility="private" />
+                    <methodref name="HttpTunnelClear" visibility="private" />
+                    <methodref name="HttpTunnelGetNtlmMessage3" visibility="private" />
+                    <methodref name="HttpTunnelProcessHdrLine" visibility="private" />
+                    <methodref name="HttpTunnelSendAuthBasic" visibility="private" />
+                    <methodref name="HttpTunnelSendAuthDigest" visibility="private" />
+                    <methodref name="HttpTunnelSendAuthNtlm_1" visibility="private" />
+                    <methodref name="HttpTunnelSendAuthNtlm_3" visibility="private" />
+                    <methodref name="HttpTunnelSendPlainConnect" visibility="private" />
+                    <methodref name="HttpTunnelTriggerResultOrContinue" visibility="private" />
+                    <methodref name="SetHttpTunnelAuthType" visibility="private" />
+                    <methodref name="SetHttpTunnelBufferSize" visibility="private" />
+                    <methodref name="SetHttpTunnelServer" visibility="private" />
+                    <methodref name="SetHttpTunnelPassword" visibility="private" />
+                    <methodref name="SetHttpTunnelPort" visibility="private" />
+                    <methodref name="SetHttpTunnelUsercode" visibility="private" />
+                    <methodref name="TriggerHttpTunnelConnected" visibility="private" />
+                    <methodref name="TriggerHttpTunnelError" visibility="private" />
+                    <methodref name="AllocateMsgHandlers" visibility="protected" procflags="override" />
+                    <methodref name="AssignDefaultValue" visibility="protected" procflags="override" />
+                    <methodref name="Do_FD_CLOSE" visibility="protected" procflags="override" />
+                    <methodref name="DoRecv" visibility="protected" procflags="override" />
+                    <methodref name="FreeMsgHandlers" visibility="protected" procflags="override" />
+                    <methodref name="GetRcvdCount" visibility="protected" procflags="override" />
+                    <methodref name="MsgHandlersCount" visibility="protected" procflags="override" />
+                    <methodref name="RaiseException" visibility="protected" procflags="override" />
+                    <methodref name="TriggerDataAvailable" visibility="protected" procflags="override" />
+                    <methodref name="TriggerSessionClosed" visibility="protected" procflags="override" />
+                    <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="override" />
+                    <methodref name="WndProc" visibility="protected" procflags="override" />
+                    <methodref name="WMHttpTunnelReconnect" visibility="protected" />
+                    <propertyref name="HttpTunnelAuthType" visibility="protected" />
+                    <propertyref name="HttpTunnelBufferSize" visibility="protected" />
+                    <propertyref name="HttpTunnelLastResponse" visibility="protected" />
+                    <propertyref name="HttpTunnelLmCompatLevel" visibility="protected" />
+                    <propertyref name="HttpTunnelPassword" visibility="protected" />
+                    <propertyref name="HttpTunnelPort" visibility="protected" />
+                    <propertyref name="HttpTunnelServer" visibility="protected" />
+                    <propertyref name="HttpTunnelUsercode" visibility="protected" />
+                    <propertyref name="HttpTunnelCurrentAuthType" visibility="protected" />
+                    <eventref name="OnHttpTunnelError" visibility="protected" />
+                    <eventref name="OnHttpTunnelConnected" visibility="protected" />
+                    <methodref name="Create" visibility="public" procflags="constructor override" />
+                    <methodref name="Connect" visibility="public" procflags="override" />
+                    <methodref name="Listen" visibility="public" procflags="override" />
+                    <ancestor name="TCustomWSocket" namespace="OverbyteIcsWSocket">
+                      <methodref name="SetIcsLogger" visibility="protected" procflags="virtual" />
+                      <methodref name="DebugLog" visibility="protected" procflags="virtual" />
+                      <methodref name="CheckLogOptions" visibility="protected" procflags="virtual" />
+                      <methodref name="AbortComponent" visibility="protected" procflags="override" />
+                      <methodref name="WndProc" visibility="protected" procflags="override" />
+                      <methodref name="MsgHandlersCount" visibility="protected" procflags="override" />
+                      <methodref name="AllocateMsgHandlers" visibility="protected" procflags="override" />
+                      <methodref name="FreeMsgHandlers" visibility="protected" procflags="override" />
+                      <methodref name="AllocateSocketHWnd" visibility="protected" procflags="virtual" />
+                      <methodref name="DeallocateSocketHWnd" visibility="protected" procflags="virtual" />
+                      <methodref name="SocketError" visibility="protected" />
+                      <methodref name="WMASyncSelect" visibility="protected" />
+                      <methodref name="WMAsyncGetHostByName" visibility="protected" />
+                      <methodref name="WMAsyncGetHostByAddr" visibility="protected" />
+                      <methodref name="WMCloseDelayed" visibility="protected" />
+                      <methodref name="ChangeState" visibility="protected" />
+                      <methodref name="TryToSend" visibility="protected" procflags="virtual" />
+                      <methodref name="ASyncReceive" visibility="protected" />
+                      <methodref name="AssignDefaultValue" visibility="protected" procflags="virtual" />
+                      <methodref name="InternalClose" visibility="protected" procflags="virtual" />
+                      <methodref name="InternalAbort" visibility="protected" procflags="virtual" />
+                      <methodref name="InternalCancelDnsLookup" visibility="protected" />
+                      <methodref name="Notification" visibility="protected" procflags="override" />
+                      <methodref name="SetSendFlags" visibility="protected" />
+                      <methodref name="GetSendFlags" visibility="protected" />
+                      <methodref name="SetAddr" visibility="protected" />
+                      <methodref name="SetCounterClass" visibility="protected" />
+                      <methodref name="SetRemotePort" visibility="protected" procflags="virtual" />
+                      <methodref name="GetRemotePort" visibility="protected" />
+                      <methodref name="SetLocalAddr" visibility="protected" />
+                      <methodref name="SetLocalPort" visibility="protected" />
+                      <methodref name="SetProto" visibility="protected" procflags="virtual" />
+                      <methodref name="GetRcvdCount" visibility="protected" procflags="virtual" />
+                      <methodref name="SetBufSize" visibility="protected" procflags="virtual" />
+                      <methodref name="GetBufSize" visibility="protected" procflags="virtual" />
+                      <methodref name="SetSocketRcvBufSize" visibility="protected" procflags="virtual" />
+                      <methodref name="SetSocketSndBufSize" visibility="protected" procflags="virtual" />
+                      <methodref name="BindSocket" visibility="protected" procflags="virtual" />
+                      <methodref name="SendText" visibility="protected" procflags="overload" />
+                      <methodref name="SendText" visibility="protected" procflags="overload" />
+                      <methodref name="SendText" visibility="protected" procflags="overload" />
+                      <methodref name="RealSend" visibility="protected" procflags="virtual" />
+                      <methodref name="RaiseException" visibility="protected" procflags="virtual" />
+                      <methodref name="GetReqVerLow" visibility="protected" />
+                      <methodref name="SetReqVerLow" visibility="protected" />
+                      <methodref name="GetReqVerHigh" visibility="protected" />
+                      <methodref name="SetReqVerHigh" visibility="protected" />
+                      <methodref name="TriggerDebugDisplay" visibility="protected" />
+                      <methodref name="TriggerSendData" visibility="protected" />
+                      <methodref name="TriggerDataAvailable" visibility="protected" procflags="virtual" />
+                      <methodref name="TriggerSessionAvailable" visibility="protected" procflags="virtual" />
+                      <methodref name="TriggerSessionConnectedSpecial" visibility="protected" procflags="virtual" />
+                      <methodref name="TriggerSessionConnected" visibility="protected" procflags="virtual" />
+                      <methodref name="TriggerSessionClosed" visibility="protected" procflags="virtual" />
+                      <methodref name="TriggerDataSent" visibility="protected" procflags="virtual" />
+                      <methodref name="TriggerChangeState" visibility="protected" procflags="virtual" />
+                      <methodref name="TriggerDNSLookupDone" visibility="protected" procflags="virtual" />
+                      <methodref name="TriggerError" visibility="protected" procflags="virtual" />
+                      <methodref name="DoRecv" visibility="protected" procflags="virtual" />
+                      <methodref name="DoRecvFrom" visibility="protected" procflags="virtual" />
+                      <methodref name="Do_FD_CONNECT" visibility="protected" procflags="virtual" />
+                      <methodref name="Do_FD_READ" visibility="protected" procflags="virtual" />
+                      <methodref name="Do_FD_WRITE" visibility="protected" procflags="virtual" />
+                      <methodref name="Do_FD_ACCEPT" visibility="protected" procflags="virtual" />
+                      <methodref name="Do_FD_CLOSE" visibility="protected" procflags="virtual" />
+                      <methodref name="DupConnected" visibility="protected" procflags="virtual" />
+                      <methodref name="Create" visibility="public" procflags="constructor override" />
+                      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+                      <methodref name="Connect" visibility="public" procflags="virtual" />
+                      <methodref name="Close" visibility="public" procflags="virtual" />
+                      <methodref name="CloseDelayed" visibility="public" procflags="virtual" />
+                      <methodref name="Abort" visibility="public" procflags="virtual" />
+                      <methodref name="Flush" visibility="public" procflags="virtual" />
+                      <methodref name="WaitForClose" visibility="public" procflags="virtual" />
+                      <methodref name="Listen" visibility="public" procflags="virtual" />
+                      <methodref name="Accept" visibility="public" procflags="virtual" />
+                      <methodref name="Receive" visibility="public" procflags="virtual" />
+                      <methodref name="ReceiveStr" visibility="public" procflags="virtual" />
+                      <methodref name="ReceiveStrA" visibility="public" procflags="virtual" />
+                      <methodref name="ReceiveStrW" visibility="public" procflags="overload virtual" />
+                      <methodref name="ReceiveStrW" visibility="public" procflags="overload virtual" />
+                      <methodref name="ReceiveFrom" visibility="public" procflags="virtual" />
+                      <methodref name="PeekData" visibility="public" />
+                      <methodref name="Send" visibility="public" procflags="overload virtual" />
+                      <methodref name="Send" visibility="public" procflags="overload virtual" />
+                      <methodref name="SendTo" visibility="public" procflags="virtual" />
+                      <methodref name="SendStr" visibility="public" procflags="overload virtual" />
+                      <methodref name="SendStr" visibility="public" procflags="overload virtual" />
+                      <methodref name="SendStr" visibility="public" procflags="overload virtual" />
+                      <methodref name="DnsLookup" visibility="public" procflags="virtual" />
+                      <methodref name="ReverseDnsLookup" visibility="public" procflags="virtual" />
+                      <methodref name="ReverseDnsLookupSync" visibility="public" procflags="virtual" />
+                      <methodref name="CancelDnsLookup" visibility="public" procflags="virtual" />
+                      <methodref name="GetPeerAddr" visibility="public" procflags="virtual" />
+                      <methodref name="GetPeerPort" visibility="public" procflags="virtual" />
+                      <methodref name="GetPeerName" visibility="public" procflags="virtual" />
+                      <methodref name="GetXPort" visibility="public" procflags="virtual" />
+                      <methodref name="GetXAddr" visibility="public" procflags="virtual" />
+                      <methodref name="TimerIsSet" visibility="public" procflags="virtual" />
+                      <methodref name="TimerClear" visibility="public" procflags="virtual" />
+                      <methodref name="TimerCmp" visibility="public" procflags="virtual" />
+                      <methodref name="GetSockName" visibility="public" procflags="virtual" />
+                      <methodref name="SetLingerOption" visibility="public" />
+                      <methodref name="SetKeepAliveOption" visibility="public" />
+                      <methodref name="SetTcpNoDelayOption" visibility="public" />
+                      <methodref name="Dup" visibility="public" procflags="virtual" />
+                      <methodref name="Shutdown" visibility="public" procflags="virtual" />
+                      <methodref name="Pause" visibility="public" procflags="virtual" />
+                      <methodref name="Resume" visibility="public" procflags="virtual" />
+                      <methodref name="PutDataInSendBuffer" visibility="public" procflags="virtual" />
+                      <methodref name="PutStringInSendBuffer" visibility="public" procflags="overload" />
+                      <methodref name="PutStringInSendBuffer" visibility="public" procflags="overload" />
+                      <methodref name="PutStringInSendBuffer" visibility="public" procflags="overload" />
+                      <methodref name="DeleteBufferedData" visibility="public" />
+                      <methodref name="ThreadAttach" visibility="public" procflags="override" />
+                      <methodref name="ThreadDetach" visibility="public" procflags="override" />
+                      <methodref name="CreateCounter" visibility="public" procflags="virtual" />
+                      <methodref name="DestroyCounter" visibility="public" />
+                      <propertyref name="BufferedByteCount" visibility="public" />
+                      <propertyref name="IcsLogger" visibility="protected" />
+                      <propertyref name="PortNum" visibility="protected" />
+                      <propertyref name="FWindowHandle" visibility="protected" />
+                      <propertyref name="HSocket" visibility="protected" />
+                      <propertyref name="Addr" visibility="protected" />
+                      <propertyref name="Port" visibility="protected" />
+                      <propertyref name="LocalPort" visibility="protected" />
+                      <propertyref name="LocalAddr" visibility="protected" />
+                      <propertyref name="Proto" visibility="protected" />
+                      <propertyref name="MultiCast" visibility="protected" />
+                      <propertyref name="MultiCastAddrStr" visibility="protected" />
+                      <propertyref name="MultiCastIpTTL" visibility="protected" />
+                      <propertyref name="ReuseAddr" visibility="protected" />
+                      <propertyref name="PeerAddr" visibility="protected" />
+                      <propertyref name="PeerPort" visibility="protected" />
+                      <propertyref name="DnsResult" visibility="protected" />
+                      <propertyref name="DnsResultList" visibility="protected" />
+                      <propertyref name="State" visibility="protected" />
+                      <propertyref name="AllSent" visibility="protected" />
+                      <propertyref name="ReadCount" visibility="protected" />
+                      <propertyref name="WriteCount" visibility="protected" />
+                      <propertyref name="RcvdCount" visibility="protected" />
+                      <propertyref name="LastError" visibility="protected" />
+                      <propertyref name="ComponentOptions" visibility="protected" />
+                      <propertyref name="BufSize" visibility="protected" />
+                      <propertyref name="SocketRcvBufSize" visibility="protected" />
+                      <propertyref name="SocketSndBufSize" visibility="protected" />
+                      <propertyref name="ListenBacklog" visibility="protected" />
+                      <propertyref name="ReqVerLow" visibility="protected" />
+                      <propertyref name="ReqVerHigh" visibility="protected" />
+                      <eventref name="OnDataAvailable" visibility="protected" />
+                      <eventref name="OnDataSent" visibility="protected" />
+                      <eventref name="OnSendData" visibility="protected" />
+                      <eventref name="OnSessionClosed" visibility="protected" />
+                      <eventref name="OnSessionAvailable" visibility="protected" />
+                      <eventref name="OnSessionConnected" visibility="protected" />
+                      <eventref name="OnChangeState" visibility="protected" />
+                      <eventref name="OnDnsLookupDone" visibility="protected" />
+                      <eventref name="OnError" visibility="protected" />
+                      <propertyref name="FlushTimeout" visibility="protected" />
+                      <propertyref name="SendFlags" visibility="protected" />
+                      <propertyref name="Text" visibility="protected" />
+                      <propertyref name="LingerOnOff" visibility="protected" />
+                      <propertyref name="LingerTimeout" visibility="protected" />
+                      <propertyref name="KeepAliveOnOff" visibility="protected" />
+                      <propertyref name="KeepAliveTime" visibility="protected" />
+                      <propertyref name="KeepAliveInterval" visibility="protected" />
+                      <eventref name="OnDebugDisplay" visibility="protected" />
+                      <propertyref name="Counter" visibility="protected" />
+                      <propertyref name="CounterClass" visibility="protected" />
+                      <ancestor name="TIcsWndControl" namespace="OverbyteIcsWndControl">
+                        <methodref name="Dispose" visibility="protected" procflags="virtual" />
+                        <methodref name="SetMultiThreaded" visibility="protected" procflags="virtual" />
+                        <methodref name="GetTerminated" visibility="protected" procflags="virtual" />
+                        <methodref name="SetTerminated" visibility="protected" procflags="virtual" />
+                        <methodref name="SetOnMessagePump" visibility="protected" procflags="virtual" />
+                        <methodref name="SetOnBgException" visibility="protected" procflags="virtual" />
+                        <methodref name="WndProc" visibility="protected" procflags="virtual" />
+                        <methodref name="HandleBackGroundException" visibility="protected" procflags="virtual" />
+                        <methodref name="TriggerBgException" visibility="protected" procflags="virtual" />
+                        <methodref name="WMRelease" visibility="protected" procflags="virtual" />
+                        <methodref name="AllocateHWnd" visibility="protected" procflags="virtual" />
+                        <methodref name="DeallocateHWnd" visibility="protected" procflags="virtual" />
+                        <methodref name="GetHandle" visibility="protected" />
+                        <methodref name="MsgHandlersCount" visibility="protected" procflags="virtual" />
+                        <methodref name="AllocateMsgHandlers" visibility="protected" procflags="virtual" />
+                        <methodref name="FreeMsgHandlers" visibility="protected" procflags="virtual" />
+                        <methodref name="AbortComponent" visibility="protected" procflags="virtual" />
+                        <methodref name="Create" visibility="public" procflags="constructor override" />
+                        <methodref name="Destroy" visibility="public" procflags="destructor override" />
+                        <methodref name="Release" visibility="public" procflags="virtual" />
+                        <methodref name="ThreadAttach" visibility="public" procflags="virtual" />
+                        <methodref name="ThreadDetach" visibility="public" procflags="virtual" />
+                        <methodref name="MessageLoop" visibility="public" procflags="virtual" />
+                        <methodref name="ProcessMessage" visibility="public" procflags="virtual" />
+                        <methodref name="ProcessMessages" visibility="public" procflags="virtual" />
+                        <methodref name="MessagePump" visibility="public" procflags="virtual" />
+                        <methodref name="PostQuitMessage" visibility="public" />
+                        <propertyref name="MultiThreaded" visibility="public" />
+                        <propertyref name="Terminated" visibility="public" />
+                        <eventref name="OnMessagePump" visibility="public" />
+                        <propertyref name="Handle" visibility="public" />
+                        <propertyref name="WndHandler" visibility="public" />
+                        <propertyref name="ThreadID" visibility="public" />
+                        <eventref name="OnBgException" visibility="public" />
+                        <eventref name="ExceptAbortProc" visibility="public" />
+                        <ancestor name="TComponent" namespace="System.Classes">
+                          <interfaces>
+                            <implements name="IInterfaceComponentReference" />
+                            <implements name="IInterface" />
+                          </interfaces>
+                          <methodref name="GetComObject" visibility="private">
+                          </methodref>
+                          <methodref name="GetComponent" visibility="private">
+                          </methodref>
+                          <methodref name="GetComponentCount" visibility="private">
+                          </methodref>
+                          <methodref name="GetComponentIndex" visibility="private">
+                          </methodref>
+                          <methodref name="Insert" visibility="private">
+                          </methodref>
+                          <methodref name="ReadLeft" visibility="private">
+                          </methodref>
+                          <methodref name="ReadTop" visibility="private">
+                          </methodref>
+                          <methodref name="Remove" visibility="private">
+                          </methodref>
+                          <methodref name="RemoveNotification" visibility="private">
+                          </methodref>
+                          <methodref name="SetComponentIndex" visibility="private">
+                          </methodref>
+                          <methodref name="SetReference" visibility="private">
+                          </methodref>
+                          <methodref name="WriteLeft" visibility="private">
+                          </methodref>
+                          <methodref name="WriteTop" visibility="private">
+                          </methodref>
+                          <methodref name="IntfGetComponent" visibility="private">
+                          </methodref>
+                          <methodref name="DoGetDeltaStreams" visibility="private">
+                          </methodref>
+                          <methodref name="ReadDeltaStream" visibility="private">
+                          </methodref>
+                          <methodref name="ReadDeltaState" visibility="private">
+                          </methodref>
+                          <methodref name="FindSortedComponent" visibility="private">
+                          </methodref>
+                          <methodref name="AddSortedComponent" visibility="private">
+                          </methodref>
+                          <methodref name="RemoveSortedComponent" visibility="private" procflags="inline">
+                          </methodref>
+                          <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+                          </methodref>
+                          <methodref name="AsyncSchedule" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="ChangeName" visibility="protected">
+                          </methodref>
+                          <methodref name="DefineProperties" visibility="protected" procflags="override">
+                          </methodref>
+                          <methodref name="GetChildren" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="GetChildOwner" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="GetChildParent" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="GetOwner" visibility="protected" procflags="override">
+                          </methodref>
+                          <methodref name="Loaded" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="Notification" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="GetDeltaStreams" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="PaletteCreated" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="ReadState" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="CanObserve" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="ObserverAdded" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="GetObservers" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="SetAncestor" visibility="protected">
+                          </methodref>
+                          <methodref name="SetDesigning" visibility="protected">
+                          </methodref>
+                          <methodref name="SetInline" visibility="protected">
+                          </methodref>
+                          <methodref name="SetDesignInstance" visibility="protected">
+                          </methodref>
+                          <methodref name="SetName" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="SetChildOrder" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="SetParentComponent" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="Updating" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="Updated" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="UpdateRegistry" visibility="protected" procflags="class virtual">
+                          </methodref>
+                          <methodref name="ValidateRename" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="ValidateContainer" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="ValidateInsert" visibility="protected" procflags="dynamic">
+                          </methodref>
+                          <methodref name="WriteState" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="RemoveFreeNotifications" visibility="protected">
+                          </methodref>
+                          <methodref name="QueryInterface" visibility="protected" procflags="virtual">
+                          </methodref>
+                          <methodref name="_AddRef" visibility="protected">
+                          </methodref>
+                          <methodref name="_Release" visibility="protected">
+                          </methodref>
+                          <methodref name="GetTypeInfoCount" visibility="protected">
+                          </methodref>
+                          <methodref name="GetTypeInfo" visibility="protected">
+                          </methodref>
+                          <methodref name="GetIDsOfNames" visibility="protected">
+                          </methodref>
+                          <methodref name="Invoke" visibility="protected">
+                          </methodref>
+                          <eventref name="OnGetDeltaStreams" visibility="protected">
+                          </eventref>
+                          <methodref name="Create" visibility="public" procflags="constructor virtual">
+                          </methodref>
+                          <methodref name="Destroy" visibility="public" procflags="destructor override">
+                          </methodref>
+                          <methodref name="BeforeDestruction" visibility="public" procflags="override">
+                          </methodref>
+                          <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                          </methodref>
+                          <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                          </methodref>
+                          <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                          </methodref>
+                          <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                          </methodref>
+                          <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                          </methodref>
+                          <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                          </methodref>
+                          <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                          </methodref>
+                          <methodref name="BeginInvoke" visibility="public" procflags="overload">
+                          </methodref>
+                          <methodref name="EndInvoke" visibility="public" procflags="overload">
+                          </methodref>
+                          <methodref name="EndInvoke" visibility="public" procflags="overload">
+                          </methodref>
+                          <methodref name="EndFunctionInvoke" visibility="public">
+                          </methodref>
+                          <methodref name="DestroyComponents" visibility="public">
+                          </methodref>
+                          <methodref name="Destroying" visibility="public">
+                          </methodref>
+                          <methodref name="ExecuteAction" visibility="public" procflags="dynamic">
+                          </methodref>
+                          <methodref name="FindComponent" visibility="public">
+                          </methodref>
+                          <methodref name="FreeNotification" visibility="public">
+                          </methodref>
+                          <methodref name="RemoveFreeNotification" visibility="public">
+                          </methodref>
+                          <methodref name="FreeOnRelease" visibility="public">
+                          </methodref>
+                          <methodref name="GetEnumerator" visibility="public" procflags="inline">
+                          </methodref>
+                          <methodref name="GetParentComponent" visibility="public" procflags="dynamic">
+                          </methodref>
+                          <methodref name="GetNamePath" visibility="public" procflags="override">
+                          </methodref>
+                          <methodref name="HasParent" visibility="public" procflags="dynamic">
+                          </methodref>
+                          <methodref name="InsertComponent" visibility="public">
+                          </methodref>
+                          <methodref name="RemoveComponent" visibility="public">
+                          </methodref>
+                          <methodref name="SetSubComponent" visibility="public">
+                          </methodref>
+                          <methodref name="SafeCallException" visibility="public" procflags="override">
+                          </methodref>
+                          <methodref name="UpdateAction" visibility="public" procflags="virtual">
+                          </methodref>
+                          <methodref name="IsImplementorOf" visibility="public">
+                          </methodref>
+                          <methodref name="ReferenceInterface" visibility="public">
+                          </methodref>
+                          <propertyref name="ComObject" visibility="public">
+                          </propertyref>
+                          <propertyref name="Components" visibility="public">
+                          </propertyref>
+                          <propertyref name="ComponentCount" visibility="public">
+                          </propertyref>
+                          <propertyref name="ComponentIndex" visibility="public">
+                          </propertyref>
+                          <propertyref name="ComponentState" visibility="public">
+                          </propertyref>
+                          <propertyref name="ComponentStyle" visibility="public">
+                          </propertyref>
+                          <propertyref name="DesignInfo" visibility="public">
+                          </propertyref>
+                          <propertyref name="Owner" visibility="public">
+                          </propertyref>
+                          <propertyref name="VCLComObject" visibility="public">
+                          </propertyref>
+                          <propertyref name="Observers" visibility="public">
+                          </propertyref>
+                          <propertyref name="Name" visibility="published">
+                          </propertyref>
+                          <propertyref name="Tag" visibility="published">
+                          </propertyref>
+                          <ancestor name="TPersistent" namespace="System.Classes">
+                            <methodref name="AssignError" visibility="private">
+                            </methodref>
+                            <methodref name="AssignTo" visibility="protected" procflags="virtual">
+                            </methodref>
+                            <methodref name="DefineProperties" visibility="protected" procflags="virtual">
+                            </methodref>
+                            <methodref name="GetOwner" visibility="protected" procflags="dynamic">
+                            </methodref>
+                            <methodref name="Destroy" visibility="public" procflags="destructor override">
+                            </methodref>
+                            <methodref name="Assign" visibility="public" procflags="virtual">
+                            </methodref>
+                            <methodref name="GetNamePath" visibility="public" procflags="dynamic">
+                            </methodref>
+                            <ancestor name="TObject" namespace="System">
+                              <methodref name="Create" visibility="public" procflags="constructor">
+                              </methodref>
+                              <methodref name="Free" visibility="public">
+                              </methodref>
+                              <methodref name="DisposeOf" visibility="public" procflags="inline">
+                              </methodref>
+                              <methodref name="InitInstance" visibility="public" procflags="class">
+                              </methodref>
+                              <methodref name="CleanupInstance" visibility="public">
+                              </methodref>
+                              <methodref name="ClassType" visibility="public" procflags="inline">
+                              </methodref>
+                              <methodref name="ClassName" visibility="public" procflags="class">
+                              </methodref>
+                              <methodref name="ClassNameIs" visibility="public" procflags="class">
+                              </methodref>
+                              <methodref name="ClassParent" visibility="public" procflags="class">
+                              </methodref>
+                              <methodref name="ClassInfo" visibility="public" procflags="class inline">
+                              </methodref>
+                              <methodref name="InstanceSize" visibility="public" procflags="class inline">
+                              </methodref>
+                              <methodref name="InheritsFrom" visibility="public" procflags="class">
+                              </methodref>
+                              <methodref name="MethodAddress" visibility="public" procflags="class overload">
+                              </methodref>
+                              <methodref name="MethodAddress" visibility="public" procflags="class overload">
+                              </methodref>
+                              <methodref name="MethodName" visibility="public" procflags="class">
+                              </methodref>
+                              <methodref name="QualifiedClassName" visibility="public" procflags="class">
+                              </methodref>
+                              <methodref name="FieldAddress" visibility="public" procflags="overload">
+                              </methodref>
+                              <methodref name="FieldAddress" visibility="public" procflags="overload">
+                              </methodref>
+                              <methodref name="GetInterface" visibility="public">
+                              </methodref>
+                              <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+                              </methodref>
+                              <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+                              </methodref>
+                              <methodref name="UnitName" visibility="public" procflags="class">
+                              </methodref>
+                              <methodref name="UnitScope" visibility="public" procflags="class">
+                              </methodref>
+                              <methodref name="Equals" visibility="public" procflags="virtual">
+                              </methodref>
+                              <methodref name="GetHashCode" visibility="public" procflags="virtual">
+                              </methodref>
+                              <methodref name="ToString" visibility="public" procflags="virtual">
+                              </methodref>
+                              <methodref name="SafeCallException" visibility="public" procflags="virtual">
+                              </methodref>
+                              <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+                              </methodref>
+                              <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+                              </methodref>
+                              <methodref name="Dispatch" visibility="public" procflags="virtual">
+                              </methodref>
+                              <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+                              </methodref>
+                              <methodref name="NewInstance" visibility="public" procflags="class virtual">
+                              </methodref>
+                              <methodref name="FreeInstance" visibility="public" procflags="virtual">
+                              </methodref>
+                              <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+                              </methodref>
+                              <methodref name="GetDisposed" visibility="protected" procflags="inline">
+                              </methodref>
+                              <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+                              </methodref>
+                              <propertyref name="Disposed" visibility="protected">
+                              </propertyref>
+                            </ancestor>
+                          </ancestor>
+                        </ancestor>
+                      </ancestor>
+                    </ancestor>
+                  </ancestor>
+                </ancestor>
+              </ancestor>
+            </ancestor>
+          </ancestor>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <property name="ClientClass" visibility="public" read="FClientClass" write="FClientClass" type="TWSocketClientClass" hoisted="true" file="OverbyteIcsWSocketS.pas" line="291" />
+      <property name="ClientCount" visibility="public" read="GetClientCount" type="Integer" hoisted="true" file="OverbyteIcsWSocketS.pas" line="292" />
+      <property name="Client[nIndex]" visibility="public" read="GetClient" type="TWSocketClient" hoisted="true" file="OverbyteIcsWSocketS.pas" line="293" />
+      <property name="IcsLogger" visibility="published" read="FIcsLogger" write="SetIcsLogger" type="TIcsLogger" hoisted="true" file="OverbyteIcsWSocketS.pas" line="296" />
+      <property name="Banner" visibility="published" read="FBanner" write="FBanner" type="string" default="0" hoisted="true" file="OverbyteIcsWSocketS.pas" line="298" />
+      <property name="BannerTooBusy" visibility="published" read="FBannerTooBusy" write="FBannerTooBusy" type="string" default="0" hoisted="true" file="OverbyteIcsWSocketS.pas" line="299" />
+      <property name="MaxClients" visibility="published" read="FMaxClients" write="FMaxClients" type="Integer" hoisted="true" file="OverbyteIcsWSocketS.pas" line="300" />
+      <event name="OnClientDisconnect" visibility="published" read="FOnClientDisconnect" write="FOnClientDisconnect" type="TWSocketClientConnectEvent" hoisted="true" file="OverbyteIcsWSocketS.pas" line="301" />
+      <event name="OnClientConnect" visibility="published" read="FOnClientConnect" write="FOnClientConnect" type="TWSocketClientConnectEvent" hoisted="true" file="OverbyteIcsWSocketS.pas" line="302" />
+    </members>
+  </class>
+</namespace>

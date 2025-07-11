@@ -1,0 +1,1348 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="WIL" platform="Win32">
+  <const name="CHECK_FREE_LIB_TIME" type="Integer" file="WIL.pas" line="12">
+    <value>
+      $2710
+    </value>
+  </const>
+  <const name="FREE_TEXTURE_TIME" type="Integer" file="WIL.pas" line="13">
+    <value>
+      $4E20
+    </value>
+  </const>
+  <const name="CHECK_FREE_TEXTURE_INTERVAL" type="Integer" file="WIL.pas" line="14">
+    <value>
+      $1388
+    </value>
+  </const>
+  <const name="msNormal" type="TMiniState" file="WIL.pas" line="16">
+    <value>
+      msNormal
+    </value>
+  </const>
+  <const name="msRequested" type="TMiniState" file="WIL.pas" line="16">
+    <value>
+      msRequested
+    </value>
+  </const>
+  <enum name="TMiniState" file="WIL.pas" line="16">
+    <element value="0" name="msNormal" file="WIL.pas" line="16" />
+    <element value="1" name="msRequested" file="WIL.pas" line="16" />
+  </enum>
+  <pointer name="PTImageFilePartInfoLite" type="TImageFilePartInfoLite" indircnt="1" file="WIL.pas" line="20" />
+  <struct name="TImageFilePartInfoLite" size="8" packed="true" file="WIL.pas" line="21">
+    <field name="FPartIndex" type=":TImageFilePartInfoLite.:1" visibility="private" size="4" offset="0" file="WIL.pas" line="23" />
+    <field name="FPartRequestTick" type=":TImageFilePartInfoLite.:2" visibility="private" size="4" offset="4" file="WIL.pas" line="24" />
+    <function name="GetPartCount" visibility="public" file="WIL.pas" line="26">
+      <parameters>
+        <retval type="Integer" />
+      </parameters>
+    </function>
+  </struct>
+  <struct name="TDXImage" size="12" packed="true" file="WIL.pas" line="29">
+    <field name="nPx" type="SmallInt" visibility="public" size="2" offset="0" file="WIL.pas" line="30" />
+    <field name="nPy" type="SmallInt" visibility="public" size="2" offset="2" file="WIL.pas" line="31" />
+    <field name="Surface" type="TAsphyreLockableTexture" visibility="public" size="4" offset="4" file="WIL.pas" line="32" />
+    <field name="dwLatestTime" type="Cardinal" visibility="public" size="4" offset="8" file="WIL.pas" line="33" />
+  </struct>
+  <pointer name="pTDxImage" type="TDXImage" indircnt="1" file="WIL.pas" line="35" />
+  <class name="TWMImages" file="WIL.pas" line="37">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FFileName" type="string" visibility="private" size="4" offset="4" file="WIL.pas" line="39" />
+      <field name="FImageCount" type="Integer" visibility="private" size="4" offset="8" file="WIL.pas" line="40" />
+      <field name="m_dwMemChecktTick" type="Cardinal" visibility="private" size="4" offset="12" file="WIL.pas" line="41" />
+      <field name="FReadTime" type="Cardinal" visibility="private" size="4" offset="16" file="WIL.pas" line="42" />
+      <field name="FHasData" type="Boolean" visibility="private" size="1" offset="20" file="WIL.pas" line="43" />
+      <field name="m_ImgArr" type=":TWMImages.:1" visibility="private" size="4" offset="24" file="WIL.pas" line="44" />
+      <field name="m_IndexList" type="TList&lt;System.Integer&gt;" visibility="private" size="4" offset="28" file="WIL.pas" line="45" />
+      <field name="m_FileStream" type="TFileStream" visibility="private" size="4" offset="32" file="WIL.pas" line="46" />
+      <field name="FVT" type="Boolean" visibility="private" size="1" offset="36" file="WIL.pas" line="47" />
+      <field name="FAppr" type="Word" visibility="private" size="2" offset="38" file="WIL.pas" line="48" />
+      <field name="FInitialize" type="Boolean" visibility="private" size="1" offset="40" file="WIL.pas" line="49" />
+      <field name="m_boMiniCreate" type="Boolean" visibility="private" size="1" offset="41" file="WIL.pas" line="50" />
+      <field name="m_PartInfo" type="PTImageFilePartInfoLite" visibility="private" size="4" offset="44" file="WIL.pas" line="51" />
+      <field name="m_boImportantDown" type="Boolean" visibility="private" size="1" offset="48" file="WIL.pas" line="52" />
+      <procedure name="SetFileName" visibility="private" file="WIL.pas" line="53">
+        <parameters>
+          <parameter name="Value" type="string" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="FreeOldMemorys" visibility="private" file="WIL.pas" line="54">
+      </procedure>
+      <function name="GetEmpty" visibility="private" file="WIL.pas" line="55">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="GetIndex" visibility="private" file="WIL.pas" line="56">
+        <parameters>
+          <parameter name="index" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetPartByIndex" visibility="private" file="WIL.pas" line="57">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetLastRequestTime" visibility="private" file="WIL.pas" line="58">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <retval type="Cardinal" />
+        </parameters>
+      </function>
+      <procedure name="SetRequestTime" visibility="private" file="WIL.pas" line="59">
+        <parameters>
+          <parameter name="index" type="Integer" />
+          <parameter name="Time" type="Cardinal" />
+        </parameters>
+      </procedure>
+      <procedure name="LoadDxImage" visibility="protected" procflags="virtual" file="WIL.pas" line="62">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <parameter name="position" type="Integer" />
+          <parameter name="pdximg" type="pTDxImage" />
+        </parameters>
+      </procedure>
+      <function name="GetImageSurface" visibility="protected" file="WIL.pas" line="63">
+        <parameters>
+          <parameter name="index" type="Integer" />
+          <retval type="TAsphyreLockableTexture" />
+        </parameters>
+      </function>
+      <procedure name="DoGetImgSize" visibility="protected" procflags="overload virtual" file="WIL.pas" line="64">
+        <parameters>
+          <parameter name="position" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="DoGetImgSize" visibility="protected" procflags="overload virtual" file="WIL.pas" line="65">
+        <parameters>
+          <parameter name="position" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+          <parameter name="m_wPx" type="Integer" paramflags="var" />
+          <parameter name="m_wPy" type="Integer" paramflags="var" />
+        </parameters>
+      </procedure>
+      <field name="AllWMImages" type="TList&lt;WIL.TWMImages&gt;" visibility="public" varflags="class" file="WIL.pas" line="67" />
+      <field name="MemmoryUsage" type="Int64" visibility="public" varflags="class" file="WIL.pas" line="68" />
+      <function name="ResourceGetMem" visibility="public" procflags="class" file="WIL.pas" line="69">
+        <parameters>
+          <parameter name="Size" type="Cardinal" />
+          <retval type="Pointer" />
+        </parameters>
+      </function>
+      <procedure name="ResourceFreeMem" visibility="public" procflags="class" file="WIL.pas" line="70">
+        <parameters>
+          <parameter name="P" type="Pointer" />
+          <parameter name="Size" type="Cardinal" />
+        </parameters>
+      </procedure>
+      <procedure name="AddMemSize" visibility="public" procflags="class" file="WIL.pas" line="71">
+        <parameters>
+          <parameter name="Size" type="Cardinal" />
+        </parameters>
+      </procedure>
+      <procedure name="DecMemSize" visibility="public" procflags="class" file="WIL.pas" line="72">
+        <parameters>
+          <parameter name="Size" type="Cardinal" />
+        </parameters>
+      </procedure>
+      <procedure name="CreateNewFile" visibility="public" procflags="class virtual" file="WIL.pas" line="74">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="BitCount" type="Integer" />
+        </parameters>
+      </procedure>
+      <constructor name="Create" visibility="public" file="WIL.pas" line="75">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="WIL.pas" line="76">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="Initialize" visibility="public" procflags="virtual" file="WIL.pas" line="78">
+      </procedure>
+      <procedure name="Finalize" visibility="public" procflags="virtual" file="WIL.pas" line="79">
+      </procedure>
+      <procedure name="ClearCache" visibility="public" file="WIL.pas" line="80">
+      </procedure>
+      <procedure name="ReLoad" visibility="public" procflags="virtual" file="WIL.pas" line="81">
+      </procedure>
+      <function name="GetImgDataSize" visibility="public" procflags="virtual" file="WIL.pas" line="83">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetCachedImage" visibility="public" file="WIL.pas" line="84">
+        <parameters>
+          <parameter name="index" type="Integer" />
+          <parameter name="m_wPx" type="Integer" paramflags="var" />
+          <parameter name="m_wPy" type="Integer" paramflags="var" />
+          <retval type="TAsphyreLockableTexture" />
+        </parameters>
+      </function>
+      <function name="GetImgSize" visibility="public" procflags="overload" file="WIL.pas" line="85">
+        <parameters>
+          <parameter name="index" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="GetImgSize" visibility="public" procflags="overload" file="WIL.pas" line="86">
+        <parameters>
+          <parameter name="index" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+          <parameter name="m_wPx" type="Integer" paramflags="var" />
+          <parameter name="m_wPy" type="Integer" paramflags="var" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="Extract" visibility="public" procflags="virtual" file="WIL.pas" line="87">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+          <parameter name="DataLen" type="Integer" paramflags="var" />
+          <parameter name="Data" type="PAnsiChar" paramflags="var" />
+        </parameters>
+      </procedure>
+      <property name="Important" visibility="public" read="m_boImportantDown" write="m_boImportantDown" type="Boolean" file="WIL.pas" line="88" />
+      <property name="FileName" visibility="public" read="FFileName" write="SetFileName" type="string" default="0" file="WIL.pas" line="89" />
+      <property name="ImageCount" visibility="public" read="FImageCount" type="Integer" file="WIL.pas" line="90" />
+      <property name="Images[index]" visibility="public" read="GetImageSurface" type="TAsphyreLockableTexture" file="WIL.pas" line="91" />
+      <property name="VT" visibility="public" read="FVT" type="Boolean" file="WIL.pas" line="92" />
+      <property name="Empty" visibility="public" read="GetEmpty" type="Boolean" file="WIL.pas" line="93" />
+      <property name="ReadTime" visibility="public" read="FReadTime" type="Cardinal" file="WIL.pas" line="94" />
+      <property name="FileStream" visibility="public" read="m_FileStream" type="TFileStream" file="WIL.pas" line="95" />
+      <property name="Index[Index]" visibility="public" read="GetIndex" type="Integer" file="WIL.pas" line="96" />
+      <property name="MiniCreate" visibility="public" read="m_boMiniCreate" write="m_boMiniCreate" type="Boolean" file="WIL.pas" line="97" />
+      <property name="Appr" visibility="public" read="FAppr" write="FAppr" type="Word" file="WIL.pas" line="98" />
+    </members>
+  </class>
+  <class name="TWMVirtualImages" file="WIL.pas" line="102">
+    <ancestor name="TWMImages" namespace="WIL">
+      <methodref name="SetFileName" visibility="private" />
+      <methodref name="FreeOldMemorys" visibility="private" />
+      <methodref name="GetEmpty" visibility="private" />
+      <methodref name="GetIndex" visibility="private" />
+      <methodref name="GetPartByIndex" visibility="private" />
+      <methodref name="GetLastRequestTime" visibility="private" />
+      <methodref name="SetRequestTime" visibility="private" />
+      <methodref name="LoadDxImage" visibility="protected" procflags="virtual" />
+      <methodref name="GetImageSurface" visibility="protected" />
+      <methodref name="DoGetImgSize" visibility="protected" procflags="overload virtual" />
+      <methodref name="DoGetImgSize" visibility="protected" procflags="overload virtual" />
+      <methodref name="ResourceGetMem" visibility="public" procflags="class" />
+      <methodref name="ResourceFreeMem" visibility="public" procflags="class" />
+      <methodref name="AddMemSize" visibility="public" procflags="class" />
+      <methodref name="DecMemSize" visibility="public" procflags="class" />
+      <methodref name="CreateNewFile" visibility="public" procflags="class virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor virtual" />
+      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+      <methodref name="Initialize" visibility="public" procflags="virtual" />
+      <methodref name="Finalize" visibility="public" procflags="virtual" />
+      <methodref name="ClearCache" visibility="public" />
+      <methodref name="ReLoad" visibility="public" procflags="virtual" />
+      <methodref name="GetImgDataSize" visibility="public" procflags="virtual" />
+      <methodref name="GetCachedImage" visibility="public" />
+      <methodref name="GetImgSize" visibility="public" procflags="overload" />
+      <methodref name="GetImgSize" visibility="public" procflags="overload" />
+      <methodref name="Extract" visibility="public" procflags="virtual" />
+      <propertyref name="Important" visibility="public" />
+      <propertyref name="FileName" visibility="public" />
+      <propertyref name="ImageCount" visibility="public" />
+      <propertyref name="Images" visibility="public" />
+      <propertyref name="VT" visibility="public" />
+      <propertyref name="Empty" visibility="public" />
+      <propertyref name="ReadTime" visibility="public" />
+      <propertyref name="FileStream" visibility="public" />
+      <propertyref name="Index" visibility="public" />
+      <propertyref name="MiniCreate" visibility="public" />
+      <propertyref name="Appr" visibility="public" />
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <procedure name="LoadDxImage" visibility="protected" procflags="override" file="WIL.pas" line="104">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <parameter name="position" type="Integer" />
+          <parameter name="pdximg" type="pTDxImage" />
+        </parameters>
+      </procedure>
+      <procedure name="DoGetImgSize" visibility="protected" procflags="overload override" file="WIL.pas" line="105">
+        <parameters>
+          <parameter name="position" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+        </parameters>
+      </procedure>
+      <constructor name="Create" visibility="public" file="WIL.pas" line="107">
+        <parameters>
+        </parameters>
+      </constructor>
+      <procedure name="Initialize" visibility="public" procflags="override" file="WIL.pas" line="108">
+      </procedure>
+    </members>
+  </class>
+  <class name="TWMImageLibManager" file="WIL.pas" line="113">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FLibs" type="TDictionary&lt;System.string,WIL.TWMImages&gt;" visibility="private" size="4" offset="4" file="WIL.pas" line="115" />
+      <field name="FMiniUseLibs" type="TDictionary&lt;System.string,WIL.TWMImages&gt;" visibility="private" size="4" offset="8" file="WIL.pas" line="116" />
+      <field name="FFullNameLibs" type="TDictionary&lt;System.string,WIL.TWMImages&gt;" visibility="private" size="4" offset="12" file="WIL.pas" line="117" />
+      <field name="FMiniOpend" type="Boolean" visibility="private" size="1" offset="16" file="WIL.pas" line="118" />
+      <field name="FAddDownloadImage" type="TOnAddDownloadImage" visibility="private" size="8" offset="24" file="WIL.pas" line="119" />
+      <field name="FReloadFinished" type="TOnReloadFinished" visibility="private" size="8" offset="32" file="WIL.pas" line="120" />
+      <field name="FMiniImageFile" type="TDictionary&lt;System.string,System.string&gt;" visibility="private" size="4" offset="40" file="WIL.pas" line="121" />
+      <field name="FPartInfo" type="TDictionary&lt;System.string,WIL.PTImageFilePartInfoLite&gt;" visibility="private" size="4" offset="44" file="WIL.pas" line="122" />
+      <field name="FPassWordList" type="TDictionary&lt;System.string,System.string&gt;" visibility="private" size="4" offset="48" file="WIL.pas" line="123" />
+      <procedure name="SetMiniOpen" visibility="private" file="WIL.pas" line="124">
+        <parameters>
+          <parameter name="Value" type="Boolean" />
+        </parameters>
+      </procedure>
+      <constructor name="Create" visibility="private" file="WIL.pas" line="125">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="private" file="WIL.pas" line="126">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="AddLib" visibility="private" file="WIL.pas" line="127">
+        <parameters>
+          <parameter name="AName" type="string" paramflags="const" />
+          <parameter name="Lib" type="TWMImages" />
+        </parameters>
+      </procedure>
+      <function name="TryGetLibByFullName" visibility="public" file="WIL.pas" line="129">
+        <parameters>
+          <parameter name="AName" type="string" paramflags="const" />
+          <parameter name="Lib" type="TWMImages" paramflags="out" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="TryGetLib" visibility="public" file="WIL.pas" line="131">
+        <parameters>
+          <parameter name="AName" type="string" paramflags="const" />
+          <parameter name="Lib" type="TWMImages" paramflags="out" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="TryGetLib2" visibility="public" file="WIL.pas" line="132">
+        <parameters>
+          <parameter name="AName" type="string" paramflags="const" />
+          <parameter name="Lib" type="TWMImages" paramflags="out" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="TryGetLibSatic" visibility="public" file="WIL.pas" line="134">
+        <parameters>
+          <parameter name="AName" type="string" paramflags="const" />
+          <parameter name="Lib" type="TWMImages" paramflags="out" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="LoadLibNames" visibility="public" file="WIL.pas" line="135">
+        <parameters>
+          <parameter name="ANames" type="TStrings" />
+        </parameters>
+      </procedure>
+      <procedure name="LoadImage" visibility="public" file="WIL.pas" line="136">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Index" type="Integer" />
+          <parameter name="Position" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="FreeMemory" visibility="public" file="WIL.pas" line="137">
+      </procedure>
+      <procedure name="ClearTextures" visibility="public" file="WIL.pas" line="138">
+      </procedure>
+      <procedure name="ReLoadImageFile" visibility="public" file="WIL.pas" line="139">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="AddDownloadImage" visibility="public" file="WIL.pas" line="140">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="ImageIndex" type="Integer" />
+          <parameter name="Important" type="Boolean" />
+        </parameters>
+      </procedure>
+      <procedure name="FileReLoadFinish" visibility="public" file="WIL.pas" line="141">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+        </parameters>
+      </procedure>
+      <function name="LoadMiniImageFile" visibility="public" file="WIL.pas" line="142">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="LoadPartInfoFile" visibility="public" file="WIL.pas" line="143">
+        <parameters>
+          <parameter name="Value" type="TImageFilePartInfo" paramflags="const" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetMiniFileName" visibility="public" file="WIL.pas" line="144">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <retval type="string" />
+        </parameters>
+      </function>
+      <procedure name="AddPassWord" visibility="public" file="WIL.pas" line="145">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="PassWord" type="string" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="FreeAllTextureMemory" visibility="public" file="WIL.pas" line="146">
+      </procedure>
+      <property name="MiniOpend" visibility="public" read="FMiniOpend" write="SetMiniOpen" type="Boolean" file="WIL.pas" line="147" />
+      <event name="OnAddDownloadImage" visibility="public" read="FAddDownloadImage" write="FAddDownloadImage" type="TOnAddDownloadImage" file="WIL.pas" line="148" />
+      <event name="OnReLoadFinished" visibility="public" read="FReloadFinished" write="FReloadFinished" type="TOnReloadFinished" file="WIL.pas" line="149" />
+    </members>
+  </class>
+  <const name="gtDIB" type="TGraphicType" file="WIL.pas" line="232">
+    <value>
+      gtDIB
+    </value>
+  </const>
+  <const name="gtPng" type="TGraphicType" file="WIL.pas" line="232">
+    <value>
+      gtPng
+    </value>
+  </const>
+  <const name="gtRealPng" type="TGraphicType" file="WIL.pas" line="232">
+    <value>
+      gtRealPng
+    </value>
+  </const>
+  <const name="gtNone" type="TGraphicType" file="WIL.pas" line="232">
+    <value>
+      gtNone
+    </value>
+  </const>
+  <struct name="TWMImageHeader" size="60" file="WIL.pas" line="153">
+    <field name="Title" visibility="public" size="41" offset="0" file="WIL.pas" line="154">
+      <type name="Title" type="ShortString" />
+    </field>
+    <field name="ImageCount" type="Integer" visibility="public" size="4" offset="44" file="WIL.pas" line="155" />
+    <field name="ColorCount" type="Integer" visibility="public" size="4" offset="48" file="WIL.pas" line="156" />
+    <field name="PaletteSize" type="Integer" visibility="public" size="4" offset="52" file="WIL.pas" line="157" />
+    <field name="VerFlag" type="Integer" visibility="public" size="4" offset="56" file="WIL.pas" line="158" />
+  </struct>
+  <struct name="TWMIndexHeader" size="52" file="WIL.pas" line="161">
+    <field name="Title" visibility="public" size="41" offset="0" file="WIL.pas" line="162">
+      <type name="Title" type="ShortString" />
+    </field>
+    <field name="IndexCount" type="Integer" visibility="public" size="4" offset="44" file="WIL.pas" line="163" />
+    <field name="VerFlag" type="Integer" visibility="public" size="4" offset="48" file="WIL.pas" line="164" />
+  </struct>
+  <struct name="TWMImageInfo" size="12" file="WIL.pas" line="167">
+    <field name="m_nWidth" type="Word" visibility="public" size="2" offset="0" file="WIL.pas" line="168" />
+    <field name="m_nHeight" type="Word" visibility="public" size="2" offset="2" file="WIL.pas" line="169" />
+    <field name="m_wPx" type="SmallInt" visibility="public" size="2" offset="4" file="WIL.pas" line="170" />
+    <field name="m_wPy" type="SmallInt" visibility="public" size="2" offset="6" file="WIL.pas" line="171" />
+    <field name="bits" type="PByte" visibility="public" size="4" offset="8" file="WIL.pas" line="172" />
+  </struct>
+  <pointer name="PRGBQuads" type="TRGBQuads" indircnt="1" file="WIL.pas" line="175" />
+  <array name="TRGBQuads" low="0" high="255">
+    <element type="tagRGBQUAD" />
+  </array>
+  <class name="TWILImages" file="WIL.pas" line="177">
+    <ancestor name="TWMImages" namespace="WIL">
+      <methodref name="SetFileName" visibility="private" />
+      <methodref name="FreeOldMemorys" visibility="private" />
+      <methodref name="GetEmpty" visibility="private" />
+      <methodref name="GetIndex" visibility="private" />
+      <methodref name="GetPartByIndex" visibility="private" />
+      <methodref name="GetLastRequestTime" visibility="private" />
+      <methodref name="SetRequestTime" visibility="private" />
+      <methodref name="LoadDxImage" visibility="protected" procflags="virtual" />
+      <methodref name="GetImageSurface" visibility="protected" />
+      <methodref name="DoGetImgSize" visibility="protected" procflags="overload virtual" />
+      <methodref name="DoGetImgSize" visibility="protected" procflags="overload virtual" />
+      <methodref name="ResourceGetMem" visibility="public" procflags="class" />
+      <methodref name="ResourceFreeMem" visibility="public" procflags="class" />
+      <methodref name="AddMemSize" visibility="public" procflags="class" />
+      <methodref name="DecMemSize" visibility="public" procflags="class" />
+      <methodref name="CreateNewFile" visibility="public" procflags="class virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor virtual" />
+      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+      <methodref name="Initialize" visibility="public" procflags="virtual" />
+      <methodref name="Finalize" visibility="public" procflags="virtual" />
+      <methodref name="ClearCache" visibility="public" />
+      <methodref name="ReLoad" visibility="public" procflags="virtual" />
+      <methodref name="GetImgDataSize" visibility="public" procflags="virtual" />
+      <methodref name="GetCachedImage" visibility="public" />
+      <methodref name="GetImgSize" visibility="public" procflags="overload" />
+      <methodref name="GetImgSize" visibility="public" procflags="overload" />
+      <methodref name="Extract" visibility="public" procflags="virtual" />
+      <propertyref name="Important" visibility="public" />
+      <propertyref name="FileName" visibility="public" />
+      <propertyref name="ImageCount" visibility="public" />
+      <propertyref name="Images" visibility="public" />
+      <propertyref name="VT" visibility="public" />
+      <propertyref name="Empty" visibility="public" />
+      <propertyref name="ReadTime" visibility="public" />
+      <propertyref name="FileStream" visibility="public" />
+      <propertyref name="Index" visibility="public" />
+      <propertyref name="MiniCreate" visibility="public" />
+      <propertyref name="Appr" visibility="public" />
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="BytesPerPixe" type="Byte" visibility="private" size="1" offset="52" file="WIL.pas" line="179" />
+      <field name="FBitCount" type="Byte" visibility="private" size="1" offset="53" file="WIL.pas" line="180" />
+      <field name="btVersion" type="Byte" visibility="private" size="1" offset="54" file="WIL.pas" line="181" />
+      <procedure name="LoadPalette" visibility="private" file="WIL.pas" line="182">
+      </procedure>
+      <procedure name="LoadIndex" visibility="protected" file="WIL.pas" line="184">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="LoadDxImage" visibility="protected" procflags="override" file="WIL.pas" line="185">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <parameter name="position" type="Integer" />
+          <parameter name="pdximg" type="pTDxImage" />
+        </parameters>
+      </procedure>
+      <procedure name="DoGetImgSize" visibility="protected" procflags="overload override" file="WIL.pas" line="186">
+        <parameters>
+          <parameter name="position" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="DoGetImgSize" visibility="protected" procflags="overload override" file="WIL.pas" line="187">
+        <parameters>
+          <parameter name="position" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+          <parameter name="m_wPx" type="Integer" paramflags="var" />
+          <parameter name="m_wPy" type="Integer" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="Initialize" visibility="public" procflags="override" file="WIL.pas" line="189">
+      </procedure>
+      <procedure name="CreateNewFile" visibility="public" procflags="class override" file="WIL.pas" line="190">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="BitCount" type="Integer" />
+        </parameters>
+      </procedure>
+    </members>
+  </class>
+  <struct name="TWZXIndexHeader" size="48" file="WIL.pas" line="193">
+    <field name="Title" visibility="public" size="44" offset="0" file="WIL.pas" line="194">
+      <type name="Title" type="ShortString" />
+    </field>
+    <field name="IndexCount" type="Integer" visibility="public" size="4" offset="44" file="WIL.pas" line="195" />
+  </struct>
+  <pointer name="PWZXIndexHeader" type="TWZXIndexHeader" indircnt="1" file="WIL.pas" line="197" />
+  <struct name="TWZLImageHeader" size="64" file="WIL.pas" line="199">
+    <field name="Title" visibility="public" size="44" offset="0" file="WIL.pas" line="200">
+      <type name="Title" type="ShortString" />
+    </field>
+    <field name="IndexCount" type="Integer" visibility="public" size="4" offset="44" file="WIL.pas" line="201" />
+    <field name="Reserved" visibility="public" size="16" offset="48" file="WIL.pas" line="202">
+      <array name="Reserved" visibility="public" low="0" high="15">
+        <element type="Byte" />
+      </array>
+    </field>
+  </struct>
+  <pointer name="PWZLImageHeader" type="TWZLImageHeader" indircnt="1" file="WIL.pas" line="204" />
+  <struct name="TWZLImageInfo" size="16" packed="true" file="WIL.pas" line="206">
+    <field name="m_Enc1" type="Byte" visibility="public" size="1" offset="0" file="WIL.pas" line="207" />
+    <field name="m_Enc2" type="Byte" visibility="public" size="1" offset="1" file="WIL.pas" line="208" />
+    <field name="m_type1" type="Byte" visibility="public" size="1" offset="2" file="WIL.pas" line="209" />
+    <field name="m_type2" type="Byte" visibility="public" size="1" offset="3" file="WIL.pas" line="210" />
+    <field name="m_nWidth" type="SmallInt" visibility="public" size="2" offset="4" file="WIL.pas" line="211" />
+    <field name="m_nHeight" type="SmallInt" visibility="public" size="2" offset="6" file="WIL.pas" line="212" />
+    <field name="m_wPx" type="SmallInt" visibility="public" size="2" offset="8" file="WIL.pas" line="213" />
+    <field name="m_wPy" type="SmallInt" visibility="public" size="2" offset="10" file="WIL.pas" line="214" />
+    <field name="m_Len" type="Cardinal" visibility="public" size="4" offset="12" file="WIL.pas" line="215" />
+  </struct>
+  <pointer name="PWZLImageInfo" type="TWZLImageInfo" indircnt="1" file="WIL.pas" line="217" />
+  <class name="TWZLImages" file="WIL.pas" line="219">
+    <ancestor name="TWMImages" namespace="WIL">
+      <methodref name="SetFileName" visibility="private" />
+      <methodref name="FreeOldMemorys" visibility="private" />
+      <methodref name="GetEmpty" visibility="private" />
+      <methodref name="GetIndex" visibility="private" />
+      <methodref name="GetPartByIndex" visibility="private" />
+      <methodref name="GetLastRequestTime" visibility="private" />
+      <methodref name="SetRequestTime" visibility="private" />
+      <methodref name="LoadDxImage" visibility="protected" procflags="virtual" />
+      <methodref name="GetImageSurface" visibility="protected" />
+      <methodref name="DoGetImgSize" visibility="protected" procflags="overload virtual" />
+      <methodref name="DoGetImgSize" visibility="protected" procflags="overload virtual" />
+      <methodref name="ResourceGetMem" visibility="public" procflags="class" />
+      <methodref name="ResourceFreeMem" visibility="public" procflags="class" />
+      <methodref name="AddMemSize" visibility="public" procflags="class" />
+      <methodref name="DecMemSize" visibility="public" procflags="class" />
+      <methodref name="CreateNewFile" visibility="public" procflags="class virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor virtual" />
+      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+      <methodref name="Initialize" visibility="public" procflags="virtual" />
+      <methodref name="Finalize" visibility="public" procflags="virtual" />
+      <methodref name="ClearCache" visibility="public" />
+      <methodref name="ReLoad" visibility="public" procflags="virtual" />
+      <methodref name="GetImgDataSize" visibility="public" procflags="virtual" />
+      <methodref name="GetCachedImage" visibility="public" />
+      <methodref name="GetImgSize" visibility="public" procflags="overload" />
+      <methodref name="GetImgSize" visibility="public" procflags="overload" />
+      <methodref name="Extract" visibility="public" procflags="virtual" />
+      <propertyref name="Important" visibility="public" />
+      <propertyref name="FileName" visibility="public" />
+      <propertyref name="ImageCount" visibility="public" />
+      <propertyref name="Images" visibility="public" />
+      <propertyref name="VT" visibility="public" />
+      <propertyref name="Empty" visibility="public" />
+      <propertyref name="ReadTime" visibility="public" />
+      <propertyref name="FileStream" visibility="public" />
+      <propertyref name="Index" visibility="public" />
+      <propertyref name="MiniCreate" visibility="public" />
+      <propertyref name="Appr" visibility="public" />
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <procedure name="LoadIndex" visibility="protected" file="WIL.pas" line="221">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="LoadDxImage" visibility="protected" procflags="override" file="WIL.pas" line="222">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <parameter name="position" type="Integer" />
+          <parameter name="pdximg" type="pTDxImage" />
+        </parameters>
+      </procedure>
+      <procedure name="DoGetImgSize" visibility="protected" procflags="overload override" file="WIL.pas" line="223">
+        <parameters>
+          <parameter name="position" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="DoGetImgSize" visibility="protected" procflags="overload override" file="WIL.pas" line="224">
+        <parameters>
+          <parameter name="position" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+          <parameter name="m_wPx" type="Integer" paramflags="var" />
+          <parameter name="m_wPy" type="Integer" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="Initialize" visibility="public" procflags="override" file="WIL.pas" line="226">
+      </procedure>
+      <procedure name="ReLoad" visibility="public" procflags="override" file="WIL.pas" line="227">
+      </procedure>
+      <function name="GetImgDataSize" visibility="public" procflags="override" file="WIL.pas" line="228">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <procedure name="Extract" visibility="public" procflags="override" file="WIL.pas" line="229">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+          <parameter name="DataLen" type="Integer" paramflags="var" />
+          <parameter name="Data" type="PAnsiChar" paramflags="var" />
+        </parameters>
+      </procedure>
+    </members>
+  </class>
+  <enum name="TGraphicType" file="WIL.pas" line="232">
+    <element value="0" name="gtDIB" file="WIL.pas" line="232" />
+    <element value="1" name="gtPng" file="WIL.pas" line="232" />
+    <element value="2" name="gtRealPng" file="WIL.pas" line="232" />
+    <element value="3" name="gtNone" file="WIL.pas" line="232" />
+  </enum>
+  <struct name="TPackDataHeader" size="72" file="WIL.pas" line="234">
+    <field name="Title" visibility="public" size="41" offset="0" file="WIL.pas" line="235">
+      <type name="Title" type="ShortString" />
+    </field>
+    <field name="ImageCount" type="Integer" visibility="public" size="4" offset="44" file="WIL.pas" line="236" />
+    <field name="IndexOffSet" type="Integer" visibility="public" size="4" offset="48" file="WIL.pas" line="237" />
+    <field name="XVersion" type="Word" visibility="public" size="2" offset="52" file="WIL.pas" line="238" />
+    <field name="Password" visibility="public" size="17" offset="54" file="WIL.pas" line="239">
+      <type name="Password" type="ShortString" />
+    </field>
+  </struct>
+  <pointer name="pTPackDataHeader" type="TPackDataHeader" indircnt="1" file="WIL.pas" line="241" />
+  <struct name="TPackDataImageInfo" size="14" packed="true" file="WIL.pas" line="243">
+    <field name="m_nWidth" type="Word" visibility="public" size="2" offset="0" file="WIL.pas" line="244" />
+    <field name="m_nHeight" type="Word" visibility="public" size="2" offset="2" file="WIL.pas" line="245" />
+    <field name="bitCount" type="Byte" visibility="public" size="1" offset="4" file="WIL.pas" line="246" />
+    <field name="m_wPx" type="SmallInt" visibility="public" size="2" offset="5" file="WIL.pas" line="247" />
+    <field name="m_wPy" type="SmallInt" visibility="public" size="2" offset="7" file="WIL.pas" line="248" />
+    <field name="m_Len" type="Cardinal" visibility="public" size="4" offset="9" file="WIL.pas" line="249" />
+    <field name="GraphicType" type="TGraphicType" visibility="public" size="1" offset="13" file="WIL.pas" line="250" />
+  </struct>
+  <pointer name="pTPackDataImageInfo" type="TPackDataImageInfo" indircnt="1" file="WIL.pas" line="252" />
+  <class name="TWMPackageImages" file="WIL.pas" line="254">
+    <ancestor name="TWMImages" namespace="WIL">
+      <methodref name="SetFileName" visibility="private" />
+      <methodref name="FreeOldMemorys" visibility="private" />
+      <methodref name="GetEmpty" visibility="private" />
+      <methodref name="GetIndex" visibility="private" />
+      <methodref name="GetPartByIndex" visibility="private" />
+      <methodref name="GetLastRequestTime" visibility="private" />
+      <methodref name="SetRequestTime" visibility="private" />
+      <methodref name="LoadDxImage" visibility="protected" procflags="virtual" />
+      <methodref name="GetImageSurface" visibility="protected" />
+      <methodref name="DoGetImgSize" visibility="protected" procflags="overload virtual" />
+      <methodref name="DoGetImgSize" visibility="protected" procflags="overload virtual" />
+      <methodref name="ResourceGetMem" visibility="public" procflags="class" />
+      <methodref name="ResourceFreeMem" visibility="public" procflags="class" />
+      <methodref name="AddMemSize" visibility="public" procflags="class" />
+      <methodref name="DecMemSize" visibility="public" procflags="class" />
+      <methodref name="CreateNewFile" visibility="public" procflags="class virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor virtual" />
+      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+      <methodref name="Initialize" visibility="public" procflags="virtual" />
+      <methodref name="Finalize" visibility="public" procflags="virtual" />
+      <methodref name="ClearCache" visibility="public" />
+      <methodref name="ReLoad" visibility="public" procflags="virtual" />
+      <methodref name="GetImgDataSize" visibility="public" procflags="virtual" />
+      <methodref name="GetCachedImage" visibility="public" />
+      <methodref name="GetImgSize" visibility="public" procflags="overload" />
+      <methodref name="GetImgSize" visibility="public" procflags="overload" />
+      <methodref name="Extract" visibility="public" procflags="virtual" />
+      <propertyref name="Important" visibility="public" />
+      <propertyref name="FileName" visibility="public" />
+      <propertyref name="ImageCount" visibility="public" />
+      <propertyref name="Images" visibility="public" />
+      <propertyref name="VT" visibility="public" />
+      <propertyref name="Empty" visibility="public" />
+      <propertyref name="ReadTime" visibility="public" />
+      <propertyref name="FileStream" visibility="public" />
+      <propertyref name="Index" visibility="public" />
+      <propertyref name="MiniCreate" visibility="public" />
+      <propertyref name="Appr" visibility="public" />
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <const name="_HKey" visibility="private" type="string" file="WIL.pas" line="256">
+        <value>
+          7BB2FA4F-2A6A-4632-B72F-F98D440E8C36
+        </value>
+      </const>
+      <const name="_Key" visibility="private" type="string" file="WIL.pas" line="257">
+        <value>
+          CFBA39C1-72A6-4171-9FF0-CF1920DD76F3
+        </value>
+      </const>
+      <field name="FDataHeader" type="TPackDataHeader" visibility="private" size="72" offset="52" file="WIL.pas" line="259" />
+      <field name="FPassWord" type="AnsiString" visibility="private" size="4" offset="124" file="WIL.pas" line="260" />
+      <field name="m_SortedIndexPosition" type="TList&lt;System.Integer&gt;" visibility="private" size="4" offset="128" file="WIL.pas" line="261" />
+      <field name="m_boSortedIndex" type="Boolean" visibility="private" size="1" offset="132" file="WIL.pas" line="262" />
+      <field name="m_PassWord" type="string" visibility="private" size="4" offset="136" file="WIL.pas" line="263" />
+      <function name="ReadHeader" visibility="private" file="WIL.pas" line="264">
+        <parameters>
+          <retval type="TPackDataHeader" />
+        </parameters>
+      </function>
+      <function name="ReadImageInfo" visibility="private" file="WIL.pas" line="265">
+        <parameters>
+          <parameter name="APosition" type="Integer" />
+          <retval type="TPackDataImageInfo" />
+        </parameters>
+      </function>
+      <function name="CheckImageInfoSize" visibility="private" file="WIL.pas" line="266">
+        <parameters>
+          <parameter name="APosition" type="Integer" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="GetIsEncrypt" visibility="private" file="WIL.pas" line="267">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="SortIndex" visibility="private" file="WIL.pas" line="268">
+      </procedure>
+      <procedure name="LoadIndex" visibility="protected" file="WIL.pas" line="270">
+      </procedure>
+      <procedure name="LoadDxImage" visibility="protected" procflags="override" file="WIL.pas" line="271">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <parameter name="position" type="Integer" />
+          <parameter name="pdximg" type="pTDxImage" />
+        </parameters>
+      </procedure>
+      <procedure name="DoGetImgSize" visibility="protected" procflags="overload override" file="WIL.pas" line="272">
+        <parameters>
+          <parameter name="position" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="DoGetImgSize" visibility="protected" procflags="overload override" file="WIL.pas" line="273">
+        <parameters>
+          <parameter name="position" type="Integer" />
+          <parameter name="AWidth" type="Integer" paramflags="var" />
+          <parameter name="AHeight" type="Integer" paramflags="var" />
+          <parameter name="m_wPx" type="Integer" paramflags="var" />
+          <parameter name="m_wPy" type="Integer" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="CreateNewFile" visibility="public" procflags="class override" file="WIL.pas" line="275">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="BitCount" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="WriteHeader" visibility="public" procflags="class" file="WIL.pas" line="276">
+        <parameters>
+          <parameter name="AStream" type="TStream" />
+          <parameter name="AHeader" type="TPackDataHeader" />
+        </parameters>
+      </procedure>
+      <function name="ReadFileHeader" visibility="public" procflags="class" file="WIL.pas" line="277">
+        <parameters>
+          <parameter name="AStream" type="TStream" />
+          <retval type="TPackDataHeader" />
+        </parameters>
+      </function>
+      <procedure name="Initialize" visibility="public" procflags="override" file="WIL.pas" line="278">
+      </procedure>
+      <function name="GetImgDataSize" visibility="public" procflags="override" file="WIL.pas" line="279">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <procedure name="ReLoad" visibility="public" procflags="override" file="WIL.pas" line="280">
+      </procedure>
+      <property name="IsEncrypt" visibility="public" read="GetIsEncrypt" type="Boolean" file="WIL.pas" line="281" />
+      <property name="PassWord" visibility="public" read="m_PassWord" write="m_PassWord" type="string" default="0" file="WIL.pas" line="282" />
+    </members>
+  </class>
+  <variable name="WMImageInfoSize" type="Integer" visibility="public" file="WIL.pas" line="285" />
+  <variable name="WZLImageInfoSize" type="Integer" visibility="public" file="WIL.pas" line="286" />
+  <variable name="PackDataImageInfoSize" type="Integer" visibility="public" file="WIL.pas" line="287" />
+  <variable name="MIRPath" type="string" visibility="public" file="WIL.pas" line="290" />
+  <variable name="ResDir" type="string" visibility="public" file="WIL.pas" line="291" />
+  <variable name="LibManager" type="TWMImageLibManager" file="WIL.pas" line="292" />
+  <variable name="ExceptionOut" type="procedure(Msg: string)" file="WIL.pas" line="293" />
+  <variable name="ResourceInitOK" type="Boolean" visibility="public" file="WIL.pas" line="294" />
+  <procedure name="ConsoleDebug" visibility="public" file="WIL.pas" line="310">
+    <parameters>
+      <parameter name="Log" type="string" paramflags="const" />
+    </parameters>
+  </procedure>
+  <function name="CreateFileStream" visibility="public" file="WIL.pas" line="334">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <parameter name="Mode" type="Word" />
+      <retval type="TFileStream" />
+    </parameters>
+  </function>
+  <function name="CreateImages2" visibility="public" file="WIL.pas" line="518">
+    <parameters>
+      <parameter name="AFileName" type="string" paramflags="const" />
+      <parameter name="ISFixedFile" type="Boolean" />
+      <retval type="TWMImages" />
+    </parameters>
+  </function>
+  <function name="CreateImages" visibility="public" file="WIL.pas" line="583">
+    <parameters>
+      <parameter name="AFileName" type="string" paramflags="const" />
+      <parameter name="ISFixedFile" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="TWMImages" />
+    </parameters>
+  </function>
+  <function name="CreateImageFile" visibility="public" file="WIL.pas" line="639">
+    <parameters>
+      <parameter name="AFileName" type="string" paramflags="const" />
+      <parameter name="BitCount" type="Integer" />
+      <retval type="TWMImages" />
+    </parameters>
+  </function>
+  <procedure name="GetClientLibFile" visibility="public" file="WIL.pas" line="667">
+    <parameters>
+      <parameter name="ResourceDir" type="string" paramflags="const" />
+    </parameters>
+  </procedure>
+  <function name="FindWLib" visibility="public" file="WIL.pas" line="695">
+    <parameters>
+      <parameter name="AName" type="string" paramflags="const" />
+      <retval type="TWMImages" />
+    </parameters>
+  </function>
+</namespace>

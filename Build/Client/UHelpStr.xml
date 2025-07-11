@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="UHelpStr" platform="Win32">
+  <variable name="g_HelpStr" type="string" visibility="public" file="UHelpStr.pas" line="4" />
+</namespace>

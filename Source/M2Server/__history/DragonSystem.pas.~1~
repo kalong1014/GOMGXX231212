@@ -1,0 +1,604 @@
+unit DragonSystem;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs,
+  Grobal2 , Hutil32, Envir , usrengn ,objBase;
+
+  const
+    DRAGON_MAX_LEVEL    =13;
+    DRAGON_RESETTIME    = 15 * 60 * 1000; // ÃÖ´ë 15ºÐ°£Àº ·¹¼ÂµÇÁö¾Ê´Â´Ù.
+    MAP_ATTACK_TIME     = 10 * 1000 ;   // ¸ã¿¡ÀÖ´Â »ç¶÷µé¿¡°Ô °ø°ÝÇÏ´Â ½Ã°£
+    DRAGONITEMFILE      = 'DragonItem.txt';
+
+  type
+     // ¾ÆÀÌÅÛ µå·ÓÁ¤º¸
+     TDropItemInfo  = record
+        Name        : string;
+        FirstRate   : integer;
+        SecondRate  : integer;
+        Amount      : integer;
+        DropCount   : integer;
+     end;
+     PTDropItemInfo = ^TDropItemInfo;
+
+     // ¿ëÀÇ ·¹º§Á¤º¸
+     TDragonLevelInfo = record
+        Level       :   integer;
+        DropExp     :   integer;
+        DropItemList:   TList;
+     end;
+
+     TATMapInfo    = record
+        Envir       : TEnvirnoment;
+        Mode        : integer;   // 1= ¹ø°³ , 2= Áö¿°°°Àº ¹ø°³
+     end;
+     PTATMapInfo = ^TATMapInfo;
+
+     TDragonSystem = class(TObject)
+      private
+        //ÃÊ±â¿¡ ·ÎµùµÇ¾ú´ø È­ÀÏÀÌ¸§ ¸®·Îµå½Ã¿¡ »ç¿ë
+        FInitFileName       : string;
+        //·¹º§ Á¤º¸ µå¶ó°ïÀº 13·¹º§±îÁö µÇ¾îÀÖ´Ù.
+        FLevelInfo          : array [0..DRAGON_MAX_LEVEL-1] of TDragonLevelInfo;
+
+        FLevel              :integer;
+        FExp                :integer;
+
+        FLastChangeExpTime  : LONGWORD; // ¸¶Áö¸· °æÇèÄ¡ º¯°æ½Ã°£
+        FLastAttackTme      : LONGWORD; // ¸¶Áö¸·À¸·Î ¸Ê¿¡ ÀÚµ¿°ø°ÝÇÑ ½Ã°£
+
+        // ¹ø°³¹× ºÒÀ» ¶³±¸´Â¸Ê
+        FAutoAttackMap      : TList;
+
+        FDropMapName        : string;
+        FDopItemEnvir       : TEnvirnoment;
+        FDropItemRect       : TRect;
+
+        procedure   RemoveAll;
+        procedure   InitFirst;
+        function    DecodeStrInfo( StrInfo : TStringList ; var IsSuccess :Boolean ):String;
+        function    GetNextLevelExp:integer;
+        procedure   ResetLevel;
+
+      protected
+      public
+        constructor Create;
+        destructor  Destroy; override;
+        function    Initialize( FileName : String ; var IsSuccess : Boolean ):string;
+        function    Reload( var IsSuccess : Boolean ):string;
+        procedure   SetAutoAttackMap( Envir_ : TEnvirnoment ; Mode_ : integer);
+        procedure   SetItemDropMap( MapName: string ; Area_ : TRect);
+
+        procedure   ChangeExp(exp : integer);
+        procedure   Run;
+
+        procedure   OnLevelup( changelevel : integer ); // ·¹º§¾÷ÀÌ µÇ¾úÀ»‹š ÇØ¾ßÇÑ´Â°Í
+        procedure   OnDropItem( changelevel : integer); // ¾ÆÀÌÅÛ µå·Ó½Ã
+        procedure   OnMapAutoAttack;                    // ¸Ê¿¡ÀÖ´Â»ç¶÷µé ÀÚµ¿°ø°Ý
+        procedure   OnAutoAttack( Envir_ : TEnvirnoment ; Mode_ : integer);
+        procedure   OnAttackTarget( Envir_ : TEnvirnoment ;user_ : TCreature ; Mode_ :integer);
+
+      end;
+
+implementation
+
+uses
+    svMain;
+constructor TDragonSystem.Create;
+var
+   RetSuccess: Boolean;
+begin
+   inherited ;
+
+   // ±âº»°ªÀ¸·Î ÃÊ±âÈ­
+   InitFirst;
+
+   Initialize( FInitFileName, RetSuccess );
+
+   if RetSuccess = FALSE then
+      ;  //MainOutMessage('TDragonSystem Initialization Failure');
+end;
+
+destructor TDragonSystem.Destroy;
+begin
+
+   RemoveAll;
+
+   inherited ;
+end;
+
+// ½Ã½ºÅÛÀÌ »ý¼ºµÉ¶§ Ã³À½ ÃÊ±âÈ­ ÇÏ´ÂºÎºÐ
+//  ¸Þ¸ð¸®¸¦ ¸ðµÎ Áö¿î´ÙÀ½¿¡µµ »ç¿ëÇÒ¼ö ÀÖ´Ù.
+procedure TDragonSystem.InitFirst;
+var
+   i : integer;
+begin
+
+   try
+      // ÃÊ±â Á¤º¸ ÀÔ·Â
+      for i := 0 to DRAGON_MAX_LEVEL -1 do
+      begin
+           FLevelInfo[i].Level        := i+1;
+           FLevelInfo[i].DropExp      := (i+1) * 10000;
+           FLevelInfo[i].DropItemList := TList.Create;
+      end;
+
+      FAutoAttackMap   := TList.Create;
+   except
+   end;
+
+   // µå·Ó¾ÆÀÌÅÛÀÌ ¶³¾îÁö´Â ¸Ê
+   FDopItemEnvir        := nil;
+   // ¶³¾îÁö´Â°÷ ÃÊ±âÈ­
+   FDropItemRect.Left   := -1;
+   FDropItemRect.Top    := -1;
+   FDropItemRect.Right  := -1;
+   FDropItemRect.Bottom := -1;
+
+
+   FLevel       := 1;
+   FExp         := 0;
+
+   FLastChangeExpTime  := GetTickCount; // ¸¶Áö¸· °æÇèÄ¡ º¯°æ½Ã°£
+   FLastAttackTme      := GetTickCount; // ¸¶Áö¸·À¸·Î ¸Ê¿¡ ÀÚµ¿°ø°ÝÇÑ ½Ã°£
+
+   FInitFileName := {EnvirDir +} DRAGONITEMFILE;
+
+end;
+
+// ¸Þ¸ð¸®»óÀÇ ¸ðµç°ÍÀ» Áö¿î´Ù
+procedure TDragonSystem.RemoveAll;
+var
+    i,j : integer;
+begin
+
+   try
+    for i := 0 to DRAGON_MAX_LEVEL -1 do
+    begin
+        // Á¤»óÀûÀ¸·Î ÃÊ±âÈ­ µÇ¾îÀÖÀ¸¸é
+        if FLevelInfo[i].DropItemList <> nil then
+        begin
+            // ¾ÆÀÌÅÛ¸®½ºÆ®ÀÇ ¿ÀºêÁ§Æ® Áö¿î´Ù.
+            for j := FLevelInfo[i].DropItemList.Count -1 downto 0 do
+            begin
+                // °´Ã¼ ¸Þ¸ð¸® ÇØÁ¦
+                dispose ( FLevelInfo[i].DropItemList[0] );
+                // ¸®½ºÆ®»èÁ¦
+                FLevelInfo[i].DropItemList.Delete(0);
+            end;
+            // ¸®½ºÆ® Free
+            FLevelInfo[i].DropItemList.Free;
+            FLevelInfo[i].DropItemList := nil;
+
+        end;
+    end;
+   except
+   end;
+
+   try
+    // ¹ø°³¸Ê ÃÊ±âÈ­
+    for i := 0 to FAutoAttackMap.count -1 do
+    begin
+        dispose ( FAutoAttackMap[0]);
+        FAutoAttackMap.Delete(0);
+    end;
+    FAutoAttackMap.Free;
+    FAutoAttackMap := nil;
+   except
+   end;
+
+
+end;
+
+function TDragonSystem.DecodeStrInfo( StrInfo : TStringList ; var IsSuccess : Boolean ):String;
+var
+    i               : integer;
+    str ,str1, str2, str3  : string;
+    infostr         : string;
+    CurrentLevel    : integer;
+    CurrentExp      : integer;
+    pDropItemInfo   : PTDropItemInfo;
+    levelCount      : integer;
+    expcount        : integer;
+    itemcount       : integer;
+begin
+    Result := '';
+    IsSuccess := false;
+
+    levelcount := 0;
+    expcount  := 0;
+    levelcount := 0;
+    ItemCount := 0;
+
+    CurrentLevel := 1;
+    CurrentExp   := 10000;
+
+    try
+       for i := 0 to StrInfo.Count -1 do
+       begin
+           str := Trim( StrInfo.Strings[i] );
+
+           if ( str <> '' ) and ( str[1] <> ';' ) then
+           begin
+               infostr := str[1];
+
+               // Ã³À½¹®ÀÚ°¡ ¸í·É¾î¹®ÀÚÀÏ°æ¿ì¿¡
+               if infostr = '!' then
+               begin
+                     str2 := GetValidStr3 (str, str1, [' ', #9]);
+
+                     //·¹º§º¯°æÀÚ
+                     if CompareText( str1, '!LEVEL' ) = 0 then
+                     begin
+                       CurrentLevel := Str_ToInt( Trim(Str2),1 );
+                       //·¹º§ÀÇ ÃÖ´ëÃÖ¼Ò°ªÀ» ³ÑÀ¸¸é ¿¡·¯
+                       if ( CurrentLevel <= 0 ) and ( CurrentLevel > DRAGON_MAX_LEVEL ) then
+                       begin
+                           Result := '['+IntTostr(i+1)+'] '+'ERROR! LevelInfo Worng 1~'+IntToStr(DRAGON_MAX_LEVEL)+':'+str2;
+                           Exit;
+                       end;
+                       inc ( levelcount );
+                     end
+                     else if CompareText( str1, '!EXP' ) = 0 then // °æÇèÄ¡ Ç¥½ÃÀÚ
+                     begin
+                       CurrentExp := Str_ToInt( Trim(str2) ,0 ) ;
+
+                       if CurrentExp > 0 then
+                       begin
+                          FLevelInfo[CurrentLevel -1].DropExp := CurrentExp;
+                          inc ( expcount );
+                       end
+                       else // °æÇèÄ¡°¡ 0º¸´ÙÀÛ°Å³ª 0ÀÌ¸é ¾ÈµÊ
+                       begin
+                           Result := '['+IntTostr(i+1)+'] '+'ERROR! ExpInfo Worong Exp < 0:'+str2;
+                           Exit;
+                       end;
+                     end
+                     else if CompareText( str1, '!DROPMAP' ) = 0 then
+                     begin
+                          FDropMapName := Trim(str2);
+                     end
+                     else if CompareText(str1, '!DROPAREA' ) = 0 then
+                     begin
+                         str2 := GetValidStr3 (str2, str3, [' ', #9]);
+                         FDropItemRect.Left := Str_ToInt( str3, -1 );
+                         str2 := GetValidStr3 (str2, str3, [' ', #9]);
+                         FDropItemRect.Top := Str_ToInt( str3, -1 );
+                         str2 := GetValidStr3 (str2, str3, [' ', #9]);
+                         FDropItemRect.Right := Str_ToInt( str3, -1 );
+                         str2 := GetValidStr3 (str2, str3, [' ', #9]);
+                         FDropItemRect.Bottom := Str_ToInt( str3, -1 );
+                     end
+                     else
+                     begin // ±×¹Û¿¡ ´Ù¸¥ ±ÛÀÚ¸é ¾ÈµÊ.
+                       Result := '['+IntTostr(i+1)+'] '+'ERROR! Check String :'+str1 ;
+                     end;
+               end
+               else
+               begin
+                   new( pDropItemInfo );
+
+                   // ¾ÆÀÌÅÛÀÌ¸§
+                   str2 := GetValidStr3 (str, str1, [' ', #9]);
+                   pDropItemInfo.Name := trim(str1);
+
+                   // ºÐÀÚÀÇ È®·ü°ª
+                   str2 := GetValidStr3 (str2, str1, [' ', #9]);
+                   pDropItemInfo.FirstRate := Str_ToInt( str1,0 );
+
+                   //ºÐ¸ðÀÇ È®·ü°ª
+                   str2 := GetValidStr3 (str2, str1, [' ', #9]);
+                   pDropItemInfo.SecondRate := Str_ToInt( str1,1);
+
+                   // ¾ç
+                   str2 := GetValidStr3 (str2, str1, [' ', #9]);
+                   pDropItemInfo.Amount := Str_ToInt( str1,1);
+
+                   // µå·ÓÈ½¼ö
+                   str2 := GetValidStr3 (str2, str1, [' ', #9]);
+                   pDropItemInfo.DropCount := Str_ToInt( str1,1);
+
+                   FLevelInfo[CurrentLevel -1].DropItemList.Add( pDropItemInfo );
+
+                   inc(itemcount);
+
+               end;
+
+           end;// ¹«½Ã½ºÆ®¸µÀÎ°æ¿ì
+
+       end;//for i...
+    except
+    end;
+
+    IsSuccess := true;
+    Result := 'READ SUCCESS Level:'+IntToStr(LevelCount) +' ,Exp:'+IntToStr(ExpCount) +' ,ITEM' + IntToStr(ItemCount)+
+              ' DROPMAP: '+FDropMapName+'DROPAREA: '+
+              ' X1:'+intToStr( FDropItemRect.Left) +','+
+              ' Y1:'+intToStr( FDropItemRect.Top) +','+
+              ' X2:'+intToStr( FDropItemRect.Right) +','+
+              ' Y2:'+intToStr( FDropItemRect.Bottom);
+
+end;
+
+function TDragonSystem.Initialize( FileName : String ; var IsSuccess : Boolean ):string;
+var
+    fileinfo    : TStringList;
+begin
+    Result :='';
+    IsSuccess := FALSE;
+
+    try
+       // È­ÀÏÀÌ Á¸ÀçÇÏ´ÂÁö ¾Ë¾Æº»´Ù.
+       if not FileExists( FileName ) then
+       begin
+           Result := self.ClassName + '|Do not Find FileName:'+FileName;
+           Exit;
+       end;
+
+       fileinfo := TStringList.Create;
+       fileinfo.LoadFromFile( FileName );
+
+       // È­ÀÏÀ» ·¹ÄÚµå¿¡ ³Ö´Â´Ù.
+       Result := DecodeStrInfo( fileinfo , IsSuccess );
+
+       fileinfo.Free;
+    except
+    end;
+end;
+
+function TDragonSystem.reload( var IsSuccess : Boolean ):string;
+begin
+    RemoveAll;
+    InitFirst;
+    Result := Initialize( FInitFileName, IsSuccess );
+end;
+
+function  TDragonSystem.GetNextLevelExp:integer;
+begin
+    if ( FLEVEL > 0 ) and ( FLEVEL <= DRAGON_MAX_LEVEL ) then
+        result := ( FLevelInfo[FLEVEL -1].DropExp ) // div 100
+    else
+        result := $7FFFFFFF;
+end;
+
+procedure TDragonSystem.OnLevelup( changelevel : integer );
+begin
+
+   // ¾ÆÀÌÅÛÀ» ¶³±º´Ù.
+   OnDropItem( changelevel );
+
+end;
+
+// ¾ÆÀÌÅÛÀ» ¸Ê¿¡ ¶³±Å¾ß ÇÒ¶§..
+procedure TDragonSystem.OnDropItem( changelevel : integer );
+var
+   i , j ,px,py: integer;
+   pinfo   : PTDropItemInfo;
+   slope1, slope2, slope3, slope4: integer;
+   LowValue, HighValue: integer;
+   itemmakeindex : integer;
+begin
+   if ( changelevel < 1 ) or ( changelevel >= 13 ) then exit;
+
+   for i := 0 to  FLevelInfo[changelevel -1].DropItemList.count -1 do
+   begin
+      pinfo  := PTDropItemInfo( FLevelInfo[changelevel -1].DropItemList[i] ) ;
+
+      for j := 0 to  pinfo.DropCount -1 do
+      begin
+         if random( pinfo.secondrate) < pinfo.FirstRate then
+         begin
+            px := random( abs(FDropItemRect.Right - FDropItemRect.Left) +1 ) + FDropItemRect.Left;
+            // Old Code...(Á÷»ç°¢Çü)
+//            py := random( abs(FDropItemRect.Bottom - FDropItemRect.Top ) ) + FDropItemRect.Top;
+
+            // ´ë°¢¼± ¿µ¿ªÀ¸·Î Á¶Á¤(sonmg)
+            // ´ë°¢¼± ¿µ¿ªÀ» ±¸¼ºÇÏ´Â ³× Á÷¼±ÀÇ ±â¿ï±â¸¦ ±¸ÇÑ´Ù.
+            slope1 := FDropItemRect.Left + FDropItemRect.Top + 4; // 121
+            slope2 := FDropItemRect.Right + FDropItemRect.Bottom - 4;   // 133
+            slope3 := FDropItemRect.Top - FDropItemRect.Left - 4; // -33
+            slope4 := FDropItemRect.Bottom - FDropItemRect.Right + 4;   // -25
+            // Á¤ÇØÁø xÁÂÇ¥(px)¿¡¼­ °¡´ÉÇÑ yÁÂÇ¥(py) ¹üÀ§¸¦ ±¸ÇÑ´Ù.
+            LowValue := _MAX(slope1 - px, px + slope3);
+            HighValue := _MIN(slope2 - px, px + slope4);
+//            LowValue := _MAX(77 + 44 - px, px - 83 + 50);
+//            HighValue := _MIN(79 + 54 - px, px - 73 + 48);
+            // Á¤ÇØÁø ¹üÀ§ ³»¿¡¼­ Random ÇÑ yÁÂÇ¥¸¦ ±¸ÇÑ´Ù.
+            py := Random( HighValue - LowValue +1 ) + LowValue;
+            itemmakeindex := 0;
+            itemmakeindex := UserEngine.MakeItemToMap(FDropMapName,pinfo.Name ,pinfo.Amount, px, py);
+
+            if itemmakeindex <> 0 then
+            begin
+
+               AddUserLog ('15'#9 + //¶³±À_
+                           FDropMapName + ''#9 +
+                           IntToStr(px) + ''#9 +
+                           IntToStr(py) + ''#9 +
+                        {$IFDEF KOREA}
+                           'Ð°¶ñÁúÉñ' + ''#9 +
+                        {$ELSE}
+                           'Ð°¶ñÁúÉñ' + ''#9 +
+                        {$ENDIF}
+                           pInfo.Name + ''#9 +
+                           IntToStr(itemmakeindex) + ''#9 +
+                           '0' + ''#9 +
+                           '0');
+
+//               MainOutMessage('DRAGON GIVE ITEM MAP:('+IntTOStr(changelevel)+')'+FDropMapName +
+//                  'ITEMNAME:'+pinfo.Name +'AMOUNT:'+intToStr(pInfo.Amount)+'X:'+
+//                  IntTOStr(px )+'Y:'+IntToStr(py));
+
+            end;
+         end;
+      end;
+
+   end;
+end;
+
+procedure TDragonSystem.OnAttackTarget( Envir_ :TEnvirnoment; user_ : TCreature ; Mode_ : integer );
+var
+    pwr , dam : integer;
+begin
+    if ( not user_.Death ) and
+       ( not user_.BoGhost ) and
+       ( not user_.BoSysopMode ) and
+       ( not user_.BoSuperviserMode )
+    then
+    begin
+
+      // ÀÌÆåÆ® ³¯·ÁÁÖ°í...
+      case Mode_ of
+      1: user_.SendRefMsg (RM_NORMALEFFECT, 0, user_.CX, user_.CY, NE_THUNDER, '');
+      2: user_.SendRefMsg (RM_NORMALEFFECT, 0, user_.CX, user_.CY, NE_FIRE, '');
+      end;
+
+      // µ¥¹ÌÁö °è»êÈÄ ³»·ÁÁØ´Ù.
+      pwr := 20 * (random(3)+1);
+      dam := user_.GetMagStruckDamage (nil, pwr);
+      user_.StruckDamage (dam, nil);
+      user_.SendDelayMsg (TCreature(RM_STRUCK), RM_REFMESSAGE, dam{wparam},
+      user_.WAbil.HP{lparam1}, user_.WAbil.MaxHP{lparam2}, Longint(nil){hiter}, '', 200);
+
+    end;
+
+end;
+
+procedure TDragonSystem.OnAutoAttack( Envir_ : TEnvirnoment ; Mode_ : integer);
+var
+    userlist    : TList;
+    usercount   : integer;
+    i           : integer;
+    Tempuser    : TCreature;
+begin
+    userlist := TList.Create;
+    usercount := UserEngine.GetAreaAllUsers( Envir_ , userlist);
+
+    for i := 0 to userlist.count -1 do
+    begin
+        Tempuser := TCreature( UserList[i]);
+
+        // »ç¶÷¸¸ °ø°ÝÇÑ´Ù.
+        if TempUser.RaceServer = RC_USERHUMAN then
+        begin
+           //·£´ý°ª¿¡ °É¸®¸é °ø°ÝÇÏÀÚ
+           if  random( 2 ) = 0 then
+           begin
+                onAttacktarget( Envir_ , Tempuser ,Mode_);
+           end;
+        end;
+    end;
+
+    userlist.Clear;
+    userlist.Free;
+end;
+
+//¸Ê¿¡ ÀÚµ¿°ø°ÝÇÒ¶§
+procedure TDragonSystem.OnMapAutoAttack;
+var
+    i : integer;
+    pmapinfo : PTATMapInfo;
+begin
+    for i := 0 to FAutoAttackMap.Count -1 do
+    begin
+        pmapinfo := FAutoAttackMap[i];
+
+        OnAutoAttack( pmapinfo.Envir , pmapinfo.Mode );
+    end;
+end;
+
+// ÀÚµ¿°ø°Ý¸Ê¿¡´ëÇÑ ¼³Á¤À»ÇÑ´Ù.
+procedure TDragonSystem.SetAutoAttackMap( Envir_ : TEnvirnoment ; Mode_ : integer);
+var
+    pmapinfo : PTATMapInfo;
+begin
+
+    if FAutoAttackMap <> nil then
+    begin
+        new( pmapinfo );
+        pmapinfo.Envir  := Envir_;
+        pmapinfo.Mode   := Mode_;
+
+        FAutoAttackMap.Add( pmapinfo );
+
+    end;
+end;
+
+// ¾ÆÀÌÅÛÀÌ ¶³¾îÁö´Â ¸Ê°ú Áö¿ªÀ» ¼³Á¤ÇÑ´Ù.
+procedure TDragonSystem.SetItemDropMap( MapName : string ; Area_ : TRect);
+begin
+
+    FDopItemEnvir := GrobalEnvir.GetEnvir( FDropMapName );
+    FDropItemRect := Area_;
+
+end;
+
+// ¿ëÀÌ ¸Â´Â°æ¿ì °æÇèÄ¡°¡ Áõ°¡ÇÑ´Ù.
+procedure TDragonSystem.ChangeExp( exp : integer);
+begin
+    FLastChangeExpTime := GetTickCount;
+    // ÃÖ´ë ·¹º§º¸´Ù ÀÛÀ»¶§..
+    if FLevel < DRAGON_MAX_LEVEL then
+    begin
+
+      if exp > 0 then
+      begin
+          if FEXP < GetNextLevelExp then
+          begin
+            FEXP := FEXP + exp;
+
+
+            if FEXP >= GetNextLevelExp then
+            begin
+                //·¹º§¾÷ÀÌ µÇ¾úÀ¸´Ï ¾ÆÀÌÅÛÀ» ¶³±ÅÁÖÀÚ.(À§Ä¡¼öÁ¤ sonmg 2006/01/27)
+                OnLevelup(FLEVEL);
+
+                FLEVEL := FLEVEL + 1;
+                FEXP  := 0;
+
+                MainOutMessage( '»ðÁúÉñ½×¶ÎLEVEL:'+IntToStr( FLEVEL ));
+                UserEngine.SendBroadCastMsg ('(*)"Ð°¶ñÁúÉñ"½øÈë:'+IntToStr( FLEVEL )+'½×¶Î!');
+            end;
+
+          end; //FEXP <
+      end;
+
+    end;
+end;
+
+// ÀÏÁ¤ÇÑ ½Ã°£ÀÌ Áö³ª¸é ·¹º§ÀÌ ÃÊ±âÈ­ µÈ´Ù.
+procedure TDragonSystem.ResetLevel;
+begin
+    if (FLevel <> 1) or (FEXP <> 0) then
+    begin
+      FLevel := 1;
+      FExp   := 0;
+      MainOutMessage('»ðÁúÉñ½×¶ÎÖØÉè');
+    end;
+end;
+
+procedure TDragonSystem.Run;
+begin
+try
+    // ¸¶Áö¸·À¸·Î °æÇèÄ¡ ¸ÔÀº½Ã°¢(Å¸°ÝÀ»¹ÞÁö¾ÊÀºÁö)ÀÌ ¿À·¡µÇ¸é(30ºÐÁ¤µµ) ¸®¼ÂÇØÁØ´Ù.
+    if GetTickCount - FLastChangeExpTime > DRAGON_RESETTIME then
+    begin
+        FLastChangeExpTime := GetTickCount;   //´Ù½Ã ½Ã°¡À» ÃÊ±âÈ­ ÇØÁØ´Ù.
+        ResetLevel;
+    end;
+
+
+    if GetTickCount - FLastAttackTme > MAP_ATTACK_TIME then
+    begin
+        FLastAttackTme := GetTickCount;
+        OnMapAutoAttack;
+    end;
+except
+    MainOutMessage('(*)"»ðÁúÉñ"½×¶ÎÖØÉè');
+end;
+end;
+
+
+end.

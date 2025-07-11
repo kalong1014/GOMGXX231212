@@ -1,0 +1,1161 @@
+unit LSShare;
+
+interface
+
+uses
+  Windows, Messages, Classes, SysUtils, GList, SQLIDDB, ScktComp, SyncObjs, Grobal2, HUtil32, ADODB;
+
+const
+  GATEMAXSESSION            = 100;
+  m_szGameType   = 'MIR2';
+  APPCAPTION = 'Login Server';
+
+type
+  TMsgLog = record
+    boAdd: Boolean;
+    dAddTime: TDateTime;
+    nFColor: Integer;
+  end;
+  pTMsgLog = ^TMsgLog;
+
+  TConfig = record
+    ODBC_DSN: string;
+    ODBC_ID: string;
+    ODBC_PW: string;
+    ODBC_DSN_PC: string;
+    ODBC_ID_PC: string;
+    ODBC_PW_PC: string;
+    CS_BPORT: Integer;
+    GS_BPORT: Integer;
+    LG_BPORT: Integer;
+    boMinimize: Boolean;
+    boStarted: Boolean;
+  end;
+
+  TTableGmIP = record
+    szIP: string[16];
+    szDesc: string[21];
+  end;
+  PTTableGmIP = ^TTableGmIP;
+
+  TTablePubIP = record
+    szIP: string[16];
+    szDesc: string[21];
+  end;
+  PTTablePubIP = ^TTablePubIP;
+
+  TTableSvrIP = record
+    ID: Integer;
+    szIP: string[16];
+    szName: string[21];
+  end;
+  PTTableSvrIP = ^TTableSvrIP;
+
+  TTblSelectGateIP = record
+    szName: string[21];
+    szIP: string[16];
+    Port: Integer;
+  end;
+  PTTblSelectGateIP = ^TTblSelectGateIP;
+
+  TGameServerInfo = record
+    szName: string[21];
+    nMaxUserCount: Integer;
+    bFreeMode: Integer;
+    nGateCount: Integer;
+    nCurrentIndex: Integer;
+    listSelectGate: TList;
+  end;
+  PTGameServerInfo = ^TGameServerInfo;
+
+  TLoginGate = record
+    GateSocket: TCustomWinSocket;
+    dbInfo: PTTablePubIP;
+    SocData: string;
+    UserList: TList;             // list of PTUserInfo
+    ConnCheckTime: integer;      // 楷搬惑怕 盲农 矫埃
+  end;
+  PTLoginGate = ^TLoginGate;
+
+//  TConnState = (csIdPasswd, csTrySelChr, csSelChr, csTryRun, csRun);
+
+  TUserInfo = record
+    nGateSocket: TCustomWinSocket;  // User's LoginGate Socket
+    szUserHandle: string[25];     // User's Socket in LoginGate (HashKey!)
+    szID: string[25];
+    szAddr: string[20];
+    szSsno: string[20];
+    nPayMode: byte;           //苞陛葛靛  0:眉氰魄, 1:蜡丰  2:公丰捞侩磊
+
+    nClientVersion: integer;
+    nCertification: integer;
+    nPassFailTime: longword;
+    nPassFailCount: Integer;
+    bVersionAccept: Boolean;
+    bSelServerOk: Boolean;   // 秦欧 规瘤
+
+     //俺牢 沥咀 荤侩磊包访
+    dwValidFrom: longword;
+    dwValidUntil: longword;
+//    dwMValidFrom: longword;
+//    dwMValidUntil: longword;
+
+     //俺牢 沥樊 荤侩磊包访
+    dwSeconds: longword;
+//    dwMSeconds: longword;
+
+     //霸烙规 沥咀包访
+    dwIpValidFrom: longword;
+    dwIpValidUntil: longword;
+//    dwIpMValidFrom: longword;
+//    dwIpMValidUntil: longword;
+
+     //霸烙规 沥樊包访
+    dwIpSeconds: LongInt;
+//    dwIpMSeconds: LongInt;
+     //dwIpSeconds: longword;
+     //dwIpMSeconds: longword;
+
+     //力犁包访
+    dwStopUntil: longword;
+//    dwMStopUntil: longword;
+    dwMakeTime: longword;
+    dwOpenTime: longword;
+    nAvailableType: Byte;
+    bFreeMode: Boolean;
+    nServerID: Integer;
+    nParentCheck: Integer;
+
+     //DELPHI程序里多的，保留 rainee
+    AccountMakeDate: TDateTime;
+//    ConnState: TConnState;
+    SocData: string;
+//    ConnectTime: longword;        // 贸澜 立加茄 矫埃, 促弗 辑滚肺 颗板栏哥 颗变 贸澜 矫埃
+//    BoServerRun: Boolean;        // 角力肺 辑滚俊 立加 咯何
+    dwLatestCmdTime: longword;
+  end;
+  PTUserInfo = ^TUserInfo;
+
+  TCertUser = record
+    szLoginID: string[21];
+    szAddr: string[16];
+    szServerName: string[20];
+    bFreeMode: Boolean;
+    nCertification: integer;
+    nOpenTime: longword;
+//    nAccountCheckTime: longword;
+    bClosing: Boolean; //true捞搁 吝汗立加栏肺 辆丰吝. 30檬饶 肯傈辆丰
+    nAvailableType: Byte;
+    nIDDay: integer;
+    nIDHour: integer;
+    nIPDay: integer;
+    nIPHour: integer;
+  end;
+  PTCertUser = ^TCertUser;
+
+  TGameServer = record
+    SocStr: string;
+    Socket: TCustomWinSocket;
+    ServerName: string;
+    ServerIndex: integer;
+    CurUserCount: integer;
+    MaxUserCount: Integer;
+    LastTick: longword;
+    CheckTime: longword;
+  end;
+  PTGameServer = ^TGameServer;
+
+var
+  FCertification: integer;
+  sLock: TCriticalSection;
+  CurrentRemotePublicAddr: string;
+  ReadyServerCount: integer;
+
+  m_listGameServer: TGList;  //List of server (selchr, game server..)
+  m_listLoginGate: TList;    // list of PTGateInfo  m_listLoginGate
+  m_csListCert: TGList;
+  m_ListCert: array[0..GATEMAXSESSION - 1] of TUserInfo;
+  m_listServerIP: TList;
+  m_listGateIP: TList;
+  m_listServerInfo: TList;
+  m_listGmIP: TList;
+
+  DecodeRunTime: integer;
+  DecodeTime: integer;
+
+  TotalUserCount: integer;
+  MaxTotalUserCount: integer;
+
+  IsNotInServiceMode: Boolean;
+  FSQLIDDB: TSQLIDDB;
+  CINFO, CERR, CNORMAL, CDBG, CSEND, CRECV: Integer; //日志颜色
+//  ODBC_DSN, ODBC_ID, ODBC_PW, ODBC_DSN_PC, ODBC_ID_PC, ODBC_PW_PC: string;
+//  CS_BPORT, GS_BPORT, LG_BPORT: integer;
+  MainLogMsgList: TGStringList;
+  g_dwUpdateListViewTick: LongWord;
+
+
+  BoTestMode: Boolean = FALSE;
+  BoEnableMakeID: Boolean = TRUE; //扁夯利栏肺绰 酒捞叼甫 积己啊瓷
+//  KoreanVersion: Boolean = FALSE; //TRUE;
+
+  GateClass: string = 'Config';
+  g_Config: TConfig = (
+    ODBC_DSN: 'Account1';     //多区需要改的
+    ODBC_ID: 'sa';
+    ODBC_PW: 'sa';
+    ODBC_DSN_PC: 'Manage1';   //多区需要改的
+    ODBC_ID_PC: 'sa';
+    ODBC_PW_PC: 'sa';
+    CS_BPORT: 3001;
+    GS_BPORT: 5601;
+    LG_BPORT: 5501;
+    boMinimize: False;
+    boStarted: False;
+    );
+
+procedure ClearMessage;
+procedure MainOutMessage(FColor: Integer; Msg: string);
+procedure LoadConfig;
+procedure WriteConLog(uid, addr: string);
+procedure SaveCountLog;
+procedure SendSocket(Socket: TCustomWinSocket; uhandle, data: string);
+procedure SendKickUser(Socket: TCustomWinSocket; uhandle: string);
+procedure SendResponse(pu: PTUserInfo; msg, Recog, param, tag, series: integer; body: string = '');
+function KickOffSocket(pu: PTUserInfo): Boolean;
+function GetDay(iYear, iMonth, iDay: Integer): Integer;
+function GetTimeInfo(buf: string): Integer;
+//身份证合法真实性效验
+function ValidatePID(const APID: string): string;
+function CheckValidatePID(const APID: string): Boolean;
+
+function isCorrectSsn(szSsn: string): Boolean;
+function isCorrectSsn2(szSsn: string): Boolean;
+
+function GetSelectGate(pServerInfo: PTGameServerInfo): PTTblSelectGateIP;    //ok
+function IsValidGateAddr(addr: string): Boolean;
+function IsValidGmAddr(addr: string): Boolean;                          //ok
+function GetPublicAddr(addr: string): PTTablePubIP;
+procedure CertifyCloseUser(uid: string; cert: integer);
+procedure GameTimeOfTimeUser(uid: string; gametime_min: integer);
+procedure CheckTimeAccount(uid: string);
+procedure SendCancelAdmissionUser(pCert: PTCertUser);
+function CheckBadAccount(szLoginid: string): Boolean;
+
+procedure WriteLog(cmd: string; ue: TUserEntryInfo; ua: TUserEntryAddInfo);
+
+implementation
+
+uses
+  LoginSvrWnd, IniFiles, NetGameServer, EDcode, mudutil;
+
+procedure ClearMessage;
+var
+  I: Integer;
+begin
+  MainLogMsgList.Lock;
+  try
+    for I := 0 to MainLogMsgList.Count - 1 do begin
+      Dispose(pTMsgLog(MainLogMsgList.Objects[I]));
+    end;
+    MainLogMsgList.Clear;
+  finally
+    MainLogMsgList.UnLock;
+  end;
+end;
+
+procedure MainOutMessage(FColor: Integer; Msg: string);
+var
+  MsgLog: pTMsgLog;
+begin
+  MainLogMsgList.Lock;
+  try
+    if MainLogMsgList.Count >= 200 then ClearMessage;
+  finally
+    MainLogMsgList.UnLock;
+  end;
+
+  MainLogMsgList.Lock;
+  try
+    New(MsgLog);
+    MsgLog.boAdd := True;
+    MsgLog.dAddTime := Now;
+    MsgLog.nFColor := FColor;
+    MainLogMsgList.AddObject(Msg, TObject(MsgLog));
+  finally
+    MainLogMsgList.UnLock;
+  end;
+end;
+
+procedure LoadConfig;
+var
+  Conf: TIniFile;
+  sConfigFileName: string;
+  nInteger: Integer;
+  sString: string;
+begin
+  sConfigFileName := '.\Config.ini';
+  Conf := TIniFile.Create(sConfigFileName);
+  sString := Conf.ReadString(GateClass, 'ODBC_DSN', '');
+  if sString = '' then Conf.WriteString(GateClass, 'ODBC_DSN', g_Config.ODBC_DSN);
+  sString := Conf.ReadString(GateClass, 'ODBC_ID', '');
+  if sString = '' then Conf.WriteString(GateClass, 'ODBC_ID', g_Config.ODBC_ID);
+  sString := Conf.ReadString(GateClass, 'ODBC_PW', '');
+  if sString = '' then Conf.WriteString(GateClass, 'ODBC_PW', g_Config.ODBC_PW);
+
+  sString := Conf.ReadString(GateClass, 'ODBC_DSN_PC', '');
+  if sString = '' then Conf.WriteString(GateClass, 'ODBC_DSN_PC', g_Config.ODBC_DSN_PC);
+  sString := Conf.ReadString(GateClass, 'ODBC_ID_PC', '');
+  if sString = '' then Conf.WriteString(GateClass, 'ODBC_ID_PC', g_Config.ODBC_ID_PC);
+  sString := Conf.ReadString(GateClass, 'ODBC_PW_PC', '');
+  if sString = '' then Conf.WriteString(GateClass, 'ODBC_PW_PC', g_Config.ODBC_PW_PC);
+
+  nInteger := Conf.ReadInteger(GateClass, 'CS_BPORT', -1);
+  if nInteger = -1 then Conf.WriteInteger(GateClass, 'CS_BPORT', g_Config.CS_BPORT);
+  nInteger := Conf.ReadInteger(GateClass, 'GS_BPORT', -1);
+  if nInteger = -1 then Conf.WriteInteger(GateClass, 'GS_BPORT', g_Config.GS_BPORT);
+  nInteger := Conf.ReadInteger(GateClass, 'LG_BPORT', -1);
+  if nInteger = -1 then Conf.WriteInteger(GateClass, 'LG_BPORT', g_Config.LG_BPORT);
+
+  nInteger := Conf.ReadInteger(GateClass, 'Minimize', -1);
+  if nInteger = -1 then Conf.WriteBool(GateClass, 'Minimize', g_Config.boMinimize);
+
+  g_Config.ODBC_DSN := Conf.ReadString(GateClass, 'ODBC_DSN', g_Config.ODBC_DSN);
+  g_Config.ODBC_ID := Conf.ReadString(GateClass, 'ODBC_ID', g_Config.ODBC_ID);
+  g_Config.ODBC_PW := Conf.ReadString(GateClass, 'ODBC_PW', g_Config.ODBC_PW);
+  g_Config.ODBC_DSN_PC := Conf.ReadString(GateClass, 'ODBC_DSN_PC', g_Config.ODBC_DSN_PC);
+  g_Config.ODBC_ID_PC := Conf.ReadString(GateClass, 'ODBC_ID_PC', g_Config.ODBC_ID_PC);
+  g_Config.ODBC_PW_PC := Conf.ReadString(GateClass, 'ODBC_PW_PC', g_Config.ODBC_PW_PC);
+  g_Config.CS_BPORT := Conf.ReadInteger(GateClass, 'CS_BPORT', g_Config.CS_BPORT);
+  g_Config.GS_BPORT := Conf.ReadInteger(GateClass, 'GS_BPORT', g_Config.GS_BPORT);
+  g_Config.LG_BPORT := Conf.ReadInteger(GateClass, 'LG_BPORT', g_Config.LG_BPORT);
+  g_Config.boMinimize := Conf.ReadBool(GateClass, 'Minimize', g_Config.boMinimize);
+  Conf.Free;
+end;
+
+procedure WriteConLog(uid, addr: string);
+var
+  szQuery: string;
+begin
+  if not FSQLIDDB.Open then Exit;
+  szQuery := Format('INSERT INTO TBL_CONNECTLOGS(FLD_LOGINID, FLD_LOGINIP,' +
+                    ' FLD_LOGINTIME, FLD_GAMETYPE) VALUES(''%s'', ''%s'',GetDate(),''%s'')', [uid, addr, m_szGameType]);
+{$IFDEF DEBUG}
+  MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+  FSQLIDDB.UseDB(tAccount);
+  FSQLIDDB.ExeCuteSQL(szQuery);
+end;
+
+procedure SaveCountLog;
+var
+  szQuery: string;
+  p: PTGameServer;
+  i: Integer;
+begin
+  if not FSQLIDDB.Open then Exit;
+
+  szQuery := Format('INSERT INTO TBL_COUNTLOGS(FLD_TIME,' +
+                    ' FLD_COUNT, FLD_MAXCOUNT, FLD_GAMETYPE) VALUES(GetDate(), %d, %d, ''%s'')',
+					          [TotalUserCount, MaxTotalUserCount, m_szGameType] );
+{$IFDEF DEBUG}
+  MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+  FSQLIDDB.UseDB(tAccount);
+  FSQLIDDB.ExeCuteSQL(szQuery);
+
+  MaxTotalUserCount := 0;
+
+  for i:=0 to m_listGameServer.Count-1 do begin
+    p:= PTGameServer(m_listGameServer[i]);
+    szQuery := Format( 'INSERT INTO TBL_USERCOUNT(FLD_NAME, FLD_INDEX, FLD_TIME,' +
+        ' FLD_COUNT, FLD_MAXCOUNT, FLD_GAMETYPE) VALUES(''%s'', %d, GetDate(), %d, %d, ''%s'')',
+        [p.ServerName, p.ServerIndex, p.CurUserCount, p.MaxUserCount, m_szGameType] );
+{$IFDEF DEBUG}
+    MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+    FSQLIDDB.ExeCuteSQL(szQuery);
+    p.MaxUserCount := 0;
+  end;
+end;
+
+procedure SendSocket(Socket: TCustomWinSocket; uhandle, data: string);
+begin
+{$IFDEF DEBUG}
+  MainOutMessage(0, '[LoginGate/Send] ' + '%' + uhandle + '/#' + data + '!$');
+{$ENDIF}
+  Socket.SendText('%' + uhandle + '/#' + data + '!$');
+end;
+
+procedure SendKickUser(Socket: TCustomWinSocket; uhandle: string);
+begin
+  Socket.SendText('%+-' + uhandle + '$');
+end;
+
+procedure SendResponse(pu: PTUserInfo; msg, Recog, param, tag, series: integer; body: string);
+var
+  dmsg: TDefaultMessage;
+begin
+  dmsg := MakeDefaultMsg(msg, Recog, param, tag, series);
+  SendSocket(pu.nGateSocket, pu.szUserHandle, EncodeMessage(dmsg) + EncodeString(body));
+end;
+
+function KickOffSocket(pu: PTUserInfo): Boolean;
+var
+  i, j: integer;
+  ginfo: PTLoginGate;
+begin
+  Result := FALSE;
+  try
+    sLock.Enter;
+    for i := 0 to m_listLoginGate.Count - 1 do begin
+      ginfo := PTLoginGate(m_listLoginGate[i]);
+      for j := ginfo.UserList.Count - 1 downto 0 do begin
+        if pu = PTUserInfo(ginfo.UserList[j]) then begin
+//          if CbViewLog.Checked then
+//            SetLog(0, 'Kick  : ' + pu.UserAddr);
+{$IFDEF DEBUG}
+          MainOutMessage(0, 'Kick  : ' + pu.szAddr);
+{$ENDIF}
+          SendKickUser(ginfo.GateSocket, pu.szUserHandle);
+          Dispose(pu);
+          ginfo.UserList.Delete(j);
+          Result := TRUE;
+          exit;
+        end;
+      end;
+    end;
+  finally
+    sLock.Leave;
+  end;
+end;
+
+////////////////////////////////////////////////////////////////////////////
+// 1. 1斥篮 乞斥 (365)
+// 2. 4斥 付促 辣斥 (366)
+// 3. 100斥 窜困绰 乞斥.
+// 4. 400斥 窜困绰 辣斥.
+////////////////////////////////////////////////////////////////////////////
+function GetDay(iYear, iMonth, iDay: Integer): Integer; //你看  他只计算了年月日
+var
+  iTotalDay, iTemp, i, iStartYear, MaxDay: Integer;
+  bYun: Boolean;
+
+// 固府 拌魂登绢柳 朝楼 1999-12-31 鳖瘤..
+const
+  DAYTOYEAR1999 = 730119;
+
+// 崔俊 秦寸登绰 朝楼 抛捞喉
+const
+  MONTH_DAY: array [0..12] of Integer = (0,31,29,31,30,31,30,31,31,30,31,30,31);
+
+begin
+  iTotalDay := 0;
+  iTemp := 0;
+  i := 0;
+  iStartYear := 1;
+  MaxDay := 0;
+  bYun := FALSE;
+
+  if iYear > 0 then begin
+
+    // 楷档啊 2000斥 捞饶扼搁 1999 鳖瘤 朝楼甫 官肺 拌魂窍磊.
+    if iYear > 1999 then begin
+      iStartYear := 2000;
+      iTotalDay := DAYTOYEAR1999;
+    end else begin
+      iStartYear := 1;
+      iTotalDay := 0;
+    end;
+
+    // 楷档俊 蝶扼 朝荐甫 歹秦霖促.
+    for i:=iStartYear to (iYear - 1) do begin
+      if i mod 400 = 0 then
+        iTemp := 366
+      else if i mod 100 = 0 then
+        iTemp := 365
+      else if i mod 4 = 0 then
+        iTemp := 366
+      else
+        iTemp := 365;
+      Inc (iTotalDay, iTemp);
+    end;
+  end else Result := 0;
+
+  // 辣斥拌魂
+  if iYear mod 400 = 0 then
+    bYun := True
+  else if iYear mod 100 = 0 then
+    bYun := False
+  else if iYear mod 4 = 0 then
+    bYun := True
+  else
+    bYun := False;
+
+  // 崔阑 扁霖栏肺 朝楼 拌魂
+  if (iMonth >= 1) and (iMonth <= 12) then begin
+    for i:=1 to (iMonth - 1) do begin
+      Inc (iTotalDay, MONTH_DAY[i]);
+      if (i = 2) and (not bYun) then
+        Dec (iTotalDay, 1);  //--- 辣斥 2岿崔篮 29老鳖瘤 , 乞斥篮 28老鳖瘤.
+    end;
+  end else Result := 0;
+
+  // 朝阑 歹窍磊..
+  MaxDay := MONTH_DAY[iMonth];
+  if (iMonth = 2) and (not bYun) then MaxDay := 28;
+  if (iDay >= 1) and (iDay <= MaxDay) then
+    Inc (iTotalDay, iDay)
+  else Result := 0;
+
+  Result := iTotalDay;
+end;
+
+function GetTimeInfo(buf: string): Integer;
+var
+  yyyy, mm, dd: Word;
+  stime: TDateTime;
+begin
+  Result := 0;
+  if buf <> '' then begin
+    stime := StrToDateTimeDef(buf, Now);
+    DecodeDate(stime, yyyy, mm, dd);
+	  Result := GetDay(yyyy, mm, dd);
+  end;
+end;
+
+//身份证合法真实性效验
+function ValidatePID(const APID: string): string;
+{内部函数,取身份证号校验位,最后一位,对18位有效}
+  function GetVerifyBit(sIdentityNum: string): Char;
+  var
+    nNum: Integer;
+  begin
+    Result := #0;
+    nNum := StrToInt(sIdentityNum[1]) * 7 +
+      StrToInt(sIdentityNum[2]) * 9 +
+      StrToInt(sIdentityNum[3]) * 10 +
+      StrToInt(sIdentityNum[4]) * 5 +
+      StrToInt(sIdentityNum[5]) * 8 +
+      StrToInt(sIdentityNum[6]) * 4 +
+      StrToInt(sIdentityNum[7]) * 2 +
+      StrToInt(sIdentityNum[8]) * 1 +
+      StrToInt(sIdentityNum[9]) * 6 +
+      StrToInt(sIdentityNum[10]) * 3 +
+      StrToInt(sIdentityNum[11]) * 7 +
+      StrToInt(sIdentityNum[12]) * 9 +
+      StrToInt(sIdentityNum[13]) * 10 +
+      StrToInt(sIdentityNum[14]) * 5 +
+      StrToInt(sIdentityNum[15]) * 8 +
+      StrToInt(sIdentityNum[16]) * 4 +
+      StrToInt(sIdentityNum[17]) * 2;
+    nNum := nNum mod 11;
+    case nNum of
+      0: Result := '1';
+      1: Result := '0';
+      2: Result := 'X';
+      3: Result := '9';
+      4: Result := '8';
+      5: Result := '7';
+      6: Result := '6';
+      7: Result := '5';
+      8: Result := '4';
+      9: Result := '3';
+      10: Result := '2';
+    end;
+  end;
+var
+  L: Integer;
+  sCentury: string;
+  sYear2Bit: string;
+  sMonth: string;
+  sDate: string;
+  iCentury: Integer;
+  iMonth: Integer;
+  iDate: Integer;
+  CRCFact: string; //18位证号的实际值
+  CRCTh: string; //18位证号的理论值
+  FebDayAmt: Byte; //2月天数
+begin
+  L := Length(APID);
+  if (L in [15, 18]) = False then begin
+    Result := Format('身份证号不是15位或18位(%0:s, 实际位数:%1:d)', [APID, L]);
+    Exit;
+  end;
+  CRCFact := '';
+  if L = 18 then begin
+    sCentury := Copy(APID, 7, 2);
+    iCentury := StrToInt(sCentury);
+    if (iCentury in [18..20]) = False then begin
+      Result := Format('身份证号码无效:18位证号的年份前两位必须在18-20之间(%0:S)', [sCentury]);
+      Exit;
+    end;
+    sYear2Bit := Copy(APID, 9, 2);
+    sMonth := Copy(APID, 11, 2);
+    sDate := Copy(APID, 13, 2);
+    CRCFact := Copy(APID, 18, 1);
+  end
+  else begin
+    sCentury := '19';
+    sYear2Bit := Copy(APID, 7, 2);
+    sMonth := Copy(APID, 9, 2);
+    sDate := Copy(APID, 11, 2);
+  end;
+  iMonth := StrToInt(sMonth);
+  iDate := StrToInt(sDate);
+  if (iMonth in [01..12]) = False then begin
+    Result := Format('身份证号码无效:月份必须在01-12之间(%0:s)', [sMonth]);
+    Exit;
+  end;
+  if (iMonth in [1, 3, 5, 7, 8, 10, 12]) then begin
+    if (iDate in [01..31]) = False then begin
+      Result := Format('身份证号码无效:日期无效,不能为零或超出当月最大值(%0:s)', [sDate]);
+      Exit;
+    end;
+  end;
+  if (iMonth in [4, 6, 9, 11]) then begin
+    if (iDate in [01..30]) = False then begin
+      Result := Format('身份证号码无效:日期无效,不能为零或超出当月最大值(%0:s)', [sDate]);
+      Exit;
+    end;
+  end;
+  if IsLeapYear(StrToInt(sCentury + sYear2Bit)) = True then begin
+    FebDayAmt := 29;
+  end
+  else begin
+    FebDayAmt := 28;
+  end;
+  if (iMonth in [2]) then begin
+    if (iDate in [01..FebDayAmt]) = False then begin
+      Result := Format('身份证号码无效:日期无效,不能为零或超出当月最大值(%0:s)', [sDate]);
+      Exit;
+    end;
+  end;
+  if CRCFact <> '' then begin
+    CRCTh := GetVerifyBit(APID);
+    if CRCFact <> CRCTh then begin
+      Result := Format('身份证号码无效:校验位(第18位)错:(%0:s)', [APID]);
+      Exit;
+    end;
+  end;
+  Result := '身份证号码合法';
+end;
+
+function CheckValidatePID(const APID: string): Boolean;
+{内部函数,取身份证号校验位,最后一位,对18位有效}
+  function GetVerifyBit(sIdentityNum: string): Char;
+  var
+    nNum: Integer;
+  begin
+    Result := #0;
+    nNum := StrToInt(sIdentityNum[1]) * 7 +
+      StrToInt(sIdentityNum[2]) * 9 +
+      StrToInt(sIdentityNum[3]) * 10 +
+      StrToInt(sIdentityNum[4]) * 5 +
+      StrToInt(sIdentityNum[5]) * 8 +
+      StrToInt(sIdentityNum[6]) * 4 +
+      StrToInt(sIdentityNum[7]) * 2 +
+      StrToInt(sIdentityNum[8]) * 1 +
+      StrToInt(sIdentityNum[9]) * 6 +
+      StrToInt(sIdentityNum[10]) * 3 +
+      StrToInt(sIdentityNum[11]) * 7 +
+      StrToInt(sIdentityNum[12]) * 9 +
+      StrToInt(sIdentityNum[13]) * 10 +
+      StrToInt(sIdentityNum[14]) * 5 +
+      StrToInt(sIdentityNum[15]) * 8 +
+      StrToInt(sIdentityNum[16]) * 4 +
+      StrToInt(sIdentityNum[17]) * 2;
+    nNum := nNum mod 11;
+    case nNum of
+      0: Result := '1';
+      1: Result := '0';
+      2: Result := 'X';
+      3: Result := '9';
+      4: Result := '8';
+      5: Result := '7';
+      6: Result := '6';
+      7: Result := '5';
+      8: Result := '4';
+      9: Result := '3';
+      10: Result := '2';
+    end;
+  end;
+var
+  L: Integer;
+  sCentury: string;
+  sYear2Bit: string;
+  sMonth: string;
+  sDate: string;
+  iCentury: Integer;
+  iMonth: Integer;
+  iDate: Integer;
+  CRCFact: string; //18位证号的实际值
+  CRCTh: string; //18位证号的理论值
+  FebDayAmt: Byte; //2月天数
+begin
+  Result := False;
+  L := Length(APID);
+  if (L in [15, 18]) = False then begin
+    Exit;
+  end;
+  CRCFact := '';
+  if L = 18 then begin
+    sCentury := Copy(APID, 7, 2);
+    iCentury := StrToInt(sCentury);
+    if (iCentury in [18..20]) = False then begin
+      Exit;
+    end;
+    sYear2Bit := Copy(APID, 9, 2);
+    sMonth := Copy(APID, 11, 2);
+    sDate := Copy(APID, 13, 2);
+    CRCFact := Copy(APID, 18, 1);
+  end
+  else begin
+    sCentury := '19';
+    sYear2Bit := Copy(APID, 7, 2);
+    sMonth := Copy(APID, 9, 2);
+    sDate := Copy(APID, 11, 2);
+  end;
+  iMonth := StrToInt(sMonth);
+  iDate := StrToInt(sDate);
+  if (iMonth in [01..12]) = False then begin
+    Exit;
+  end;
+  if (iMonth in [1, 3, 5, 7, 8, 10, 12]) then begin
+    if (iDate in [01..31]) = False then begin
+      Exit;
+    end;
+  end;
+  if (iMonth in [4, 6, 9, 11]) then begin
+    if (iDate in [01..30]) = False then begin
+      Exit;
+    end;
+  end;
+  if IsLeapYear(StrToInt(sCentury + sYear2Bit)) = True then begin
+    FebDayAmt := 29;
+  end
+  else begin
+    FebDayAmt := 28;
+  end;
+  if (iMonth in [2]) then begin
+    if (iDate in [01..FebDayAmt]) = False then begin
+      Exit;
+    end;
+  end;
+  if CRCFact <> '' then begin
+    CRCTh := GetVerifyBit(APID);
+    if CRCFact <> CRCTh then begin
+      Exit;
+    end;
+  end;
+  Result := True;
+end;
+
+function isCorrectSsn(szSsn: string): Boolean;
+var
+  i, iSum: integer;
+  szTemp: string[2];
+begin
+  Result := false;
+  if szSsn = '' then exit;
+
+	//13俺 磊府牢瘤 眉农
+	if (Length(szSsn) <> 13) then exit;
+
+	//箭磊牢瘤眉农
+	for i:=0 to 12 do begin
+    if (byte(szSsn[i]) < byte('0')) or (byte(szSsn[i]) > byte('9')) then begin
+			exit;
+		end;
+	end;
+
+	//林刮殿废锅龋痹蘑俊 嘎绰瘤 眉农
+	iSum := 0;
+  szTemp := '';
+
+	//以下转换未测试，估计有错误 rainee
+  for i := 0 to 11 do begin
+		//strncpy(szTemp, szSsn+i,1);
+    szTemp[0] := AnsiChar(szSsn[i]);
+    szTemp[1] := '0';
+    iSum := iSum + (i mod 8 + 2) * StrToInt(szTemp);
+  end;
+
+  iSum := 11 - (iSum mod 11);
+  iSum := iSum mod 10;
+  if (iSum <> StrToInt(szSsn) + 12) then begin
+    Result := false;
+  end;
+
+	Result := true;
+end;
+
+function isCorrectSsn2(szSsn: string): Boolean;
+var
+   str, t1, t2, smon, sday: string;
+   amon, aday, sex: integer;
+   flag: Boolean;
+begin
+   Result := TRUE;
+   str := szSsn;
+   str := GetValidStr3 (str, t1, ['-']);
+   GetValidStr3 (str, t2, ['-']);
+   flag := TRUE;
+   if (Length(t1) = 6) and (Length(t2) = 7) then begin
+      smon := Copy(t1, 3, 2);
+      sday := Copy(t1, 5, 2);
+      amon := Str_ToInt (smon, 0);
+      aday := Str_ToInt (sday, 0);
+      if (amon <= 0) or (amon > 12) then flag := FALSE;
+      if (aday <= 0) or (aday > 31) then flag := FALSE;
+      sex := Str_ToInt (Copy(t2, 1, 1), 0);
+      if (sex <= 0) or (sex > 2) then flag := FALSE;
+   end else flag := FALSE;
+   if not flag then begin
+      Result := FALSE;
+   end;
+end;
+
+function GetSelectGate(pServerInfo: PTGameServerInfo): PTTblSelectGateIP;
+var
+  iCount: integer;
+begin
+  Result := nil;
+  if pServerInfo.nGateCount > 0 then begin
+    with pServerInfo^ do begin
+      Inc(nCurrentIndex);
+      if nCurrentIndex >= nGateCount then
+        nCurrentIndex := 0;
+{$IFDEF DEBUG}
+      MainOutMessage(0, Format('CurrentIndex:[%d/%d]', [nCurrentIndex, nGateCount]));
+{$ENDIF}
+
+      for iCount := 0 to listSelectGate.Count - 1 do begin
+        if nCurrentIndex = iCount then
+          Result := PTTblSelectGateIP(listSelectGate[iCount]);
+      end;
+    end;
+  end;
+end;
+
+function IsValidGateAddr(addr: string): Boolean;
+var
+  i: integer;
+begin
+  Result := FALSE;
+  for i := 0 to m_listGateIP.Count - 1 do begin
+    if PTTablePubIP(m_listGateIP[i]).szIP = addr then begin
+      Result := TRUE;
+      break;
+    end;
+  end;
+end;
+
+function IsValidGmAddr(addr: string): Boolean;
+var
+  i: integer;
+begin
+  Result := FALSE;
+  for i := 0 to m_listGmIP.Count - 1 do begin
+    if PTTableGmIP(m_listGmIP[i]).szIP = addr then begin
+      Result := TRUE;
+      break;
+    end;
+  end;
+end;
+
+function GetPublicAddr(addr: string): PTTablePubIP;
+var
+  i: integer;
+begin
+  Result := nil;
+  for i := 0 to m_listGateIP.Count - 1 do begin
+    if PTTablePubIP(m_listGateIP[i]).szIP = addr then begin
+      Result := PTTablePubIP(m_listGateIP[i]);
+      break;
+    end;
+  end;
+end;
+
+procedure CertifyCloseUser(uid: string; cert: integer);
+var
+  i: integer;
+  pc: PTCertUser;
+  szIPAddr, szQuery: string;
+  pRec: _Recordset;
+  nPCRoomIndex: Integer;
+begin
+  for i := m_csListCert.Count - 1 downto 0 do begin
+    pc := PTCertUser(m_csListCert[i]);
+    if (pc.szLoginID = uid) or (pc.nCertification = cert) then begin
+      szIPAddr := pc.szAddr;
+
+      SendCancelAdmissionUser(pc);
+
+      Dispose(PTCertUser(m_csListCert[i]));
+      m_csListCert.Delete(i);
+
+         (* 2003/02/03 吝汗 酒捞乔 眉农
+         pRec := nil;
+         nPCRoomIndex := 0;
+         if ( not DBConnected ) then Exit;
+         SQLExecute('use ' + DBPOOLPC);
+
+         // 荤侩吝牢 IP啊 乔揪规牢瘤 犬牢
+         szQuery := Format( 'SELECT * FROM TBL_USINGIP WHERE FLD_USINGIP=''%s'' AND FLD_GAMETYPE=''%s''', [szIPAddr, GAMETYPE] );
+{$IFDEF DEBUG}
+         SetLog( '[SQL QUERY] ' + szQuery );
+{$ENDIF}
+         pRec := SQLExecute(szQuery);
+	       if (pRec <> nil ) and ( pRec.RecordCount > 0 ) then
+         begin
+		        nPCRoomIndex := Str_ToInt( pRec.Fields ['FLD_PCBANG'].Value, 0 );
+            pRec.Close;
+         end;
+         pRec := nil;
+
+	       if ( nPCRoomIndex > 0 ) then
+	       begin
+   	        // 荤侩吝牢 IP府胶飘 昏力
+            szQuery := Format( 'DELETE FROM TBL_USINGIP WHERE FLD_USINGIP=''%s'' AND FLD_GAMETYPE=''%s''', [szIPAddr, GAMETYPE] );
+{$IFDEF DEBUG}
+            SetLog( '[SQL QUERY] ' + szQuery );
+{$ENDIF}
+		        pRec := SQLExecute(szQuery);
+		        pRec := nil;
+
+		        // 荤侩吝牢 吝汗 IP昏力
+		        szQuery := Format( 'UPDATE TBL_DUPIP SET FLD_ISOK=1, FLD_KICK = GetDate() FROM TBL_DUPIP WHERE FLD_IP=''%s'' AND FLD_GAMETYPE=''%s'' AND FLD_ISOK=0', [szIPAddr, GAMETYPE] );
+{$IFDEF DEBUG}
+	        	SetLog( '[SQL QUERY] ' + szQuery );
+{$ENDIF}
+		        pRec := SQLExecute(szQuery);
+		        pRec := nil;
+
+		        // 荤侩吝牢 IP肮荐 皑家
+		        szQuery := Format( 'UPDATE MR3_PCRoomStatusTable SET PCRoomStatus_UsingIPCount = PCRoomStatus_UsingIPCount-1 WHERE PCRoomStatus_PCRoomIndex=%d AND PCRoomStatus_UsingIPCount > 0', [nPCRoomIndex]);
+{$IFDEF DEBUG}
+		        SetLog( '[SQL QUERY] ' + szQuery );
+{$ENDIF}
+		        pRec := SQLExecute(szQuery);
+		        pRec := nil;
+      	 end;
+	       DBDisConnect;  *)
+
+    end;
+  end;
+end;
+
+procedure GameTimeOfTimeUser(uid: string; gametime_min: integer);
+var
+  i: integer;
+  pUser: PTCertUser;
+  szQuery: string;
+  pRec: TADOQuery;
+  dwSeconds: Integer;
+begin
+  if (gametime_min <= 0) or (uid = '') then exit;
+  if BoTestMode then exit;
+
+  if not FSQLIDDB.Open then exit;
+   //------------------------------------
+   // Query Warning(sonmg 2005/06/16)
+   //变 巩磊凯 眉农(LoginSvr)
+  if Length(uid) > 20 then
+    MainOutMessage(CERR, '[LONG-QUERY MESSAGE!!!] ' + uid);
+   //------------------------------------
+   // DB俊辑 沥樊矫埃 八荤...
+  dwSeconds := 0;
+
+  szQuery := Format('SELECT FLD_SECONDS FROM TBL_ACCOUNT WHERE FLD_LOGINID=N''%s''',
+    [uid]);
+{$IFDEF DEBUG}
+  MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+  FSQLIDDB.UseDB(tAccount);
+  pRec := FSQLIDDB.OpenQuery(szQuery);
+  if (pRec = nil) or (pRec.RecordCount <= 0) then
+    pRec.Close
+  else begin
+    dwSeconds := pRec.FieldByName('FLD_SECONDS').AsInteger;
+
+    if dwSeconds > 0 then begin
+      dwSeconds := dwSeconds - (gametime_min div (1 * 1000));   //减去使用时间
+      if dwSeconds < 0 then
+        dwSeconds := 0;
+
+      szQuery := Format('UPDATE TBL_ACCOUNT SET FLD_SECONDS=%d WHERE FLD_LOGINID=N''%s''',
+        [dwSeconds, uid]);
+{$IFDEF DEBUG}
+      MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+      FSQLIDDB.ExeCuteSQL(szQuery);
+    end;
+
+      // 沥樊 矫埃 醚钦 : 巢篮 矫埃捞 绝栏搁...
+    if dwSeconds = 0 then begin
+      for i := m_csListCert.Count - 1 downto 0 do begin
+        pUser := PTCertUser(m_csListCert[i]);
+        if pUser.szLoginID = uid then begin
+          if (not pUser.bFreeMode) and (not pUser.bClosing) then begin
+            if (pUser.nAvailableType = 2) or ((pUser.nAvailableType >= 6) and (pUser.nAvailableType
+              <= 10)) then begin
+              SendCancelAdmissionUser(pUser);
+                     //Dispose (pUser);
+                     //listCert.Delete (i);  //救谗绢龙 荐档 乐栏骨肺 固府 昏力窍瘤 臼绰促.
+            end;
+          end;
+          Break;
+        end;
+      end;
+    end;
+    pRec.Close;
+  end;
+end;
+
+procedure CheckTimeAccount(uid: string);
+var
+  i: integer;
+  pUser: PTCertUser;
+  szQuery: string;
+  pRec: TADOQuery;
+  dwSeconds: Integer;
+begin
+  if (uid = '') then exit;
+  if BoTestMode then exit;
+
+  if not FSQLIDDB.Open then exit;
+   //------------------------------------
+  if Length(uid) > 20 then
+    MainOutMessage(CERR, '[LONG-QUERY MESSAGE!!!] ' + uid);
+   //------------------------------------
+   // DB俊辑 沥樊矫埃 八荤...
+  dwSeconds := 0;
+
+  szQuery := Format('SELECT FLD_SECONDS FROM TBL_ACCOUNT WHERE FLD_LOGINID=N''%s''',
+    [uid]);
+{$IFDEF DEBUG}
+  MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+  FSQLIDDB.UseDB(tAccount);
+  pRec := FSQLIDDB.OpenQuery(szQuery);
+  if (pRec = nil) or (pRec.RecordCount <= 0) then
+    pRec.Close
+  else begin
+    dwSeconds := pRec.FieldByName('FLD_SECONDS').AsInteger;
+
+//    if dwSeconds > 0 then begin
+//      dwSeconds := dwSeconds - (gametime_min * 60);   //减去使用时间
+//      if dwSeconds < 0 then
+//        dwSeconds := 0;
+//
+//      szQuery := Format('UPDATE TBL_ACCOUNT SET FLD_SECONDS=%d WHERE FLD_LOGINID=N''%s''',
+//        [dwSeconds, uid]);
+//{$IFDEF DEBUG}
+//      MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+//{$ENDIF}
+//      FSQLIDDB.ExeCuteSQL(szQuery);
+//    end;
+
+    // 沥樊 矫埃 醚钦 : 巢篮 矫埃捞 绝栏搁...
+    if dwSeconds = 0 then begin
+      for i := m_csListCert.Count - 1 downto 0 do begin
+        pUser := PTCertUser(m_csListCert[i]);
+        if pUser.szLoginID = uid then begin
+          if (not pUser.bFreeMode) and (not pUser.bClosing) then begin
+            if (pUser.nAvailableType = 2) or ((pUser.nAvailableType >= 6) and (pUser.nAvailableType <= 10)) then begin
+              CLoginSvrWnd.SendAccountExpireUser(pUser);
+              //Dispose (pUser);
+              //listCert.Delete (i);  //救谗绢龙 荐档 乐栏骨肺 固府 昏力窍瘤 臼绰促.
+            end;
+          end;
+          Break;
+        end;
+      end;
+    end;
+    pRec.Close;
+  end;
+end;
+
+procedure SendCancelAdmissionUser(pCert: PTCertUser);
+begin
+//  if not pCert.Closing then
+    CGameServer.SendNamedServerMsg(pCert.szServerName, ISM_CANCELADMISSION, pCert.szLoginID + '/' + IntToStr(pCert.nCertification));
+//  pCert.OpenTime := GetTickCount; //摧洒扁 矫累茄 矫累
+//  pCert.Closing := TRUE;
+{$IFDEF DEBUG}
+  MainOutMessage(0, Format('[GameServer/Send] ISM_CANCELADMISSION : %s TO (%s)', [pCert.szLoginID, pCert.szAddr]));
+{$ENDIF}
+end;
+
+function CheckBadAccount(szLoginid: string): Boolean;
+var
+  szQuery: string;
+  pRec: TADOQuery;
+begin
+	if not FSQLIDDB.Open then exit;
+
+  szQuery := Format('SELECT FLD_ID FROM TBL_CONNCHECKUSER WHERE FLD_ID=N''%s'' AND FLD_ISDEL=0', [szLoginid]);
+	//sprintf(szQuery, "SELECT Getdate()");
+{$IFDEF DEBUG}
+  MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+  FSQLIDDB.UseDB(tAccount);
+  pRec := FSQLIDDB.OpenQuery(szQuery);
+  if (pRec = nil) or (pRec.RecordCount <= 0) then begin
+    pRec.Close;
+    Result := False;
+  end else begin
+    pRec.Close;
+    Result := True;
+  end;
+end;
+
+procedure WriteLog(cmd: string; ue: TUserEntryInfo; ua: TUserEntryAddInfo);
+var
+  ayear, amon, aday: word;
+  monstr, flname: string;
+  f: TextFile;
+  dirname: array[0..255] of char;
+begin
+  DecodeDate(Date, ayear, amon, aday);
+  monstr := '.\Log\' + IntToStr(ayear) + '-' + IntToStr(amon);
+  if not FileExists(monstr) then begin
+    StrPCopy(dirname, monstr);
+    CreateDirectory(@dirname, nil);
+  end;
+  if aday < 10 then
+    flname := monstr + '\Id_0' + IntToStr(aday) + '.log'
+  else
+    flname := monstr + '\Id_' + IntToStr(aday) + '.log';
+  AssignFile(f, flname);
+  if not FileExists(flname) then
+    Rewrite(f)
+  else
+    Append(f);
+  WriteLn (f, '*' + cmd + '* ' +
+           FmStr2(ue.LoginId, 11) +
+           FmStr2('"' + ue.Password + '"', 13) +
+           FmStr2(ue.UserName, 21) +
+           FmStr2(ue.SSNo, 15) +
+           FmStr2(ue.Phone, 15) +
+           FmStr2(ue.Quiz,  21) +
+           FmStr2(ue.Answer, 13) +
+           FmStr2(ue.EMail, 41) +
+           FmStr2(ua.Quiz2, 21) +
+           FmStr2(ua.Answer2, 13) +
+           FmStr2(ua.Birthday, 11) +
+           FmStr2(ua.MobilePhone, 14) +
+           '[' + TimeToStr(Time) + ']');
+   //Flush (f);
+  CloseFile (f);
+end;
+
+initialization
+  sLock := TCriticalSection.Create;
+  FCertification := 1;
+
+finalization
+  sLock.Free;
+
+end.

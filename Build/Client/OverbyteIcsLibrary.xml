@@ -1,0 +1,791 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsLibrary" platform="Win32">
+  <const name="OverbyteIcsLibraryVersion" type="Integer" file="OverbyteIcsLibrary.pas" line="120">
+    <value>
+      $75
+    </value>
+  </const>
+  <variable name="CopyRight" type="string" visibility="public" file="OverbyteIcsLibrary.pas" line="121" />
+  <const name="fmOpenRead" type="Integer" file="OverbyteIcsLibrary.pas" line="266">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="fmShareDenyWrite" type="Integer" file="OverbyteIcsLibrary.pas" line="268">
+    <value>
+      $20
+    </value>
+  </const>
+  <const name="faAnyFile" type="Integer" file="OverbyteIcsLibrary.pas" line="270">
+    <value>
+      $1FF
+    </value>
+  </const>
+  <const name="faDirectory" type="Integer" file="OverbyteIcsLibrary.pas" line="272">
+    <value>
+      $10
+    </value>
+  </const>
+  <const name="faReadOnly" type="Integer" file="OverbyteIcsLibrary.pas" line="276">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="faSysFile" type="Integer" file="OverbyteIcsLibrary.pas" line="278">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="faHidden" type="Integer" file="OverbyteIcsLibrary.pas" line="280">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="rfReplaceAll" type=":85" file="OverbyteIcsLibrary.pas" line="282">
+    <value>
+      rfReplaceAll
+    </value>
+  </const>
+  <variable name="MinDateTime" type="TDateTime" visibility="public" file="OverbyteIcsLibrary.pas" line="284" />
+  <variable name="MaxDateTime" type="TDateTime" visibility="public" file="OverbyteIcsLibrary.pas" line="287" />
+  <const name="opRemove" type="TOperation" file="OverbyteIcsLibrary.pas" line="290">
+    <value>
+      opRemove
+    </value>
+  </const>
+  <const name="csDesigning" type=":55" file="OverbyteIcsLibrary.pas" line="292">
+    <value>
+      csDesigning
+    </value>
+  </const>
+  <const name="csDestroying" type=":55" file="OverbyteIcsLibrary.pas" line="294">
+    <value>
+      csDestroying
+    </value>
+  </const>
+  <const name="lnDeleted" type="TListNotification" file="OverbyteIcsLibrary.pas" line="296">
+    <value>
+      lnDeleted
+    </value>
+  </const>
+  <const name="WM_QUIT" type="Integer" file="OverbyteIcsLibrary.pas" line="299">
+    <value>
+      $12
+    </value>
+  </const>
+  <const name="WM_USER" type="Integer" file="OverbyteIcsLibrary.pas" line="301">
+    <value>
+      $400
+    </value>
+  </const>
+  <const name="WM_TIMER" type="Integer" file="OverbyteIcsLibrary.pas" line="303">
+    <value>
+      $113
+    </value>
+  </const>
+  <const name="PM_REMOVE" type="Integer" file="OverbyteIcsLibrary.pas" line="305">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="WS_EX_TOOLWINDOW" type="Integer" file="OverbyteIcsLibrary.pas" line="307">
+    <value>
+      $80
+    </value>
+  </const>
+  <const name="WS_POPUP" type="Integer" file="OverbyteIcsLibrary.pas" line="309">
+    <value>
+      $80000000
+    </value>
+  </const>
+  <const name="TIME_ZONE_ID_DAYLIGHT" type="Integer" file="OverbyteIcsLibrary.pas" line="311">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="TIME_ZONE_ID_STANDARD" type="Integer" file="OverbyteIcsLibrary.pas" line="313">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="CP_ACP" type="Integer" file="OverbyteIcsLibrary.pas" line="315">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="CP_UTF8" type="Integer" file="OverbyteIcsLibrary.pas" line="317">
+    <value>
+      $FDE9
+    </value>
+  </const>
+  <const name="CP_UTF7" type="Integer" file="OverbyteIcsLibrary.pas" line="319">
+    <value>
+      $FDE8
+    </value>
+  </const>
+  <function name="_SysErrorMessage" visibility="public" file="OverbyteIcsLibrary.pas" line="826">
+    <parameters>
+      <parameter name="ErrCode" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <procedure name="_ShowException" visibility="public" file="OverbyteIcsLibrary.pas" line="831">
+    <parameters>
+      <parameter name="ExceptObject" type="TObject" />
+      <parameter name="ExceptAddr" type="Pointer" />
+    </parameters>
+  </procedure>
+  <function name="_BoolToStr" visibility="public" file="OverbyteIcsLibrary.pas" line="836">
+    <parameters>
+      <parameter name="B" type="Boolean" />
+      <parameter name="UseBoolStrs" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_IntToStr" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="841">
+    <parameters>
+      <parameter name="N" type="Integer" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_IntToStr" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="846">
+    <parameters>
+      <parameter name="N" type="Int64" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_IntToStr" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="851">
+    <parameters>
+      <parameter name="N" type="Cardinal" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsIntToStrA" visibility="public" file="OverbyteIcsLibrary.pas" line="892">
+    <parameters>
+      <parameter name="N" type="Integer" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="IcsIntToHexA" visibility="public" file="OverbyteIcsLibrary.pas" line="933">
+    <parameters>
+      <parameter name="N" type="Integer" />
+      <parameter name="Digits" type="Byte" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="_StrToInt" visibility="public" file="OverbyteIcsLibrary.pas" line="946">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_StrToInt64" visibility="public" file="OverbyteIcsLibrary.pas" line="951">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="Int64" />
+    </parameters>
+  </function>
+  <function name="_StrPas" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="956">
+    <parameters>
+      <parameter name="P" type="PAnsiChar" paramflags="const" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="_StrPas" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="962">
+    <parameters>
+      <parameter name="P" type="PWideChar" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_StrLen" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="968">
+    <parameters>
+      <parameter name="P" type="PAnsiChar" paramflags="const" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="_StrLen" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="974">
+    <parameters>
+      <parameter name="P" type="PWideChar" paramflags="const" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="_StrCopy" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="980">
+    <parameters>
+      <parameter name="Dest" type="PAnsiChar" />
+      <parameter name="Source" type="PAnsiChar" paramflags="const" />
+      <retval type="PAnsiChar" />
+    </parameters>
+  </function>
+  <function name="_StrCopy" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="986">
+    <parameters>
+      <parameter name="Dest" type="PWideChar" />
+      <parameter name="Source" type="PWideChar" paramflags="const" />
+      <retval type="PWideChar" />
+    </parameters>
+  </function>
+  <function name="IcsTrimA" visibility="public" file="OverbyteIcsLibrary.pas" line="1017">
+    <parameters>
+      <parameter name="Str" type="AnsiString" paramflags="const" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="_Trim" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1035">
+    <parameters>
+      <parameter name="Str" type="AnsiString" paramflags="const" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="_Trim" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1050">
+    <parameters>
+      <parameter name="Str" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_StrLower" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1058">
+    <parameters>
+      <parameter name="Str" type="PAnsiChar" />
+      <retval type="PAnsiChar" />
+    </parameters>
+  </function>
+  <function name="_StrLower" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1064">
+    <parameters>
+      <parameter name="Str" type="PWideChar" />
+      <retval type="PWideChar" />
+    </parameters>
+  </function>
+  <function name="_StrPCopy" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1070">
+    <parameters>
+      <parameter name="Dest" type="PAnsiChar" />
+      <parameter name="Source" type="AnsiString" paramflags="const" />
+      <retval type="PAnsiChar" />
+    </parameters>
+  </function>
+  <function name="_StrPCopy" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1076">
+    <parameters>
+      <parameter name="Dest" type="PWideChar" />
+      <parameter name="Source" type="string" paramflags="const" />
+      <retval type="PWideChar" />
+    </parameters>
+  </function>
+  <function name="_StrComp" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1082">
+    <parameters>
+      <parameter name="Str1" type="PAnsiChar" paramflags="const" />
+      <parameter name="Str2" type="PAnsiChar" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_StrComp" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1088">
+    <parameters>
+      <parameter name="Str1" type="PWideChar" paramflags="const" />
+      <parameter name="Str2" type="PWideChar" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_StrIComp" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1094">
+    <parameters>
+      <parameter name="Str1" type="PAnsiChar" paramflags="const" />
+      <parameter name="Str2" type="PAnsiChar" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_StrIComp" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1100">
+    <parameters>
+      <parameter name="Str1" type="PWideChar" paramflags="const" />
+      <parameter name="Str2" type="PWideChar" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_StrLComp" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1106">
+    <parameters>
+      <parameter name="Str1" type="PAnsiChar" paramflags="const" />
+      <parameter name="Str2" type="PAnsiChar" paramflags="const" />
+      <parameter name="MaxLen" type="Cardinal" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_StrLComp" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1112">
+    <parameters>
+      <parameter name="Str1" type="PWideChar" paramflags="const" />
+      <parameter name="Str2" type="PWideChar" paramflags="const" />
+      <parameter name="MaxLen" type="Cardinal" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_StrLIComp" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1132">
+    <parameters>
+      <parameter name="Str1" type="PAnsiChar" paramflags="const" />
+      <parameter name="Str2" type="PAnsiChar" paramflags="const" />
+      <parameter name="MaxLen" type="Cardinal" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_StrLIComp" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1138">
+    <parameters>
+      <parameter name="Str1" type="PWideChar" paramflags="const" />
+      <parameter name="Str2" type="PWideChar" paramflags="const" />
+      <parameter name="MaxLen" type="Cardinal" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsLowerCaseA" visibility="public" file="OverbyteIcsLibrary.pas" line="1160">
+    <parameters>
+      <parameter name="S" type="AnsiString" paramflags="const" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="_LowerCase" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1183">
+    <parameters>
+      <parameter name="S" type="AnsiString" paramflags="const" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="_LowerCase" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1197">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsUpperCaseA" visibility="public" file="OverbyteIcsLibrary.pas" line="1205">
+    <parameters>
+      <parameter name="S" type="AnsiString" paramflags="const" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="_UpperCase" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1228">
+    <parameters>
+      <parameter name="S" type="AnsiString" paramflags="const" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="_UpperCase" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1242">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsSameTextA" visibility="public" file="OverbyteIcsLibrary.pas" line="1248">
+    <parameters>
+      <parameter name="S1" type="AnsiString" paramflags="const" />
+      <parameter name="S2" type="AnsiString" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsCompareTextA" visibility="public" file="OverbyteIcsLibrary.pas" line="1255">
+    <parameters>
+      <parameter name="S1" type="AnsiString" paramflags="const" />
+      <parameter name="S2" type="AnsiString" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_CompareText" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1297">
+    <parameters>
+      <parameter name="S1" type="AnsiString" paramflags="const" />
+      <parameter name="S2" type="AnsiString" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_CompareText" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1311">
+    <parameters>
+      <parameter name="S1" type="string" paramflags="const" />
+      <parameter name="S2" type="string" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_AnsiStrComp" visibility="public" file="OverbyteIcsLibrary.pas" line="1317">
+    <parameters>
+      <parameter name="S1" type="PAnsiChar" />
+      <parameter name="S2" type="PAnsiChar" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_CompareStr" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1347">
+    <parameters>
+      <parameter name="S1" type="AnsiString" paramflags="const" />
+      <parameter name="S2" type="AnsiString" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_CompareStr" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1361">
+    <parameters>
+      <parameter name="S1" type="string" paramflags="const" />
+      <parameter name="S2" type="string" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_StringReplace" visibility="public" file="OverbyteIcsLibrary.pas" line="1368">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <parameter name="OldPattern" type="string" paramflags="const" />
+      <parameter name="NewPattern" type="string" paramflags="const" />
+      <parameter name="Flags" type="TReplaceFlags" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_FileExists" visibility="public" file="OverbyteIcsLibrary.pas" line="1373">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <procedure name="_FreeAndNil" visibility="public" file="OverbyteIcsLibrary.pas" line="1378">
+    <parameters>
+      <parameter name="Obj" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="_DeleteFile" visibility="public" file="OverbyteIcsLibrary.pas" line="1383">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="_ExtractFileExt" visibility="public" file="OverbyteIcsLibrary.pas" line="1388">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_DateTimeToStr" visibility="public" file="OverbyteIcsLibrary.pas" line="1393">
+    <parameters>
+      <parameter name="DateTime" type="TDateTime" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <procedure name="_DecodeDate" visibility="public" file="OverbyteIcsLibrary.pas" line="1398">
+    <parameters>
+      <parameter name="Date" type="TDateTime" />
+      <parameter name="Year" type="Word" paramflags="var" />
+      <parameter name="Month" type="Word" paramflags="var" />
+      <parameter name="Day" type="Word" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="_DecodeTime" visibility="public" file="OverbyteIcsLibrary.pas" line="1403">
+    <parameters>
+      <parameter name="Time" type="TDateTime" />
+      <parameter name="Hour" type="Word" paramflags="var" />
+      <parameter name="Min" type="Word" paramflags="var" />
+      <parameter name="Sec" type="Word" paramflags="var" />
+      <parameter name="MSec" type="Word" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="_EncodeTime" visibility="public" file="OverbyteIcsLibrary.pas" line="1408">
+    <parameters>
+      <parameter name="Hour" type="Word" />
+      <parameter name="Min" type="Word" />
+      <parameter name="Sec" type="Word" />
+      <parameter name="MSec" type="Word" />
+      <retval type="TDateTime" />
+    </parameters>
+  </function>
+  <function name="_StrToDateTime" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1413">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="TDateTime" />
+    </parameters>
+  </function>
+  <function name="_StrToDateTime" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1418">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <parameter name="FormatSettings" type="TFormatSettings" paramflags="const" />
+      <retval type="TDateTime" />
+    </parameters>
+  </function>
+  <function name="_DirectoryExists" visibility="public" file="OverbyteIcsLibrary.pas" line="1423">
+    <parameters>
+      <parameter name="Name" type="string" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="_IncludeTrailingPathDelimiter" visibility="public" file="OverbyteIcsLibrary.pas" line="1428">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_ExcludeTrailingPathDelimiter" visibility="public" file="OverbyteIcsLibrary.pas" line="1433">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_Now" visibility="public" file="OverbyteIcsLibrary.pas" line="1438">
+    <parameters>
+      <retval type="TDateTime" />
+    </parameters>
+  </function>
+  <function name="_Format" visibility="public" file="OverbyteIcsLibrary.pas" line="1443">
+    <parameters>
+      <parameter name="Fmt" type="string" paramflags="const" />
+      <parameter name="Args" paramflags="const">
+        <array name="Args">
+          <element type="TVarRec" />
+        </array>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_FindFirst" visibility="public" file="OverbyteIcsLibrary.pas" line="1448">
+    <parameters>
+      <parameter name="Path" type="string" paramflags="const" />
+      <parameter name="Attr" type="Integer" />
+      <parameter name="F" type="TSearchRec" paramflags="var" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_FindNext" visibility="public" file="OverbyteIcsLibrary.pas" line="1453">
+    <parameters>
+      <parameter name="F" type="TSearchRec" paramflags="var" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <procedure name="_FindClose" visibility="public" file="OverbyteIcsLibrary.pas" line="1458">
+    <parameters>
+      <parameter name="F" type="TSearchRec" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="_FileDateToDateTime" visibility="public" file="OverbyteIcsLibrary.pas" line="1463">
+    <parameters>
+      <parameter name="FileDate" type="Integer" />
+      <retval type="TDateTime" />
+    </parameters>
+  </function>
+  <function name="_ExtractFilePath" visibility="public" file="OverbyteIcsLibrary.pas" line="1468">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_Date" visibility="public" file="OverbyteIcsLibrary.pas" line="1473">
+    <parameters>
+      <retval type="TDateTime" />
+    </parameters>
+  </function>
+  <function name="_IntToHex" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1478">
+    <parameters>
+      <parameter name="Value" type="Integer" />
+      <parameter name="Digits" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_IntToHex" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1483">
+    <parameters>
+      <parameter name="Value" type="Int64" />
+      <parameter name="Digits" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_IntToHex" visibility="public" procflags="overload" file="OverbyteIcsLibrary.pas" line="1489">
+    <parameters>
+      <parameter name="Value" type="UInt64" />
+      <parameter name="Digits" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_FloatToStr" visibility="public" file="OverbyteIcsLibrary.pas" line="1495">
+    <parameters>
+      <parameter name="Value" type="Extended" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_GetTimeZoneInformation" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1501">
+    <parameters>
+      <parameter name="lpTimeZoneInformation" type="_TIME_ZONE_INFORMATION" paramflags="var" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="_GetWindowLong" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1506">
+    <parameters>
+      <parameter name="H" type="HWND" />
+      <parameter name="nIndex" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_DefWindowProc" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1511">
+    <parameters>
+      <parameter name="H" type="HWND" />
+      <parameter name="Msg" type="Cardinal" />
+      <parameter name="ParamW" type="NativeUInt" />
+      <parameter name="ParamL" type="NativeInt" />
+      <retval type="NativeInt" />
+    </parameters>
+  </function>
+  <function name="_GetCurrentThreadId" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1516">
+    <parameters>
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="_GetMessage" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1523">
+    <parameters>
+      <parameter name="lpMsg" type="tagMSG" paramflags="var" />
+      <parameter name="H" type="HWND" />
+      <parameter name="wMsgFilterMin" type="Cardinal" />
+      <parameter name="wMsgFilterMax" type="Cardinal" />
+      <retval type="LongBool" />
+    </parameters>
+  </function>
+  <function name="_TranslateMessage" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1528">
+    <parameters>
+      <parameter name="lpMsg" type="tagMSG" paramflags="const" />
+      <retval type="LongBool" />
+    </parameters>
+  </function>
+  <function name="_DispatchMessage" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1533">
+    <parameters>
+      <parameter name="lpMsg" type="tagMSG" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_PeekMessage" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1540">
+    <parameters>
+      <parameter name="lpMsg" type="tagMSG" paramflags="var" />
+      <parameter name="H" type="HWND" />
+      <parameter name="wMsgFilterMin" type="Cardinal" />
+      <parameter name="wMsgFilterMax" type="Cardinal" />
+      <parameter name="wRemoveMsg" type="Cardinal" />
+      <retval type="LongBool" />
+    </parameters>
+  </function>
+  <function name="_PostMessage" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1546">
+    <parameters>
+      <parameter name="H" type="HWND" />
+      <parameter name="Msg" type="Cardinal" />
+      <parameter name="ParamW" type="NativeUInt" />
+      <parameter name="ParamL" type="NativeInt" />
+      <retval type="LongBool" />
+    </parameters>
+  </function>
+  <procedure name="_EnterCriticalSection" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1551">
+    <parameters>
+      <parameter name="lpCriticalSection" type="_RTL_CRITICAL_SECTION" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="_LeaveCriticalSection" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1556">
+    <parameters>
+      <parameter name="lpCriticalSection" type="_RTL_CRITICAL_SECTION" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="_InitializeCriticalSection" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1561">
+    <parameters>
+      <parameter name="lpCriticalSection" type="_RTL_CRITICAL_SECTION" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="_DeleteCriticalSection" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1566">
+    <parameters>
+      <parameter name="lpCriticalSection" type="_RTL_CRITICAL_SECTION" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="_GetClassInfo" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1573">
+    <parameters>
+      <parameter name="hInstance" type="NativeUInt" />
+      <parameter name="lpClassName" type="PWideChar" />
+      <parameter name="lpWndClass" type="tagWNDCLASSW" paramflags="var" />
+      <retval type="LongBool" />
+    </parameters>
+  </function>
+  <function name="_RegisterClass" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1578">
+    <parameters>
+      <parameter name="lpWndClass" type="tagWNDCLASSW" paramflags="const" />
+      <retval type="Word" />
+    </parameters>
+  </function>
+  <function name="_CreateWindowEx" visibility="public" file="OverbyteIcsLibrary.pas" line="1585">
+    <parameters>
+      <parameter name="dwExStyle" type="Cardinal" />
+      <parameter name="lpClassName" type="PWideChar" />
+      <parameter name="lpWindowName" type="PWideChar" />
+      <parameter name="dwStyle" type="Cardinal" />
+      <parameter name="X" type="Integer" />
+      <parameter name="Y" type="Integer" />
+      <parameter name="nWidth" type="Integer" />
+      <parameter name="nHeight" type="Integer" />
+      <parameter name="hWndParent" type="HWND" />
+      <parameter name="h_Menu" type="HMENU" />
+      <parameter name="hInstance" type="NativeUInt" />
+      <parameter name="lpParam" type="Pointer" />
+      <retval type="HWND" />
+    </parameters>
+  </function>
+  <function name="_DestroyWindow" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1592">
+    <parameters>
+      <parameter name="H" type="HWND" />
+      <retval type="LongBool" />
+    </parameters>
+  </function>
+  <function name="_SetWindowLong" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1597">
+    <parameters>
+      <parameter name="H" type="HWND" />
+      <parameter name="nIndex" type="Integer" />
+      <parameter name="dwNewLong" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_UnregisterClass" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1602">
+    <parameters>
+      <parameter name="lpClassName" type="PWideChar" />
+      <parameter name="hInstance" type="NativeUInt" />
+      <retval type="LongBool" />
+    </parameters>
+  </function>
+  <function name="_FreeLibrary" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1607">
+    <parameters>
+      <parameter name="hLibModule" type="NativeUInt" />
+      <retval type="LongBool" />
+    </parameters>
+  </function>
+  <function name="_LoadLibrary" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1612">
+    <parameters>
+      <parameter name="lpLibFileName" type="PWideChar" />
+      <retval type="NativeUInt" />
+    </parameters>
+  </function>
+  <function name="_GetProcAddress" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1617">
+    <parameters>
+      <parameter name="hModule" type="NativeUInt" />
+      <parameter name="lpProcName" type="PAnsiChar" />
+      <retval type="Pointer" />
+    </parameters>
+  </function>
+  <function name="_GetTickCount" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1622">
+    <parameters>
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <procedure name="_Sleep" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1627">
+    <parameters>
+      <parameter name="dwMilliseconds" type="Cardinal" />
+    </parameters>
+  </procedure>
+  <function name="_GetACP" visibility="public" callconv="stdcall" file="OverbyteIcsLibrary.pas" line="1632">
+    <parameters>
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="Application" visibility="public" file="OverbyteIcsLibrary.pas" line="1639">
+    <parameters>
+      <retval type="TApplication" />
+    </parameters>
+  </function>
+  <function name="MakeWord" visibility="public" file="OverbyteIcsLibrary.pas" line="1646">
+    <parameters>
+      <parameter name="a" type="Byte" />
+      <parameter name="b" type="Byte" />
+      <retval type="Word" />
+    </parameters>
+  </function>
+  <function name="MakeLong" visibility="public" file="OverbyteIcsLibrary.pas" line="1651">
+    <parameters>
+      <parameter name="a" type="Word" />
+      <parameter name="b" type="Word" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="HiWord" visibility="public" file="OverbyteIcsLibrary.pas" line="1656">
+    <parameters>
+      <parameter name="L" type="Cardinal" />
+      <retval type="Word" />
+    </parameters>
+  </function>
+</namespace>

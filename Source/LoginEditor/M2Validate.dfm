@@ -1,0 +1,61 @@
+object FRMVerValidate: TFRMVerValidate
+  Left = 0
+  Top = 0
+  ActiveControl = cxTextEdit1
+  BorderStyle = bsDialog
+  Caption = #29256#26412#20445#25252
+  ClientHeight = 90
+  ClientWidth = 348
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  PixelsPerInch = 96
+  TextHeight = 13
+  object cxTextEdit1: TcxTextEdit
+    Left = 8
+    Top = 31
+    Properties.EchoMode = eemPassword
+    Properties.PasswordChar = '*'
+    Style.BorderStyle = ebsFlat
+    Style.LookAndFeel.NativeStyle = True
+    StyleDisabled.LookAndFeel.NativeStyle = True
+    StyleFocused.LookAndFeel.NativeStyle = True
+    StyleHot.LookAndFeel.NativeStyle = True
+    TabOrder = 0
+    Width = 329
+  end
+  object cxLabel1: TcxLabel
+    Left = 8
+    Top = 8
+    Caption = #35813#29256#26412#35774#32622#26377#23494#30721#20445#25252#65292#35831#36755#20837#23494#30721#65306
+  end
+  object cxButton1: TcxButton
+    Left = 203
+    Top = 58
+    Width = 64
+    Height = 25
+    Caption = #30830#23450
+    Default = True
+    LookAndFeel.Kind = lfFlat
+    LookAndFeel.NativeStyle = True
+    ModalResult = 1
+    TabOrder = 2
+  end
+  object cxButton2: TcxButton
+    Left = 273
+    Top = 58
+    Width = 64
+    Height = 25
+    Cancel = True
+    Caption = #21462#28040
+    LookAndFeel.Kind = lfFlat
+    LookAndFeel.NativeStyle = True
+    ModalResult = 2
+    TabOrder = 3
+  end
+end

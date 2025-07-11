@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="NgShare" platform="Win32">
+  <variable name="g_sRenewBooks" visibility="public" file="NgShare.pas" line="9">
+    <array low="0" high="3" generated="true">
+      <element type="string" />
+    </array>
+  </variable>
+  <struct name="TMapDescList" size="60" file="NgShare.pas" line="17">
+    <field name="sMapName" visibility="public" size="51" offset="0" file="NgShare.pas" line="18">
+      <type name="sMapName" type="ShortString" />
+    </field>
+    <field name="MaxList" type="TList" visibility="public" size="4" offset="52" file="NgShare.pas" line="19" />
+    <field name="MinList" type="TList" visibility="public" size="4" offset="56" file="NgShare.pas" line="20" />
+  </struct>
+  <pointer name="pTMapDescList" type="TMapDescList" indircnt="1" file="NgShare.pas" line="22" />
+  <struct name="TMapDesc" size="60" file="NgShare.pas" line="24">
+    <field name="sName" visibility="public" size="51" offset="0" file="NgShare.pas" line="25">
+      <type name="sName" type="ShortString" />
+    </field>
+    <field name="nX" type="Word" visibility="public" size="2" offset="52" file="NgShare.pas" line="26" />
+    <field name="nY" type="Word" visibility="public" size="2" offset="54" file="NgShare.pas" line="26" />
+    <field name="nColor" type="TColor" visibility="public" size="4" offset="56" file="NgShare.pas" line="27" />
+  </struct>
+  <pointer name="pTMapDesc" type="TMapDesc" indircnt="1" file="NgShare.pas" line="29" />
+  <struct name="TItemFiltrate" size="3" packed="true" file="NgShare.pas" line="31">
+    <field name="boItemHiht" type="Boolean" visibility="public" size="1" offset="0" file="NgShare.pas" line="32" />
+    <field name="boPickUp" type="Boolean" visibility="public" size="1" offset="1" file="NgShare.pas" line="33" />
+    <field name="boShowName" type="Boolean" visibility="public" size="1" offset="2" file="NgShare.pas" line="34" />
+  </struct>
+  <pointer name="pTItemFiltrate" type="TItemFiltrate" indircnt="1" file="NgShare.pas" line="37" />
+  <struct name="NgConfigInfo" size="80" file="NgShare.pas" line="39">
+    <field name="boShowName" type="Boolean" visibility="public" size="1" offset="0" file="NgShare.pas" line="41" />
+    <field name="boNotDeath" type="Boolean" visibility="public" size="1" offset="1" file="NgShare.pas" line="42" />
+    <field name="boDuraWarning" type="Boolean" visibility="public" size="1" offset="2" file="NgShare.pas" line="43" />
+    <field name="boNotNeedShift" type="Boolean" visibility="public" size="1" offset="3" file="NgShare.pas" line="44" />
+    <field name="boExpShow" type="Boolean" visibility="public" size="1" offset="4" file="NgShare.pas" line="45" />
+    <field name="nExpShow" type="Integer" visibility="public" size="4" offset="8" file="NgShare.pas" line="46" />
+    <field name="boBrightShowHp" type="Boolean" visibility="public" size="1" offset="12" file="NgShare.pas" line="47" />
+    <field name="boShowMap" type="Boolean" visibility="public" size="1" offset="13" file="NgShare.pas" line="48" />
+    <field name="boPickUpItemAll" type="Boolean" visibility="public" size="1" offset="14" file="NgShare.pas" line="50" />
+    <field name="boSpecialHP" type="Boolean" visibility="public" size="1" offset="15" file="NgShare.pas" line="52" />
+    <field name="nSpecialHP" type="Integer" visibility="public" size="4" offset="16" file="NgShare.pas" line="53" />
+    <field name="nwSpecialHP" type="Cardinal" visibility="public" size="4" offset="20" file="NgShare.pas" line="54" />
+    <field name="boRanHP" type="Boolean" visibility="public" size="1" offset="24" file="NgShare.pas" line="56" />
+    <field name="nRanHP" type="Integer" visibility="public" size="4" offset="28" file="NgShare.pas" line="57" />
+    <field name="nwRanHP" type="Cardinal" visibility="public" size="4" offset="32" file="NgShare.pas" line="58" />
+    <field name="sRanItemName" type="string" visibility="public" size="4" offset="36" file="NgShare.pas" line="59" />
+    <field name="boHpPtEat" type="Boolean" visibility="public" size="1" offset="40" file="NgShare.pas" line="61" />
+    <field name="nHpPtEat" type="Integer" visibility="public" size="4" offset="44" file="NgShare.pas" line="62" />
+    <field name="nwHpPtEat" type="Cardinal" visibility="public" size="4" offset="48" file="NgShare.pas" line="63" />
+    <field name="boMpPtEat" type="Boolean" visibility="public" size="1" offset="52" file="NgShare.pas" line="64" />
+    <field name="nMpPtEat" type="Integer" visibility="public" size="4" offset="56" file="NgShare.pas" line="65" />
+    <field name="nwMpPtEat" type="Cardinal" visibility="public" size="4" offset="60" file="NgShare.pas" line="66" />
+    <field name="boAutoFireHit" type="Boolean" visibility="public" size="1" offset="64" file="NgShare.pas" line="68" />
+    <field name="boAutoShield" type="Boolean" visibility="public" size="1" offset="65" file="NgShare.pas" line="69" />
+    <field name="boAutoHide" type="Boolean" visibility="public" size="1" offset="66" file="NgShare.pas" line="70" />
+    <field name="boAutoHld" type="Boolean" visibility="public" size="1" offset="67" file="NgShare.pas" line="71" />
+    <field name="boAutoJld" type="Boolean" visibility="public" size="1" offset="68" file="NgShare.pas" line="72" />
+    <field name="boAutoLongHit" type="Boolean" visibility="public" size="1" offset="69" file="NgShare.pas" line="73" />
+    <field name="boAutoMagic" type="Boolean" visibility="public" size="1" offset="70" file="NgShare.pas" line="74" />
+    <field name="nwAutoMagic" type="Cardinal" visibility="public" size="4" offset="72" file="NgShare.pas" line="75" />
+    <field name="nAutoMagicID" type="Integer" visibility="public" size="4" offset="76" file="NgShare.pas" line="76" />
+  </struct>
+  <variable name="g_MapDescList" type="TList" file="NgShare.pas" line="80" />
+  <variable name="g_MapDesc" type="pTMapDescList" visibility="public" file="NgShare.pas" line="81" />
+  <variable name="g_boShiftOff" type="Boolean" visibility="public" file="NgShare.pas" line="82" />
+  <variable name="g_boShiftUp" type="Boolean" visibility="public" file="NgShare.pas" line="83" />
+  <variable name="g_boMirDark" type="Boolean" visibility="public" file="NgShare.pas" line="84" />
+  <variable name="g_DefaultNgConfigInfo" type="NgConfigInfo" visibility="public" file="NgShare.pas" line="87" />
+  <variable name="g_NgConfigInfo" type="NgConfigInfo" file="NgShare.pas" line="126" />
+  <variable name="g_DwItemDuraTick" type="Cardinal" visibility="public" file="NgShare.pas" line="127" />
+  <variable name="g_DwEatHpTick" type="Cardinal" visibility="public" file="NgShare.pas" line="128" />
+  <variable name="g_DwEatMpTick" type="Cardinal" visibility="public" file="NgShare.pas" line="129" />
+  <variable name="g_DwAutoFireTick" type="Cardinal" visibility="public" file="NgShare.pas" line="130" />
+  <variable name="g_DwAutoShieldTick" type="Cardinal" visibility="public" file="NgShare.pas" line="131" />
+  <variable name="g_DwAutoHideTick" type="Cardinal" visibility="public" file="NgShare.pas" line="132" />
+  <variable name="g_DwAutoMagicTick" type="Cardinal" visibility="public" file="NgShare.pas" line="133" />
+  <variable name="g_DwSpecialHPTick" type="Cardinal" visibility="public" file="NgShare.pas" line="134" />
+  <variable name="g_DwAutoRanHPTick" type="Cardinal" visibility="public" file="NgShare.pas" line="135" />
+  <variable name="g_DwAutoPickUpItemTick" type="Cardinal" visibility="public" file="NgShare.pas" line="136" />
+  <variable name="g_boMirNg" type="Boolean" visibility="public" file="NgShare.pas" line="137" />
+  <variable name="g_boMirShowHp" type="Boolean" visibility="public" file="NgShare.pas" line="138" />
+  <variable name="g_boMirShowNumber" type="Boolean" visibility="public" file="NgShare.pas" line="139" />
+  <variable name="g_MemoList" type="TStringList" file="NgShare.pas" line="140" />
+  <variable name="g_Memobyte" type="Byte" visibility="public" file="NgShare.pas" line="141" />
+  <variable name="bo摆摊" type="Boolean" visibility="public" file="NgShare.pas" line="142" />
+  <variable name="boHelp" type="Boolean" visibility="public" file="NgShare.pas" line="143" />
+  <variable name="g_TopDWindow" type="TDWindow" visibility="public" file="NgShare.pas" line="145" />
+  <variable name="g_boHostpot" type="Boolean" visibility="public" file="NgShare.pas" line="147" />
+  <variable name="g_boQuestions" type="Boolean" visibility="public" file="NgShare.pas" line="148" />
+  <variable name="g_boChinese" type="Boolean" visibility="public" file="NgShare.pas" line="149" />
+  <variable name="g_boWhisperWin" type="Boolean" visibility="public" file="NgShare.pas" line="150" />
+  <variable name="g_boRelationWin" type="Boolean" visibility="public" file="NgShare.pas" line="151" />
+  <variable name="g_boMirShop" type="Boolean" visibility="public" file="NgShare.pas" line="152" />
+  <variable name="g_bofuguHP" type="Boolean" visibility="public" file="NgShare.pas" line="153" />
+  <variable name="g_bozuduihp" type="Boolean" visibility="public" file="NgShare.pas" line="154" />
+  <variable name="g_boHostpotWeb" type="string" visibility="public" file="NgShare.pas" line="155" />
+  <variable name="g_boQuestionsWeb" type="string" visibility="public" file="NgShare.pas" line="156" />
+  <variable name="g_bo免助跑" type="Boolean" visibility="public" file="NgShare.pas" line="157" />
+  <variable name="g_bo技能备注" type="Boolean" visibility="public" file="NgShare.pas" line="158" />
+  <variable name="g_bo物品窗口" type="Boolean" visibility="public" file="NgShare.pas" line="159" />
+  <variable name="g_bo主界面" type="Boolean" visibility="public" file="NgShare.pas" line="160" />
+  <variable name="g_bo锁定人物" type="Boolean" visibility="public" file="NgShare.pas" line="161" />
+  <variable name="g_bo锁定怪物" type="Boolean" visibility="public" file="NgShare.pas" line="162" />
+  <variable name="g_boRefreshBagItem" type="Boolean" visibility="public" file="NgShare.pas" line="163" />
+  <variable name="g_dw刷新背包间隔" type="Cardinal" visibility="public" file="NgShare.pas" line="164" />
+  <variable name="g_bo极品蓝字" type="Boolean" visibility="public" file="NgShare.pas" line="166" />
+  <variable name="g_bo自动换符" type="Boolean" visibility="public" file="NgShare.pas" line="167" />
+  <variable name="g_bo自动换毒" type="Boolean" visibility="public" file="NgShare.pas" line="168" />
+  <variable name="g_bo地图雷达" type="Boolean" visibility="public" file="NgShare.pas" line="169" />
+  <variable name="g_bo悬浮信息" type="Boolean" visibility="public" file="NgShare.pas" line="170" />
+  <variable name="g_bo人物四格" type="Boolean" visibility="public" file="NgShare.pas" line="171" />
+  <variable name="g_bo大地图开关" type="Boolean" visibility="public" file="NgShare.pas" line="172" />
+  <variable name="g_bo小地图迷宫入口显示" type="Boolean" visibility="public" file="NgShare.pas" line="173" />
+  <variable name="g_bo稳如泰山" type="Boolean" visibility="public" file="NgShare.pas" line="174" />
+  <variable name="g_bosjcd" type="Boolean" visibility="public" file="NgShare.pas" line="175" />
+  <variable name="g_bozdfy" type="Boolean" visibility="public" file="NgShare.pas" line="176" />
+  <variable name="g_bo绝对泰山" type="Boolean" visibility="public" file="NgShare.pas" line="177" />
+  <variable name="g_bo刀刀刺杀" type="Boolean" visibility="public" file="NgShare.pas" line="178" />
+  <procedure name="LoadMemoList" visibility="public" file="NgShare.pas" line="198">
+  </procedure>
+  <procedure name="CloseNgInfo" visibility="public" file="NgShare.pas" line="227">
+  </procedure>
+  <procedure name="LoadNgInfo" visibility="public" file="NgShare.pas" line="250">
+  </procedure>
+  <procedure name="SaveNgInfo" visibility="public" file="NgShare.pas" line="294">
+  </procedure>
+  <procedure name="LoadMapDescList" visibility="public" file="NgShare.pas" line="340">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+    </parameters>
+  </procedure>
+  <function name="GetMapDescList" visibility="public" file="NgShare.pas" line="406">
+    <parameters>
+      <parameter name="sMapName" type="string" />
+      <retval type="pTMapDescList" />
+    </parameters>
+  </function>
+  <procedure name="ClearMapDescList" visibility="public" file="NgShare.pas" line="421">
+  </procedure>
+</namespace>

@@ -1,0 +1,259 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="DX9Rasterizer" platform="Win32">
+  <const name="MaxCachedVertices" type="Integer" file="DX9Rasterizer.pas" line="52">
+    <value>
+      $3000
+    </value>
+  </const>
+  <const name="MaxCachedPrimitives" type="Integer" file="DX9Rasterizer.pas" line="53">
+    <value>
+      $1000
+    </value>
+  </const>
+  <class name="TDX9Rasterizer" file="DX9Rasterizer.pas" line="57">
+    <ancestor name="TAsphyreRasterizer" namespace="AbstractRasterizer">
+      <methodref name="OnDeviceCreate" visibility="private" />
+      <methodref name="OnDeviceDestroy" visibility="private" />
+      <methodref name="OnDeviceReset" visibility="private" />
+      <methodref name="OnDeviceLost" visibility="private" />
+      <methodref name="OnBeginScene" visibility="private" />
+      <methodref name="OnEndScene" visibility="private" />
+      <methodref name="GetClipRect" visibility="private" />
+      <methodref name="SetClipRect" visibility="private" />
+      <methodref name="HandleDeviceCreate" visibility="protected" procflags="virtual" />
+      <methodref name="HandleDeviceDestroy" visibility="protected" procflags="virtual" />
+      <methodref name="HandleDeviceReset" visibility="protected" procflags="virtual" />
+      <methodref name="HandleDeviceLost" visibility="protected" procflags="virtual" />
+      <methodref name="HandleBeginScene" visibility="protected" procflags="abstract virtual" />
+      <methodref name="HandleEndScene" visibility="protected" procflags="abstract virtual" />
+      <methodref name="GetViewport" visibility="protected" procflags="abstract virtual" />
+      <methodref name="SetViewport" visibility="protected" procflags="abstract virtual" />
+      <methodref name="NextDrawCall" visibility="protected" />
+      <propertyref name="DrawCalls" visibility="public" />
+      <propertyref name="ClipRect" visibility="public" />
+      <methodref name="FillTri" visibility="public" procflags="abstract virtual" />
+      <methodref name="UseTexture" visibility="public" procflags="abstract virtual" />
+      <methodref name="UseImage" visibility="public" />
+      <methodref name="TexMap" visibility="public" procflags="abstract virtual" />
+      <methodref name="Flush" visibility="public" procflags="abstract virtual" />
+      <methodref name="ResetStates" visibility="public" procflags="virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor virtual" />
+      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="VertexBuffer" type="IDirect3DVertexBuffer9" visibility="private" size="4" offset="8" file="DX9Rasterizer.pas" line="59" />
+      <field name="VertexArray" type="Pointer" visibility="private" size="4" offset="12" file="DX9Rasterizer.pas" line="60" />
+      <field name="FVertexCache" type="Integer" visibility="private" size="4" offset="16" file="DX9Rasterizer.pas" line="61" />
+      <field name="FVertexCount" type="Integer" visibility="private" size="4" offset="20" file="DX9Rasterizer.pas" line="62" />
+      <field name="FPrimitives" type="Integer" visibility="private" size="4" offset="24" file="DX9Rasterizer.pas" line="64" />
+      <field name="FMaxPrimitives" type="Integer" visibility="private" size="4" offset="28" file="DX9Rasterizer.pas" line="65" />
+      <field name="ActiveTex" type="TAsphyreCustomTexture" visibility="private" size="4" offset="32" file="DX9Rasterizer.pas" line="67" />
+      <field name="CachedTex" type="TAsphyreCustomTexture" visibility="private" size="4" offset="36" file="DX9Rasterizer.pas" line="68" />
+      <field name="CachedEffect" type="TRasterEffect" visibility="private" size="1" offset="40" file="DX9Rasterizer.pas" line="69" />
+      <procedure name="InitCacheSpec" visibility="private" file="DX9Rasterizer.pas" line="71">
+      </procedure>
+      <procedure name="CreateSystemBuffers" visibility="private" file="DX9Rasterizer.pas" line="73">
+      </procedure>
+      <procedure name="DestroySystemBuffers" visibility="private" file="DX9Rasterizer.pas" line="74">
+      </procedure>
+      <function name="CreateVideoBuffers" visibility="private" file="DX9Rasterizer.pas" line="76">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DestroyVideoBuffers" visibility="private" file="DX9Rasterizer.pas" line="77">
+      </procedure>
+      <function name="UploadVertexBuffer" visibility="private" file="DX9Rasterizer.pas" line="79">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DrawBuffers" visibility="private" file="DX9Rasterizer.pas" line="80">
+      </procedure>
+      <function name="NextVertexEntry" visibility="private" file="DX9Rasterizer.pas" line="82">
+        <parameters>
+          <retval type="Pointer" />
+        </parameters>
+      </function>
+      <function name="RequestCache" visibility="private" file="DX9Rasterizer.pas" line="83">
+        <parameters>
+          <parameter name="Vertices" type="Integer" />
+          <parameter name="Effect" type="TRasterEffect" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="SetEffectStates" visibility="private" file="DX9Rasterizer.pas" line="86">
+        <parameters>
+          <parameter name="Effect" type="TRasterEffect" />
+        </parameters>
+      </procedure>
+      <function name="HandleDeviceCreate" visibility="protected" procflags="override" file="DX9Rasterizer.pas" line="88">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="HandleDeviceDestroy" visibility="protected" procflags="override" file="DX9Rasterizer.pas" line="89">
+      </procedure>
+      <function name="HandleDeviceReset" visibility="protected" procflags="override" file="DX9Rasterizer.pas" line="90">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="HandleDeviceLost" visibility="protected" procflags="override" file="DX9Rasterizer.pas" line="91">
+      </procedure>
+      <procedure name="HandleBeginScene" visibility="protected" procflags="override" file="DX9Rasterizer.pas" line="93">
+      </procedure>
+      <procedure name="HandleEndScene" visibility="protected" procflags="override" file="DX9Rasterizer.pas" line="94">
+      </procedure>
+      <procedure name="GetViewport" visibility="protected" procflags="override" file="DX9Rasterizer.pas" line="96">
+        <parameters>
+          <parameter name="x" type="Integer" paramflags="out" />
+          <parameter name="y" type="Integer" paramflags="out" />
+          <parameter name="Width" type="Integer" paramflags="out" />
+          <parameter name="Height" type="Integer" paramflags="out" />
+        </parameters>
+      </procedure>
+      <procedure name="SetViewport" visibility="protected" procflags="override" file="DX9Rasterizer.pas" line="97">
+        <parameters>
+          <parameter name="x" type="Integer" />
+          <parameter name="y" type="Integer" />
+          <parameter name="Width" type="Integer" />
+          <parameter name="Height" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="FillTri" visibility="public" procflags="override" file="DX9Rasterizer.pas" line="99">
+        <parameters>
+          <parameter name="Vtx0" type="TVector4" paramflags="const" />
+          <parameter name="Vtx1" type="TVector4" paramflags="const" />
+          <parameter name="Vtx2" type="TVector4" paramflags="const" />
+          <parameter name="Diffuse0" type="Cardinal" />
+          <parameter name="Diffuse1" type="Cardinal" />
+          <parameter name="Diffuse2" type="Cardinal" />
+          <parameter name="Specular0" type="Cardinal" />
+          <parameter name="Specular1" type="Cardinal" />
+          <parameter name="Specular2" type="Cardinal" />
+          <parameter name="Effect" type="TRasterEffect">
+            <value>
+              reNormal
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="UseTexture" visibility="public" procflags="override" file="DX9Rasterizer.pas" line="103">
+        <parameters>
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+        </parameters>
+      </procedure>
+      <procedure name="TexMap" visibility="public" procflags="override" file="DX9Rasterizer.pas" line="105">
+        <parameters>
+          <parameter name="Vtx0" type="TVector4" paramflags="const" />
+          <parameter name="Vtx1" type="TVector4" paramflags="const" />
+          <parameter name="Vtx2" type="TVector4" paramflags="const" />
+          <parameter name="Tex0" type="TPoint2" />
+          <parameter name="Tex1" type="TPoint2" />
+          <parameter name="Tex2" type="TPoint2" />
+          <parameter name="Diffuse0" type="Cardinal" />
+          <parameter name="Diffuse1" type="Cardinal" />
+          <parameter name="Diffuse2" type="Cardinal" />
+          <parameter name="Specular0" type="Cardinal" />
+          <parameter name="Specular1" type="Cardinal" />
+          <parameter name="Specular2" type="Cardinal" />
+          <parameter name="Effect" type="TRasterEffect">
+            <value>
+              reNormal
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="Flush" visibility="public" procflags="override" file="DX9Rasterizer.pas" line="109">
+      </procedure>
+      <procedure name="ResetStates" visibility="public" procflags="override" file="DX9Rasterizer.pas" line="110">
+      </procedure>
+      <constructor name="Create" visibility="public" file="DX9Rasterizer.pas" line="112">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="DX9Rasterizer.pas" line="113">
+        <parameters>
+        </parameters>
+      </destructor>
+    </members>
+  </class>
+</namespace>

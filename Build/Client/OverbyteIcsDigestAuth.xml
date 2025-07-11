@@ -1,0 +1,324 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsDigestAuth" platform="Win32">
+  <const name="adalgMD5" type="TIcsAuthDigestAlgorithm" file="OverbyteIcsDigestAuth.pas" line="84">
+    <value>
+      adalgMD5
+    </value>
+  </const>
+  <const name="adalgMD5sess" type="TIcsAuthDigestAlgorithm" file="OverbyteIcsDigestAuth.pas" line="84">
+    <value>
+      adalgMD5sess
+    </value>
+  </const>
+  <const name="adqopAuth" type="TIcsAuthDigestQop" file="OverbyteIcsDigestAuth.pas" line="85">
+    <value>
+      adqopAuth
+    </value>
+  </const>
+  <const name="adqopAuthInt" type="TIcsAuthDigestQop" file="OverbyteIcsDigestAuth.pas" line="85">
+    <value>
+      adqopAuthInt
+    </value>
+  </const>
+  <const name="daAuth" type="TAuthDigestMethod" file="OverbyteIcsDigestAuth.pas" line="93">
+    <value>
+      daAuth
+    </value>
+  </const>
+  <const name="daAuthInt" type="TAuthDigestMethod" file="OverbyteIcsDigestAuth.pas" line="93">
+    <value>
+      daAuthInt
+    </value>
+  </const>
+  <const name="daBoth" type="TAuthDigestMethod" file="OverbyteIcsDigestAuth.pas" line="93">
+    <value>
+      daBoth
+    </value>
+  </const>
+  <class name="EIcsAuthenticationError" file="OverbyteIcsDigestAuth.pas" line="81">
+    <ancestor name="Exception" namespace="System.SysUtils">
+      <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+      </methodref>
+      <methodref name="Destroy@" visibility="class private" procflags="class destructor noself">
+      </methodref>
+      <methodref name="SetInnerException" visibility="protected">
+      </methodref>
+      <methodref name="SetStackInfo" visibility="protected">
+      </methodref>
+      <methodref name="GetStackTrace" visibility="protected">
+      </methodref>
+      <methodref name="RaisingException" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmt" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmtHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="GetBaseException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="override">
+      </methodref>
+      <propertyref name="BaseException" visibility="public">
+      </propertyref>
+      <propertyref name="HelpContext" visibility="public">
+      </propertyref>
+      <propertyref name="InnerException" visibility="public">
+      </propertyref>
+      <propertyref name="Message" visibility="public">
+      </propertyref>
+      <propertyref name="StackTrace" visibility="public">
+      </propertyref>
+      <propertyref name="StackInfo" visibility="public">
+      </propertyref>
+      <methodref name="RaiseOuterException" visibility="public" procflags="static">
+      </methodref>
+      <methodref name="ThrowOuterException" visibility="public" procflags="static">
+      </methodref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+  </class>
+  <type name="THashHex" type="AnsiString" file="OverbyteIcsDigestAuth.pas" line="82" />
+  <type name="TIcsNonceString" type="AnsiString" file="OverbyteIcsDigestAuth.pas" line="83" />
+  <enum name="TIcsAuthDigestAlgorithm" file="OverbyteIcsDigestAuth.pas" line="84">
+    <element value="0" name="adalgMD5" file="OverbyteIcsDigestAuth.pas" line="84" />
+    <element value="1" name="adalgMD5sess" file="OverbyteIcsDigestAuth.pas" line="84" />
+  </enum>
+  <enum name="TIcsAuthDigestQop" file="OverbyteIcsDigestAuth.pas" line="85">
+    <element value="0" name="adqopAuth" file="OverbyteIcsDigestAuth.pas" line="85" />
+    <element value="1" name="adqopAuthInt" file="OverbyteIcsDigestAuth.pas" line="85" />
+  </enum>
+  <struct name="TAuthDigestNonceRec" size="24" file="OverbyteIcsDigestAuth.pas" line="87">
+    <field name="DT" type="TDateTime" visibility="public" size="8" offset="0" file="OverbyteIcsDigestAuth.pas" line="88" />
+    <field name="Hash" type="TMD5Digest" visibility="public" size="16" offset="8" file="OverbyteIcsDigestAuth.pas" line="89" />
+  </struct>
+  <pointer name="PAuthDigestNonceRec" type="TAuthDigestNonceRec" indircnt="1" file="OverbyteIcsDigestAuth.pas" line="91" />
+  <enum name="TAuthDigestMethod" file="OverbyteIcsDigestAuth.pas" line="93">
+    <element value="0" name="daAuth" file="OverbyteIcsDigestAuth.pas" line="93" />
+    <element value="1" name="daAuthInt" file="OverbyteIcsDigestAuth.pas" line="93" />
+    <element value="2" name="daBoth" file="OverbyteIcsDigestAuth.pas" line="93" />
+  </enum>
+  <struct name="TAuthDigestResponseInfo" size="32" file="OverbyteIcsDigestAuth.pas" line="109">
+    <field name="Nc" type="Integer" visibility="public" size="4" offset="0" file="OverbyteIcsDigestAuth.pas" line="110" />
+    <field name="Realm" type="string" visibility="public" size="4" offset="4" file="OverbyteIcsDigestAuth.pas" line="112" />
+    <field name="Qop" type="string" visibility="public" size="4" offset="8" file="OverbyteIcsDigestAuth.pas" line="113" />
+    <field name="Algorithm" type="string" visibility="public" size="4" offset="12" file="OverbyteIcsDigestAuth.pas" line="114" />
+    <field name="Nonce" type="string" visibility="public" size="4" offset="16" file="OverbyteIcsDigestAuth.pas" line="115" />
+    <field name="Opaque" type="string" visibility="public" size="4" offset="20" file="OverbyteIcsDigestAuth.pas" line="116" />
+    <field name="Domain" type="string" visibility="public" size="4" offset="24" file="OverbyteIcsDigestAuth.pas" line="117" />
+    <field name="Stale" type="Boolean" visibility="public" size="1" offset="28" file="OverbyteIcsDigestAuth.pas" line="118" />
+  </struct>
+  <procedure name="AuthDigestGetBodyHash" visibility="public" file="OverbyteIcsDigestAuth.pas" line="203">
+    <parameters>
+      <parameter name="EntityBody" type="RawByteString" paramflags="const" />
+      <parameter name="EntityHash" type="THashHex" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="AuthDigestGenerateIcsNonce" visibility="public" file="OverbyteIcsDigestAuth.pas" line="217">
+    <parameters>
+      <parameter name="TimeStamp" type="TDateTime" />
+      <parameter name="Secret" type="UInt64" />
+      <parameter name="Opaque" type="AnsiString" paramflags="const" />
+      <parameter name="Realm" type="AnsiString" paramflags="const" />
+      <retval type="TIcsNonceString" />
+    </parameters>
+  </function>
+  <procedure name="AuthDigestCalcResponse" visibility="public" file="OverbyteIcsDigestAuth.pas" line="243">
+    <parameters>
+      <parameter name="HA1" type="THashHex" paramflags="const" />
+      <parameter name="Nonce" type="AnsiString" paramflags="const" />
+      <parameter name="NonceCount" type="AnsiString" paramflags="const" />
+      <parameter name="CNonce" type="AnsiString" paramflags="const" />
+      <parameter name="Qop" type="AnsiString" paramflags="const" />
+      <parameter name="Method" type="AnsiString" paramflags="const" />
+      <parameter name="DigestUri" type="AnsiString" paramflags="const" />
+      <parameter name="HEntity" type="THashHex" paramflags="const" />
+      <parameter name="Response" type="THashHex" paramflags="out" />
+    </parameters>
+  </procedure>
+  <procedure name="AuthDigestCalcHA1" visibility="public" file="OverbyteIcsDigestAuth.pas" line="292">
+    <parameters>
+      <parameter name="Algorithm" type="string" paramflags="const" />
+      <parameter name="UserName" type="AnsiString" paramflags="const" />
+      <parameter name="Realm" type="AnsiString" paramflags="const" />
+      <parameter name="Password" type="AnsiString" paramflags="const" />
+      <parameter name="Nonce" type="AnsiString" paramflags="const" />
+      <parameter name="CNonce" type="AnsiString" paramflags="const" />
+      <parameter name="SessionKey" type="THashHex" paramflags="out" />
+    </parameters>
+  </procedure>
+  <function name="AuthDigestGetRequest" visibility="public" file="OverbyteIcsDigestAuth.pas" line="333">
+    <parameters>
+      <parameter name="ALine" type="string" paramflags="const" />
+      <parameter name="NonceTime" type="TDateTime" paramflags="var" />
+      <parameter name="UserName" type="string" paramflags="var" />
+      <parameter name="Realm" type="string" paramflags="var" />
+      <parameter name="Qop" type="string" paramflags="var" />
+      <parameter name="Algorithm" type="string" paramflags="var" />
+      <parameter name="Nonce" type="string" paramflags="var" />
+      <parameter name="Nc" type="string" paramflags="var" />
+      <parameter name="DigestUri" type="string" paramflags="var" />
+      <parameter name="Cnonce" type="string" paramflags="var" />
+      <parameter name="Opaque" type="string" paramflags="var" />
+      <parameter name="Response" type="string" paramflags="var" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <procedure name="AuthDigestParseChallenge" visibility="public" file="OverbyteIcsDigestAuth.pas" line="498">
+    <parameters>
+      <parameter name="ALine" type="string" paramflags="const" />
+      <parameter name="Info" type="TAuthDigestResponseInfo" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="AuthDigestValidateResponse" visibility="public" file="OverbyteIcsDigestAuth.pas" line="598">
+    <parameters>
+      <parameter name="Info" type="TAuthDigestResponseInfo" paramflags="var" />
+      <parameter name="APreferredAlgo" type="TIcsAuthDigestAlgorithm">
+        <value>
+          adalgMD5
+        </value>
+      </parameter>
+      <parameter name="APreferredQop" type="TIcsAuthDigestQop">
+        <value>
+          adqopAuth
+        </value>
+      </parameter>
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="AuthDigestGenerateRequest" visibility="public" procflags="overload" file="OverbyteIcsDigestAuth.pas" line="644">
+    <parameters>
+      <parameter name="UserName" type="string" paramflags="const" />
+      <parameter name="Password" type="string" paramflags="const" />
+      <parameter name="HttpMethod" type="string" paramflags="const" />
+      <parameter name="Uri" type="string" paramflags="const" />
+      <parameter name="Realm" type="string" paramflags="const" />
+      <parameter name="Qop" type="string" paramflags="const" />
+      <parameter name="Nonce" type="string" paramflags="const" />
+      <parameter name="Opaque" type="string" paramflags="const" />
+      <parameter name="Algorithm" type="string" paramflags="const" />
+      <parameter name="EntityHash" type="THashHex" paramflags="const" />
+      <parameter name="Cnonce" type="string" paramflags="var" />
+      <parameter name="Nc" type="Integer" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="AuthDigestGenerateRequest" visibility="public" procflags="overload" file="OverbyteIcsDigestAuth.pas" line="695">
+    <parameters>
+      <parameter name="UserName" type="string" paramflags="const" />
+      <parameter name="Password" type="string" paramflags="const" />
+      <parameter name="HttpMethod" type="string" paramflags="const" />
+      <parameter name="Uri" type="string" paramflags="const" />
+      <parameter name="EntityHash" type="THashHex" paramflags="const" />
+      <parameter name="Info" type="TAuthDigestResponseInfo" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="AuthDigestGenerateChallenge" visibility="public" file="OverbyteIcsDigestAuth.pas" line="744">
+    <parameters>
+      <parameter name="DigestMethod" type="TAuthDigestMethod" />
+      <parameter name="Secret" type="UInt64" />
+      <parameter name="Realm" type="string" paramflags="const" />
+      <parameter name="Domain" type="string" paramflags="const" />
+      <parameter name="Stale" type="Boolean" />
+      <parameter name="Nonce" type="string" paramflags="var" />
+      <parameter name="Opaque" type="string" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+</namespace>

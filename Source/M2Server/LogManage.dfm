@@ -1,0 +1,393 @@
+object FrmLogManage: TFrmLogManage
+  Left = 557
+  Top = 206
+  Caption = #26085#35760#26597#35810
+  ClientHeight = 573
+  ClientWidth = 918
+  Color = clBtnFace
+  Font.Charset = GB2312_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = #23435#20307
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poOwnerFormCenter
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 12
+  object Panel: TPanel
+    Left = 0
+    Top = 0
+    Width = 918
+    Height = 49
+    Align = alTop
+    TabOrder = 0
+    object Label1: TLabel
+      Left = 8
+      Top = 16
+      Width = 54
+      Height = 12
+      Caption = #24320#22987#26085#26399':'
+    end
+    object Label2: TLabel
+      Left = 192
+      Top = 16
+      Width = 54
+      Height = 12
+      Caption = #32467#26463#26085#26399':'
+    end
+    object Label3: TLabel
+      Left = 376
+      Top = 16
+      Width = 54
+      Height = 12
+      Caption = #26597#35810#26465#20214':'
+    end
+    object DateTimeEditBegin: TRzDateTimeEdit
+      Left = 68
+      Top = 13
+      Width = 109
+      Height = 20
+      EditType = etDate
+      OnDateTimeChange = DateTimeEditBeginDateTimeChange
+      TabOrder = 0
+    end
+    object DateTimeEditEnd: TRzDateTimeEdit
+      Left = 252
+      Top = 13
+      Width = 109
+      Height = 20
+      EditType = etDate
+      OnDateTimeChange = DateTimeEditEndDateTimeChange
+      TabOrder = 1
+    end
+    object ComboBoxCondition: TComboBox
+      Left = 436
+      Top = 13
+      Width = 101
+      Height = 20
+      Style = csDropDownList
+      TabOrder = 2
+      Items.Strings = (
+        #26080#26465#20214
+        #20154#29289#21517#31216
+        #29289#21697#21517#31216
+        #29289#21697'ID'
+        #20132#26131#23545#35937)
+    end
+    object EditSearch: TEdit
+      Left = 543
+      Top = 13
+      Width = 103
+      Height = 20
+      TabOrder = 3
+    end
+    object ButtonStart: TButton
+      Left = 652
+      Top = 11
+      Width = 75
+      Height = 25
+      Caption = #24320#22987#26597#35810
+      TabOrder = 4
+      OnClick = ButtonStartClick
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Top = 49
+    Width = 105
+    Height = 505
+    Align = alLeft
+    TabOrder = 1
+    object CheckListBox: TCheckListBox
+      Left = 1
+      Top = 1
+      Width = 103
+      Height = 503
+      OnClickCheck = CheckListBoxClickCheck
+      Align = alClient
+      BevelKind = bkSoft
+      Font.Charset = GB2312_CHARSET
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = #23435#20307
+      Font.Style = []
+      ItemHeight = 13
+      Items.Strings = (
+        #20840#37096#26597#35810
+        #21462#22238#29289#21697
+        #23384#25918#29289#21697
+        #28860#21046#33647#21697
+        #25345#20037#28040#22833
+        #25441#21462#29289#21697
+        #21046#36896#29289#21697
+        #38144#27585#29289#21697
+        #25172#25481#29289#21697
+        #36141#20080#29289#21697
+        #21806#20986#29289#21697
+        #20351#29992#29289#21697
+        #20154#29289#21319#32423
+        #20943#23569#37329#24065
+        #22686#21152#37329#24065
+        #27515#20129#25481#33853
+        #25481#33853#29289#21697
+        #20154#29289#27515#20129
+        #21319#32423#25104#21151
+        #21319#32423#22833#36133
+        #22478#22561#21462#38065
+        #22478#22561#23384#38065
+        #21319#32423#21462#22238
+        #27494#22120#21319#32423
+        #32972#21253#20943#23569
+        #25913#21464#22478#20027
+        #20803#23453#25913#21464
+        #33021#37327#25913#21464
+        #21830#38138#36141#20080
+        #35013#22791#21319#32423
+        #23492#21806#29289#21697
+        #23492#21806#36141#20080
+        #25361#25112#29289#21697
+        #25670#25674#36141#20080
+        #21452#20987#35302#21457)
+      ParentFont = False
+      TabOrder = 0
+    end
+  end
+  object ListView: TListView
+    Left = 136
+    Top = 170
+    Width = 571
+    Height = 152
+    Columns = <
+      item
+        Caption = #24207#21495
+      end
+      item
+        Caption = #21160#20316
+        Width = 80
+      end
+      item
+        Caption = #22320#22270
+        Width = 60
+      end
+      item
+        Caption = #22352#26631'X'
+      end
+      item
+        Caption = #22352#26631'Y'
+      end
+      item
+        Caption = #20154#29289#21517#31216
+        Width = 70
+      end
+      item
+        Caption = #29289#21697#21517#31216
+        Width = 70
+      end
+      item
+        Caption = #29289#21697'ID'
+        Width = 55
+      end
+      item
+        Caption = #20132#26131#23545#35937
+        Width = 70
+      end
+      item
+        Caption = #26102#38388
+        Width = 70
+      end>
+    GridLines = True
+    MultiSelect = True
+    RowSelect = True
+    PopupMenu = PopupMenu
+    TabOrder = 2
+    ViewStyle = vsReport
+  end
+  object StatusBar: TStatusBar
+    Left = 0
+    Top = 554
+    Width = 918
+    Height = 19
+    Panels = <
+      item
+        Width = 100
+      end
+      item
+        Width = 100
+      end
+      item
+        Width = 400
+      end
+      item
+        Width = 50
+      end>
+  end
+  object dbgrd1: TDBGrid
+    Left = 105
+    Top = 49
+    Width = 813
+    Height = 505
+    Align = alClient
+    DataSource = ds1
+    ReadOnly = True
+    TabOrder = 4
+    TitleFont.Charset = GB2312_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -12
+    TitleFont.Name = #23435#20307
+    TitleFont.Style = []
+    Columns = <
+      item
+        Expanded = False
+        FieldName = 'FLD_ID'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'FLD_ACTION'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'FLD_MAPNAME'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'FLD_CX'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'FLD_CY'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'FLD_USERNAME'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'FLD_ITEMNAME'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'FLD_ITEMMAKEINDEX'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'FLD_OPT1'
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'FLD_OPT2'
+        Title.Caption = #23545#35937#21517#31216
+        Width = 91
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'FLD_TIME'
+        Width = 132
+        Visible = True
+      end>
+  end
+  object PopupMenu: TPopupMenu
+    Left = 368
+    Top = 248
+    object PopupMenu_COPY: TMenuItem
+      Caption = #22797#21046
+      OnClick = PopupMenu_COPYClick
+    end
+    object PopupMenu_SELECTALL: TMenuItem
+      Caption = #20840#36873
+      OnClick = PopupMenu_SELECTALLClick
+    end
+  end
+  object Timer: TTimer
+    Enabled = False
+    Interval = 100
+    OnTimer = TimerTimer
+    Left = 424
+    Top = 328
+  end
+  object ds1: TDataSource
+    DataSet = qry1
+    Left = 432
+    Top = 88
+  end
+  object qry1: TADOQuery
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      'select * from tbl_userlog')
+    Left = 397
+    Top = 88
+    object atncfldqry1ID: TAutoIncField
+      DisplayLabel = #24207#21495
+      DisplayWidth = 5
+      FieldName = 'FLD_ID'
+      ReadOnly = True
+    end
+    object wdstrngfldqry1FLD_ACTION: TWideStringField
+      DisplayLabel = #21160#20316
+      DisplayWidth = 5
+      FieldName = 'FLD_ACTION'
+      Size = 10
+    end
+    object wdstrngfldqry1FLD_MAPNAME: TWideStringField
+      DisplayLabel = #22320#22270
+      FieldName = 'FLD_MAPNAME'
+      Size = 10
+    end
+    object wdstrngfldqry1FLD_XX: TWideStringField
+      DisplayLabel = #22352#26631'X'
+      DisplayWidth = 6
+      FieldName = 'FLD_CX'
+      Size = 10
+    end
+    object wdstrngfldqry1FLD_YY: TWideStringField
+      DisplayLabel = #22352#26631'Y'
+      DisplayWidth = 6
+      FieldName = 'FLD_CY'
+      Size = 10
+    end
+    object wdstrngfldqry1FLD_USERNAME: TWideStringField
+      DisplayLabel = #20154#29289#21517#31216
+      DisplayWidth = 12
+      FieldName = 'FLD_USERNAME'
+      Size = 15
+    end
+    object wdstrngfldqry1FLD_ITEMNAME: TWideStringField
+      DisplayLabel = #29289#21697#21517#31216
+      DisplayWidth = 15
+      FieldName = 'FLD_ITEMNAME'
+      Size = 30
+    end
+    object wdstrngfldqry1FLD_ITEMMAKEINDEX: TWideStringField
+      DisplayLabel = #29289#21697#21495
+      FieldName = 'FLD_ITEMMAKEINDEX'
+      Size = 15
+    end
+    object wdstrngfldqry1FLD_OPT1: TWideStringField
+      DisplayLabel = #20132#26131#23545#35937
+      FieldName = 'FLD_OPT1'
+      Size = 10
+    end
+    object wdstrngfldqry1FLD_OPT2: TWideStringField
+      DisplayLabel = #21442#25968'2'
+      FieldName = 'FLD_OPT2'
+      Visible = False
+      Size = 10
+    end
+    object dtmfldqry1FLD_TIME: TDateTimeField
+      DisplayLabel = #26102#38388
+      FieldName = 'FLD_TIME'
+    end
+  end
+end

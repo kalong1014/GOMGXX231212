@@ -1,0 +1,975 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="uGameEngine" platform="Win32">
+  <variable name="TransparentBlendingEff" visibility="public" file="uGameEngine.pas" line="10" />
+  <const name="DefaultFontName" type="string" file="uGameEngine.pas" line="11">
+    <value>
+      宋体
+    </value>
+  </const>
+  <const name="DefaultFontSize" type="Integer" file="uGameEngine.pas" line="12">
+    <value>
+      $9
+    </value>
+  </const>
+  <const name="DefaultFontStyle" type="Set" file="uGameEngine.pas" line="13">
+    <value>
+      []
+    </value>
+  </const>
+  <const name="FontBorderColor" type="Integer" file="uGameEngine.pas" line="14">
+    <value>
+      $80808
+    </value>
+  </const>
+  <const name="rkNone" type="TReversalKind" file="uGameEngine.pas" line="35">
+    <value>
+      rkNone
+    </value>
+  </const>
+  <const name="rkHor" type="TReversalKind" file="uGameEngine.pas" line="35">
+    <value>
+      rkHor
+    </value>
+  </const>
+  <const name="rkVer" type="TReversalKind" file="uGameEngine.pas" line="35">
+    <value>
+      rkVer
+    </value>
+  </const>
+  <pointer name="PBGR" type="TBGR" indircnt="1" file="uGameEngine.pas" line="17" />
+  <struct name="TBGR" size="3" packed="true" file="uGameEngine.pas" line="18">
+    <field name="B" type="Byte" visibility="public" size="1" offset="0" file="uGameEngine.pas" line="19" />
+    <field name="G" type="Byte" visibility="public" size="1" offset="1" file="uGameEngine.pas" line="19" />
+    <field name="R" type="Byte" visibility="public" size="1" offset="2" file="uGameEngine.pas" line="19" />
+  </struct>
+  <struct name="TRGBA" size="4" packed="true" file="uGameEngine.pas" line="21">
+    <field name="R" type="Byte" visibility="public" size="1" offset="0" file="uGameEngine.pas" line="22" />
+    <field name="G" type="Byte" visibility="public" size="1" offset="1" file="uGameEngine.pas" line="23" />
+    <field name="B" type="Byte" visibility="public" size="1" offset="2" file="uGameEngine.pas" line="24" />
+    <field name="A" type="Byte" visibility="public" size="1" offset="3" file="uGameEngine.pas" line="25" />
+  </struct>
+  <struct name="TARGB" size="4" packed="true" file="uGameEngine.pas" line="28">
+    <field name="A" type="Byte" visibility="public" size="1" offset="0" file="uGameEngine.pas" line="29" />
+    <field name="R" type="Byte" visibility="public" size="1" offset="1" file="uGameEngine.pas" line="30" />
+    <field name="G" type="Byte" visibility="public" size="1" offset="2" file="uGameEngine.pas" line="31" />
+    <field name="B" type="Byte" visibility="public" size="1" offset="3" file="uGameEngine.pas" line="32" />
+  </struct>
+  <enum name="TReversalKind" file="uGameEngine.pas" line="35">
+    <element value="0" name="rkNone" file="uGameEngine.pas" line="35" />
+    <element value="1" name="rkHor" file="uGameEngine.pas" line="35" />
+    <element value="2" name="rkVer" file="uGameEngine.pas" line="35" />
+  </enum>
+  <helper name="TAsphyreCanvasHelper" for="TAsphyreCanvas" file="uGameEngine.pas" line="36">
+    <members>
+      <procedure name="Draw" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="38">
+        <parameters>
+          <parameter name="SrcRect" type="TRect" />
+          <parameter name="DstRect" type="TRect" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Color" type="TColor4" />
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="Draw" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="39">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="SrcRect" type="TRect" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Color" type="TColor4" />
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="Draw" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="40">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Color" type="TColor4" />
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="Draw" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="41">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Effect" type="TBlendingEffect" />
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="Draw" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="42">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="Draw" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="43">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="SourceRect" type="TRect" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawColor" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="44">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Color" type="TColor" />
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawColor" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="45">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="SrcRect" type="TRect" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Color" type="TColor" />
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawBlend" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="46">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawBlend" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="47">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Blendmode" type="Integer" />
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawBlend" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="48">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="SrcRect" type="TRect" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Blendmode" type="Integer" />
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawBlendEffect" visibility="public" procflags="helper inline" file="uGameEngine.pas" line="52">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Blendmode" type="Integer" />
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawBlendAdd" visibility="public" procflags="helper inline" file="uGameEngine.pas" line="53">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Blendmode" type="Integer" />
+          <parameter name="tNum" type="Integer" />
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawAlpha" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="54">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Alpha" type="Byte" />
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawAlpha" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="55">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="SrcRect" type="TRect" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Alpha" type="Byte" />
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="FillRectAlpha" visibility="public" procflags="helper inline" file="uGameEngine.pas" line="56">
+        <parameters>
+          <parameter name="DestRect" type="TRect" paramflags="const" />
+          <parameter name="Color" type="TColor" />
+          <parameter name="Alpha" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="DrawColorAlpha" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="57">
+        <parameters>
+          <parameter name="X" type="Integer" paramflags="const" />
+          <parameter name="Y" type="Integer" paramflags="const" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Color" type="TColor" />
+          <parameter name="Transparent" type="Boolean" />
+          <parameter name="Alpha" type="Integer" />
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawColorAlpha" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="58">
+        <parameters>
+          <parameter name="X" type="Integer" paramflags="const" />
+          <parameter name="Y" type="Integer" paramflags="const" />
+          <parameter name="SrcRect" type="TRect" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Color" type="TColor" />
+          <parameter name="Transparent" type="Boolean" />
+          <parameter name="Alpha" type="Integer" />
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawInRect" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="59">
+        <parameters>
+          <parameter name="X" type="Integer" paramflags="const" />
+          <parameter name="Y" type="Integer" paramflags="const" />
+          <parameter name="DstRect" type="TRect" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Color" type="TColor4" />
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+          <parameter name="ReversalKind" type="TReversalKind">
+            <value>
+              rkNone
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="HorFillDraw" visibility="public" procflags="helper" file="uGameEngine.pas" line="60">
+        <parameters>
+          <parameter name="X1" type="Integer" paramflags="const" />
+          <parameter name="X2" type="Integer" paramflags="const" />
+          <parameter name="Y" type="Integer" paramflags="const" />
+          <parameter name="Source" type="TAsphyreCustomTexture" />
+          <parameter name="Transparent" type="Boolean" paramflags="const">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="VerFillDraw" visibility="public" procflags="helper" file="uGameEngine.pas" line="61">
+        <parameters>
+          <parameter name="X" type="Integer" paramflags="const" />
+          <parameter name="Y1" type="Integer" paramflags="const" />
+          <parameter name="Y2" type="Integer" paramflags="const" />
+          <parameter name="Source" type="TAsphyreCustomTexture" />
+          <parameter name="Transparent" type="Boolean" paramflags="const">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="StretchDraw" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="65">
+        <parameters>
+          <parameter name="DestRect" type="TRect" paramflags="const" />
+          <parameter name="SrcRect" type="TRect" paramflags="const" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Color" type="TColor4" />
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="StretchDraw" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="66">
+        <parameters>
+          <parameter name="DestRect" type="TRect" paramflags="const" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+          <parameter name="Alpha" type="Integer">
+            <value>
+              $FF
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="RectText" visibility="public" procflags="helper" file="uGameEngine.pas" line="68">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="FColor" type="TColor" />
+          <parameter name="BColor" type="TColor" />
+          <parameter name="DstRect" type="TRect" />
+          <parameter name="FontStyles" type="TFontStyles" />
+          <parameter name="FontSize" type="Integer" />
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="BoldText" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="70">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+        </parameters>
+      </procedure>
+      <procedure name="BoldText" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="71">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+          <parameter name="FontStyles" type="TFontStyles" />
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="BoldText" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="72">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="BoldTextOut" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="73">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+        </parameters>
+      </procedure>
+      <procedure name="BoldTextOut" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="74">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+          <parameter name="Text" type="string" />
+        </parameters>
+      </procedure>
+      <procedure name="BoldTextOut" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="75">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+          <parameter name="FontStyles" type="TFontStyles" />
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="BoldTextOut" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="76">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="BoldTextOut" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="77">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+          <parameter name="FontStyles" type="TFontStyles" />
+          <parameter name="FontSize" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="BoldTextOut" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="78">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+          <parameter name="FontStyles" type="TFontStyles" />
+          <parameter name="FontSize" type="Integer" />
+          <parameter name="FontName" type="string" />
+        </parameters>
+      </procedure>
+      <procedure name="BoldTextOutZ" visibility="public" procflags="helper" file="uGameEngine.pas" line="79">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Z" type="Integer" />
+          <parameter name="fcolor" type="Integer" />
+          <parameter name="bcolor" type="Integer" />
+          <parameter name="Str" type="string" />
+        </parameters>
+      </procedure>
+      <procedure name="TextOut" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="81">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="FontColor" type="TColor">
+            <value>
+              $FFFFFF
+            </value>
+          </parameter>
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="TextOut" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="82">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="FontColor" type="TColor" paramflags="const" />
+          <parameter name="Text" type="string" />
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="TextOut" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="83">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawBoldText" visibility="public" procflags="overload helper inline" file="uGameEngine.pas" line="84">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Text" type="TAsphyreCustomTexture" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawOutLineTextInRect" visibility="public" procflags="helper" file="uGameEngine.pas" line="85">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="DstRect" type="TRect" />
+          <parameter name="Text" type="TAsphyreCustomTexture" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+          <parameter name="OutLinePixel" type="Integer">
+            <value>
+              $1
+            </value>
+          </parameter>
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawOutLineText" visibility="public" procflags="helper" file="uGameEngine.pas" line="86">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Text" type="TAsphyreCustomTexture" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+          <parameter name="OutLinePixel" type="Integer">
+            <value>
+              $1
+            </value>
+          </parameter>
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawBoldTextInRect" visibility="public" procflags="helper inline" file="uGameEngine.pas" line="87">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="DstRect" type="TRect" />
+          <parameter name="Text" type="TAsphyreCustomTexture" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="BgColor" type="TColor" />
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawText" visibility="public" procflags="helper inline" file="uGameEngine.pas" line="88">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Text" type="TAsphyreCustomTexture" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="DrawTextInRect" visibility="public" procflags="helper inline" file="uGameEngine.pas" line="89">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="DstRect" type="TRect" />
+          <parameter name="Text" type="TAsphyreCustomTexture" />
+          <parameter name="FontColor" type="TColor" />
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="PixelsOut" visibility="public" procflags="helper" file="uGameEngine.pas" line="90">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Color" type="TColor" />
+          <parameter name="Size" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="FrameRect" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="91">
+        <parameters>
+          <parameter name="ARect" type="TRect" />
+          <parameter name="Color" type="TColor" />
+        </parameters>
+      </procedure>
+      <procedure name="FillRect" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="92">
+        <parameters>
+          <parameter name="ARect" type="TRect" />
+          <parameter name="Color" type="TColor" />
+        </parameters>
+      </procedure>
+      <procedure name="Line" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="93">
+        <parameters>
+          <parameter name="X1" type="Integer" />
+          <parameter name="Y1" type="Integer" />
+          <parameter name="X2" type="Integer" />
+          <parameter name="Y2" type="Integer" />
+          <parameter name="LineColor" type="TColor" />
+        </parameters>
+      </procedure>
+      <procedure name="TextRect" visibility="public" procflags="helper" file="uGameEngine.pas" line="94">
+        <parameters>
+          <parameter name="BRect" type="TRect" />
+          <parameter name="nX" type="Integer" />
+          <parameter name="nY" type="Integer" />
+          <parameter name="Text" type="WideString" />
+          <parameter name="FColor" type="Cardinal" />
+          <parameter name="BColor" type="Cardinal" />
+          <parameter name="TextFormat" type="TTextFormat">
+            <value>
+              []
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+    </members>
+  </helper>
+  <helper name="TAsphyreCustomTextureHelper" for="TAsphyreCustomTexture" file="uGameEngine.pas" line="97">
+    <members>
+      <function name="ClientRect" visibility="public" procflags="helper inline" file="uGameEngine.pas" line="99">
+        <parameters>
+          <retval type="TRect" />
+        </parameters>
+      </function>
+      <procedure name="SetSize" visibility="public" procflags="helper inline" file="uGameEngine.pas" line="100">
+        <parameters>
+          <parameter name="W" type="Integer" />
+          <parameter name="H" type="Integer" />
+          <parameter name="AutoInitialize" type="Boolean">
+            <value>
+              False
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+    </members>
+  </helper>
+  <helper name="TAsphyreLockableTextureHelper" for="TAsphyreLockableTexture" file="uGameEngine.pas" line="103">
+    <members>
+      <function name="ClientRect" visibility="public" procflags="helper inline" file="uGameEngine.pas" line="105">
+        <parameters>
+          <retval type="TRect" />
+        </parameters>
+      </function>
+      <procedure name="SetSize" visibility="public" procflags="helper inline" file="uGameEngine.pas" line="106">
+        <parameters>
+          <parameter name="W" type="Integer" />
+          <parameter name="H" type="Integer" />
+          <parameter name="AutoInitialize" type="Boolean">
+            <value>
+              False
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <function name="LoadFromFontData" visibility="public" procflags="helper" file="uGameEngine.pas" line="107">
+        <parameters>
+          <parameter name="AData" type="Pointer" />
+          <parameter name="ADataSize" type="Cardinal" />
+          <parameter name="AWidth" type="Integer" />
+          <parameter name="AHeight" type="Integer" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="LoadFromDataEx" visibility="public" procflags="helper" file="uGameEngine.pas" line="108">
+        <parameters>
+          <parameter name="ABuffer" type="Pointer" />
+          <parameter name="ADataSize" type="Cardinal" />
+          <parameter name="ABitCount" type="Byte" />
+          <parameter name="AWidth" type="Integer" />
+          <parameter name="AHeight" type="Integer" />
+          <parameter name="MirrorX" type="Boolean" />
+          <parameter name="MirrorY" type="Boolean" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="LoadAlphaFromDataEx" visibility="public" procflags="helper" file="uGameEngine.pas" line="109">
+        <parameters>
+          <parameter name="ABuffer" type="Pointer" />
+          <parameter name="ADataSize" type="Cardinal" />
+          <parameter name="AWidth" type="Integer" />
+          <parameter name="AHeight" type="Integer" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="LoadFromPng32Data" visibility="public" procflags="helper" file="uGameEngine.pas" line="110">
+        <parameters>
+          <parameter name="ABuffer" type="Pointer" />
+          <parameter name="ADataSize" type="Cardinal" />
+          <parameter name="ABitCount" type="Byte" />
+          <parameter name="AWidth" type="Integer" />
+          <parameter name="AHeight" type="Integer" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="LoadFromPng" visibility="public" procflags="helper" file="uGameEngine.pas" line="111">
+        <parameters>
+          <parameter name="PNG" type="TPngImage" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="ResetAlpha" visibility="public" procflags="helper" file="uGameEngine.pas" line="112">
+      </procedure>
+      <procedure name="Fill" visibility="public" procflags="helper" file="uGameEngine.pas" line="113">
+        <parameters>
+          <parameter name="Color" type="TColor" />
+        </parameters>
+      </procedure>
+      <procedure name="FillRect" visibility="public" procflags="helper" file="uGameEngine.pas" line="114">
+        <parameters>
+          <parameter name="ARect" type="TRect" />
+          <parameter name="Color" type="TColor" />
+        </parameters>
+      </procedure>
+      <procedure name="Draw" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="115">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="Source" type="TAsphyreLockableTexture" />
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="Draw" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="116">
+        <parameters>
+          <parameter name="X" type="Integer" />
+          <parameter name="Y" type="Integer" />
+          <parameter name="SrcRect" type="TRect" />
+          <parameter name="Source" type="TAsphyreLockableTexture" />
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="Draw" visibility="public" procflags="overload helper" file="uGameEngine.pas" line="117">
+        <parameters>
+          <parameter name="SrcRect" type="TRect" />
+          <parameter name="DstRect" type="TRect" />
+          <parameter name="Source" type="TAsphyreLockableTexture" />
+          <parameter name="Transparent" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="HorFillDraw" visibility="public" procflags="helper" file="uGameEngine.pas" line="118">
+        <parameters>
+          <parameter name="X1" type="Integer" paramflags="const" />
+          <parameter name="X2" type="Integer" paramflags="const" />
+          <parameter name="Y" type="Integer" paramflags="const" />
+          <parameter name="Source" type="TAsphyreLockableTexture" />
+          <parameter name="Transparent" type="Boolean" paramflags="const">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="VerFillDraw" visibility="public" procflags="helper" file="uGameEngine.pas" line="119">
+        <parameters>
+          <parameter name="X" type="Integer" paramflags="const" />
+          <parameter name="Y1" type="Integer" paramflags="const" />
+          <parameter name="Y2" type="Integer" paramflags="const" />
+          <parameter name="Source" type="TAsphyreLockableTexture" />
+          <parameter name="Transparent" type="Boolean" paramflags="const">
+            <value>
+              True
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="CopyFrom" visibility="public" procflags="helper" file="uGameEngine.pas" line="120">
+        <parameters>
+          <parameter name="Source" type="TAsphyreLockableTexture" />
+        </parameters>
+      </procedure>
+    </members>
+  </helper>
+  <variable name="Bit8MainPalette" type="TRGBQuads" file="uGameEngine.pas" line="139" />
+  <variable name="ColorTable_565" file="uGameEngine.pas" line="140" />
+  <variable name="ColorTable_R5G6B5_32" file="uGameEngine.pas" line="141" />
+  <variable name="ColorTable_A1R5G5B5" file="uGameEngine.pas" line="142" />
+  <variable name="ColorPalette" file="uGameEngine.pas" line="143" />
+  <function name="NotColor" visibility="public" procflags="inline" file="uGameEngine.pas" line="151">
+    <parameters>
+      <parameter name="Source" type="TColor" />
+      <retval type="TColor" />
+    </parameters>
+  </function>
+  <function name="DisplaceRB" visibility="public" file="uGameEngine.pas" line="156">
+    <parameters>
+      <parameter name="Color" type="Cardinal" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="dxColorToAlphaColor" visibility="public" file="uGameEngine.pas" line="170">
+    <parameters>
+      <parameter name="AColor" type="TColor" />
+      <parameter name="Alpha" type="Byte" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="cColor1" visibility="public" procflags="inline" file="uGameEngine.pas" line="193">
+    <parameters>
+      <parameter name="Color" type="TColor" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <procedure name="WidthBytes" visibility="public" procflags="inline" file="uGameEngine.pas" line="199">
+    <parameters>
+      <parameter name="AWidth" type="Integer" />
+      <parameter name="ABitCount" type="Integer" />
+      <parameter name="APicth" type="Integer" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="GetRGB" visibility="public" file="uGameEngine.pas" line="1509">
+    <parameters>
+      <parameter name="c256" type="Byte" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="MakeNewGUID38" visibility="public" file="uGameEngine.pas" line="1514">
+    <parameters>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="MakeNewGUID36" visibility="public" file="uGameEngine.pas" line="1522">
+    <parameters>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="MakeNewGUID32" visibility="public" file="uGameEngine.pas" line="1527">
+    <parameters>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="MakeNewGUID16" visibility="public" file="uGameEngine.pas" line="1532">
+    <parameters>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <procedure name="CompressBufZ" visibility="public" file="uGameEngine.pas" line="1564">
+    <parameters>
+      <parameter name="InBuf" type="PAnsiChar" paramflags="const" />
+      <parameter name="InBytes" type="Integer" />
+      <parameter name="OutBuf" type="PAnsiChar" paramflags="out" />
+      <parameter name="OutBytes" type="Integer" paramflags="out" />
+    </parameters>
+  </procedure>
+  <procedure name="DecompressBufZ" visibility="public" file="uGameEngine.pas" line="1604">
+    <parameters>
+      <parameter name="inBuffer" type="PAnsiChar" paramflags="const" />
+      <parameter name="inSize" type="Integer" />
+      <parameter name="outEstimate" type="Integer" />
+      <parameter name="outBuffer" type="PAnsiChar" paramflags="out" />
+      <parameter name="outSize" type="Integer" paramflags="out" />
+    </parameters>
+  </procedure>
+  <procedure name="FreeAndNilEx" visibility="public" file="uGameEngine.pas" line="1639">
+    <parameters>
+      <parameter name="Obj" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="FreeAndNilSafe" visibility="public" file="uGameEngine.pas" line="1651">
+    <parameters>
+      <parameter name="Obj" paramflags="var" />
+    </parameters>
+  </procedure>
+</namespace>

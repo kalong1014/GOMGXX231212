@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsWinnls" platform="Win32">
+  <const name="NormalizationOther" type="_NORM_FORM" file="OverbyteIcsWinnls.pas" line="22">
+    <value>
+      NormalizationOther
+    </value>
+  </const>
+  <const name="NormalizationC" type="_NORM_FORM" file="OverbyteIcsWinnls.pas" line="23">
+    <value>
+      NormalizationC
+    </value>
+  </const>
+  <const name="NormalizationD" type="_NORM_FORM" file="OverbyteIcsWinnls.pas" line="24">
+    <value>
+      NormalizationD
+    </value>
+  </const>
+  <const name="NormalizationKC" type="_NORM_FORM" file="OverbyteIcsWinnls.pas" line="25">
+    <value>
+      NormalizationKC
+    </value>
+  </const>
+  <const name="NormalizationKD" type="_NORM_FORM" file="OverbyteIcsWinnls.pas" line="26">
+    <value>
+      NormalizationKD
+    </value>
+  </const>
+  <enum name="_NORM_FORM" file="OverbyteIcsWinnls.pas" line="21">
+    <element value="0" name="NormalizationOther" file="OverbyteIcsWinnls.pas" line="22" />
+    <element value="1" name="NormalizationC" file="OverbyteIcsWinnls.pas" line="23" />
+    <element value="2" name="NormalizationD" file="OverbyteIcsWinnls.pas" line="24" />
+    <element value="5" name="NormalizationKC" file="OverbyteIcsWinnls.pas" line="25" />
+    <element value="6" name="NormalizationKD" file="OverbyteIcsWinnls.pas" line="26" />
+  </enum>
+  <enum name="NORM_FORM" alias="OverbyteIcsWinnls._NORM_FORM" file="OverbyteIcsWinnls.pas" line="28">
+    <element value="0" name="NormalizationOther" file="OverbyteIcsWinnls.pas" line="22" />
+    <element value="1" name="NormalizationC" file="OverbyteIcsWinnls.pas" line="23" />
+    <element value="2" name="NormalizationD" file="OverbyteIcsWinnls.pas" line="24" />
+    <element value="5" name="NormalizationKC" file="OverbyteIcsWinnls.pas" line="25" />
+    <element value="6" name="NormalizationKD" file="OverbyteIcsWinnls.pas" line="26" />
+  </enum>
+  <enum name="TNormForm" alias="OverbyteIcsWinnls._NORM_FORM" file="OverbyteIcsWinnls.pas" line="29">
+    <element value="0" name="NormalizationOther" file="OverbyteIcsWinnls.pas" line="22" />
+    <element value="1" name="NormalizationC" file="OverbyteIcsWinnls.pas" line="23" />
+    <element value="2" name="NormalizationD" file="OverbyteIcsWinnls.pas" line="24" />
+    <element value="5" name="NormalizationKC" file="OverbyteIcsWinnls.pas" line="25" />
+    <element value="6" name="NormalizationKD" file="OverbyteIcsWinnls.pas" line="26" />
+  </enum>
+  <function name="LoadNormalizeLib" visibility="public" file="OverbyteIcsWinnls.pas" line="53">
+    <parameters>
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsNormalizedString" visibility="public" callconv="stdcall" file="OverbyteIcsWinnls.pas" line="70">
+    <parameters>
+      <parameter name="NormForm" type="_NORM_FORM" />
+      <parameter name="lpString" type="PWideChar" />
+      <parameter name="cwLength" type="Integer" />
+      <retval type="LongBool" />
+    </parameters>
+  </function>
+  <function name="NormalizeString" visibility="public" callconv="stdcall" file="OverbyteIcsWinnls.pas" line="79">
+    <parameters>
+      <parameter name="NormForm" type="_NORM_FORM" />
+      <parameter name="lpSrcString" type="PWideChar" />
+      <parameter name="cwSrcLength" type="Integer" />
+      <parameter name="lpDstString" type="PWideChar" />
+      <parameter name="cwDstLength" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+</namespace>

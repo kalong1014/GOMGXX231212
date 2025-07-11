@@ -1,0 +1,74 @@
+<html>
+<head>
+<META HTTP-EQUIV="Content-Type" content="text/html; charset=gb2312">
+</head>
+<body>
+<pre>
+<table width=100% bgcolor=#CFCFE5><tr> <td> <font face=宋体 size=+3>
+生成日志
+</font></table><table width=* cellspacing=0 cellpadding=0><tr><td width=0 bgcolor=#EDEDF5>&nbsp;</td><td width=0 bgcolor=#FFFFFF>&nbsp;</td><td width=*><pre>
+<h3>------- 已启动生成: 项目: LoginSvr，配置: Debug|Win32 -------
+</h3>
+</pre></table><table width=100%% bgcolor=#DFDFE5><tr><td><font face=arial size=+2>
+命令行
+</font></table><table width=* cellspacing=0 cellpadding=0><tr><td width=0 bgcolor=#EDEDF5>&nbsp;</td><td width=0 bgcolor=#FFFFFF>&nbsp;</td><td width=*><pre>正在创建临时文件“e:\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\RSP000001.rsp”，其内容为
+[
+/Od /I "C:\Program Files\Microsoft SDK\Include" /I "../\_Oranze Library" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "WIN32_LEAN_AND_MEAN" /D "_TIMER_DEBUG" /D "_MBCS" /FD /EHsc /RTC1 /MTd /YX"stdafx.h" /Fp".\../_Obj_Debug/LoginSvr/LoginSvr.pch" /Fo".\../_Obj_Debug/LoginSvr/" /Fd".\../_Obj_Debug/LoginSvr/" /W3 /c /ZI
+.\netUdpsender.cpp
+.\netloginsvr.cpp
+.\netlogingate.cpp
+"\虎卫传说开发项目\Source\LoginServer\_Oranze Library\netiocp.cpp"
+.\netgameserver.cpp
+.\netcheckserver.cpp
+.\mir2dbhandler.cpp
+.\loginsvrwnd.cpp
+\虎卫传说开发项目\Source\LoginServer\Common\mir2packet.cpp
+\虎卫传说开发项目\Source\LoginServer\Common\endecode.cpp
+.\mir2wnd.cpp
+.\dlgcfg.cpp
+]
+正在创建命令行“cl.exe @e:\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\RSP000001.rsp /nologo”
+正在创建命令行“rc.exe /d "_DEBUG" /l 0x412 /I "Res" /fo".\../_Obj_Debug/LoginSvr/resource.res" .\Res\resource.rc”
+正在创建临时文件“e:\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\RSP000002.rsp”，其内容为
+[
+/OUT:".\../_Bin/LoginSvr.exe" /INCREMENTAL:NO /NOLOGO /DEBUG /PDB:".\../_Bin/LoginSvr.pdb" /SUBSYSTEM:WINDOWS /MACHINE:X86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
+"\虎卫传说开发项目\Source\LoginServer\_Oranze Library\_Bin\_Oranze Library_Debug.lib"
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\resource.res
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\dlgcfg.obj
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\mir2wnd.obj
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\endecode.obj
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\mir2packet.obj
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\loginsvrwnd.obj
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\mir2dbhandler.obj
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\netcheckserver.obj
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\netgameserver.obj
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\netiocp.obj
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\netlogingate.obj
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\netloginsvr.obj
+\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\netUdpsender.obj
+]
+正在创建命令行“link.exe @e:\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\RSP000002.rsp”
+</pre></table><table width=100%% bgcolor=#DFDFE5><tr><td><font face=arial size=+2>
+输出窗口
+</font></table><table width=* cellspacing=0 cellpadding=0><tr><td width=0 bgcolor=#EDEDF5>&nbsp;</td><td width=0 bgcolor=#FFFFFF>&nbsp;</td><td width=*><pre>正在编译...
+netUdpsender.cpp
+netloginsvr.cpp
+netlogingate.cpp
+netiocp.cpp
+netgameserver.cpp
+netcheckserver.cpp
+mir2dbhandler.cpp
+loginsvrwnd.cpp
+mir2packet.cpp
+endecode.cpp
+mir2wnd.cpp
+dlgcfg.cpp
+正在编译资源...
+正在链接...
+LINK : warning LNK4075: 忽略“/EDITANDCONTINUE”(由于“/INCREMENTAL:NO”规范)
+</pre></table><table width=100%% bgcolor=#DFDFE5><tr><td><font face=arial size=+2>
+结果
+</font></table><table width=* cellspacing=0 cellpadding=0><tr><td width=0 bgcolor=#EDEDF5>&nbsp;</td><td width=0 bgcolor=#FFFFFF>&nbsp;</td><td width=*><pre>
+生成日志保存在“file://e:\虎卫传说开发项目\Source\LoginServer\_Obj_Debug\LoginSvr\BuildLog.htm”中
+LoginSvr - 0 错误，1 警告</pre></table><table   width=100% height=20 bgcolor=#CFCFE5><tr><td><font face=宋体 size=+2>
+</font></table></body></html>

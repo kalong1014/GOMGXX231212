@@ -1,0 +1,8862 @@
+unit ObjNpc;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs, ScktComp, syncobjs, MudUtil,
+  HUtil32, Grobal2, Envir, EdCode, ObjBase, M2Share, Guild, StrUtils, MasterSystem, DBSQL;
+
+
+const
+   GUILDWARFEE = 60000;
+   // 2003/07/15 »çºÏ¼º °ü·Ã ¼öÁ¤
+   CASTLEMAINDOORREPAREGOLD = 1500000; //2000000;
+   CASTLECOREWALLREPAREGOLD = 400000;  //500000;
+   CASTLEARCHEREMPLOYFEE = 250000;     //300000;
+   CASTLEGUARDEMPLOYFEE = 250000;      //300000;
+   UPGRADEWEAPONFEE = 10000; //10000
+
+   MAXREQUIRE = 10;
+
+   //¹®ÆÄ Àå¿ø
+//   GUILDAGITREGFEE = 10000000;
+//   GUILDAGITEXTENDFEE = 1000000;
+
+type
+   //¹«±â Á¦·Ã °ü·Ã
+   TUpgradeInfo = record
+      UserName: string[14];
+      uitem: TUserItem;
+      updc: byte;
+      upsc: byte;
+      upmc: byte;
+      durapoint: byte;
+      readydate: TDateTime;
+      readycount: longword;
+   end;
+   PTUpgradeInfo = ^TUpgradeInfo;
+
+   //Äù½ºÆ® °ü·Ã
+   TQuestRequire = record
+      RandomCount: integer;
+      CheckIndex: word;
+      CheckValue: byte;  //0, 1
+   end;
+
+   TQuestActionInfo = record
+      ActIdent: integer;
+      ActParam: string;
+      ActParamVal: integer;
+      ActTag: string;
+      ActTagVal: integer;
+      ActExtra: string;
+      ActExtraVal: integer;
+      ActTagEx: string;
+      ActTagExVal: integer;
+      ActTagEx2: string;
+      ActTagEx2Val: integer;
+      ActExtra2: string;
+      ActExtraVal2: integer;
+      ActExtra3: string;
+      ActExtraVal3: integer;
+      ActExtra4: string;
+      ActExtraVal4: integer;
+   end;
+   PTQuestActionInfo = ^TQuestActionInfo;
+
+   TQuestConditionInfo = record
+    IfIdent: integer;
+    IfParam: string;
+    IfParamVal: integer;
+    IfTag: string;
+    IfTagVal: integer;
+    IfExtra: string;
+    IfExtraVal: integer;
+    IfExtra2: string;
+    IfExtraVal2: integer;       //×°±¸¼ì²âÊôÐÔ
+    IfExtra3: string;
+    IfExtraVal3: integer;
+    IfExtra4: string;
+    IfExtraVal4: integer;
+   end;
+   PTQuestConditionInfo = ^TQuestConditionInfo;
+
+   TSayingProcedure = record
+      ConditionList: TList;
+      ActionList: TList; //StringList;
+      Saying: string;
+      ElseActionList: TList; //StringList;
+      ElseSaying: string;
+      AvailableCommands: TStringList;
+   end;
+   PTSayingProcedure = ^TSayingProcedure;
+
+   TSayingRecord = record
+      Title: string;
+      Procs: TList; //list of PTSayingProcedure
+   end;
+   PTSayingRecord = ^TSayingRecord;
+
+   TQuestRecord = record
+      BoRequire: Boolean;  //¿ä±¸Á¶°ÇÀÌ ÀÖ´ÂÁö ¿©ºÎ, ¾øÀ¸¸é ±âº» ´ëÈ­
+      LocalNumber: integer;
+      QuestRequireArr: array[0..MAXREQUIRE-1] of TQuestRequire;
+      SayingList: TList;  //list of PTSayingRecord
+   end;
+   PTQuestRecord = ^TQuestRecord;
+
+
+   TNormNpc = class (TAnimal)
+      NpcFace: byte;  //»óÀÎ ¾ó±¼.. Ã¤ÆÃÃ¢¿¡ ³ª¿À´Â ¾ó±¼..
+      //SayString: string; //»óÀÎÀÌ ¸»ÇÏ´Â ´ë»ç...
+      //SayStrings: TStringList; //list of TStringList;
+      Sayings: TList;  //list of PTQuestRecord
+      DefineDirectory: string;  //±âº»Àº ''
+      BoInvisible: Boolean;
+      BoUseMapFileName: Boolean;  //ÆÄÀÏÀÌ¸§¿¡ '-D001'Ã³·³ ¸ÊÀÌ¸§ÀÌ µû¶ó ºÙ´ÂÁö ¿©ºÎ
+      //6-11
+      NpcBaseDir: string;
+
+      CanSell       : Boolean;
+      CanBuy        : Boolean;
+      CanStorage    : Boolean;
+      CanGetBack    : Boolean;
+      CanRepair     : Boolean;
+      CanMakeDrug   : Boolean;
+      CanUpgrade    : Boolean;
+      CanMakeItem   : Boolean;
+      CanItemMarket : Boolean;
+
+      CanSpecialRepair  : Boolean;
+      CanTotalRepair    : Boolean;
+
+      // ¹®ÆÄ Àå¿ø
+      CanAgitUsage  : Boolean;
+      CanAgitManage  : Boolean;
+      CanBuyDecoItem : Boolean;
+
+      // ±âÅ¸
+      CanDoingEtc : Boolean;
+
+      BoSoundPlaying : Boolean;
+      SoundStartTime : LongWord;
+
+      MemorialCount : LongInt;
+
+   private
+      procedure SendMsg(who: TCreature; pqa: PTQuestActionInfo);
+      procedure SendScrollMsg(who: TCreature; pqa: PTQuestActionInfo);
+      function GetLineVariableText(hum: TUserHuman; sMsg: string): string;
+      procedure ActionOfGiveexItem(who: TCreature; pqa: PTQuestActionInfo);
+      function CHECKHaveGuild(who: TCreature; pqc: PTQuestConditionInfo): Boolean;  //ÊÇ·ñ¼ÓÈëÐÐ»á
+      function CHECKISCASTLEMASTER(who: TCreature; pqc: PTQuestConditionInfo): Boolean;  //ÊÇ·ñÎªÉ³°Í¿ËÀÏ´ó
+      function CHECKISCASTLEGUILD(who: TCreature; pqc: PTQuestConditionInfo): Boolean;   //ÊÇ·ñÊÇÉ³°Í¿Ë³ÉÔ±
+      function CheckItemAddValue(who: TCreature; pqc: PTQuestConditionInfo): Boolean;    //¼ì²é×°±¸ÊôÐÔ
+      function CheckInfo(who: TCreature; pqc: PTQuestConditionInfo): Boolean;    //¼ì²âÊÇ·ñÔÚµ±Ç°µØÍ¼
+      function CheckGamePoint(who: TCreature; pqc: PTQuestConditionInfo): Boolean;   //»ý·Ö
+
+      procedure NpcAddSkill(who: TCreature; pqa: PTQuestActionInfo); //Ôö¼Ó¼¼ÄÜ
+      procedure NpcDelSkill(who: TCreature; pqa: PTQuestActionInfo); //É¾³ý¼¼ÄÜ
+      procedure NpcDelNoJobSkill(who: TCreature); //É¾³ý·Ç±¾Ö°ÒµÆäËû¼¼ÄÜ
+      procedure NpcClearSkill(who: TCreature); //É¾³ýËùÓÐ¼¼ÄÜ
+      procedure NpcSkillLevel(who: TCreature; pqa: PTQuestActionInfo); //µ÷Õû¼¼ÄÜµÈ¼¶
+      procedure NPCMessageBox(who: TCreature; pqa: PTQuestActionInfo);  //´°¿Úµ¯´°
+      procedure SetRankLevelName(who: TCreature; pqa: PTQuestActionInfo); //³ÆºÅ
+      procedure ChangeGamePoint(who: TCreature; pqa: PTQuestActionInfo); //»ý·Ö
+      procedure ActionOfCHANGEHUMABILITY(who: TCreature; pqa: PTQuestActionInfo); //changeHumAbilityÊôÐÔ¼Óµã
+      procedure NpcDelayGoto(who: TCreature; pqa: PTQuestActionInfo);
+      procedure NPCSayMsg(who: TCreature; pqa: PTQuestActionInfo);
+   protected
+   public
+      constructor Create;
+      destructor Destroy; override;
+      procedure RunMsg (msg: TMessageInfo); override;
+      procedure Run; override;
+      procedure ActivateNpcUtilitys (saystr: string);  //»óÀÎÀÌ ÇÒ ¼ö ÀÖ´Â ±â´É Á¦¾î,  ÆÇ¸Å, ±¸ÀÔ, ¸Ã±â±â µî...
+      procedure UserCall (caller: TCreature); dynamic;
+      procedure UserSelect (whocret: TCreature; selstr: string); dynamic;
+      //procedure ArrangeSayStrings;
+      procedure NpcSay (target: TCreature; str: string);
+      function  ChangeNpcSayTag (src, orgstr, chstr: string): string;
+      procedure NpcSayTitle (who: TCreature; title: string);
+      procedure CheckNpcSayCommand (hum: TUserHuman; var source: string; tag: string); dynamic;
+      procedure ClearNpcInfos;
+      procedure LoadNpcInfos;
+      procedure LoadMemorialCount;
+      procedure WriteMemorialCount;
+      procedure ActionOfWebBrowser(hum: TUserHuman; QuestActionInfo: pTQuestActionInfo);
+      procedure ActionOfGmExecute(hum: TUserHuman; pqa: pTQuestActionInfo);
+   end;
+
+  TTimeLabel = record
+    idx: Integer;
+    sLabel: string;
+    dwTime: LongWord;
+    boChangeMapDelete: Boolean;
+    boDelete: Boolean;
+    Npc: TNormNpc;
+    Envir: TObject;
+  end;
+  PTTimeLabel = ^TTimeLabel;
+
+   TMerchant = class (TNormNpc)  //ÆÇ¸Å¸¸ ÇÏ´Â »óÀÎ
+      MarketName: string;
+      MarketType: byte;
+      //RepairItem: byte;  //0:¾ÈÇÔ,  1:ÇÔ
+      //StorageItem: byte;
+      PriceRate: integer;  //¹°°¡, 100:º¸Åë, 100º¸´Ù Å©¸é ºñ½Î´Ù.
+      NoSeal: Boolean;
+      BoCastleManage: Boolean;  //¼º¿¡¼­ °ü¸®ÇÏ´Â »óÁ¡ (»çºÏ¼ºÀÌ ÇÑ°³ ÀÖÀ» °æ¿ì¿¡ ÇØ´çµÊ)
+      BoHiddenNpc: Boolean;
+      fSaveToFileCount: integer;
+      CreateIndex: integer;   //»ý¼ºµÉ ¶§ ¼øÂ÷ÀûÀ¸·Î ºÎ¿©µÇ´Â Index(ºÎÇÏ ºÐ»ê¿¡ ÀÌ¿ëÇÑ´Ù).
+   private
+      checkrefilltime: longword;
+      checkverifytime: longword;
+      goodSaveTick:longword;
+      //specialrepairtime: longword;
+      //specialrepair: integer;
+      function  GetGoodsPrice (uitem: TUserItem): integer;
+      function  GetSellPrice (whocret: TUserHuman; price: integer): integer;
+      function  GetBuyPrice (price: integer): integer;
+      procedure RefillGoods;
+      procedure SaveUpgradeItemList;
+      procedure LoadUpgradeItemList;
+      procedure VerifyUpgradeList;
+   protected
+   public
+      DealGoods: TStringList;  //Ãë±ÞÇÏ´Â ¾ÆÀÌÅÛ StdMode   ;°øÀ¯ºÒ°¡
+      ProductList: TList;  //Á¨µÇ´Â ¾ÆÀÌÅÛ list of PTMarketProduct  ;°øÀ¯ºÒ°¡
+      GoodsList: TList;  //ÇöÀç ÆÇ¸ÅÇÏ´Â »óÇ° ¸®½ºÆ®  ;°øÀ¯ºÒ°¡
+      PriceList: TList;  //°¡°Ý ¸®½ºÆ®, ÇÑ¹ø ÆÇ¸ÅµÈ ¾ÆÀÌÅÛÀº ¹°°¡ Á¤º¸¿¡ ±â·ÏÀÌ ³²´Â´Ù.
+
+      UpgradingList: TList;  //¾÷±×·¹ÀÌµå¸¦ ¸Ã±ä ¾ÆÀÌÅÛ ¸ñ·Ï
+
+      constructor Create;
+      destructor Destroy; override;
+      procedure RunMsg (msg: TMessageInfo); override;
+      procedure Run; override;
+      procedure CheckNpcSayCommand (hum: TUserHuman; var source: string; tag: string); override;
+      procedure UserCall (caller: TCreature); override;
+      //------------------------------------------------------------------------
+      // UserSelect¿¡¼­ ºÐ¸®
+      procedure SendGoodsEntry (who: TCreature; ltop: integer);  //
+      procedure SendSellGoods (who: TCreature); //ÆÈ±â ¸Þ´ºÁØ´Ù.
+      procedure SendRepairGoods (who: TCreature); //¼ö¸®ÇÏ±â ¸Þ´º
+      procedure SendSpecialRepairGoods (who: TCreature); //Æ¯¼ö¼ö¸®ÇÏ±â ¸Þ´º
+      procedure SendStorageItemMenu (who: TCreature);
+      procedure SendStorageItemList (who: TCreature; StorageType: Byte = 0);
+      procedure SendMakeDrugItemList (who: TCreature);
+      procedure SendMakeFoodList (who: TCreature);
+      procedure SendMakePotionList (who: TCreature);
+      procedure SendMakeGemList (who: TCreature);
+      procedure SendMakeItemList (who: TCreature);
+      procedure SendMakeStuffList (who: TCreature);
+      procedure SendMakeEtcList (who: TCreature);
+      //------------------------------------------------------------------------
+      //Àå¿ø²Ù¹Ì±â
+      procedure SendDecoItemListShow (who: TCreature);
+      //------------------------------------------------------------------------
+      // À§Å¹»óÁ¡
+      procedure SendUserMarket( hum : TuserHuman ; ItemType : integer ; UserMode : integer );
+      //------------------------------------------------------------------------
+      procedure UserSelect (whocret: TCreature; selstr: string); override;
+      procedure SayMakeItemMaterials (whocret: TCreature; selstr: string);
+      procedure QueryPrice (whocret: TCreature; uitem: TUserItem);
+      function  AddGoods (uitem: TUserItem): Boolean;
+      function  UserSellItem (whocret: TCreature; uitem: TUserItem): Boolean;
+      function  UserCountSellItem (whocret: TCreature; uitem: TUserItem; sellcnt: integer): Boolean;
+      procedure QueryRepairCost (whocret: TCreature; uitem: TUserItem);
+      function  UserRepairItem (whocret: TCreature; puitem: PTUserItem): Boolean;
+      procedure UserSelectUpgradeWeapon (hum: TUserHuman);
+      procedure UserSelectGetBackUpgrade (hum: TUserHuman);
+      procedure PriceDown (index: integer);
+      procedure PriceUp (index: integer);
+      function  GetGoodsList (gindex: integer): TList;
+      function  GetPrice (index: integer): integer;
+      procedure NewPrice (index, price: integer);
+      procedure RefillNow (var list: TList; itemname: string; fcount: integer);
+      procedure CheckProductList(Add:boolean=false);
+//      function  IsDealingItem (stdmode: integer): Boolean;
+      function  IsDealingItem (stdmode: integer ; shape :integer ): Boolean;
+      procedure UserBuyItem (whocret: TUserHuman; itmname: string; serverindex, BuyCount: integer);
+      procedure UserWantDetailItems (whocret: TCreature; itmname: string; menuindex: integer);
+      procedure UserMakeNewItem (whocret: TUserHuman; itmname: string);
+      procedure UserManufactureItem (whocret: TUserHuman; itmname: string);
+      procedure ClearMerchantInfos;
+      procedure LoadMerchantInfos;
+      procedure LoadMarketSavedGoods;
+      function CheckMakeItemCondition (hum: TUserHuman; itemname: string; sItemMakeIndex, sItemName, sItemCount: array of string; var iPrice, iMakeCount: Integer): Integer;
+      function GetGradeOfGuardStoneByName ( strGuardStone: string ): Integer;
+
+      procedure UserChkMarry(whocret: TUserHuman;smname:string);
+      procedure UserUnChkMarry(whocret: TUserHuman);
+      procedure UserAgreeMarry(whocret: TUserHuman);
+      procedure UserCancelMarry(whocret: TUserHuman);
+      procedure UserLeftMarry(whocret: TUserHuman);
+
+      procedure UserReqMaster(whocret: TUserHuman; smname: string);
+      procedure UserUnbindMaster(whocret: TUserHuman; smname: string);
+      procedure UserAgreeBeMaster(whocret: TUserHuman; smname: string);
+      procedure UserCancelBeMaster(whocret: TUserHuman; smname: string);
+      procedure UserLeftPrentice(whocret: TUserHuman;nno : Integer);
+   end;
+
+   TGuildOfficial = class (TNormNpc)
+   private
+      function  UserDeclareGuildWarNow (hum: TUserHuman; gname: string): integer;
+      function  UserBuildGuildNow (hum: TUserHuman; gname: string): Integer;
+      function  UserFreeGuild (hum: TUserHuman): integer;
+      procedure UserDonateGold (hum: TUserHuman);
+      procedure UserRequestCastleWar (hum: TUserHuman);
+//      function UserGuildMemberRecall (hum: TUserHuman; man: string): Boolean;
+   public
+      constructor Create;
+      destructor Destroy; override;
+      procedure Run; override;
+      procedure UserCall (caller: TCreature); override;
+      procedure UserSelect (whocret: TCreature; selstr: string); override;
+   end;
+
+   TTrainer = class (TNormNpc)
+   private
+      strucktime: longword;
+      damagesum: integer;
+      struckcount: integer;
+   public
+      constructor Create;
+      procedure RunMsg (msg: TMessageInfo); override;
+      procedure Run; override;
+   end;
+
+   TCastleManager = class (TMerchant)
+   private
+      procedure RepaireCastlesMainDoor (hum: TUserHuman);
+      procedure RepaireCoreCastleWall (wall: integer; hum: TUserHuman);
+      procedure HireCastleGuard (numstr: string; hum: TUserHuman);
+      procedure HireCastleArcher (numstr: string; hum: TUserHuman);
+   public
+      constructor Create;
+      procedure CheckNpcSayCommand (hum: TUserHuman; var source: string; tag: string); override;
+      procedure UserCall (caller: TCreature); override;
+      procedure UserSelect (whocret: TCreature; selstr: string); override;
+   end;
+
+   // ÀÏÁ¤ ¹üÀ§¾È¿¡ ¿À¸é ³ªÅ¸³ª´Â NPC(sonmg)
+   THiddenNpc = class (TMerchant)
+   private
+   protected
+      RunDone: Boolean;
+      DigupRange: integer;
+      DigdownRange: integer;
+      procedure CheckComeOut; dynamic;
+      procedure ComeOut; dynamic;
+      procedure ComeDown; dynamic;
+   public
+      constructor Create;
+      destructor Destroy; override;
+      procedure RunMsg (msg: TMessageInfo); override;
+      procedure Run; override;
+   end;
+
+implementation
+
+uses
+   svMain, RunSock, LocalDB, ObjMon2, Castle, IdSrvClient, Relationship;
+
+
+constructor TNormNpc.Create;
+begin
+   inherited Create;
+   NeverDie := TRUE;
+   RaceServer := RC_NPC;
+   Light := 2;
+   AntiPoison := 99;
+   //SayStrings := TStringList.Create;
+   Sayings := TList.Create;
+   StickMode := TRUE;
+   DefineDirectory := '';
+   BoInvisible := FALSE;
+   BoUseMapFileName := TRUE;
+
+   CanSell      := FALSE;
+   CanBuy       := FALSE;
+   CanStorage   := FALSE;
+   CanGetBack   := FALSE;
+   CanRepair    := FALSE;
+   CanMakeDrug  := FALSE;
+   CanUpgrade   := FALSE;
+   CanMakeItem  := FALSE;
+   CanItemMarket:= FALSE;
+
+   CanSpecialRepair  := FALSE;
+   CanTotalRepair    := FALSE;
+
+   // ¹®ÆÄ Àå¿ø
+   CanAgitUsage   := FALSE;
+   CanAgitManage  := FALSE;
+   CanBuyDecoItem := FALSE;
+
+   // ±âÅ¸
+   CanDoingEtc    := FALSE;
+
+   BoSoundPlaying := FALSE;
+   SoundStartTime := GetTickCount;
+
+   MemorialCount := 0;
+end;
+
+destructor TNormNpc.Destroy;
+var
+   i, j: integer;
+begin
+   //for i:=0 to SayStrings.Count-1 do
+   //   TStringList(SayStrings.Objects[i]).Free;
+   //SayStrings.Free;
+   for i:=0 to Sayings.Count-1 do begin
+      Dispose (PTQuestRecord(Sayings[i]));
+      //PTQuestRecord ³»ºÎ ºí·°Àº FreeÇÏÁö ¾ÊÀ½ (¿ø·¡ ÇØ¾ßÇÔ)
+   end;
+   Sayings.Free;
+   inherited Destroy;
+end;
+
+procedure TNormNpc.RunMsg (msg: TMessageInfo);
+begin
+   inherited RunMsg (msg);
+end;
+
+procedure TNormNpc.Run;
+begin
+   inherited Run;
+end;
+
+{procedure TNormNpc.ArrangeSayStrings;
+var
+   i, k: integer;
+   strs: TStringList;
+   ptq: PTQuestRecord;
+begin
+   //for i:=0 to SayStrings.Count-1 do begin
+   //   strs := TStringList(SayStrings.Objects[i]);
+   //   for k:=1 to strs.Count-1 do begin
+   //      strs[0] := strs[0] + strs[k];
+   //   end;
+   //end;
+
+end; }
+
+procedure TNormNpc.ActivateNpcUtilitys (saystr: string);
+var
+   lwstr: string;
+begin
+   lwstr := LowerCase (saystr);
+   if pos ('@buy', lwstr) > 0 then CanBuy := TRUE;
+   if pos ('@sell', lwstr) > 0 then CanSell := TRUE;
+   if pos ('@storage', lwstr) > 0 then CanStorage := TRUE;
+   if pos ('@storages', lwstr) > 0 then CanGetBack := TRUE;
+   if pos ('@getback', lwstr) > 0 then CanGetBack := TRUE;
+   if pos ('@repair', lwstr) > 0 then CanRepair := TRUE;
+   if pos ('@makedrug', lwstr) > 0 then CanMakeDrug := TRUE;   
+   if pos ('@upgradenow', lwstr) > 0 then CanUpgrade := TRUE;
+   if pos ('@s_repair', lwstr) > 0 then CanSpecialRepair := TRUE;
+   if pos ('@t_repair', lwstr) > 0 then CanTotalRepair := TRUE;
+   // ¾ÆÀÌÅÛ Á¦Á¶
+   if pos ('@makefood', lwstr) > 0 then CanMakeItem := TRUE;
+   if pos ('@makepotion', lwstr) > 0 then CanMakeItem := TRUE;
+   if pos ('@makegem', lwstr) > 0 then CanMakeItem := TRUE;
+   if pos ('@makeitem', lwstr) > 0 then CanMakeItem := TRUE;
+   if pos ('@makestuff', lwstr) > 0 then CanMakeItem := TRUE;  //»õ·ÎÃß°¡(sonmg)
+   if pos ('@makeetc', lwstr) > 0 then CanMakeItem := TRUE;  //»õ·ÎÃß°¡(sonmg)
+   // À§Å¹»óÁ¡
+   if pos( '@market_', lwstr ) > 0 then CanItemMarket := TRUE;
+   // ¹®ÆÄÀå¿ø
+   if pos( '@agitreg', lwstr ) > 0 then CanAgitUsage := TRUE;
+   if pos( '@agitmove', lwstr ) > 0 then CanAgitUsage := TRUE;
+   if pos( '@agitbuy', lwstr ) > 0 then CanAgitUsage := TRUE;
+   if pos( '@agittrade', lwstr ) > 0 then CanAgitUsage := TRUE;
+   // ¹®ÆÄÀå¿ø(°ü¸®)
+   if pos( '@agitextend', lwstr ) > 0 then CanAgitManage := TRUE;
+   if pos( '@agitremain', lwstr ) > 0 then CanAgitManage := TRUE;
+   if pos( '@@agitonerecall', lwstr ) > 0 then CanAgitManage := TRUE;
+   if pos( '@agitrecall', lwstr ) > 0 then CanAgitManage := TRUE;
+   if pos( '@@agitforsale', lwstr ) > 0 then CanAgitManage := TRUE;
+   if pos( '@agitforsalecancel', lwstr ) > 0 then CanAgitManage := TRUE;
+   if pos( '@gaboardlist', lwstr ) > 0 then CanAgitManage := TRUE;
+   if pos( '@@guildagitdonate', lwstr ) > 0 then CanAgitManage := TRUE;
+   if pos( '@viewdonation', lwstr ) > 0 then CanAgitManage := TRUE;
+//   if pos( '@apprentice', lwstr ) > 0 then CanAgitManage := TRUE;
+//   if pos( '@marry', lwstr ) > 0 then CanAgitManage := TRUE;
+   // Àå¿ø²Ù¹Ì±â
+   if pos( '@ga_decoitem_buy', lwstr ) > 0 then CanBuyDecoItem := TRUE;
+   if pos( '@ga_decomon_count', lwstr ) > 0 then CanBuyDecoItem := TRUE;
+   // ¸í¼ºÄ¡
+   if pos( '@@freepkother', lwstr ) > 0 then CanDoingEtc := TRUE;
+end;
+
+function TNormNpc.GetLineVariableText(hum: TUserHuman; sMsg: string): string;
+var
+  n: Integer;
+  sStr: string;
+begin
+  try
+    n := 0;
+    while (True) do begin
+      try
+        if TagCount(sMsg, '>') < 1 then Break;
+        ArrestStringEx(sMsg, '<', '>', sStr);
+        CheckNpcSayCommand(hum, sMsg, sStr);
+      except
+      end;
+      Inc(n);
+      if n >= 101 then Break;
+    end;
+    Result := sMsg;
+  except
+    MainOutMessage('TNormNpc.GetLineVariableText');
+  end;
+end;
+
+procedure TNormNpc.SendMsg(who: TCreature; pqa: PTQuestActionInfo);
+var
+  sMsg: string;
+  SysOrWho: Byte;
+begin
+  sMsg := GetLineVariableText(TUserHuman(who), pqa.ActTag);
+  sMsg := AnsiReplaceText(sMsg, '%s', who.UserName);
+  sMsg := AnsiReplaceText(sMsg, '%d', UserName);
+  if who.PEnvir <> nil then
+    sMsg := AnsiReplaceText(sMsg, '%m', who.PEnvir.MapTitle);
+  sMsg := AnsiReplaceText(sMsg, '%x', IntToStr(who.CX));
+  sMsg := AnsiReplaceText(sMsg, '%y', IntToStr(who.CY));
+
+  SysOrWho := pqa.ActExtraVal;
+  try
+    case SysOrWho of
+      0:
+        begin   //0´ú±í±¾µØÌáÊ¾Óï/²»ÉèÖÃÊýÖµÊÇÈ«·þÌáÊ¾Óï
+          if who.PEnvir <> nil then
+            sMsg := AnsiReplaceText(sMsg, '%m', who.PEnvir.MapTitle)
+          else
+            sMsg := AnsiReplaceText(sMsg, '%m', 'Î´ÖªµØÍ¼');
+          who.SysMsg(sMsg, pqa.ActParamVal, pqa.ActTagExVal, pqa.ActTagEx2Val, 1);
+        end;
+    else
+      begin
+        if who.PEnvir <> nil then
+          sMsg := AnsiReplaceText(sMsg, '%m', who.PEnvir.MapTitle)
+        else
+          sMsg := AnsiReplaceText(sMsg, '%m', 'Î´ÖªµØÍ¼');
+        UserEngine.SysMsgAllEx(sMsg, pqa.ActParamVal, pqa.ActTagExVal, pqa.ActTagEx2Val, 1);
+      end;
+    end;
+  except
+    MainOutMessage('TNormNpc.SendMsg');
+  end;
+end;
+
+
+procedure TNormNpc.SendScrollMsg(who: TCreature; pqa: PTQuestActionInfo);
+//  function GetLineVariableText(hum: TUserHuman; sMsg: string): string;
+//  var
+//    n: Integer;
+//    sStr: string;
+//  begin
+//    try
+//      n := 0;
+//      while (True) do begin
+//        try
+//          if TagCount(sMsg, '>') < 1 then Break;
+//          ArrestStringEx(sMsg, '<', '>', sStr);
+//          CheckNpcSayCommand(hum, sMsg, sStr);
+//        except
+//        end;
+//        Inc(n);
+//        if n >= 101 then Break;
+//      end;
+//      Result := sMsg;
+//    except
+//      MainOutMessage('TNormNpc.GetLineVariableText');
+//    end;
+//  end;
+var
+  sMsg: string;
+begin
+  sMsg := GetLineVariableText(TUserHuman(who), pqa.ActParam);
+  sMsg := AnsiReplaceText(sMsg, '%s', who.UserName);
+  sMsg := AnsiReplaceText(sMsg, '%d', UserName);
+  if who.PEnvir <> nil then
+    sMsg := AnsiReplaceText(sMsg, '%m', who.PEnvir.MapTitle);
+  sMsg := AnsiReplaceText(sMsg, '%x', IntToStr(who.CX));
+  sMsg := AnsiReplaceText(sMsg, '%y', IntToStr(who.CY));
+
+  try
+    if who.PEnvir <> nil then
+      sMsg := AnsiReplaceText(sMsg, '%m', who.PEnvir.MapTitle)
+    else
+      sMsg := AnsiReplaceText(sMsg, '%m', 'Î´ÖªµØÍ¼');
+    UserEngine.SysMsgAllScroll(sMsg, pqa.ActTagVal, pqa.ActExtraVal);
+  except
+    MainOutMessage('TNormNpc.SendMsg');
+  end;
+end;
+
+function GetPP (str: string): integer;
+var
+   n: integer;
+begin
+   Result := -1;
+   if Length(str) >= 2 then begin
+      if UpCase(str[1]) = 'P' then begin
+         if Length(str) = 3 then begin
+           n := Str_ToInt(Copy(str, 2, 2), -1);
+           if n < 100 then
+              Result := n;
+         end else begin
+           n := Str_ToInt (str[2], -1);
+           if n in [0..9] then
+              Result := n;
+         end;
+      end;
+      if UpCase(str[1]) = 'G' then begin
+         if Length(str) = 3 then begin
+           n := Str_ToInt(Copy(str, 2, 2), -1);
+           if n < 100 then
+              Result := 100 + n;
+         end else begin
+           n := Str_ToInt (str[2], -1);
+           if n in [0..9] then
+              Result := 100 + n;
+         end;
+      end;
+      if UpCase(str[1]) = 'D' then begin
+         if Length(str) = 3 then begin
+           n := Str_ToInt(Copy(str, 2, 2), -1);
+           if n < 100 then
+              Result := 200 + n;
+         end else begin
+           n := Str_ToInt (str[2], -1);
+           if n in [0..9] then
+              Result := 200 + n;
+         end;
+      end;
+      if UpCase(str[1]) = 'M' then begin
+         if Length(str) = 3 then begin
+           n := Str_ToInt(Copy(str, 2, 2), -1);
+           if n < 100 then
+              Result := 300 + n;
+         end else begin
+           n := Str_ToInt (str[2], -1);
+           if n in [0..9] then
+              Result := 300 + n;
+         end;
+      end;
+
+      if UpCase(str[1]) = 'I' then begin
+         if Length(str) = 3 then begin
+           n := Str_ToInt(Copy(str, 2, 2), -1);
+           if n < 100 then
+              Result := 400 + n;
+         end else begin
+           n := Str_ToInt (str[2], -1);
+           if n in [0..9] then
+              Result := 400 + n;
+         end;
+      end;
+
+      if UpCase(str[1]) = 'A' then begin
+         if Length(str) = 3 then begin
+           n := Str_ToInt(Copy(str, 2, 2), -1);
+           if n < 100 then
+              Result := 500 + n;
+         end else begin
+           n := Str_ToInt (str[2], -1);
+           if n in [0..9] then
+              Result := 500 + n;
+         end;
+      end;
+      if UpCase(str[1]) = 'S' then begin
+         if Length(str) = 3 then begin
+           n := Str_ToInt(Copy(str, 2, 2), -1);
+           if n < 100 then
+              Result := 600 + n;
+         end else begin
+           n := Str_ToInt (str[2], -1);
+           if n in [0..9] then
+              Result := 600 + n;
+         end;
+      end;
+      if UpCase(str[1]) = 'N' then begin
+         if Length(str) = 3 then begin
+           n := Str_ToInt(Copy(str, 2, 2), -1);
+           if n < 100 then
+              Result := 700 + n;
+         end else begin
+           n := Str_ToInt (str[2], -1);
+           if n in [0..9] then
+              Result := 700 + n;
+         end;
+      end;
+   end;
+end;
+
+procedure TNormNpc.NpcSay (target: TCreature; str: string);  //Á¡Â÷ ¾È ¾²ÀÓ... ÇÏµåÄÚµù ÇÏÁö ¾Ê´Â °ÍÀÌ ÁÁÀ½
+begin
+   str := ReplaceChar (str, '\', char($a));
+	target.SendMsg (self, RM_MERCHANTSAY, 0, 0, 0, 0, UserName + '/' + str);
+end;
+
+function TNormNpc.ChangeNpcSayTag (src, orgstr, chstr: string): string;
+var
+   n: integer;
+   src1, src2: string;
+begin
+   n := pos(orgstr, src);
+   if n > 0 then begin
+      src1 := Copy(src, 1, n-1);
+      src2 := Copy(src, n+Length(orgstr), Length(src));
+      Result := src1 + chstr + src2;
+   end else
+      Result := src;
+end;
+
+procedure TNormNpc.CheckNpcSayCommand (hum: TUserHuman; var source: string; tag: string);
+var
+   sText, data, str2: string;
+   n: integer;
+begin
+   if tag = '$OWNERGUILD' then begin
+      data := UserCastle.OwnerGuildName;
+      if data = '' then data := 'GameManagerconsultation';
+      source := ChangeNpcSayTag (source, '<$OWNERGUILD>', data);
+   end;
+   if tag = '$LORD' then begin
+      if UserCastle.OwnerGuild <> nil then begin
+         data := UserCastle.OwnerGuild.GetGuildMaster;
+      end else begin
+         {$IFDEF KOREA} data := 'Ô¤±¸';
+         {$ELSE}        data := 'Ô¤±¸';
+         {$ENDIF}
+      end;
+      source := ChangeNpcSayTag (source, '<$LORD>', data);
+   end;
+   if tag = '$GUILDWARFEE' then begin
+      source := ChangeNpcSayTag (source, '<$GUILDWARFEE>', GetGoldStr(GUILDWARFEE));
+   end;
+   if tag = '$GUILDWARTIME' then begin
+      source := ChangeNpcSayTag (source, '<$GUILDWARTIME>', IntToStr(GUILDWARTIME));
+   end;
+   if tag = '$CASTLEWARDATE' then begin
+      if not UserCastle.BoCastleUnderAttack then begin
+         data := UserCastle.GetNextWarDateTimeStr;
+         if data <> '' then begin
+            source := ChangeNpcSayTag (source, '<$CASTLEWARDATE>', data);
+         end else begin
+            {$IFDEF KOREA} source := '¶ÌÆÚÄÚÃ»ÓÐ¹¥³ÇÕ½\ \<·µ»Ø/@main> ';
+            {$ELSE}        source := '¶ÌÆÚÄÚÃ»ÓÐ¹¥³ÇÕ½\ \<·µ»Ø/@main> ';
+            {$ENDIF}
+         end;
+      end else begin
+         {$IFDEF KOREA} source := 'ÕýÔÚ¹¥³ÇÖÐ£¡\ \<·µ»Ø/@main>';
+         {$ELSE}        source := 'ÕýÔÚ¹¥³ÇÖÐ£¡\ \<·µ»Ø/@main>';
+         {$ENDIF}
+      end;
+      source := ReplaceChar (source, '\', char($a));
+   end;
+   if tag = '$LISTOFWAR' then begin
+      data := UserCastle.GetListOfWars;  //¸ðµç °ø¼º ÀÏÁ¤
+      if data <> '' then begin
+         source := ChangeNpcSayTag (source, '<$LISTOFWAR>', data);
+      end else begin
+         {$IFDEF KOREA} source := 'ÎÒÃÇÎ´È·¶¨Ê±¼ä¡­¡­\ \<·µ»Ø/@main>';
+         {$ELSE}        source := 'ÎÒÃÇÎ´È·¶¨Ê±¼ä¡­¡­\ \<·µ»Ø/@main';
+         {$ENDIF}
+      end;
+      source := ReplaceChar (source, '\', char($a));
+   end;
+   if tag = '$USERNAME' then begin
+      source := ChangeNpcSayTag (source, '<$USERNAME>', hum.UserName);
+   end;
+
+  if tag = '$SERVERNAME' then
+  begin
+    source := ChangeNpcSayTag(source, '<$SERVERNAME>', ServerName);
+  end;
+
+  if tag = '$DATETIME' then
+  begin
+    sText := FormatDateTime('dddddd,dddd,hh:nn:ss', Now);
+    source := ChangeNpcSayTag(source, '<$DATETIME>', sText);
+  end;
+
+   if tag = '$TUSERNAME' then begin
+      source := ChangeNpcSayTag (source, '<$TUSERNAME>', hum.GetFrontCret.UserName);
+   end;
+   if tag = '$PRENTICE1' then begin
+      source := ChangeNpcSayTag (source, '<$PRENTICE1>', hum.fMaster.GetChildNameByNo(1));
+   end;
+   if tag = '$PRENTICE2' then begin
+      source := ChangeNpcSayTag (source, '<$PRENTICE2>', hum.fMaster.GetChildNameByNo(2));
+   end;
+   if tag = '$PRENTICE3' then begin
+      source := ChangeNpcSayTag (source, '<$PRENTICE3>', hum.fMaster.GetChildNameByNo(3));
+   end;
+   if tag = '$PRENTICE4' then begin
+      source := ChangeNpcSayTag (source, '<$PRENTICE4>', hum.fMaster.GetChildNameByNo(4));
+   end;
+   if tag = '$PRENTICE5' then begin
+      source := ChangeNpcSayTag (source, '<$PRENTICE5>', hum.fMaster.GetChildNameByNo(5));
+   end;
+   if tag = '$CREDITPOINT' then begin   //ÉùÍû±äÁ¿
+      source := ChangeNpcSayTag (source, '<$CREDITPOINT>', IntToStr(hum.m_btCreditPoint));
+   end;
+   if tag = '$SECONDSCARD' then begin
+      source := ChangeNpcSayTag (source, '<$SECONDSCARD>', IntToStr(hum.SecondsCard));
+   end;
+   if tag = '$MONTHCARD' then begin
+     source := ChangeNpcSayTag (source, '<$MONTHCARD>', IntToStr(hum.iDay))
+   end;
+
+   if tag = '$SECONDCARD' then begin
+//      if hum.iDay > 0 then
+//         source := ChangeNpcSayTag (source, '<$SECONDCARD>', IntToStr(hum.SecondsCard))
+//      else
+//         source := ChangeNpcSayTag (source, '<$SECONDCARD>', IntToStr(hum.SecondsCard - ((GetTickCount - hum.LoginTime) div 1000)));
+     source := ChangeNpcSayTag (source, '<$SECONDCARD>', IntToStr(hum.SecondsCard));
+   end;
+
+   if tag = '$PKTIME' then begin
+      source := ChangeNpcSayTag (source, '<$PKTIME>',hum.GetPKTimeMin);
+   end;
+   //¿©°ü º¸°ü °³¼ö
+   if tag = '$SAVEITEM' then begin
+      source := ChangeNpcSayTag (source, '<$SAVEITEM>', IntToStr(hum.SaveItems.Count));
+   end;
+   if tag = '$REMAINSAVEITEM' then begin
+      source := ChangeNpcSayTag (source, '<$REMAINSAVEITEM>', IntToStr(MAXSAVELIMIT - hum.SaveItems.Count));
+   end;
+   if tag = '$MAXSAVEITEM' then begin
+      source := ChangeNpcSayTag (source, '<$MAXSAVEITEM>', IntToStr(MAXSAVELIMIT));
+   end;
+
+   if tag = '$GAMEGOLD' then begin
+      source := ChangeNpcSayTag (source, '<$GAMEGOLD>', IntToStr(hum.PotCash));
+   end;
+   if tag = '$GAMEPOINT' then
+   begin //ÏÔÊ¾»ý·Ö
+     source := ChangeNpcSayTag(source, '<$GAMEPOINT>', IntToStr(hum.GamePoint));
+   end;
+
+   //¹®ÆÄ Àå¿ø.
+   if tag = '$GUILDAGITREGFEE' then begin
+      source := ChangeNpcSayTag (source, '<$GUILDAGITREGFEE>', GetGoldStr(GUILDAGITREGFEE));
+   end;
+   if tag = '$GUILDAGITEXTENDFEE' then begin
+      source := ChangeNpcSayTag (source, '<$GUILDAGITEXTENDFEE>', GetGoldStr(GUILDAGITEXTENDFEE));
+   end;
+   if tag = '$GUILDAGITMAXGOLD' then begin
+      source := ChangeNpcSayTag (source, '<$GUILDAGITMAXGOLD>', GetGoldStr(GUILDAGITMAXGOLD));
+   end;
+   //Àå¿ø²Ù¹Ì±â.
+   if tag = '$AGITGUILDNAME' then begin
+      source := ChangeNpcSayTag (source, '<$AGITGUILDNAME>', hum.GetGuildNameHereAgit);
+   end;
+   if tag = '$AGITGUILDMASTER' then begin
+      source := ChangeNpcSayTag (source, '<$AGITGUILDMASTER>', hum.GetGuildMasterNameHereAgit);
+   end;
+
+   if tag = '$MEMORIALCOUNT' then begin
+      source := ChangeNpcSayTag (source, '<$MEMORIALCOUNT>', IntToStr(MemorialCount));
+   end;
+
+   if CompareLStr(tag, '$STR(', Length('$STR(')) then begin
+
+      ArrestStringEx (tag, '(', ')', str2);
+      n := GetPP (str2);
+      if n >= 0 then begin
+         case n of
+            0..99:       source := ChangeNpcSayTag (source, '<'+tag+'>', IntToStr(TUserHuman(hum).QuestParams[n]));
+            100..199:   source := ChangeNpcSayTag (source, '<'+tag+'>', IntToStr(GrobalQuestParams[n-100]));
+            200..299:   source := ChangeNpcSayTag (source, '<'+tag+'>', IntToStr(TUserHuman(hum).DiceParams[n-200]));
+            300..399:   source := ChangeNpcSayTag (source, '<'+tag+'>', IntToStr(PEnvir.MapQuestParams[n-300]));
+            400..499:   source := ChangeNpcSayTag(source, '<'+tag+'>', IntToStr(GlobaDyMval[n - 400]));
+            500..599:   source := ChangeNpcSayTag(source, '<'+tag+'>', GlobaDyTval[n - 500]);
+            600..699:   source := ChangeNpcSayTag(source, '<'+tag+'>', TUserHuman(hum).m_nSval[n - 600]);
+            700..799:   source := ChangeNpcSayTag(source, '<'+tag+'>', IntToStr(HGlobalVal[n - 700]));
+         end;
+      end;
+   end;
+end;
+
+procedure ReadStrings (flname: string; strlist: TStringList);
+var
+   f: TextFile;
+   str: string;
+begin
+   strlist.Clear;
+   {$I-}
+   AssignFile (f, flname);
+   FileMode := 0;  {Set file access to read only }
+   Reset (f);
+   while not EOF(f) do begin
+      ReadLn (f, str);
+      strlist.Add (str);
+   end;
+   CloseFile (f);
+   //IOResult
+   {$I+}
+end;
+
+procedure WriteStrings (flname: string; strlist: TStringList);
+var
+   f: TextFile;
+   str: string;
+   i: integer;
+begin
+   {$I-}
+   AssignFile (f, flname);
+   //FileMode := 2;  {Set file access to read only }
+   Rewrite (f);
+   for i:=0 to strlist.Count-1 do begin
+      WriteLn (f, strlist[i]);
+   end;
+   CloseFile (f);
+   //IOResult
+   {$I+}
+end;
+
+procedure TNormNpc.NpcSayTitle (who: TCreature; title: string);
+var
+   latesttakeitem: string;
+   pcheckitem, puTemp: PTUserItem;
+   batchlist: TStringList;
+   batchdelay, previousbatchdelay: integer;
+   bosaynow: Boolean;
+
+   //6-11
+   // Çø·Ö´óÐ¡µÄ¼ì²â
+   (*function CheckNameAndDeleteFromFileList (uname, listfile: string): Boolean;
+   var
+      i: integer;
+      str: string;
+      strlist: TStringList;
+   begin
+      Result := FALSE;
+      listfile := EnvirDir + listfile;
+      if FileExists (listfile) then begin
+         strlist := TStringList.Create;
+         try
+            ReadStrings (listfile, strlist);
+         except
+            MainOutMessage ('loading fail.... => ' + listfile);
+         end;
+         for i:=0 to strlist.Count-1 do begin
+            str := Trim(strlist[i]);
+            if str = uname then begin
+               strlist.Delete (i);
+               Result := TRUE;
+               break;
+            end;
+         end;
+         try
+            WriteStrings (listfile, strlist);
+         except
+            MainOutMessage ('saving fail.... => ' + listfile);
+         end;
+         strlist.Free;
+      end else
+         MainOutMessage ('file not found => ' + listfile);
+   end; *)
+   function CheckNameAndDeleteFromFileList(uname, listfile: string): Boolean;   //²»Çø·Ö×ÖÄ¸´óÐ¡µÄ¼ì²é
+  var
+    i: integer;
+    str: string;
+    strlist: TStringList;
+  begin
+    Result := FALSE;
+    listfile := EnvirDir + listfile;
+    if FileExists(listfile) then
+    begin
+      strlist := TStringList.Create;
+      try
+        ReadStrings(listfile, strlist);
+      except
+        MainOutMessage('loading fail.... => ' + listfile);
+      end;
+      for i := 0 to strlist.Count - 1 do
+      begin
+        str := Trim(strlist[i]);
+        //if str = uname then
+        if CompareText (str, uname) = 0 then
+        begin
+          strlist.Delete(i);
+          Result := TRUE;
+          break;
+        end;
+      end;
+      try
+        WriteStrings(listfile, strlist);
+      except
+        MainOutMessage('saving fail.... => ' + listfile);
+      end;
+      strlist.Free;
+    end
+    else
+      MainOutMessage('file not found => ' + listfile);
+  end;
+   //6-11
+   function CheckNameFromFileList (uname, listfile: string): Boolean;
+   var
+      i: integer;
+      str: string;
+      strlist: TStringList;
+   begin
+      Result := FALSE;
+      listfile := EnvirDir + listfile;
+      if FileExists (listfile) then begin
+         strlist := TStringList.Create;
+         try
+            ReadStrings (listfile, strlist);
+         except
+            MainOutMessage ('loading fail.... => ' + listfile);
+         end;
+         for i:=0 to strlist.Count-1 do begin
+            str := Trim(strlist[i]);
+            if str = uname then begin
+               Result := TRUE;
+               break;
+            end;
+         end;
+         strlist.Free;
+      end else
+         MainOutMessage ('file not found => ' + listfile);
+   end;
+   //6-11
+   procedure AddNameFromFileList (uname, listfile: string);
+   var
+      i: integer;
+      str: string;
+      strlist: TStringList;
+      flag: Boolean;
+   begin
+      listfile := EnvirDir + listfile;
+      strlist := TStringList.Create;
+      if FileExists (listfile) then begin
+         try
+            ReadStrings (listfile, strlist);
+         except
+            MainOutMessage ('loading fail.... => ' + listfile);
+         end;
+      end;
+
+      //flag := FALSE;
+      //for i:=0 to strlist.Count-1 do begin
+      //   str := Trim(strlist[i]);
+      //   if str = uname then begin
+      //      flag := TRUE;
+      //      break;
+      //   end;
+      //end;
+      //if not flag then   //º¹¼ö·Î Ãß°¡ ¾ÈÇÔ
+
+      strlist.Add (uname);
+
+      try
+         WriteStrings (listfile, strlist);
+      except
+         MainOutMessage ('saving fail.... => ' + listfile);
+      end;
+      strlist.Free;
+   end;
+   //6-11
+   procedure DeleteNameFromFileList (uname, listfile: string);
+   var
+      i: integer;
+      str: string;
+      strlist: TStringList;
+   begin
+      listfile := EnvirDir + listfile;
+      if FileExists (listfile) then begin
+         strlist := TStringList.Create;
+         try
+            ReadStrings (listfile, strlist);
+         except
+            MainOutMessage ('loading fail.... => ' + listfile);
+         end;
+         for i:=0 to strlist.Count-1 do begin
+            str := Trim(strlist[i]);
+            if str = uname then begin
+               strlist.Delete (i);
+               break;
+            end;
+         end;
+         try
+            WriteStrings (listfile, strlist);
+         except
+            MainOutMessage ('saving fail.... => ' + listfile);
+         end;
+         strlist.Free;
+      end else
+         MainOutMessage ('file not found => ' + listfile);
+   end;
+   procedure ClearAllNameFromFileList(listfile: string);  //laodu add
+   var
+     i: integer;
+     str: string;
+     strlist: TStringList;
+   begin
+     listfile := EnvirDir + listfile;
+
+     strlist := TStringList.Create;
+     strlist.clear;
+     try
+      strlist.savetofile(listfile);
+     except
+       MainOutMessage('saving fail.... => ' + listfile);
+     end;
+     strlist.Free;
+   end;
+   function  CheckQuestCondition (pq: PTQuestRecord): Boolean;
+   var
+      i: integer;
+   begin
+      Result := TRUE;
+      if pq.BoRequire then begin
+         for i:=0 to MAXREQUIRE-1 do begin
+            if pq.QuestRequireArr[i].RandomCount > 0 then begin
+               if Random (pq.QuestRequireArr[i].RandomCount) <> 0 then begin
+                  Result := FALSE;
+                  break;
+               end;
+            end;
+            if who.GetQuestMark (pq.QuestRequireArr[i].CheckIndex) <> pq.QuestRequireArr[i].CheckValue then begin
+               Result := FALSE;
+               break;
+            end;
+         end;
+      end;
+   end;
+   function FindItemFromState (iname: string; count: integer): PTUserItem;
+   var
+      n: integer;
+   begin
+      Result := nil;
+      if CompareLStr (iname, '[NECKLACE]', 4) then begin
+         if who.UseItems[U_NECKLACE].Index > 0 then
+            Result := @(who.UseItems[U_NECKLACE]);
+         exit;
+      end;
+      if CompareLStr (iname, '[RING]', 4) then begin
+         if who.UseItems[U_RINGL].Index > 0 then
+            Result := @(who.UseItems[U_RINGL]);
+         if who.UseItems[U_RINGR].Index > 0 then
+            Result := @(who.UseItems[U_RINGR]);
+         exit;
+      end;
+      if CompareLStr (iname, '[ARMRING]', 4) then begin
+         if who.UseItems[U_ARMRINGL].Index > 0 then
+            Result := @(who.UseItems[U_ARMRINGL]);
+         if who.UseItems[U_ARMRINGR].Index > 0 then
+            Result := @(who.UseItems[U_ARMRINGR]);
+         exit;
+      end;
+      if CompareLStr (iname, '[WEAPON]', 4) then begin
+         if who.UseItems[U_WEAPON].Index > 0 then
+            Result := @(who.UseItems[U_WEAPON]);
+         exit;
+      end;
+      if CompareLStr (iname, '[HELMET]', 4) then begin
+         if who.UseItems[U_HELMET].Index > 0 then
+            Result := @(who.UseItems[U_HELMET]);
+         exit;
+      end;
+      // 2003/03/15 COPARK ¾ÆÀÌÅÛ ÀÎº¥Åä¸® È®Àå
+      if CompareLStr (iname, '[BUJUK]', 4) then begin
+         if who.UseItems[U_BUJUK].Index > 0 then
+            Result := @(who.UseItems[U_BUJUK]);
+         exit;
+      end;
+      if CompareLStr (iname, '[BELT]', 4) then begin
+         if who.UseItems[U_BELT].Index > 0 then
+            Result := @(who.UseItems[U_BELT]);
+         exit;
+      end;
+      if CompareLStr (iname, '[BOOTS]', 4) then begin
+         if who.UseItems[U_BOOTS].Index > 0 then
+            Result := @(who.UseItems[U_BOOTS]);
+         exit;
+      end;
+      if CompareLStr (iname, '[CHARM]', 4) then begin
+         if who.UseItems[U_CHARM].Index > 0 then
+            Result := @(who.UseItems[U_CHARM]);
+         exit;
+      end;
+
+      Result := who.FindItemWear (iname, n);
+      if n < count then
+         Result := nil;
+   end;
+   function  CheckSayingCondition (clist: TList): Boolean;
+   var
+      i, k, m, n, param, tag, count, durasum, duratop: integer;
+      ahour, amin, asec, amsec: word;
+      pqc: PTQuestConditionInfo;
+      pitem: PTUserItem;
+      ps: PTStdItem;
+      penv: TEnvirnoment;
+      hum: TUserHuman;
+      nFame: integer;
+      WarriorCount, WizardCount, TaoistCount: integer;
+      equalvar: integer;
+      CheckMap, nstr: string;
+      cret: TCreature;
+      list: TList;
+      flag: Boolean;
+      pum: PTUserMagic;
+   begin
+      Result := TRUE;
+
+      for i:=0 to clist.Count-1 do begin
+        pqc := PTQuestConditionInfo (clist[i]);
+
+        if (pqc.IfParam <> '') then begin
+          if (pqc.IfParam[1] = '$') then begin
+            nstr := pqc.IfParam;
+            pqc.IfParam := '<' + pqc.IfParam + '>';
+            CheckNpcSayCommand(TUserHuman(who), pqc.IfParam, nstr);
+          end else if Pos('>', pqc.IfParam) > 0 then
+            pqc.IfParam := GetLineVariableText(TUserHuman(who), pqc.IfParam);
+        end;
+
+        if (pqc.IfTag <> '') then begin
+          if (pqc.IfTag[1] = '$') then begin
+            nstr := pqc.IfTag;
+            pqc.IfTag := '<' + pqc.IfTag + '>';
+            CheckNpcSayCommand(TUserHuman(who), pqc.IfTag, nstr);
+          end else if Pos('>', pqc.IfTag) > 0 then
+            pqc.IfTag := GetLineVariableText(TUserHuman(who), pqc.IfTag);
+        end;
+
+         case pqc.IfIdent of
+            QI_CHECK:
+               begin
+                  param := Str_ToInt (pqc.IfParam, 0);
+                  tag := Str_ToInt (pqc.IfTag, 0);
+                  n := who.GetQuestMark (param);
+                  if n = 0 then begin
+                     if tag <> 0 then Result := FALSE;
+                  end else
+                     if tag = 0 then Result := FALSE;
+               end;
+            QI_CHECKOPENUNIT:
+               begin
+                  param := Str_ToInt (pqc.IfParam, 0);
+                  tag := Str_ToInt (pqc.IfTag, 0);
+                  n := who.GetQuestOpenIndexMark (param);
+                  if n = 0 then begin
+                     if tag <> 0 then Result := FALSE;
+                  end else
+                     if tag = 0 then Result := FALSE;
+               end;
+            QI_CHECKUNIT:
+               begin
+                  param := Str_ToInt (pqc.IfParam, 0);
+                  tag := Str_ToInt (pqc.IfTag, 0);
+                  n := who.GetQuestFinIndexMark (param);
+                  if n = 0 then begin
+                     if tag <> 0 then Result := FALSE;
+                  end else
+                     if tag = 0 then Result := FALSE;
+               end;
+            QI_RANDOM:
+               begin
+                  if Random(pqc.IfParamVal) <> 0 then Result := FALSE;
+               end;
+            QI_GENDER:
+               begin
+                  if CompareText (pqc.IfParam, 'MAN') = 0 then begin  //¿ä±¸°¡ ³²ÀÚ
+                     if who.Sex <> 0 then Result := FALSE;
+                  end else begin //
+                     if who.Sex <> 1 then Result := FALSE;
+                  end;
+               end;
+            QI_DAYTIME:
+               begin
+                  if CompareText (pqc.IfParam, 'SUNRAISE') = 0 then begin
+                     if MirDayTime <> 0 then Result := FALSE;
+                  end;
+                  if CompareText (pqc.IfParam, 'DAY') = 0 then begin
+                     if MirDayTime <> 1 then Result := FALSE;
+                  end;
+                  if CompareText (pqc.IfParam, 'SUNSET') = 0 then begin
+                     if MirDayTime <> 2 then Result := FALSE;
+                  end;
+                  if CompareText (pqc.IfParam, 'NIGHT') = 0 then begin
+                     if MirDayTime <> 3 then Result := FALSE;
+                  end;
+               end;
+            QI_DAYOFWEEK:
+               begin
+                  if CompareLStr (pqc.IfParam, 'Sun', 3) then
+                     if DayOfWeek(Date) <> 1 then Result := FALSE;
+                  if CompareLStr (pqc.IfParam, 'Mon', 3) then
+                     if DayOfWeek(Date) <> 2 then Result := FALSE;
+                  if CompareLStr (pqc.IfParam, 'Tue', 3) then
+                     if DayOfWeek(Date) <> 3 then Result := FALSE;
+                  if CompareLStr (pqc.IfParam, 'Wed', 3) then
+                     if DayOfWeek(Date) <> 4 then Result := FALSE;
+                  if CompareLStr (pqc.IfParam, 'Thu', 3) then
+                     if DayOfWeek(Date) <> 5 then Result := FALSE;
+                  if CompareLStr (pqc.IfParam, 'Fri', 3) then
+                     if DayOfWeek(Date) <> 6 then Result := FALSE;
+                  if CompareLStr (pqc.IfParam, 'Sat', 3) then
+                     if DayOfWeek(Date) <> 7 then Result := FALSE;
+               end;
+            QI_TIMEHOUR:
+               begin
+                  if (pqc.IfParamVal <> 0) and (pqc.IfTagVal = 0) then
+                     pqc.IfTagVal := pqc.IfParamVal;
+                  DecodeTime (Time, ahour, amin, asec, amsec);
+                  if not ((ahour >= pqc.IfParamVal) and (ahour <= pqc.IfTagVal)) then
+                     Result := FALSE;
+               end;
+            QI_TIMEMIN:
+               begin
+                  if (pqc.IfParamVal <> 0) and (pqc.IfTagVal = 0) then
+                     pqc.IfTagVal := pqc.IfParamVal;
+                  DecodeTime (Time, ahour, amin, asec, amsec);
+                  if not ((amin >= pqc.IfParamVal) and (amin <= pqc.IfTagVal)) then
+                     Result := FALSE;
+               end;
+
+            QI_CHECKITEM:
+               begin
+                  pcheckitem := who.FindItemNameEx (pqc.IfParam, count, durasum, duratop);
+                  if count < pqc.IfTagVal then
+                     Result := FALSE;
+               end;
+            QI_CHECKITEMW:
+               begin
+                  pcheckitem := FindItemFromState (pqc.IfParam, pqc.IfTagVal);
+                  if pcheckitem = nil then
+                     Result := FALSE;
+               end;
+               //¼ì²éÀ¯Öò£¬Ñ«ÕÂÎ»ÖÃÊÇ·ñÓÐÎïÆ· 2022/10/6
+//            QI_RIGHTHAND:
+//               begin
+//                    if who.UseItems[U_RIGHTHAND].Index > 0 then begin
+//                  if pcheckitem = nil then
+//                     Result := FALSE;
+//               end;
+//               end;
+            QI_CHECKGOLD:
+               begin
+                  if who.Gold < pqc.ifParamVal then
+                     Result := FALSE;
+               end;
+            QI_ISTAKEITEM:
+               begin
+                  if latesttakeitem <> pqc.IfParam then
+                     Result := FALSE;
+               end;
+            QI_CHECKLEVEL:
+               begin
+                  if who.Abil.Level < pqc.IfParamVal then
+                     Result := FALSE;
+               end;
+            QI_CHECKJOB:
+               begin
+                  if CompareLStr (pqc.IfParam, 'Warrior', 3) then
+                     if who.Job <> 0 then Result := FALSE;
+                  if CompareLStr (pqc.IfParam, 'Wizard', 3) then
+                     if who.Job <> 1 then Result := FALSE;
+                  if CompareLStr (pqc.IfParam, 'Taoist', 3) then
+                     if who.Job <> 2 then Result := FALSE;
+               end;
+            QI_CHECKDURA:
+               begin
+                  pcheckitem := who.FindItemNameEx (pqc.IfParam, count, durasum, duratop);
+                  if Round(duratop/1000) < pqc.IfTagVal then
+                     Result := FALSE;
+               end;
+            QI_CHECKDURAEVA:
+               begin
+                  pcheckitem := who.FindItemNameEx (pqc.IfParam, count, durasum, duratop);
+                  if count > 0 then begin
+                     if Round((durasum/count)/1000) < pqc.IfTagVal then
+                        Result := FALSE;
+                  end else
+                     Result := FALSE;
+               end;
+            QI_CHECKPKPOINT:
+               begin
+                  if who.PKLevel < pqc.IfParamVal then
+                     Result := FALSE;
+               end;
+            QI_CHECKLUCKYPOINT:
+               begin
+                  if who.BodyLuckLevel < pqc.IfParamVal then
+                     Result := FALSE;
+               end;
+            QI_CHECKMON_MAP:
+               begin
+                  penv := GrobalEnvir.GetEnvir (pqc.IfParam);
+                  if penv <> nil then
+                     if UserEngine.GetMapMons (penv, nil) < pqc.IfTagVal then
+                        Result := FALSE;
+               end;
+            QI_CHECKMON_NORECALLMOB_MAP:
+               begin
+                  penv := GrobalEnvir.GetEnvir (pqc.IfParam);
+                  if penv <> nil then
+                     if UserEngine.GetMapMonsNoRecallMob (penv, nil) < pqc.IfTagVal then
+                        Result := FALSE;
+               end;
+            QI_CHECKMON_AREA:
+               begin
+               end;
+            QI_CHECKHUM:
+               begin
+                  if UserEngine.GetHumCount (pqc.IfParam) < pqc.IfTagVal then
+                     Result := FALSE;
+               end;
+            QI_CHECKBAGGAGE:
+               begin
+                  if who.CanAddItem then begin
+                     if pqc.IfParam <> '' then begin
+                        Result := FALSE;
+                        ps := UserEngine.GetStdItemFromName (pqc.IfParam);
+                        if ps <> nil then begin
+                           if who.IsAddWeightAvailable (ps.Weight) then
+                              Result := TRUE;
+                        end;
+                     end;
+                  end else
+                     Result := FALSE;
+               end;
+            //6-11
+            QI_CHECKANDDELETENAMELIST:
+               begin
+                  if not CheckNameAndDeleteFromFileList (who.UserName, NpcBaseDir + pqc.IfParam{filename}) then
+                     Result := FALSE;
+               end;
+            //6-11
+            QI_CHECKANDDELETEIDLIST:
+               begin
+                  hum := TUserHuman (who);
+                  if not CheckNameAndDeleteFromFileList (hum.UserId, NpcBaseDir + pqc.IfParam{filename}) then
+                     Result := FALSE;
+               end;
+            //6-11
+            QI_CHECKNAMELIST:
+               begin
+                  if not CheckNameFromFileList (who.UserName, NpcBaseDir + pqc.IfParam{filename}) then
+                     Result := FALSE;
+               end;
+
+            //*dq
+            QI_IFGETDAILYQUEST:
+               begin
+                  if who.GetDailyQuest <> 0 then
+                     Result := FALSE;
+               end;
+            //*dq
+            QI_RANDOMEX:
+               begin
+                  if Random(pqc.IfTagVal) >= pqc.IfParamVal then
+                     Result := FALSE;
+               end;
+            //*dq
+            QI_CHECKDAILYQUEST:
+               begin
+                  if who.GetDailyQuest <> pqc.IfParamVal then
+                     Result := FALSE;
+               end;
+
+            QI_CHECKGRADEITEM:   //Event Grade
+               begin
+                  //------------------------------------------------------------
+                  // IfParamVal : ÀÌº¥Æ® ¾ÆÀÌÅÛ µî±Þ
+                  // IfTagVal   : Á¸Àç ¾ÆÀÌÅÛ °³¼ö(Ä«¿îÆ® ¾ÆÀÌÅÛÀº ÇÏ³ª·Î °£ÁÖ)
+                  // ÁöÁ¤ µî±ÞÀÇ ¾ÆÀÌÅÛÀ» ÁöÁ¤ °³¼ö ÀÌ»ó °¡Áö°í ÀÖ´ÂÁö °Ë»çÇØ¼­
+                  // ÀÖÀ¸¸é TRUE, ¾øÀ¸¸é FALSE¸¦ ¸®ÅÏÇÔ.
+                  //------------------------------------------------------------
+                  if who.FindItemEventGrade (pqc.IfParamVal, pqc.IfTagVal) = FALSE then
+                     Result := FALSE;
+               end;
+            QI_CHECKBAGREMAIN:  // °¡¹æÃ¢¿¡ Parameter °³¼ö¸¸Å­ ³²¾Æ ÀÖ´ÂÁö
+               begin
+                  if who.CanAddItem then begin
+                     if pqc.IfParamVal > 0 then begin
+                        Result := FALSE;
+                        if (MAXBAGITEM - who.ItemList.Count) >= pqc.IfParamVal then begin
+                           Result := TRUE;
+                        end;
+                     end;
+                  end else
+                     Result := FALSE;
+               end;
+
+            QI_EQUALVAR:
+               begin
+                  equalvar := 0;
+                  n := GetPP (pqc.IfParam);
+                  m := GetPP (pqc.IfTag);
+                  if m >= 0 then begin
+                     case m of
+                        0..99:
+                           equalvar := TUserHuman(who).QuestParams[m];
+                        100..199:
+                           equalvar := GrobalQuestParams[m-100];
+                        200..299:
+                           equalvar := TUserHuman(who).DiceParams[m-200];
+                        300..399:
+                           equalvar := PEnvir.MapQuestParams[m-300];
+
+                        400..499:   equalvar := GlobaDyMval[n - 400];
+                        500..599:   equalvar := StrToInt(GlobaDyTval[n - 500]);
+                        600..699:   equalvar := StrToInt(TUserHuman(hum).m_nSval[n - 600]);
+                        700..799:   equalvar :=  HGlobalVal[n - 700];
+                     end;
+                  end;
+                  if n >= 0 then begin
+                     case n of
+                        0..99:
+                           if TUserHuman(who).QuestParams[n] <> equalvar then
+                              Result := FALSE;
+                        100..199:
+                           //Àü¿ªº¯¼ö
+                           if GrobalQuestParams[n-100] <> equalvar then
+                              Result := FALSE;
+                        200..299:
+                           if TUserHuman(who).DiceParams[n-200] <> equalvar then
+                              Result := FALSE;
+                        300..399:
+                           //¸ÊÁö¿ªº¯¼ö
+                           if PEnvir.MapQuestParams[n-300] <> equalvar then
+                              Result := FALSE;
+                        400..499:
+                           if GlobaDyMval[n - 400] <> equalvar then
+                              Result := FALSE;
+                        500..599:
+                             if StrToInt(GlobaDyTval[n - 500]) <> equalvar then
+                              Result := FALSE;
+                        600..699:
+                           if StrToInt(TUserHuman(hum).m_nSval[n - 600]) <> equalvar then
+                              Result := FALSE;
+                        700..799:
+                              if HGlobalVal[n-700] <> equalvar then
+                              Result := FALSE;
+
+                     end;
+                  end else
+                     Result := FALSE;
+               end;
+
+            QI_EQUAL:
+               begin
+                  n := GetPP (pqc.IfParam);
+                  if n >= 0 then begin
+                     case n of
+                        0..99:
+                           if TUserHuman(who).QuestParams[n] <> pqc.IfTagVal then
+                              Result := FALSE;
+                        100..199:
+                           //Àü¿ªº¯¼ö
+                           if GrobalQuestParams[n-100] <> pqc.IfTagVal then
+                              Result := FALSE;
+                        200..299:
+                           if TUserHuman(who).DiceParams[n-200] <> pqc.IfTagVal then
+                             Result := FALSE;
+                        300..399:
+                           //¸ÊÁö¿ªº¯¼ö
+                           if PEnvir.MapQuestParams[n-300] <> pqc.IfTagVal then
+                              Result := FALSE;
+
+                        400..499:
+                           if GlobaDyMval[n - 400] <> pqc.IfTagVal then
+                              Result := FALSE;
+                        500..599:
+                             if GlobaDyTval[n - 500] <> pqc.IfTag then
+                              Result := FALSE;
+                        600..699:
+                           if TUserHuman(who).m_nSval[n - 600] <> pqc.IfTag then
+                              Result := FALSE;
+                        700..799:
+                              if HGlobalVal[n-700] <> pqc.IfTagVal then
+                              Result := FALSE;
+                     end;
+                  end else
+                     Result := FALSE;
+               end;
+            QI_LARGE:
+               begin
+                  n := GetPP (pqc.IfParam);
+                  if n >= 0 then begin
+                     case n of
+                        0..99:
+                           if TUserHuman(who).QuestParams[n] <= pqc.IfTagVal then
+                              Result := FALSE;
+                        100..199:
+                           if GrobalQuestParams[n-100] <= pqc.IfTagVal then
+                              Result := FALSE;
+                        200..299:
+                           if TUserHuman(who).DiceParams[n-200] <= pqc.IfTagVal then
+                              Result := FALSE;
+                        300..399:
+                           if PEnvir.MapQuestParams[n-300] <= pqc.IfTagVal then
+                              Result := FALSE;
+
+                        400..499:
+                           if GlobaDyMval[n - 400] <= pqc.IfTagVal then
+                              Result := FALSE;
+                        500..599:
+                             if StrToInt(GlobaDyTval[n - 500]) <= pqc.IfTagVal then
+                              Result := FALSE;
+                        600..699:
+                           if StrToInt(TUserHuman(hum).m_nSval[n - 600]) <= pqc.IfTagVal then
+                              Result := FALSE;
+                        700..799:
+                              if HGlobalVal[n-700] <= pqc.IfTagVal then
+                              Result := FALSE;
+                     end;
+                  end else
+                     Result := FALSE;
+               end;
+            QI_SMALL:
+               begin
+                  n := GetPP (pqc.IfParam);
+                  if n >= 0 then begin
+                     case n of
+                        0..99:
+                           if TUserHuman(who).QuestParams[n] >= pqc.IfTagVal then
+                              Result := FALSE;
+                        100..199:
+                           if GrobalQuestParams[n-100] >= pqc.IfTagVal then
+                              Result := FALSE;
+                        200..299:
+                           if TUserHuman(who).DiceParams[n-200] >= pqc.IfTagVal then
+                              Result := FALSE;
+                        300..399:
+                           if PEnvir.MapQuestParams[n-300] >= pqc.IfTagVal then
+                              Result := FALSE;
+
+                        400..499:
+                           if GlobaDyMval[n - 400] >= pqc.IfTagVal then
+                              Result := FALSE;
+                        500..599:
+                             if StrToInt(GlobaDyTval[n - 500]) >= pqc.IfTagVal then
+                              Result := FALSE;
+                        600..699:
+                           if StrToInt(TUserHuman(hum).m_nSval[n - 600]) >= pqc.IfTagVal then
+                              Result := FALSE;
+                        700..799:
+                              if HGlobalVal[n-700] >= pqc.IfTagVal then
+                              Result := FALSE;
+                     end;
+                  end else
+                     Result := FALSE;
+               end;
+            QI_ISGROUPOWNER:
+               begin
+                  //ÀÚ½ÅÀÌ GroupOwnerÀÎÁö °Ë»ç.
+                  Result := FALSE;
+                  if who <> nil then begin
+                     if who.GroupOwner <> nil then begin
+                        if who.GroupOwner = who then
+                           Result := TRUE;
+                     end;
+                  end;
+               end;
+            QI_ISEXPUSER:
+               begin
+                  //ÀÚ½ÅÀÌ Ã¼ÇèÆÇ À¯ÀúÀÎÁö °Ë»çÇÑ´Ù.
+                  Result := FALSE;
+                  hum := TUserHuman (who);
+                  if hum <> nil then begin
+                     if hum.ApprovalMode = 1 then
+                        Result := TRUE;
+                  end;
+               end;
+            QI_CHECKLOVERFLAG:
+               begin
+                  if TUserHuman(who).fLover <> nil then begin
+                     hum := UserEngine.GetUserHuman(TUserHuman(who).fLover.GetLoverName);
+                     if hum <> nil then begin
+                        param := Str_ToInt (pqc.IfParam, 0);
+                        tag := Str_ToInt (pqc.IfTag, 0);
+                        n := hum.GetQuestMark (param);
+                        if n = 0 then begin
+                           if tag <> 0 then Result := FALSE;
+                        end else
+                           if tag = 0 then Result := FALSE;
+                     end else begin
+                        Result := FALSE;
+                     end;
+                  end else begin
+                     Result := FALSE;
+                  end;
+               end;
+            QI_CHECKLOVERRANGE:
+               begin
+                  if TUserHuman(who).fLover <> nil then begin
+                     hum := UserEngine.GetUserHuman(TUserHuman(who).fLover.GetLoverName);
+                     if hum <> nil then begin
+                        param := Str_ToInt (pqc.IfParam, 0);
+                        if not( (abs(who.CX - hum.CX) <= param) and (abs(who.CY - hum.CY) <= param) ) then
+                           Result := FALSE;
+                     end else begin
+                        Result := FALSE;
+                     end;
+                  end else begin
+                     Result := FALSE;
+                  end;
+               end;
+            QI_CHECKLOVERDAY:
+               begin
+                  if TUserHuman(who).fLover <> nil then begin
+                     param := Str_ToInt( pqc.IfParam, 0 );
+                     if Str_ToInt( TUserHuman(who).fLover.GetLoverDays, 0 ) < param then
+                        Result := FALSE;
+                  end else begin
+                     Result := FALSE;
+                  end;
+               end;
+            //¸í¼ºÄ¡
+            QI_CHECKFAMEGRADE:
+               begin
+                  TUserHuman(who).GetFameName(nFame);
+                  if nFame < pqc.IfParamVal then begin
+                     Result := FALSE;
+                  end;
+               end;
+            QI_CHECKFAMEPOINT:
+               begin
+                  nFame := TUserHuman(who).Abil.FameCur;
+                  if nFame < pqc.IfParamVal then begin
+                     Result := FALSE;
+                  end;
+               end;
+            QI_CHECKFAMEBASEPOINT:
+               begin
+                  nFame := TUserHuman(who).Abil.FameBase;
+                  if nFame < pqc.IfParamVal then begin
+                     Result := FALSE;
+                  end;
+               end;
+            QI_CHECKDONATION:
+               begin
+                  if TUserHuman(who).GetGuildAgitDonation < pqc.IfParamVal then
+                     Result := FALSE;
+               end;
+            QI_ISGUILDMASTER:
+               begin
+                  if not who.IsGuildMaster then
+                     Result := FALSE;
+               end;
+            QI_CHECKWEAPONBADLUCK:
+               begin
+                  if who.UseItems[U_WEAPON].Index <> 0 then begin
+                     if not (who.UseItems[U_WEAPON].Desc[4] - who.UseItems[U_WEAPON].Desc[3] > 0) then begin //ÀúÁÖ°¡ ºÙ¾îÀÖÀ» ¶§
+                        Result := FALSE;
+                     end;
+                  end;
+               end;
+            QI_CHECKPREMIUMGRADE:
+               begin
+                  if who.PremiumGrade <> pqc.IfParamVal then begin
+                     Result := FALSE;
+                  end;
+               end;
+            QI_CHECKCHILDMOB:
+               begin
+                  if who.GetExistSlave(pqc.IfParam) = nil then begin
+                     Result := FALSE;
+                  end;
+               end;
+            QI_CHECKGROUPJOBBALANCE:
+               begin
+                  WarriorCount := 0;
+                  WizardCount := 0;
+                  TaoistCount := 0;
+                  CheckMap := '';
+                  for k:=0 to who.GroupMembers.Count-1 do begin
+                     hum := UserEngine.GetUserHuman (who.GroupMembers[k]);
+                     if hum <> nil then begin
+                        //°°Àº ¸Ê¿¡ ÀÖ´ÂÁö Ã¼Å©
+                        if CheckMap = '' then begin
+                           CheckMap := hum.MapName;
+                        end else begin
+                           if CheckMap <> hum.MapName then begin
+                              Result := FALSE;
+                           end;
+                        end;
+
+                        if hum.Job = 0 then begin
+                           Inc(WarriorCount);
+                        end else if hum.Job = 1 then begin
+                           Inc(WizardCount);
+                        end else if hum.Job = 2 then begin
+                           Inc(TaoistCount);
+                        end;
+                     end;
+                  end;
+                  if not( (WarriorCount = pqc.IfParamVal) and (WizardCount = pqc.IfParamVal) and (TaoistCount = pqc.IfParamVal) ) then begin
+                     Result := FALSE;
+                  end;
+               end;
+            QI_CHECKRANGEONELOVER:
+               begin
+                  //ÁÖº¯¿¡ ¿¬ÀÎ ¸ÎÀº »ç¶÷ÀÌ ÀÖ´ÂÁö Ã¼Å©
+                  flag := FALSE;
+                  list := TList.Create;
+                  //¸ÊÄù½ºÆ®¸¦ À§ÇØ PEnvir ´ë½Å¿¡ who.PEnvir¸¦ »ç¿ëÇÑ´Ù.
+                  who.PEnvir.GetCreatureInRange (who.CX, who.CY, pqc.IfParamVal, TRUE, list);
+                  for k:=0 to list.Count-1 do begin
+                     cret := TCreature(list[k]);
+                     if (cret <> nil) and (cret.RaceServer = RC_USERHUMAN) then begin
+                        hum := TUserHuman(cret);
+                        if (hum.fLover <> nil) and (hum.fLover.GetLoverName <> '') and (hum <> who) then begin
+                           flag := TRUE;
+                           break;
+                        end;
+                     end;
+                  end;
+                  list.Free;
+
+                  if not flag then begin
+                     Result := FALSE;
+                  end;
+               end;
+            QI_EVENTCHECK: //ComeBack2005 ÀÌº¥Æ® Ã¼Å©
+               begin
+                  if not who.EventCheckFlag then Result := FALSE;
+               end;
+            QI_CHECKITEMWVALUE: //Âø¿ëÁßÀÎ °íÅë ¾ÆÀÌÅÛ ±â¼öÄ¡ Ã¼Å©
+               begin
+                  flag := FALSE;
+                  pitem := FindItemFromState (pqc.IfParam, 1);
+                  if pitem <> nil then begin
+                     ps := UserEngine.GetStdItem(pitem.Index);
+                     if ps <> nil then begin
+                        if ps.Shape = PAIN_SERIES_SHAPE then begin
+                           if pitem.Desc[10] >= pqc.IfTagVal then begin
+                              flag := TRUE;
+                           end;
+                        end;
+                     end;
+                  end;
+
+                  if not flag then
+                     Result := FALSE;
+               end;
+            QI_CHECKFREEMODE:
+               begin
+                  if TUserHuman(who).ApprovalMode = 1 then begin
+                     Result := true;
+                  end else
+                     Result := FALSE;
+               end;
+
+            QI_INSAFEZONE: //¼ì²éÍæ¼Ò°²È«Çø
+               begin
+                  if not who.InSafeZone() then
+                     Result := False;
+               end;
+            QI_ISCASTLEMASTER: //¼ì²éÍæ¼ÒÊÇ·ñÎªÉ³³ÇÀÏ´ó
+               begin
+                 if not CHECKISCASTLEMASTER(who, pqc) then
+                     Result := False;
+               end;
+            QI_ISCASTLEGUILD: //¼ì²éÍæ¼ÒÊÇ·ñÎªÉ³³Ç³ÉÔ±
+              begin
+                 if not CHECKISCASTLEGUILD(who, pqc) then
+                     Result := False;
+              end;
+            QI_HAVEGUILD: //¼ì²éÍæ¼ÒÊÇ·ñÎªÐÐ»á³ÉÔ±
+               begin
+                  if not CHECKHAVEGUILD(who, pqc) then
+                     Result := False;
+               end;
+            QI_CHECKITEMADDVALUE:
+               begin
+                  if not CheckItemAddValue(who, pqc) then
+                     Result := False;
+               end;
+            QI_CHECKINFO:    //ÊÇ·ñÔÚµ±Ç°µØÍ¼
+               begin
+                  if not CheckInfo(who, pqc) then
+                    Result := False;
+                end;
+            //¼ì²âÊÇ²»ÊÇÐÂÈË
+            QI_ISNEWHUMAN:
+               begin
+                 Result := TUserHuman(who).FirstTimeConnection;
+               end;
+            QI_ISUSEITEM:
+               begin
+                  if CompareText(pqc.IfParam, TUserHuman(who).latestuseitem) <> 0 then
+                    Result := FALSE;
+                end;
+            //¼ì²âÈËÎïµÈ¼¶À©Õ¹ÃüÁî
+            QI_CHECKLEVELEX:
+               begin
+                 Result := FALSE;
+                 if pqc.IfParam = '>' then begin
+                   Result := who.Abil.Level > pqc.IfTagVal;
+                 end;
+                 if pqc.IfParam = '>=' then begin
+                   Result := who.Abil.Level >= pqc.IfTagVal;
+                 end;
+                 if pqc.IfParam = '<' then begin
+                   Result := who.Abil.Level < pqc.IfTagVal;
+                 end;
+                 if pqc.IfParam = '<=' then begin
+                   Result := who.Abil.Level <= pqc.IfTagVal;
+                 end;
+                 if pqc.IfParam = '=' then begin
+                   Result := who.Abil.Level = pqc.IfTagVal;
+                 end;
+               end;
+            QI_CHECKGAMEGOLD:  //¼ì²âÈËÎïÔª±¦
+               begin
+                  if pqc.IfParam = '>' then begin
+                    Result := who.PotCash > pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '>=' then begin
+                    Result := who.PotCash >= pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '<' then begin
+                    Result := who.PotCash < pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '>=' then begin
+                    Result := who.PotCash >= pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '=' then begin
+                    Result := who.PotCash = pqc.IfTagVal;
+                  end;
+               end;
+            QI_CHECKGAMEPOINT: // ¼ì²â»ý·Ö
+                begin
+                  if not CheckGamePoint(who, pqc) then
+                    Result := False;
+                end;
+            QI_CHECKIDLIST:
+               begin
+                 if not CheckNameFromFileList (TUserHuman(who).UserId, pqc.IfParam{filename}) then
+                    Result := FALSE;
+               end;
+            QI_CHECKADDUSERIDTIME:
+               begin
+                  Result := FALSE;
+                  if pqc.IfParam = '>' then begin
+                    Result := TUserHuman(who).iDay > pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '>=' then begin
+                    Result := TUserHuman(who).iDay >= pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '<' then begin
+                    Result := TUserHuman(who).iDay < pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '>=' then begin
+                    Result := TUserHuman(who).iDay >= pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '=' then begin
+                    Result := TUserHuman(who).iDay = pqc.IfTagVal;
+                  end;;
+               end;
+            QI_CHECKSECONDCARD:
+               begin
+                  if pqc.IfParam = '>' then begin
+                    Result := TUserHuman(who).SecondsCard > pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '>=' then begin
+                    Result := TUserHuman(who).SecondsCard >= pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '<' then begin
+                    Result := TUserHuman(who).SecondsCard < pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '>=' then begin
+                    Result := TUserHuman(who).SecondsCard >= pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '=' then begin
+                    Result := TUserHuman(who).SecondsCard = pqc.IfTagVal;
+                  end;;
+               end;
+            QI_CHECKCREDITPOINT:
+               begin
+                  if pqc.IfParam = '>' then begin
+                    Result := TUserHuman(who).m_btCreditPoint > pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '>=' then begin
+                    Result := TUserHuman(who).m_btCreditPoint >= pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '<' then begin
+                    Result := TUserHuman(who).m_btCreditPoint < pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '>=' then begin
+                    Result := TUserHuman(who).m_btCreditPoint >= pqc.IfTagVal;
+                  end;
+                  if pqc.IfParam = '=' then begin
+                    Result := TUserHuman(who).m_btCreditPoint = pqc.IfTagVal;
+                  end;;
+               end;
+             QI_CHECKHAVEPRENTICE:
+               begin
+                 if (TUserHuman(who).fMaster.SonCount > 0) and (TUserHuman(who).fMaster.MasterName = '') then
+                   Result := True
+                 else
+                   Result := False;
+               end;
+             QI_CHECKSLAVECOUNT:
+             begin
+                if (TUserHuman(who).SlaveList.Count < pqc.IfTagVal) then
+                  Result:= True
+                else
+                  Result:= False;
+             end;
+              QI_ISADMIN:
+              begin
+               if not(who.UserDegree >= 8) then     //±¾ÃüÁîÓÃÓÚ¼ì²âÍæ¼ÒµÄ¹ÜÀíÈ¨ÏÞÊÇ·ñ´óÓÚµÈÓÚ8¼¶  2022.7.29
+              Result := FALSE;
+             end;
+            QI_CheckMapHumanCount:
+          begin
+            count := UserEngine.GetMapHumCount(pqc.ifparam);
+            if pqc.iftag = '>' then
+            begin
+              Result := count > pqc.ifextraval;
+            end;
+            if pqc.iftag = '>=' then
+            begin
+              Result := count >= pqc.ifextraval;
+            end;
+            if pqc.iftag = '<' then
+            begin
+              Result := count < pqc.ifextraval;
+            end;
+            if pqc.iftag = '>=' then
+            begin
+              Result := count >= pqc.ifextraval;
+            end;
+            if pqc.iftag = '=' then
+            begin
+              Result := count = pqc.ifextraval;
+            end;
+             END;
+             QI_CHECKMAPMONCOUNT:
+          begin
+             list := TList.Create;
+            count :=UserEngine.GetMapMons (GrobalEnvir.GetEnvir(pqc.ifparam), list);
+            if pqc.iftag = '>' then
+            begin
+              Result := count > pqc.ifextraval;
+            end;
+            if pqc.iftag = '>=' then
+            begin
+              Result := count >= pqc.ifextraval;
+            end;
+            if pqc.iftag = '<' then
+            begin
+              Result := count < pqc.ifextraval;
+            end;
+            if pqc.iftag = '>=' then
+            begin
+              Result := count >= pqc.ifextraval;
+            end;
+            if pqc.iftag = '=' then
+            begin
+              Result := count = pqc.ifextraval;
+            end;
+             END;
+             QI_CHECKMAGICNAME:
+             begin
+               Result := False;
+               for count := 0 to TUserHuman(who).MagicList.Count - 1 do
+               begin
+                 pum := PTUserMagic(TUserHuman(who).MagicList[count]);
+                 if pum <> nil then
+                 begin
+                    if CompareText (pum.pDef.MagicName, pqc.ifparam) = 0 then
+                    begin
+                      Result := True;
+                      Break;
+                    end;
+                 end;
+               end;
+             end;
+         end;
+         if not Result then
+           Break;
+      end;
+   end;
+   procedure GotoQuest (num: integer);
+   var
+      i: integer;
+   begin
+      for i:=0 to Sayings.Count-1 do
+         if PTQuestRecord (Sayings[i]).LocalNumber = num then begin
+            PTQuestRecord (TUserHuman(who).CurQuest) := PTQuestRecord (Sayings[i]);
+            TUserHuman(who).CurQuestNpc := self;
+            NpcSayTitle (who, '@main');
+            break;
+         end;
+   end;
+   procedure GotoSay (saystr: string);
+   begin
+      NpcSayTitle (who, saystr);
+   end;
+   procedure TakeItemFromUser (iname: string; count: integer);
+   var
+      i: integer;
+      pu: PTUserItem;
+      ps: PTStdItem;
+   begin
+      pu := nil;
+      ps := nil;
+      if CompareText (iname, NAME_OF_MONEY) = 0 then begin
+         who.DecGold (count);
+         who.GoldChanged;
+         latesttakeitem := NAME_OF_MONEY;
+
+         AddUserLog ('10'#9 + //ÆÇ¸Å ¿Í °°ÀÌ¾¸
+                     who.MapName + ''#9 +
+                     IntToStr(who.CX) + ''#9 +
+                     IntToStr(who.CY) + ''#9 +
+                     who.UserName + ''#9 +
+                     NAME_OF_GOLD{'±ÝÀü'} + ''#9 +
+                     IntToStr(count) + ''#9 +
+                     '1'#9 +
+                     UserName);
+      end else if CompareText (iname, NAME_OF_PC) = 0 then begin
+         TUserHuman(who).DecPotCash (count);
+         TUserHuman(who).PotCashChanged;
+         latesttakeitem := NAME_OF_PC;
+        // TUserHuman(who).SysMsg(NAME_OF_PC + '¼õÉÙ ' + IntToStr(count), 0);        //Ôª±¦¼õÉÙµÄÌáÊ¾
+
+
+
+         AddUserLog ('10'#9 + //ÆÇ¸Å ¿Í °°ÀÌ¾¸
+                     who.MapName + ''#9 +
+                     IntToStr(who.CX) + ''#9 +
+                     IntToStr(who.CY) + ''#9 +
+                     who.UserName + ''#9 +
+                     NAME_OF_PC{'±ÝÀü'} + ''#9 +
+                     IntToStr(count) + ''#9 +
+                     '1'#9 +
+                     UserName);
+
+      end else
+         for i:=who.ItemList.Count-1 downto 0 do begin
+            if count <= 0 then break;
+            pu := PTUserItem(who.ItemList[i]);
+            ps := UserEngine.GetStdItem( pu.Index );
+            if ps <> nil then begin
+               if CompareText (ps.Name, iname) = 0 then begin
+                  //Ä«¿îÆ®¾ÆÀÌÅÛ (sonmg 2005/03/15)
+                  if ps.OverlapItem >= 1 then begin
+                     //·Î±×³²±è
+                     AddUserLog ('10'#9 + //ÆÇ¸Å ¿Í °°ÀÌ¾¸(Ä«¿îÆ®¾ÆÀÌÅÛ)
+                                 who.MapName + ''#9 +
+                                 IntToStr(who.CX) + ''#9 +
+                                 IntToStr(who.CY) + ''#9 +
+                                 who.UserName + ''#9 +
+                                 IntToStr(pu.Index) + ''#9 +
+                                 IntToStr(count) + ''#9 +  //count
+                                 '1'#9 +
+                                 UserName);
+
+                     //-------------------------(sonmg 2005/03/15)
+                     if pu.Dura >= count then begin
+                        pu.Dura := pu.Dura - count;
+
+                        if pu.Dura <= 0 then begin
+                           if who.RaceServer = RC_USERHUMAN then begin
+                              TUserHuman(who).SendDelItem (pu^);
+                           end;
+                           Dispose(pu);
+                           who.ItemList.Delete (i);
+                        end else begin
+                           who.SendMsg(self, RM_COUNTERITEMCHANGE, 0, pu.MakeIndex, pu.Dura, 0, ps.Name);
+                        end;
+                     end else begin
+                        if who.RaceServer = RC_USERHUMAN then begin
+                           TUserHuman(who).SendDelItem (pu^);
+                        end;
+                        Dispose (pu);
+                        who.ItemList.Delete (i);
+                     end;
+                     //-------------------------
+
+//                     TUserHuman(who).SendDelItem (pu^);    // ÀÌ»óÇÏ´Ù.
+                     latesttakeitem := UserEngine.GetStdItemName (pu^.index);
+//                     Dispose (pu);
+//                     who.ItemList.Delete (i);
+//                     Dec (count);
+                     break;
+                  end else begin
+                     //-----------------------------------------------------------
+                     //ºÎÀûÀÌ¸é °³¼ö¸¦ Ã¼Å©ÇØ¼­ ¸ðÀÚ¸£¸é ´ÙÀ½ ¾ÆÀÌÅÛÀ¸·Î ³Ñ¾î°¨.
+                     if iname = GetUnbindItemName(SHAPE_AMULET_BUNCH) then begin
+                        if pu.Dura < pu.DuraMax then
+                           continue;
+                     end;
+                     //-----------------------------------------------------------
+
+                     //·Î±×³²±è
+                     AddUserLog ('10'#9 + //ÆÇ¸Å ¿Í °°ÀÌ¾¸
+                                 who.MapName + ''#9 +
+                                 IntToStr(who.CX) + ''#9 +
+                                 IntToStr(who.CY) + ''#9 +
+                                 who.UserName + ''#9 +
+                                 iname + ''#9 +
+                                 IntToStr(pu.MakeIndex) + ''#9 +  //count
+                                 '1'#9 +
+                                 UserName);
+
+                     TUserHuman(who).SendDelItem (pu^);    // ÀÌ»óÇÏ´Ù.
+                     latesttakeitem := UserEngine.GetStdItemName (pu^.index);
+                     Dispose (pu);
+                     who.ItemList.Delete (i);
+                     Dec (count);
+                  end;
+               end;
+            end;
+         end;
+   end;
+   // ÁöÁ¤ µî±Þ ÀÌÇÏÀÇ ¾ÆÀÌÅÛÀ» ¸ðµÎ °¡Á®¿Â´Ù.
+   procedure TakeEventGradeItemFromUser (grade: integer);
+   var
+      i: integer;
+      pu: PTUserItem;
+      ps: PTStdItem;
+   begin
+      pu := nil;
+      ps := nil;
+      for i:=who.ItemList.Count-1 downto 0 do begin
+         pu := PTUserItem(who.ItemList[i]);
+         if pu <> nil then begin
+            ps := UserEngine.GetStdItem(pu.Index);
+            if ps <> nil then begin
+               if ps.EffType2 = EFFTYPE2_EVENT_GRADE then begin
+                  if ps.EffValue2 <= grade then begin
+                     //·Î±×³²±è
+                     AddUserLog ('10'#9 + //ÆÇ¸Å ¿Í °°ÀÌ¾¸
+                                 who.MapName + ''#9 +
+                                 IntToStr(who.CX) + ''#9 +
+                                 IntToStr(who.CY) + ''#9 +
+                                 who.UserName + ''#9 +
+                                 ps.Name + ''#9 +
+                                 IntToStr(pu.MakeIndex) + ''#9 +  //count
+                                 '1'#9 +
+                                 UserName);
+
+                     TUserHuman(who).SendDelItem (pu^);    // ÀÌ»óÇÏ´Ù.
+                     latesttakeitem := UserEngine.GetStdItemName (pu^.index);
+                     Dispose (pu);
+                     who.ItemList.Delete (i);
+                  end;
+               end;
+            end;
+         end;
+      end;
+   end;
+   procedure TakeWItemFromUser (iname: string; count: integer);
+   var
+      i: integer;
+   begin
+      if CompareLStr (iname, '[NECKLACE]', 4) then begin
+         if who.UseItems[U_NECKLACE].Index > 0 then begin
+            TUserHuman(who).SendDelItem (who.UseItems[U_NECKLACE]);
+            latesttakeitem := UserEngine.GetStdItemName (who.UseItems[U_NECKLACE].index);
+            who.UseItems[U_NECKLACE].Index := 0;
+         end;
+         exit;
+      end;
+      if CompareLStr (iname, '[RING]', 4) then begin
+         if who.UseItems[U_RINGL].Index > 0 then begin
+            TUserHuman(who).SendDelItem (who.UseItems[U_RINGL]);
+            latesttakeitem := UserEngine.GetStdItemName (who.UseItems[U_RINGL].index);
+            who.UseItems[U_RINGL].Index := 0;
+            exit;
+         end;
+         if who.UseItems[U_RINGR].Index > 0 then begin
+            TUserHuman(who).SendDelItem (who.UseItems[U_RINGR]);
+            latesttakeitem := UserEngine.GetStdItemName (who.UseItems[U_RINGR].index);
+            who.UseItems[U_RINGR].Index := 0;
+            exit;
+         end;
+         exit;
+      end;
+      if CompareLStr (iname, '[ARMRING]', 4) then begin
+         if who.UseItems[U_ARMRINGL].Index > 0 then begin
+            TUserHuman(who).SendDelItem (who.UseItems[U_ARMRINGL]);
+            latesttakeitem := UserEngine.GetStdItemName (who.UseItems[U_ARMRINGL].index);
+            who.UseItems[U_ARMRINGL].Index := 0;
+            exit;
+         end;
+         if who.UseItems[U_ARMRINGR].Index > 0 then begin
+            TUserHuman(who).SendDelItem (who.UseItems[U_ARMRINGR]);
+            latesttakeitem := UserEngine.GetStdItemName (who.UseItems[U_ARMRINGR].index);
+            who.UseItems[U_ARMRINGR].Index := 0;
+            exit;
+         end;
+         exit;
+      end;
+      if CompareLStr (iname, '[WEAPON]', 4) then begin
+         if who.UseItems[U_WEAPON].Index > 0 then begin
+            TUserHuman(who).SendDelItem (who.UseItems[U_WEAPON]);
+            latesttakeitem := UserEngine.GetStdItemName (who.UseItems[U_WEAPON].index);
+            who.UseItems[U_WEAPON].Index := 0;
+         end;
+         exit;
+      end;
+      if CompareLStr (iname, '[HELMET]', 4) then begin
+         if who.UseItems[U_HELMET].Index > 0 then begin
+            TUserHuman(who).SendDelItem (who.UseItems[U_HELMET]);
+            latesttakeitem := UserEngine.GetStdItemName (who.UseItems[U_HELMET].index);
+            who.UseItems[U_HELMET].Index := 0;
+         end;
+         exit;
+      end;
+      // 2003/03/15 COPARK ¾ÆÀÌÅÛ ÀÎº¥Åä¸® È®Àå
+      if CompareLStr (iname, '[BUJUK]', 4) then begin
+         if who.UseItems[U_BUJUK].Index > 0 then begin
+            TUserHuman(who).SendDelItem (who.UseItems[U_BUJUK]);
+            latesttakeitem := UserEngine.GetStdItemName (who.UseItems[U_BUJUK].index);
+            who.UseItems[U_BUJUK].Index := 0;
+         end;
+         exit;
+      end;
+      if CompareLStr (iname, '[BELT]', 4) then begin
+         if who.UseItems[U_BELT].Index > 0 then begin
+            TUserHuman(who).SendDelItem (who.UseItems[U_BELT]);
+            latesttakeitem := UserEngine.GetStdItemName (who.UseItems[U_BELT].index);
+            who.UseItems[U_BELT].Index := 0;
+         end;
+         exit;
+      end;
+      if CompareLStr (iname, '[BOOTS]', 4) then begin
+         if who.UseItems[U_BOOTS].Index > 0 then begin
+            TUserHuman(who).SendDelItem (who.UseItems[U_BOOTS]);
+            latesttakeitem := UserEngine.GetStdItemName (who.UseItems[U_BOOTS].index);
+            who.UseItems[U_BOOTS].Index := 0;
+         end;
+         exit;
+      end;
+      if CompareLStr (iname, '[CHARM]', 4) then begin
+         if who.UseItems[U_CHARM].Index > 0 then begin
+            TUserHuman(who).SendDelItem (who.UseItems[U_CHARM]);
+            latesttakeitem := UserEngine.GetStdItemName (who.UseItems[U_CHARM].index);
+            who.UseItems[U_CHARM].Index := 0;
+         end;
+         exit;
+      end;
+//2022/10/6¼ÓÈëÀ¯ÖòÎ»ÖÃ¼ì²éÈ¡ÏÂ
+      if CompareLStr (iname, '[RIGHTHAND]', 4) then begin
+         if who.UseItems[U_RIGHTHAND].Index > 0 then begin
+            TUserHuman(who).SendDelItem (who.UseItems[U_RIGHTHAND]);
+            latesttakeitem := UserEngine.GetStdItemName (who.UseItems[U_RIGHTHAND].index);
+            who.UseItems[U_RIGHTHAND].Index := 0;
+         end;
+         exit;
+      end;
+      // 2003/03/15 COPARK ¾ÆÀÌÅÛ ÀÎº¥Åä¸® È®Àå
+      for i:=0 to U_TRANS do begin     // 8->12
+         if count <= 0 then break;
+         if who.UseItems[i].Index > 0 then begin
+            if CompareText (UserEngine.GetStdItemName (who.UseItems[i].Index), iname) = 0 then begin
+               TUserHuman(who).SendDelItem (who.UseItems[i]);
+               latesttakeitem := UserEngine.GetStdItemName (who.UseItems[i].index);
+               who.UseItems[i].Index := 0;
+               Dec (count);
+            end;
+         end;
+      end;
+   end;
+   procedure GiveItemToUser (receivewho: TCreature; iname: string; count: integer);
+   var
+      i, idx: integer;
+      pstd, pstd2: PTStdItem;
+      pu: PTUserItem;
+      wg: integer;
+   begin
+      if CompareText (iname, NAME_OF_MONEY) = 0 then begin
+         receivewho.IncGold (count);
+         receivewho.GoldChanged;
+
+         AddUserLog ('9'#9 + //±¸ÀÔ ¿Í °°ÀÌ¾¸
+                     receivewho.MapName + ''#9 +
+                     IntToStr(receivewho.CX) + ''#9 +
+                     IntToStr(receivewho.CY) + ''#9 +
+                     receivewho.UserName + ''#9 +
+                     NAME_OF_GOLD{'±ÝÀü'} + ''#9 +
+                     IntToStr(count) + ''#9 +  //count
+                     '1'#9 +
+                     UserName);
+      end else if CompareText (iname, NAME_OF_PC) = 0 then begin
+         TUserHuman(receivewho).IncPotCash(count);
+         TUserHuman(receivewho).PotCashChanged;
+         TUserHuman(receivewho).SysMsg(NAME_OF_PC+'Ôö¼Ó ' + IntToStr(count), 2);
+         AddUserLog ('9'#9 + //±¸ÀÔ ¿Í °°ÀÌ¾¸
+                     receivewho.MapName + ''#9 +
+                     IntToStr(receivewho.CX) + ''#9 +
+                     IntToStr(receivewho.CY) + ''#9 +
+                     receivewho.UserName + ''#9 +
+                     NAME_OF_PC{'±ÝÀü'} + ''#9 +
+                     IntToStr(count) + ''#9 +  //count
+                     '1'#9 +
+                     UserName);
+      end else begin
+         idx := 0;
+         idx := UserEngine.GetStdItemIndex(iname);
+         pstd := UserEngine.GetStdItem(idx);
+
+         if (idx > 0) and (pstd <> nil) then begin
+            for i:=0 to count-1 do begin
+               // Ä«¿îÆ®¾ÆÀÌÅÛ
+               if pstd.OverlapItem >= 1 then begin
+                  if receivewho.UserCounterItemAdd(pstd.StdMode, pstd.Looks, count, iName, FALSE) then begin
+                      AddUserLog('9'#9 + //±¸ÀÔ ¿Í °°ÀÌ¾¸(Ä«¿îÆ®¾ÆÀÌÅÛ)
+                          receivewho.MapName + ''#9 +
+                          IntToStr(receivewho.CX) + ''#9 +
+                          IntToStr(receivewho.CY) + ''#9 +
+                          receivewho.UserName + ''#9 +
+                          IntToStr(idx) + ''#9 +
+                          IntToStr(count) + ''#9 +
+                          '1'#9 +
+                          UserName);
+                      receivewho.WeightChanged;
+                      exit;
+                  end;
+               end;
+
+               if pstd.OverlapItem = 1 then
+                  wg := receivewho.WAbil.Weight + (count div 10)
+               else if pstd.OverlapItem >= 2 then
+                  wg := receivewho.WAbil.Weight + (pstd.Weight * count)
+               else
+                  wg := receivewho.WAbil.Weight + pstd.Weight;
+
+               if (receivewho.CanAddItem) {and (wg <= receivewho.WAbil.MaxWeight)} then begin
+                  new (pu);
+                  if UserEngine.CopyToUserItemFromName (iname, pu^) then begin
+                     // gadget:Ä«¿îÆ®¾ÆÀÌÅÛ
+                     if pstd.OverlapItem >= 1 then begin
+                        pu.Dura := count;
+                     end;
+
+                     receivewho.ItemList.Add (pu);
+                     TUserHuman(receivewho).SendAddItem (pu^);
+                     //·Î±×³²±è
+                     AddUserLog ('9'#9 + //±¸ÀÔ ¿Í °°ÀÌ¾¸
+                                 receivewho.MapName + ''#9 +
+                                 IntToStr(receivewho.CX) + ''#9 +
+                                 IntToStr(receivewho.CY) + ''#9 +
+                                 receivewho.UserName + ''#9 +
+                                 iname + ''#9 +
+                                 IntToStr(pu.MakeIndex) + ''#9 +
+                                 '1'#9 +
+                                 UserName);
+                     receivewho.WeightChanged;
+                     if pstd.OverlapItem >= 1 then break;
+                  end else
+                     Dispose (pu);
+               end else begin
+                  new (pu);
+                  if UserEngine.CopyToUserItemFromName (iname, pu^) then begin
+                     pstd2 := UserEngine.GetStdItem(UserEngine.GetStdItemIndex(iname));
+                     if pstd2 <> nil then
+                     begin
+                        if pstd2.OverlapItem >= 1 then begin
+                           pu.Dura := count;  // gadget:Ä«¿îÆ®¾ÆÀÌÅÛ
+                        end;
+                        //·Î±×³²±è
+                        AddUserLog ('9'#9 + //±¸ÀÔ ¿Í °°ÀÌ¾¸
+                                    receivewho.MapName + ''#9 +
+                                    IntToStr(receivewho.CX) + ''#9 +
+                                    IntToStr(receivewho.CY) + ''#9 +
+                                    receivewho.UserName + ''#9 +
+                                    iname + ''#9 +
+                                    IntToStr(pu.MakeIndex) + ''#9 +
+                                    '1'#9 +
+                                    UserName);
+                        receivewho.DropItemDown (pu^, 3, FALSE, receivewho, nil , 2);  //ÀÏÁ¤½Ã°£µ¿¾È ´Ù¸¥ »ç¶÷ÀÌ ¸ø ÁÝ°Ô
+                     end;//if pstd2 <> nil then
+                  end;
+                  if pu <> nil then Dispose(pu);   // Memory Leak sonmg
+               end;
+            end;
+         end;
+      end;
+   end;
+
+   procedure ActionOfAddGuild(who: TCreature; gname: string);
+   var
+      guild: TGuild;
+      hum: TUserHuman;
+   begin
+      hum := TUserHuman (who);
+      guild := GuildMan.GetGuild (gname);
+      if guild <> nil then begin
+         if guild = TGuild(hum.MyGuild) then begin
+            exit;
+         end;
+         if not TGuild(guild).GetMemgerFull then begin
+            TGuild(guild).AddMember (hum);
+            UserEngine.SendInterMsg (ISM_RELOADGUILD, ServerIndex, TGuild(guild).GuildName);
+            hum.MyGuild := guild;
+            hum.GuildRankName := TGuild (guild).MemberLogin (hum, hum.GuildRank);
+
+//            if CompareText (TGuild(hum.MyGuild).GuildName, 'ÐÂÊÖÃÅÅÉ') = 0 then begin
+//              hum.SendAddBuff (1, 507, 0, 0, 60, '')
+//            end;
+//            hum.SysMsg('ÄúÒÑ¼ÓÈëÃÅÅÉ: ' + TGuild(guild).GuildName + ' µ±Ç°·âºÅÎª: ' + hum.GuildRankName, 1);
+         end;
+      end;
+   end;
+
+   function  DoActionList (alist: TList): Boolean;
+   var
+      i, k, n, n1, n2, ixx, iyy, param, tag, timerval, iparam1, iparam2, iparam3, iparam4: integer;
+      sparam1, sparam2, sparam3, sparam4, nstr: string;
+      pqa: PTQuestActioninfo;
+      list: TList;
+      hum: TUserHuman;
+      envir: TEnvirnoment;
+      kind, Tempint: integer;
+   begin
+      iparam2 := 0;
+      iparam3 := 0;
+      Result := TRUE; //CONTINUE ÀÇ¹Ì
+      timerval := 0;
+
+      for i:=0 to alist.Count-1 do begin
+         pqa := PTQuestActioninfo (alist[i]);
+
+        if pqa.ActIdent <> QA_SENDMSG then begin
+          if (pqa.ActParam <> '') then begin
+            if (pqa.ActParam[1] = '$') then begin
+              nstr := pqa.ActParam;
+              pqa.ActParam := '<' + pqa.ActParam + '>';
+              CheckNpcSayCommand(TUserHuman(who), pqa.ActParam, nstr);
+            end else if Pos('>', pqa.ActParam) > 0 then
+              pqa.ActParam := GetLineVariableText(TUserHuman(who), pqa.ActParam);
+
+            if IsStringNumber (pqa.ActParam) then
+              pqa.ActParamVal := Str_ToInt(pqa.ActParam, 1);
+          end;
+
+          if (pqa.ActTag <> '') then begin
+            if (pqa.ActTag[1] = '$') then begin
+              nstr := pqa.ActTag;
+              pqa.ActTag := '<' + pqa.ActTag + '>';
+              CheckNpcSayCommand(TUserHuman(who), pqa.ActTag, nstr);
+            end else if Pos('>', pqa.ActTag) > 0 then
+              pqa.ActTag := GetLineVariableText(TUserHuman(who), pqa.ActTag);
+
+            if IsStringNumber (pqa.ActTag) then
+              pqa.ActTagVal := Str_ToInt(pqa.ActTag, 1);
+          end;
+        end;
+         case pqa.ActIdent of
+            QA_SET:
+               begin
+                  param := Str_ToInt (pqa.ActParam, 0);
+                  //if param > 100 then begin
+                  tag := Str_ToInt (pqa.ActTag, 0);
+                  who.SetQuestMark (param, tag);
+                  //end;
+               end;
+            QA_OPENUNIT:
+               begin
+                  param := Str_ToInt (pqa.ActParam, 0);
+                  tag := Str_ToInt (pqa.ActTag, 0);
+                  who.SetQuestOpenIndexMark (param, tag);
+               end;
+            QA_SETUNIT:
+               begin
+                  param := Str_ToInt (pqa.ActParam, 0);
+                  tag := Str_ToInt (pqa.ActTag, 0);
+                  who.SetQuestFinIndexMark (param, tag);
+               end;
+            QA_TAKE:
+               begin
+                  TakeItemFromUser (pqa.ActParam, pqa.ActTagVal);
+               end;
+            QA_TAKEW:
+               begin
+                  TakeWItemFromUser (pqa.ActParam, pqa.ActTagVal);
+               end;
+            QA_GIVE:
+               begin
+                  GiveItemToUser (who, pqa.ActParam, pqa.ActTagVal);
+               end;
+            QA_CLOSE: //´ëÈ­Ã¢À» ´ÝÀ½
+               begin
+                  who.SendMsg (self, RM_MERCHANTDLGCLOSE, 0, integer(self), 0, 0, '');
+               end;
+            QA_CLOSENOINVEN: //´ëÈ­Ã¢À» ´ÝÀ½(ÀÎº¥Ã¢Àº °Çµå¸®Áö ¾ÊÀ½)
+               begin
+                  who.SendMsg (self, RM_MERCHANTDLGCLOSE, 0, integer(self), 1, 0, '');
+               end;
+            QA_RESET:
+               begin
+                  //if pqa.ActParamVal > 100 then  //100¹Ì¸¸Àº ¸®·¿ÇÒ ¼ö ¾ø´Ù
+                  for k:=0 to pqa.ActTagVal-1 do
+                     who.SetQuestMark (pqa.ActParamVal + k, 0);
+               end;
+            QA_RESETUNIT:
+               begin
+                  //for k:=0 to pqa.ActTagVal-1 do
+                  //   if pqa.ActParamVal + k <= 100 then  //100ÀÌÇÏ¸¸ ¸®¼Â µÊ
+                  //      who.SetQuestMark (pqa.ActParamVal + k, 0);
+               end;
+            QA_MAPMOVE:  //ÀÚÀ¯ÀÌµ¿ ½ÃÄÑÁÜ
+               begin
+                  who.SendRefMsg (RM_SPACEMOVE_HIDE, 0, 0, 0, 0, '');
+                  who.SpaceMove (pqa.ActParam, pqa.ActTagVal, pqa.ActExtraVal, 0);
+                  bosaynow := TRUE;
+               end;
+            QA_MAPRANDOM:
+               begin
+                  who.SendRefMsg (RM_SPACEMOVE_HIDE, 0, 0, 0, 0, '');
+                  who.RandomSpaceMove (pqa.ActParam, 0);
+                  bosaynow := TRUE;
+               end;
+            QA_BREAK:
+               Result := FALSE;  //break;
+            QA_TIMERECALL:
+               begin
+                  TUserHuman(who).BoTimeRecall := TRUE;
+                  TUserHuman(who).TimeRecallMap := TUserHuman(who).MapName;
+                  TUserHuman(who).TimeRecallX := TUserHuman(who).CX;
+                  TUserHuman(who).TimeRecallY := TUserHuman(who).CY;
+                  TUserHuman(who).TimeRecallEnd := LongInt(GetTickCount) + pqa.ActParamVal * 60 * 1000;
+               end;
+            QA_TIMERECALLGROUP:
+               begin
+                  for k:=0 to who.GroupMembers.Count-1 do begin
+                     hum := UserEngine.GetUserHuman (who.GroupMembers[k]);
+                     if hum <> nil then begin
+                        hum.BoTimeRecall := FALSE; //°³ÀÎ TimeRecallÀº ÇØÁ¦
+                        hum.BoTimeRecallGroup := TRUE;
+                        hum.TimeRecallMap := hum.MapName;
+                        hum.TimeRecallX := hum.CX;
+                        hum.TimeRecallY := hum.CY;
+                        hum.TimeRecallEnd := LongInt(GetTickCount) + pqa.ActParamVal * 60 * 1000;
+                     end;
+                  end;
+               end;
+            QA_BREAKTIMERECALL:
+               begin
+                  TUserHuman(who).BoTimeRecall := FALSE;
+                  TUserHuman(who).BoTimeRecallGroup := FALSE;
+               end;
+            QA_PARAM1:
+               begin
+                  iparam1 := pqa.ActParamVal;
+                  sparam1 := pqa.ActParam;
+               end;
+            QA_PARAM2:
+               begin
+                  iparam2 := pqa.ActParamVal;
+                  sparam2 := pqa.ActParam;
+               end;
+            QA_PARAM3:
+               begin
+                  iparam3 := pqa.ActParamVal;
+                  sparam3 := pqa.ActParam;
+               end;
+            QA_PARAM4:
+               begin
+                  iparam4 := pqa.ActParamVal;
+                  sparam4 := pqa.ActParam;
+               end;
+            QA_TAKECHECKITEM:
+               begin
+                  if pcheckitem <> nil then begin
+                     who.DeletePItemAndSend (pcheckitem);
+                  end;
+               end;
+            QA_MONGEN:
+               begin
+                  for k:=0 to pqa.ActTagVal-1 do begin
+                     //pqa.ActTagVal : ¸÷¼ö
+                     //pqa.ActExtraVal : ¹üÀ§
+                     //sparam1 : map
+                     //iparam2 : x
+                     //iparam3 : y
+                     ixx := iparam2 - pqa.ActExtraVal + Random(pqa.ActExtraVal*2+1);
+                     iyy := iparam3 - pqa.ActExtraVal + Random(pqa.ActExtraVal*2+1);
+                     UserEngine.AddCreatureSysop (UpperCase(sparam1),  //map
+                                                  ixx,
+                                                  iyy,
+                                                  pqa.ActParam); //mon-name
+                  end;
+               end;
+            QA_MONCLEAR:
+               begin
+                  list := TList.Create;
+                  UserEngine.GetMapMons (GrobalEnvir.GetEnvir(pqa.ActParam), list);
+                  for k:=0 to list.Count-1 do begin
+                     TCreature(list[k]).BoNoItem := TRUE;
+                     TCreature(list[k]).WAbil.HP := 0;  //È«²¿É±µô.
+                  end;
+                  list.Free;
+               end;
+               //2022-10-23ÐÂµØÍ¼ÇåÀí¹ÖÎï
+            QA_CLEARMAPMON:
+               begin
+                  list := TList.Create;
+                  UserEngine.GetMapMons (GrobalEnvir.GetEnvir(pqa.ActParam), list);
+                  for k:=0 to list.Count-1 do begin
+                  if TCreature(list[k]).Master <> nil then
+                     Continue;
+                     TCreature(list[k]).BoNoItem := TRUE;
+                     TCreature(list[k]).WAbil.HP := 0;  //³ýÁË±¦±¦È«²¿É±µô.
+                  end;
+                  list.Free;
+               end;
+            QA_MOV:
+               begin
+                  n := GetPP (pqa.ActParam);
+                  if n >= 0 then begin
+                     case n of
+                        0..99:
+                           TUserHuman(who).QuestParams[n] := pqa.ActTagVal;
+                        100..199:
+                           GrobalQuestParams[n-100] := pqa.ActTagVal;
+                        200..299:
+                           TUserHuman(who).DiceParams[n-200] := pqa.ActTagVal;
+                        300..399:
+                           PEnvir.MapQuestParams[n-300] := pqa.ActTagVal;
+
+                        400..499:
+                           GlobaDyMval[n-400] := pqa.ActTagVal;
+                        500..599:
+                           GlobaDyTval[n-500] := pqa.ActTag;
+                        600..699:
+                           TUserHuman(who).m_nSval[n - 600] := pqa.ActTag;
+                        700..799:
+                          HGlobalVal[n-700] := pqa.ActTagVal;
+                     end;
+                  end;
+               end;
+            QA_INC:
+               begin
+                  n := GetPP (pqa.ActParam);
+                  if n >= 0 then begin
+                     case n of
+                        0..99:
+                           if pqa.ActTagVal > 1 then
+                              TUserHuman(who).QuestParams[n] := TUserHuman(who).QuestParams[n] + pqa.ActTagVal
+                           else
+                              TUserHuman(who).QuestParams[n] := TUserHuman(who).QuestParams[n] + 1;
+                        100..199:
+                           if pqa.ActTagVal > 1 then
+                              GrobalQuestParams[n-100] := GrobalQuestParams[n-100] + pqa.ActTagVal
+                           else
+                              GrobalQuestParams[n-100] := GrobalQuestParams[n-100] + 1;
+                        200..299:
+                           if pqa.ActTagVal > 1 then
+                              TUserHuman(who).DiceParams[n-200] := TUserHuman(who).DiceParams[n-200] + pqa.ActTagVal
+                           else
+                              TUserHuman(who).DiceParams[n-200] := TUserHuman(who).DiceParams[n-200] + 1;
+                        300..399:
+                           if pqa.ActTagVal > 1 then
+                              PEnvir.MapQuestParams[n-300] := PEnvir.MapQuestParams[n-300] + pqa.ActTagVal
+                           else
+                              PEnvir.MapQuestParams[n-300] := PEnvir.MapQuestParams[n-300] + 1;
+
+                        400..499:
+                           if pqa.ActTagVal > 1 then
+                              GlobaDyMval[n-400] := GlobaDyMval[n-400] + pqa.ActTagVal
+                           else
+                              GlobaDyMval[n-400] := GlobaDyMval[n-400] + 1;
+                        500..599:
+                           if pqa.ActTagVal > 1 then
+                              GlobaDyTval[n-500] := GlobaDyTval[n-500] + pqa.ActTag
+                           else
+                              GlobaDyTval[n-500] := GlobaDyTval[n-500] + '';
+                        600..699:
+                           if pqa.ActTagVal > 1 then
+                              TUserHuman(hum).m_nSval[n - 600] := TUserHuman(hum).m_nSval[n - 600] + pqa.ActTag
+                           else
+                              TUserHuman(hum).m_nSval[n - 600] := TUserHuman(hum).m_nSval[n - 600] + '';
+                        700..799:
+                           if pqa.ActTagVal > 1 then
+                              HGlobalVal[n - 700] := HGlobalVal[n - 700] + pqa.ActTagVal
+                           else
+                              HGlobalVal[n - 700] := HGlobalVal[n - 700] + 1;
+                     end;
+                  end;
+               end;
+            QA_DEC:
+               begin
+                  n := GetPP (pqa.ActParam);
+                  if n >= 0 then begin
+                     case n of
+                        0..99:
+                           if pqa.ActTagVal > 1 then
+                              TUserHuman(who).QuestParams[n] := _MAX(0, TUserHuman(who).QuestParams[n] - pqa.ActTagVal)
+                           else
+                              TUserHuman(who).QuestParams[n] :=  _MAX(0, TUserHuman(who).QuestParams[n] - 1);
+                        100..199:
+                           if pqa.ActTagVal > 1 then
+                              GrobalQuestParams[n-100] :=  _MAX(0, GrobalQuestParams[n-100] - pqa.ActTagVal)
+                           else
+                              GrobalQuestParams[n-100] :=  _MAX(0, GrobalQuestParams[n-100] - 1);
+                        200..299:
+                           if pqa.ActTagVal > 1 then
+                              TUserHuman(who).DiceParams[n-200] :=  _MAX(0, TUserHuman(who).DiceParams[n-200] - pqa.ActTagVal)
+                           else
+                              TUserHuman(who).DiceParams[n-200] :=  _MAX(0, TUserHuman(who).DiceParams[n-200] - 1);
+                        300..399:
+                           if pqa.ActTagVal > 1 then
+                              PEnvir.MapQuestParams[n-300] :=  _MAX(0, PEnvir.MapQuestParams[n-300] - pqa.ActTagVal)
+                           else
+                              PEnvir.MapQuestParams[n-300] :=  _MAX(0, PEnvir.MapQuestParams[n-300] - 1);
+
+                        400..499:
+                           if pqa.ActTag <> '' then
+                              GlobaDyMval[n-400] :=  _MAX(0, GlobaDyMval[n-400] - pqa.ActTagVal)
+                           else
+                              GlobaDyMval[n-400] :=  _MAX(0, GlobaDyMval[n-400] - 1);
+                        500..599:
+                              GlobaDyTval[n-500] := DecStr(GlobaDyTval[n-500], pqa.ActTagVal, pqa.ActExtraVal);
+
+                        600..699:
+                           TUserHuman(hum).m_nSval[n-600] := DecStr(TUserHuman(hum).m_nSval[n-600], pqa.ActTagVal, pqa.ActExtraVal);
+
+                        700..799:
+                           if pqa.ActTagVal > 1 then
+                              HGlobalVal[n - 700] :=  _MAX(0, HGlobalVal[n - 700] - pqa.ActTagVal)
+                           else
+                              HGlobalVal[n - 700] :=  _MAX(0, HGlobalVal[n - 700] - 1);
+                     end;
+                  end;
+               end;
+            QA_DIV:
+               begin
+                  n := GetPP (pqa.ActParam);
+                  if n >= 0 then begin
+                     case n of
+                        0..99: TUserHuman(who).QuestParams[n] := TUserHuman(who).QuestParams[n] div pqa.ActTagVal;
+                        100..199: GrobalQuestParams[n-100] := GrobalQuestParams[n-100] div pqa.ActTagVal;
+                        200..299: TUserHuman(who).DiceParams[n-200] := TUserHuman(who).DiceParams[n-200] div pqa.ActTagVal;
+                        300..399: PEnvir.MapQuestParams[n-300] := PEnvir.MapQuestParams[n-300] div pqa.ActTagVal;
+                        400..499: GlobaDyMval[n-400] := GlobaDyMval[n-400] div pqa.ActTagVal;
+                        700..799: HGlobalVal[n - 700] := HGlobalVal[n - 700] div pqa.ActTagVal;
+                     end;
+                  end;
+               end;
+
+            QA_MUL:
+               begin
+                  n := GetPP (pqa.ActParam);
+                  if n >= 0 then begin
+                     case n of
+                        0..99: TUserHuman(who).QuestParams[n] := TUserHuman(who).QuestParams[n] * pqa.ActTagVal;
+                        100..199: GrobalQuestParams[n-100] := GrobalQuestParams[n-100] * pqa.ActTagVal;
+                        200..299: TUserHuman(who).DiceParams[n-200] := TUserHuman(who).DiceParams[n-200] * pqa.ActTagVal;
+                        300..399: PEnvir.MapQuestParams[n-300] := PEnvir.MapQuestParams[n-300] * pqa.ActTagVal;
+                        400..499: GlobaDyMval[n-400] := GlobaDyMval[n-400] * pqa.ActTagVal;
+                        700..799: HGlobalVal[n - 700] := HGlobalVal[n - 700] * pqa.ActTagVal;
+                     end;
+                  end;
+               end;
+            QA_SUM:
+               begin
+                  n1 := 0;
+                  n := GetPP (pqa.ActParam);
+                  if n >= 0 then begin
+                     case n of
+                        0..99:     n1 := TUserHuman(who).QuestParams[n];
+                        100..199:  n1 := GrobalQuestParams[n-100];
+                        200..299:  n1 := TUserHuman(who).DiceParams[n-200];
+                        300..399:  n1 := PEnvir.MapQuestParams[n-300];
+                        400..499:  n1 := GlobaDyMval[n-400];
+                        700..799:  n1 := HGlobalVal[n-700];
+                     end;
+                  end;
+                  n2 := 0;
+                  n := GetPP (pqa.ActTag);
+                  if n >= 0 then begin
+                     case n of
+                        0..99:     n2 := TUserHuman(who).QuestParams[n];
+                        100..199:  n2 := GrobalQuestParams[n-100];
+                        200..299:  n2 := TUserHuman(who).DiceParams[n-200];
+                        300..399:  n2 := PEnvir.MapQuestParams[n-300];
+                        400..499:  n2 := GlobaDyMval[n-400];
+                        700..799:  n2 := HGlobalVal[n-700];
+                     end;
+                  end;
+                  n := GetPP (pqa.ActParam);
+                  if n >= 0 then begin
+                     case n of
+                        0..99:      TUserHuman(who).QuestParams[9] := TUserHuman(who).QuestParams[9] + n1 + n2;
+                        100..199:  GrobalQuestParams[9] := GrobalQuestParams[9] + n1 + n2;
+                        200..299:   TUserHuman(who).DiceParams[9] := TUserHuman(who).DiceParams[9] + n1 + n2;
+                        300..399:   PEnvir.MapQuestParams[9] := PEnvir.MapQuestParams[9] + n1 + n2;
+                        400..499:   GlobaDyMval[9] := GlobaDyMval[9] + n1 + n2;
+                        700..799:   HGlobalVal[9] := HGlobalVal[9] + n1 + n2;
+                     end;
+                  end;
+               end;
+
+            QA_MOVRANDOM:  //MOVR
+               begin
+                  n := GetPP (pqa.ActParam);
+                  if n >= 0 then begin
+                     case n of
+                        0..99:
+                           TUserHuman(who).QuestParams[n] := Random(pqa.ActTagVal);
+                        100..199:
+                           GrobalQuestParams[n-100] := Random(pqa.ActTagVal);
+                        200..299:
+                           TUserHuman(who).DiceParams[n-200] := Random(pqa.ActTagVal);
+                        300..399:
+                           PEnvir.MapQuestParams[n-300] := Random(pqa.ActTagVal);
+                        400..499:
+                           GlobaDyMval[n-400] := Random(pqa.ActTagVal);
+                        700..799:
+                           HGlobalVal[n-700] := Random(pqa.ActTagVal);
+
+                     end;
+                  end;
+               end;
+
+            QA_PERCENT: begin
+                  n := GetPP (pqa.ActParam);
+                  if n >= 0 then begin
+                     case n of
+                        0..99: TUserHuman(who).QuestParams[n] := TUserHuman(who).QuestParams[n] * 100 div pqa.ActTagVal;
+                        100..199: GrobalQuestParams[n-100] := GrobalQuestParams[n-100] * 100 div pqa.ActTagVal;
+                        200..299: TUserHuman(who).DiceParams[n-200] := TUserHuman(who).DiceParams[n-200] * 100 div pqa.ActTagVal;
+                        300..399: PEnvir.MapQuestParams[n-300] := PEnvir.MapQuestParams[n-300] * 100 div pqa.ActTagVal;
+                        400..499: GlobaDyMval[n-400] := GlobaDyMval[n-400] * 100 div pqa.ActTagVal;
+                        700..799: HGlobalVal[n - 700] := HGlobalVal[n - 700] * 100 div pqa.ActTagVal;
+                     end;
+                  end;
+              end;
+
+            QA_EXCHANGEMAP:
+               begin
+                  //ºÎ¸¦ »ç¶÷
+                  envir := GrobalEnvir.GetEnvir (pqa.ActParam);
+                  if envir <> nil then begin
+                     list := TList.Create;
+                     UserEngine.GetAreaUsers (envir, 0, 0, 1000, list);
+                     if list.Count > 0 then begin
+                        //ÇÑ¸í¸¸ ¼±ÅÃ
+                        hum := TUserHuman (list[0]);
+                        if hum <> nil then begin
+                           hum.RandomSpaceMove (MapName, 0);
+                        end;
+                     end;
+                     list.Free;
+                  end;
+                  //³ªµµ ÀÌµ¿
+                  who.RandomSpaceMove (pqa.ActParam, 0);
+               end;
+            QA_RECALLMAP:
+               begin
+                  //ºÎ¸¦ »ç¶÷
+                  envir := GrobalEnvir.GetEnvir (pqa.ActParam);
+                  if envir <> nil then begin
+                     list := TList.Create;
+                     UserEngine.GetAreaUsers (envir, 0, 0, 1000, list);
+                     for k:=0 to list.Count-1 do begin
+                        hum := TUserHuman (list[k]);
+                        if hum <> nil then begin
+                           hum.RandomSpaceMove (MapName, 0);
+                        end;
+                        //22¸í Á¦ÇÑ
+                        if k > 20 then break;
+                     end;
+                     list.Free;
+                  end;
+               end;
+            QA_BATCHDELAY:
+               begin
+                  batchdelay := pqa.ActParamVal * 1000;
+               end;
+            QA_ADDBATCH:
+               begin
+                  batchlist.AddObject (pqa.ActParam, TObject(batchdelay));
+               end;
+            QA_BATCHMOVE:
+               begin
+                  for k:=0 to batchlist.Count-1 do begin
+                     who.SendDelayMsg (self, RM_RANDOMSPACEMOVE, 0, 0, 0, 0, batchlist[k], previousbatchdelay + integer(batchlist.Objects[k]));
+                     previousbatchdelay := previousbatchdelay + integer(batchlist.Objects[k])
+                  end;
+               end;
+            QA_PLAYDICE:
+               begin
+                  who.SendMsg (self, RM_PLAYDICE,
+                                     pqa.ActParamVal,  //±¼¸®´Â ÁÖ»çÀ§ ¼ö
+                                     MakeLong(MakeWord(TUserHuman(who).DiceParams[0],
+                                                       TUserHuman(who).DiceParams[1]),
+                                              MakeWord(TUserHuman(who).DiceParams[2],
+                                                       TUserHuman(who).DiceParams[3])),
+                                     MakeLong(MakeWord(TUserHuman(who).DiceParams[4],
+                                                       TUserHuman(who).DiceParams[5]),
+                                              MakeWord(TUserHuman(who).DiceParams[6],
+                                                       TUserHuman(who).DiceParams[7])),
+                                     MakeLong(MakeWord(TUserHuman(who).DiceParams[8],
+                                                       TUserHuman(who).DiceParams[9]),
+                                              0),
+                                     pqa.ActTag);  //±¼¸°ÈÄ ÀÌµ¿ ´ëÈ­ ÅÂ±× ¿¹)@diceresult
+                  bosaynow := TRUE;
+               end;
+            QA_PLAYROCK:  //°¡À§¹ÙÀ§º¸ °ÔÀÓ
+               begin
+                  who.SendMsg (self, RM_PLAYROCK,
+                                     pqa.ActParamVal,  //±¼¸®´Â ÁÖ»çÀ§ ¼ö
+                                     MakeLong(MakeWord(TUserHuman(who).DiceParams[0],
+                                                       TUserHuman(who).DiceParams[1]),
+                                              MakeWord(TUserHuman(who).DiceParams[2],
+                                                       TUserHuman(who).DiceParams[3])),
+                                     MakeLong(MakeWord(TUserHuman(who).DiceParams[4],
+                                                       TUserHuman(who).DiceParams[5]),
+                                              MakeWord(TUserHuman(who).DiceParams[6],
+                                                       TUserHuman(who).DiceParams[7])),
+                                     MakeLong(MakeWord(TUserHuman(who).DiceParams[8],
+                                                       TUserHuman(who).DiceParams[9]),
+                                              0),
+                                     pqa.ActTag);  //±¼¸°ÈÄ ÀÌµ¿ ´ëÈ­ ÅÂ±× ¿¹)@diceresult
+                  bosaynow := TRUE;
+               end;
+            //6-11
+            QA_ADDNAMELIST:
+               begin
+                  AddNameFromFileList (who.UserName, NpcBaseDir + pqa.ActParam{filename});
+               end;
+            //6-11
+            QA_DELETENAMELIST:
+               begin
+                  DeleteNameFromFileList (who.UserName, NpcBaseDir + pqa.ActParam{filename});
+               end;
+               QA_CLEARNAMELIST:
+           begin
+             ClearAllNameFromFileList(NpcBaseDir + pqa.ActParam);
+           end;
+            QA_NOTONLINE:  //ÀëÏß¹Ò»ú
+               begin//ÀëÏß¹Ò»ú
+                  TUserHuman(who).m_boNotOnlineAddExp := Boolean(pqa.ActParamVal);
+               end;
+            //*DQ
+            QA_RANDOMSETDAILYQUEST:
+               begin
+                  who.SetDailyQuest (pqa.ActParamVal + Random(pqa.ActTagVal - pqa.ActParamVal + 1));
+               end;
+            //*DQ
+            QA_SETDAILYQUEST:
+               begin
+                  who.SetDailyQuest (pqa.ActParamVal);
+               end;
+            //°æÇèÄ¡ ÁÖ´Â ½ºÅ©¸³Æ®
+            QA_GIVEEXP:
+               begin
+                  // 4ÁÖ³â ÀÌº¥Æ®¿ë °æÇèÄ¡ ÁÖ´Â ¸í·É(ÃßÈÄ »èÁ¦ ¿ä¸Á)
+                  who.WinExp( _MIN(pqa.ActParamVal, High(Integer)) );
+                  MainOutMessage( 'GIVEEXP(' + IntToStr(_MIN(pqa.ActParamVal, High(Integer))) + ') : ' + who.UserName );
+               end;
+
+            QA_TAKEGRADEITEM: // Event Grade
+               begin
+                  TakeEventGradeItemFromUser (pqa.ActParamVal);
+               end;
+
+            QA_GOTOQUEST:
+               begin
+                  GotoQuest (pqa.ActParamVal);
+               end;
+            QA_ENDQUEST:
+               begin
+                  TUserHuman(who).CurQuest := nil;
+               end;
+            QA_GOTO:
+               begin
+                  GotoSay (pqa.ActParam);
+               end;
+            QA_SOUND:
+               begin
+                  who.SendMsg( self, RM_SOUND , 0 ,Str_ToInt( pqa.ActParam,0), 0 , 0 ,'');
+               end;
+            QA_NOVICEHEIP:
+               begin
+                  who.SendMsg( self, RM_NOVICEHEIP, 0 ,Str_ToInt( pqa.ActParam,0), 0 , 0 ,'');
+               end;
+            QA_SOUNDALL:
+               begin
+                  //½Ã°£ÀÌ Áö³ª¸é ÇÃ·¡±× Reset
+                  if GetTickCount - SoundStartTime > 25 * 1000{25ÃÊ} then begin
+                     SoundStartTime := GetTickCount;
+                     BoSoundPlaying := FALSE;
+                  end;
+
+                  if not BoSoundPlaying then begin
+                     BoSoundPlaying := TRUE;
+                     //»ç¿îµå ÇÃ·¹ÀÌ ¿äÃ»
+                     SendRefMsg (RM_DIGUP, Dir, CX, CY, 0, '');
+                  end;
+               end;
+            QA_CHANGEGENDER:
+               begin
+                  TUserHuman(who).CmdChangeSex;
+
+                  if who.Sex = 1 then begin
+                     {$IFDEF KOREA}
+                     who.BoxMsg( 'ÔÚÄÐÐÔ±ä³ÉÅ®ÐÔºó£¬ÐèÒªÖØÐÂÁ¬½Ó',1);
+                     who.SysMsg( 'ÔÚÄÐÐÔ±ä³ÉÅ®ÐÔºó£¬ÐèÒªÖØÐÂÁ¬½Ó',1);
+                     {$ELSE}
+                     who.BoxMsg( 'Äã¿ÉÒÔ¼ì²éÄãµÄÐÂÐÎÏó',1);
+                     who.SysMsg( 'Äã¿ÉÒÔ¼ì²éÄãµÄÐÂÐÎÏó',1);
+                     {$ENDIF}
+                  end else begin
+                     {$IFDEF KOREA}
+                     who.BoxMsg( 'ÔÚÅ®ÐÔ±ä³ÉÄÐÐÔºó£¬ÐèÒªÖØÐÂÁ¬½Ó',1);
+                     who.SysMsg( 'ÔÚÅ®ÐÔ±ä³ÉÄÐÐÔºó£¬ÐèÒªÖØÐÂÁ¬½Ó',1);
+                     {$ELSE}
+                     who.BoxMsg( 'Äã¿ÉÒÔ¼ì²éÄãµÄÐÂÐÎÏó',1);
+                     who.SysMsg( 'Äã¿ÉÒÔ¼ì²éÄãµÄÐÂÐÎÏó',1);
+                     {$ENDIF}
+                  end;
+               end;
+            QA_KICK:
+               begin
+                  TUserHuman(who).EmergencyClose := TRUE;
+               end;
+            QA_MOVEALLMAP:
+               begin
+                  param := pqa.ActTagVal;
+                  //ÀÌµ¿ ½ÃÅ³ »ç¶÷
+                  envir := GrobalEnvir.GetEnvir (MapName);
+                  if envir <> nil then begin
+                     list := TList.Create;
+                     UserEngine.GetAreaUsers (envir, 0, 0, 1000, list);
+                     for k:=0 to list.Count-1 do begin
+                        hum := TUserHuman (list[k]);
+                        if hum <> nil then begin
+                           hum.RandomSpaceMove (pqa.ActParam, 0);
+                        end;
+                        //param¸í Á¦ÇÑ
+                        if k >= (param - 1) then break;
+                     end;
+                     list.Free;
+                  end;
+               end;
+            QA_MOVEALLMAPGROUP:
+               begin
+                  if who.GroupOwner = nil then begin
+                     // ±×·ìÀÌ ¾ø°í ÀÚ±â È¥ÀÚ¸¸ ÀÖÀ» ¶§
+                     if (pqa.ActTag = '') and (pqa.ActExtra = '') then begin
+                        who.RandomSpaceMove(pqa.ActParam, 0);
+                     end else begin
+                        who.SpaceMove (pqa.ActParam, pqa.ActTagVal, pqa.ActExtraVal, 0);
+                     end;
+                  end else if who.GroupOwner = who then begin //ÀÚ½ÅÀÌ ±×·ìÂ¯
+                     for k:=0 to who.GroupMembers.Count-1 do begin  //ÀÚ½Å Æ÷ÇÔ.
+                        hum := UserEngine.GetUserHuman (who.GroupMembers[k]);
+                        if hum <> nil then begin
+                           // ÇöÀç ¸Ê¿¡ ÀÖ´Â »ç¶÷¸¸ ÁöÁ¤ ¸ÊÀ¸·Î ÀÌµ¿.
+                           if hum.MapName = MapName then begin
+                              if (pqa.ActTag = '') and (pqa.ActExtra = '') then begin
+                                 hum.RandomSpaceMove(pqa.ActParam, 0);
+                              end else begin
+                                 hum.SpaceMove (pqa.ActParam, pqa.ActTagVal, pqa.ActExtraVal, 0);
+                              end;
+                           end;
+                        end;
+                     end;
+                  end;
+               end;
+            QA_RECALLMAPGROUP:
+               begin
+                  n := (GetTickCount - who.CGHIstart) div 1000;
+                  who.CGHIstart := who.CGHIstart + longword(n * 1000);
+                  if who.CGHIUseTime > n then who.CGHIUseTime := who.CGHIUseTime - n
+                  else who.CGHIUseTime := 0;
+                  if who.CGHIUseTime = 0 then begin
+                     if who.GroupOwner = who then begin //ÀÚ½ÅÀÌ ±×·ìÂ¯
+                        for k:=1 to who.GroupMembers.Count-1 do begin  //ÀÚ½Å »©°í
+                           // ÁöÁ¤ÇÑ ¸Ê¿¡ ÀÖ´Â »ç¶÷¸¸ ¼ÒÈ¯
+                           TUserHuman(who).CmdRecallMan (who.GroupMembers[k], pqa.ActParam);
+                        end;
+                        who.CGHIstart := GetTickCount;
+                        who.CGHIUseTime := 10;  //10ÃÊ °£°Ý
+                     end;
+                  end else begin
+                     {$IFDEF KOREA} who.SysMsg (IntToStr(who.CGHIUseTime) + 'ÃëºóÔÙÊ¹ÓÃ', 0);
+                     {$ELSE}        who.SysMsg ('Can be used again after ' + IntToStr(who.CGHIUseTime) + ' seconds.', 0);
+                     {$ENDIF}
+                  end;
+               end;
+            QA_WEAPONUPGRADE:
+               begin
+                  if (pqa.ActParam = 'DC') or (pqa.ActParam = '¹¥»÷') then
+                     TUserHuman(who).CmdRefineWeapon(pqa.ActTagVal, 0, 0, 0)
+                  else if (pqa.ActParam = 'MC') or (pqa.ActParam = 'Ä§·¨') then
+                     TUserHuman(who).CmdRefineWeapon(0, pqa.ActTagVal, 0, 0)
+                  else if (pqa.ActParam = 'SC') or (pqa.ActParam = 'µÀÊõ') then
+                     TUserHuman(who).CmdRefineWeapon(0, 0, pqa.ActTagVal, 0)
+                  else if (pqa.ActParam = 'ACC') or (pqa.ActParam = '×¼È·') then
+                     TUserHuman(who).CmdRefineWeapon(0, 0, 0, pqa.ActTagVal);
+               end;
+            QA_SETALLINMAP:
+               begin
+                  param := Str_ToInt (pqa.ActParam, 0);
+                  tag := Str_ToInt (pqa.ActTag, 0);
+                  //¸Ê¿¡ ÀÖ´Â ¸ðµç »ç¶÷
+                  envir := GrobalEnvir.GetEnvir (MapName);
+                  if envir <> nil then begin
+                     list := TList.Create;
+                     UserEngine.GetAreaUsers (envir, 0, 0, 1000, list);
+                     for k:=0 to list.Count-1 do begin
+                        hum := TUserHuman (list[k]);
+                        if hum <> nil then
+                           hum.SetQuestMark (param, tag);
+                     end;
+                     list.Free;
+                  end;
+               end;
+            QA_INCPKPOINT:
+               begin
+                  param := Str_ToInt (pqa.ActParam, 0);
+                  TUserHuman(who).IncPkPoint(param);
+               end;
+            QA_DECPKPOINT:
+               begin
+                  param := Str_ToInt (pqa.ActParam, 0);
+                  TUserHuman(who).DecPkPoint(param);
+               end;
+            QA_MOVETOLOVER:   //¿¬ÀÎ ¾ÕÀ¸·Î ÀÌµ¿
+               begin
+                  if TUserHuman(who).fLover <> nil then begin
+                     if TUserHuman(who).fLover.GetLoverName <> '' then
+                        TUserHuman(who).CmdCharSpaceMove( TUserHuman(who).fLover.GetLoverName );
+                  end;
+               end;
+            QA_BREAKLOVER:   //¿¬ÀÎ °ü°è ÀÏ¹æ ÇØÁ¦
+               begin
+                  TUserHuman(who).CmdBreakLoverRelation;
+               end;
+
+            QA_USEFAMEPOINT:   //¸í¼ºÄ¡ »ç¿ë
+               begin
+                  who.UseCurrentFamePoint( pqa.ActParamVal );
+               end;
+            QA_DECWEAPONBADLUCK:
+               begin
+                  who.DecWeaponBadLuck;
+               end;
+            QA_DECDONATION:   //Àå¿ø±âºÎ±Ý
+               begin
+                  TUserHuman(who).DecGuildAgitDonation( pqa.ActParamVal );
+               end;
+            QA_SHOWEFFECT:    //Àå¿øÀÌÆåÆ®
+               begin
+                  if pqa.ActTagVal > 0 then tag := pqa.ActTagVal * 1000
+                  else tag := 60000;
+
+                  case pqa.ActParamVal of  //ÀÌÆåÆ® Á¾·ù
+                  1:
+                     begin
+                        who.SendRefMsg (RM_LOOPNORMALEFFECT, integer(self), tag, 0, NE_JW_EFFECT1, '');
+                     end;
+                  else
+                     begin
+                        who.SendRefMsg (RM_LOOPNORMALEFFECT, integer(self), tag, 0, NE_JW_EFFECT1, '');
+                     end;
+                  end;
+               end;
+            QA_MONGENAROUND:    //Ä³¸¯ ÁÖÀ§¿¡ ¸ó½ºÅÍ Á¨
+               begin
+                  for ixx:=who.CX-2 to who.CX+2 do begin
+                     for iyy:=who.CY-2 to who.CY+2 do begin
+                        //sparam1 : map
+                        if sparam1 = '' then sparam1 := who.MapName;
+                        if ( (abs(who.CX - ixx) = 2) or (abs(who.CY - iyy) = 2) )
+                              and ( (abs(who.CX - ixx) mod 2 = 0) and (abs(who.CY - iyy) mod 2 = 0) ) then begin
+                           //¸ÊÄù½ºÆ®¸¦ À§ÇØ PEnvir ´ë½Å¿¡ who.PEnvir¸¦ »ç¿ëÇÑ´Ù.
+                           if who.PEnvir.CanWalk(ixx, iyy, FALSE) then begin
+                              UserEngine.AddCreatureSysop (UpperCase(sparam1),  //map
+                                                           ixx,
+                                                           iyy,
+                                                           pqa.ActParam); //mon-name
+                           end;
+                        end;
+                     end;
+                  end;
+               end;
+            QA_RECALLMOB:
+               begin
+                  TUserHuman(who).CmdCallMakeSlaveMonster(pqa.ActParam{Ãû×Ö}, pqa.ActTag{ÊýÁ¿}, 3, pqa.ActExtraVal{µÈ¼¶});
+               end;
+
+            QA_SETLOVERFLAG:
+               begin
+                  if TUserHuman(who).fLover <> nil then begin
+                     hum := UserEngine.GetUserHuman(TUserHuman(who).fLover.GetLoverName);
+                     if hum <> nil then begin
+                        param := Str_ToInt (pqa.ActParam, 0);
+                        //if param > 100 then begin
+                        tag := Str_ToInt (pqa.ActTag, 0);
+                        hum.SetQuestMark (param, tag);
+                        //end;
+                     end;
+                  end;
+               end;
+            QA_GUILDSECESSION:
+               begin
+                  if who.RaceServer = RC_USERHUMAN then
+                     TUserHuman(who).GuildSecession;
+               end;
+            QA_GIVETOLOVER:
+               begin
+                  if TUserHuman(who).fLover <> nil then begin
+                     hum := UserEngine.GetUserHuman(TUserHuman(who).fLover.GetLoverName);
+                     if hum <> nil then begin
+                        if (Abs(hum.CX-who.CX) <= 7) and (Abs(hum.CY-who.CY) <= 7) then begin
+                           GiveItemToUser (hum, pqa.ActParam, pqa.ActTagVal);
+                        end else begin
+                           {$IFDEF KOREA} who.SysMsg('ÄãµÄ°®ÈËÃ»ÓÐÔÚÉí±ß', 0);
+                           {$ELSE}        who.SysMsg('ÄãµÄ°®ÈËÃ»ÓÐÔÚÉí±ß', 0);
+                           {$ENDIF}
+                        end;
+                     end else begin
+                        {$IFDEF KOREA} who.SysMsg('ÕÒ²»µ½ÄãµÄ°®ÈË', 0);
+                        {$ELSE}        who.SysMsg('ÕÒ²»µ½ÄãµÄ°®ÈË', 0);
+                        {$ENDIF}
+                     end;
+                  end;
+               end;
+            QA_INCMEMORIALCOUNT:
+               begin
+                  MemorialCount := MemorialCount + pqa.ActParamVal;
+               end;
+            QA_DECMEMORIALCOUNT:
+               begin
+                  MemorialCount := MemorialCount - pqa.ActParamVal;
+               end;
+            QA_SAVEMEMORIALCOUNT:
+               begin
+                  WriteMemorialCount;
+               end;
+            //2005/12/14
+            QA_INSTANTPOWERUP:
+               begin
+                  if (UPPERCASE(pqa.ActParam) = 'DC') then begin
+                     kind := EABIL_DCUP;
+                  end else if (UPPERCASE(pqa.ActParam) = 'MC') then begin
+                     kind := EABIL_MCUP;
+                  end else if (UPPERCASE(pqa.ActParam) = 'SC') then begin
+                     kind := EABIL_SCUP;
+                  end else if (UPPERCASE(pqa.ActParam) = 'HITSPEED') then begin
+                     kind := EABIL_HITSPEEDUP;
+                  end else if (UPPERCASE(pqa.ActParam) = 'HP') then begin
+                     kind := EABIL_HPUP;
+                  end else if (UPPERCASE(pqa.ActParam) = 'MP') then begin
+                     kind := EABIL_MPUP;
+                  end else begin
+                     kind := -1;
+                  end;
+                  who.EnhanceExtraAbility( kind, pqa.ActTagVal, pqa.ActExtraVal div 60, pqa.ActExtraVal mod 60 );
+                  who.RecalcAbilitys;
+                  who.SendMsg (who, RM_ABILITY, 0, 0, 0, 0, '');
+               end;
+            QA_INSTANTEXPDOUBLE:
+               begin
+                 if pqa.ActParamVal > 100 then
+                   who.nInstantExpDouble := pqa.ActParamVal
+                 else
+                   who.nInstantExpDouble := 100;
+                 if pqa.ActTagVal > 1 then
+                   who.InstantExpDoubleTime := GetTickCount + LongWord(pqa.ActTagVal * 1000)
+                 else
+                   who.InstantExpDoubleTime := 0;
+               end;
+            QA_HEALING:
+               begin
+                  who.SendRefMsg (RM_NORMALEFFECT, 0, who.CX, who.CY, NE_USERHEALING, '');
+                  who.IncHealing := who.IncHealing + pqa.ActParamVal;
+                  who.PerHealing := 5;
+               end;
+            QA_UNIFYITEM:
+               begin
+                  if who.RaceServer = RC_USERHUMAN then
+                     TUserHuman(who).UserUnifyItem( Integer(self), pqa.ActParam );
+               end;
+            QA_SENDMSG:
+               begin
+                  SendMsg(who, pqa);
+               end;
+            QA_ADDIDLIST:
+               begin
+                  hum := TUserHuman (who);
+                  AddNameFromFileList (hum.UserId, NpcBaseDir + pqa.ActParam{filename});
+               end;
+            QA_DELIDLIST:
+               begin
+                  hum := TUserHuman (who);
+                  DeleteNameFromFileList (hum.UserId, NpcBaseDir + pqa.ActParam{filename});
+               end;
+            QA_HAIRSTYPE:
+               begin
+                  param := _MIN(9, Str_ToInt(pqa.ActParam, 1));
+                  TUserHuman(who).CmdChangeHair (param);
+                  TUserHuman(who).FeatureChanged;
+               end;
+            QA_WEBBROWSER:
+               begin
+                  hum := TUserHuman (who);
+                  ActionOfWebBrowser(hum, pqa);
+               end;
+            QA_ADDUSERIDTIME:
+               begin
+                  hum := TUserHuman (who);
+                   if pqa.ActParam = '+' then begin
+                    Tempint := hum.iDay + pqa.ActTagVal;
+                  end;
+                  if pqa.ActParam = '-' then begin
+                    Tempint := hum.iDay - pqa.ActTagVal;
+                  end;
+                  if pqa.ActParam = '=' then begin
+                    Tempint := pqa.ActTagVal;
+                  end;
+                  hum.iDay := Tempint;
+                  if hum.iDay = 1 then
+                    hum.iHours := 86400;
+                  FrmIDSoc.SendRechargeDayAdd (hum.UserName, hum.UserId, Tempint);
+               end;
+            QA_ADDSECONDCARD://ÔÂ¿¨Ö´ÐÐÃüÁî
+               begin
+                  hum := TUserHuman (who);
+                   if pqa.ActParam = '+' then begin
+                    Tempint := hum.SecondsCard + pqa.ActTagVal;
+                  end;
+                  if pqa.ActParam = '-' then begin
+                    Tempint := hum.SecondsCard - pqa.ActTagVal;
+                  end;
+                  if pqa.ActParam = '=' then begin
+                    Tempint := pqa.ActTagVal;
+                  end;
+                  hum.SecondsCard := Tempint;
+                  FrmIDSoc.SendRechargeHoursAdd(hum.UserName, hum.UserId, Tempint);
+               end;
+            QA_SENDSCROLLMSG:
+               begin
+                  SendScrollMsg(who, pqa);
+               end;
+            QA_GMEXECUTE:
+               begin
+                 hum := TUserHuman (who);
+                 ActionOfGmExecute(hum, pqa);
+               end;
+            QA_DIVORCE:
+               begin
+                 TUserHuman(who).LeftMarry;
+               end;
+            QA_CREDITPOINT:
+               begin
+                  hum := TUserHuman (who);
+                   if pqa.ActParam = '+' then begin
+                    g_DBSQL.AddCreditPoint(hum.UserName, pqa.ActTagVal);
+                  end;
+                  if pqa.ActParam = '-' then begin
+                    g_DBSQL.DelCreditPoint(hum.UserName, pqa.ActTagVal);
+                  end;
+                  if pqa.ActParam = '=' then begin
+                    g_DBSQL.SetCreditPoint(hum.UserName, pqa.ActTagVal);
+                  end;
+                  hum.m_btCreditPoint := g_DBSQL.GetCreditPoint(hum.UserName);
+
+                    who.SendCreditPoint;
+               end;
+            QA_SECONDSCARD:
+               begin
+                  param := Str_ToInt (pqa.ActParam, 0);
+                  Inc(TUserHuman(who).SecondsCard, (param * 86400));
+                  who.SysMsg(Format('[ÕË»§ÐÅÏ¢]µ±Ç°ÕË»§³äÖµÊ£ÓàÊ±¼ä%dÃë', [TUserHuman(who).SecondsCard]), 0);
+               end;
+            QA_GAMEGOLD://Ôª±¦Ö´ÐÐÃüÁî
+               begin
+                  hum := TUserHuman(who);
+                   if pqa.ActParam = '+' then begin
+                    hum.PotCash := hum.PotCash + pqa.ActTagVal;
+                  end;
+                  if pqa.ActParam = '-' then begin
+                    hum.PotCash := hum.PotCash - pqa.ActTagVal;
+                  end;
+                  if pqa.ActParam = '=' then begin
+                    hum.PotCash := pqa.ActTagVal;
+                  end;
+                    hum.PotCashChanged;
+              end;
+            QA_GAMEPOINT:       //»ý·Ö
+              begin
+                ChangeGamePoint(who, pqa);
+              end;
+            QA_npcsay:
+             begin
+            NPCSayMsg(who, pqa);
+             end;
+
+            QA_GIVEEX:
+              begin
+                 ActionOfGiveexItem(who, pqa);
+              end;
+            QA_ADDSKILL:
+              begin
+                 NpcAddSkill(TUserHuman(who), pqa);
+              end;
+            QA_DELSKILL:
+              begin
+                 NpcDelSkill(TUserHuman(who), pqa);
+              end;
+            QA_DELNOJOBSKILL:
+              begin
+                 NpcDelNoJobSkill(TUserHuman(who));
+              end;
+            QA_CLEARSKILL:
+              begin
+                 NpcClearSkill(TUserHuman(who));
+              end;
+            QA_SKILLLEVEL:
+              begin
+                 NpcSkillLevel(TUserHuman(who), pqa);
+              end;
+            QA_MESSAGEBOX: //´°¿ÚÌáÊ¾
+              begin
+                 NPCMessageBox(who, pqa);
+              end;
+            QA_DELAYGOTO:
+            begin
+              NpcDelayGoto(who, pqa);
+              end;
+             QA_CLEARDELAYGOTO:
+            begin
+              TUserHuman(who).ClearTimeLabel;
+            end;
+            QA_SETRANKLEVELNAME: //»ñÈ¡³ÆºÅ
+              begin
+                 SetRankLevelName(who, pqa);
+              end;
+            QA_CHANGEHUMABILITY:
+              begin
+                ActionOfCHANGEHUMABILITY(who, pqa); //changeHumAbilityÊôÐÔ¼Óµã
+              end;
+
+            QA_ADDGUILDMEMBER:     //¼ÓÈëÖ¸¶¨ÐÐ»á
+               begin
+                  ActionOfAddGuild(who, pqa.ActParam);
+               end;
+            QA_SETITEMEVENT:  //×Ô¶¨Òå×Ö¶Î´¥·¢Ë«»÷ÎïÆ·
+              begin
+                if (TUserHuman(who).latestuseitem <> '') and
+                   (pqa.ActParamVal = TUserHuman(who).UseItemStdMode) and
+                   (pqa.ActTagVal = TUserHuman(who).UseItemShape) then begin
+                   TUserHuman(who).UseItemStdMode := -1;
+                   TUserHuman(who).UseItemShape := -1;
+                   GotoSay (pqa.ActExtra);
+                end;
+              end;
+         end;
+      end;
+   end;
+   procedure NpcSayProc (str: string; fast: Boolean);
+   var
+      k: integer;
+      tag, rst: string;
+   begin
+      rst := str;
+      for k:=0 to 100 do begin
+         if CharCount(rst, '>') >= 1 then begin
+            rst := ArrestStringEx (rst, '<', '>', tag);
+            CheckNpcSayCommand (TUserHuman(who), str, tag);
+         end else
+            break;
+      end;
+      if fast then
+         who.SendFastMsg (self, RM_MERCHANTSAY, 0, 0, 0, 0, UserName + '/' + str)
+      else
+         who.SendMsg (self, RM_MERCHANTSAY, 0, 0, 0, 0, UserName + '/' + str);
+   end;
+var
+   i, j, m: integer;
+   str, tag: string;
+   pquest, pqr: PTQuestRecord;
+   psay: PTSayingRecord;
+   psayproc: PTSayingProcedure;
+begin
+   pquest := nil;
+   psayproc := nil;
+   batchlist := TStringList.Create;
+   batchdelay := 1000;
+   previousbatchdelay := 0;
+
+//   if  TUserHuman(who).CurQuestNpc = g_RobotNPC then begin
+//      TUserHuman(who).CurQuestNpc := nil;
+//      TUserHuman(who).CurQuest := nil;
+//      FillChar (TUserHuman(who).QuestParams, sizeof(integer)*10, #0);
+//   end;
+
+   if TUserHuman(who).CurQuestNpc <> self then begin
+      TUserHuman(who).CurQuestNpc := nil;
+      TUserHuman(who).CurQuest := nil;
+      FillChar (TUserHuman(who).QuestParams, sizeof(integer)*10, #0);
+   end;
+
+   if CompareText (title, '@main') = 0 then begin
+      for i:=0 to Sayings.Count-1 do begin
+         pqr := PTQuestRecord (Sayings[i]);
+         for j:=0 to pqr.SayingList.Count-1 do begin
+            psay := pqr.SayingList[j];
+            if CompareText (psay.Title, title) = 0 then begin
+               pquest := pqr;
+               TUserHuman(who).CurQuest := pquest;
+               TUserHuman(who).CurQuestNpc := self;
+               break;
+            end;
+         end;
+         if pquest <> nil then break;
+      end;
+   end;
+   if pquest = nil then begin
+      if TUserHuman(who).CurQuest <> nil then begin
+         for i:=Sayings.Count-1 downto 0 do begin
+            if TUserHuman(who).CurQuest = PTQuestRecord (Sayings[i]) then begin
+               pquest := PTQuestRecord (Sayings[i]);
+            end;
+         end;
+      end;
+      if pquest = nil then begin
+         for i:=Sayings.Count-1 downto 0 do begin
+            //Äù½ºÆ®ÀÇ Á¶°ÇÀ» °Ë»ç ÇÑ´Ù.
+            if CheckQuestCondition (PTQuestRecord (Sayings[i])) then begin
+               pquest := PTQuestRecord (Sayings[i]);
+               TUserHuman(who).CurQuest := pquest;
+               TUserHuman(who).CurQuestNpc := self;
+            end;
+         end;
+      end;
+   end;
+   if pquest <> nil then begin
+      for j:=0 to pquest.SayingList.Count-1 do begin
+         psay := PTSayingRecord (pquest.SayingList[j]);
+         if CompareText (psay.Title, title) = 0 then begin
+            str := '';
+            for m:=0 to psay.Procs.Count-1 do begin
+               psayproc := PTSayingProcedure(psay.Procs[m]);
+               if psayproc = nil then continue; // 2003-09-08 nil °Ë»ç
+               bosaynow := FALSE;
+
+
+               if CheckSayingCondition (psayproc.ConditionList) then begin
+                  //Á¶°Ç ÂüÀÎ °æ¿ì, ´ëÈ­
+                  str := str + psayproc.Saying;
+                  //Á¶°Ç ÂüÀÎ °æ¿ì, ¾×¼Ç
+                  if not DoActionList (psayproc.ActionList) then
+                     break;
+                  if bosaynow then begin
+                     NpcSayProc (str, TRUE);
+                     TUserHuman(who).CurSayProc := psayproc;
+                  end;
+               end else begin
+                  //Á¶°Ç °ÅÁþÀÎ °æ¿ì, ´ëÈ­
+                  str := str + psayproc.ElseSaying;
+                  //Á¶°Ç °ÅÁþÀÎ °æ¿ì, ¾×¼Ç
+                  if not DoActionList (psayproc.ElseActionList) then
+                     break;
+                  if bosaynow then begin
+                     NpcSayProc (str, TRUE);
+                     TUserHuman(who).CurSayProc := psayproc;
+                  end;
+               end;
+            end;
+
+            if str <> '' then begin
+               NpcSayProc (str, FALSE);
+               TUserHuman(who).CurSayProc := psayproc;
+            end;
+            break;
+         end;
+      end;
+   end;
+
+   batchlist.Free;
+
+end;
+
+//¼ì²éÎïÆ·ÊôÐÔ
+function TNormNpc.CheckItemAddValue(who: TCreature; pqc: PTQuestConditionInfo): Boolean;
+var
+  nWhere, nAVWhere: Integer;
+  nAddAllValue, nAddValue: Integer;
+  UserItem: pTUserItem;
+  cMethod: Char;
+  nCode: Byte;
+begin
+  Result := False;
+  nCode:= 0;
+  try
+    nWhere := Str_ToInt(pqc.IfParam, -1);
+    nAVWhere := Str_ToInt(pqc.IfTag, -1);
+    cMethod := pqc.IfExtra[1];
+    nAddValue := Str_ToInt(pqc.IfExtra2, -1);
+    nCode:= 1;
+    if not (nWhere in [Low(UseItems)..High(UseItems)]) or (nAddValue < 0) or not (nAVWhere in [0..13]) then
+      begin
+        MainOutMessage('½Å±¾´íÎó: CHECKITEMADDVALUE.');
+        exit;
+      end;
+    nCode:= 2;
+    UserItem := @who.UseItems[nWhere];
+    nCode:= 3;
+    if (UserItem = nil) or (UserItem.Index <= 0) then
+    begin
+      who.SendMsg(Self, RM_MENU_OK, 0, Integer(Self), 0, 0, '¶Ô²»Æð£¬Äú¶ÔÓ¦µÄ×°±¸Î»ÖÃÃ»ÓÐ´øºÃ×°±¸£¡');
+      Exit;
+    end;
+    nCode:= 4;
+    if nAVWhere = 14 then
+      nAddAllValue := UserItem.Dura div 1000
+    else
+     nAddAllValue := UserItem.Desc[nAVWhere];
+
+    nCode:= 5;
+    case cMethod of
+      '=':
+        if nAddAllValue = nAddValue then
+          Result := True;
+      '>':
+        if nAddAllValue > nAddValue then
+          Result := True;
+      '<':
+        if nAddAllValue < nAddValue then
+          Result := True;
+    else
+      if nAddAllValue >= nAddValue then
+        Result := True;
+    end;
+    nCode:= 6;
+  except
+    MainOutMessage('³ö´í Code:'+inttostr(nCode));
+    MainOutMessage('[Exception] TNormNpc.CheckItemAddValue');
+  end;
+end;
+
+procedure TNormNpc.ChangeGamePoint(who: TCreature; pqa: pTQuestActionInfo);
+var
+  n, ns: Integer;
+  CmdNum: Char;
+begin
+  try
+    ns := who.GamePoint;
+    n := Str_ToInt(pqa.ActTag, -1);
+
+    CmdNum := pqa.ActParam[1];
+    case CmdNum of
+      '=':
+        begin
+          if (n >= 0) then
+          begin
+            who.GamePoint := n;
+          end;
+        end;
+      '-':
+        begin
+          who.GamePoint := _MAX(0, who.GamePoint - n);
+        end;
+      '+':
+        begin
+          who.GamePoint := _MIN(2100000000, who.GamePoint + n);
+        end;
+    end;
+
+    if ns <> who.GamePoint then
+      who.GamePointChanged;
+  except
+  end;
+end;
+
+procedure TNormNpc.NPCSayMsg(who: TCreature; pqa: PTQuestActionInfo);
+var
+  str: string;
+begin
+  str := GetLineVariableText(TUserHuman(who), pqa.ActParam);
+  str := AnsiReplaceText(str, '%s', who.UserName);
+  str := AnsiReplaceText(str, '%x', IntToStr(who.CX));
+  str := AnsiReplaceText(str, '%y', IntToStr(who.CY));
+  if who.PEnvir <> nil then
+    str := AnsiReplaceText(str, '%m', who.PEnvir.MapTitle)
+  else
+    str := AnsiReplaceText(str, '%m', 'Î´ÖªµØÍ¼');
+
+  Self.Say(str);
+end;
+
+
+procedure TNormNpc.ClearNpcInfos;
+var
+   i, j, k, m: integer;
+   pqr: PTQuestRecord;
+   psay: PTSayingRecord;
+   psayproc: PTSayingProcedure;
+   pqcon: PTQuestConditionInfo;
+   pqact: PTQuestActionInfo;
+begin
+   for i:=0 to Sayings.Count-1 do begin
+      pqr := PTQuestRecord (Sayings[i]);
+      for j:=0 to pqr.SayingList.Count-1 do begin
+         psay := pqr.SayingList[j];
+         for k:=0 to psay.Procs.Count-1 do begin
+            psayproc := PTSayingProcedure(psay.Procs[k]);
+            for m:=0 to psayproc.ConditionList.Count-1 do
+               Dispose (PTQuestConditionInfo (psayproc.ConditionList[m]));
+            for m:=0 to psayproc.ActionList.Count-1 do
+               Dispose (PTQuestActionInfo (psayproc.ActionList[m]));
+            for m:=0 to psayproc.ElseActionList.Count-1 do
+               Dispose (PTQuestActionInfo (psayproc.ElseActionList[m]));
+            psayproc.ConditionList.Free;
+            psayproc.ActionList.Free;
+            psayproc.ElseActionList.Free;
+            Dispose (psayproc);
+         end;
+         psay.Procs.Free;
+         Dispose (psay);
+      end;
+      pqr.SayingList.Free;
+      Dispose (pqr);
+   end;
+   Sayings.Clear;
+end;
+
+procedure TNormNpc.LoadNpcInfos;
+begin
+   if BoUseMapFileName then begin
+      NpcBaseDir := NPCDEFDIR;
+      FrmDB.LoadNpcDef (self, DefineDirectory, UserName + '-' + MapName)
+   end else begin
+      NpcBaseDir := DefineDirectory;
+      FrmDB.LoadNpcDef (self, DefineDirectory, UserName);
+   end;
+   //ArrangeSayStrings;
+end;
+
+procedure TNormNpc.LoadMemorialCount;
+begin
+   FrmDB.LoadMemorialCount (self, UserName + '-' + MapName);
+end;
+
+procedure TNormNpc.WriteMemorialCount;
+begin
+   FrmDB.WriteMemorialCount (self, UserName + '-' + MapName);
+end;
+
+procedure TNormNpc.UserCall (caller: TCreature);
+begin
+end;
+procedure TNormNpc.UserSelect (whocret: TCreature; selstr: string);
+begin
+end;
+
+function TNormNpc.CheckGamePoint(who: TCreature; pqc: PTQuestConditionInfo): Boolean;
+var
+  n: Integer;
+  CmdNum: Char;
+begin
+  Result := False;
+  try
+    n := Str_ToInt(pqc.IfTag, -1);
+
+    CmdNum := pqc.IfParam[1];
+    case CmdNum of
+      '=':
+        if who.GamePoint = n then
+          Result := True;
+      '>':
+        if who.GamePoint > n then
+          Result := True;
+      '<':
+        if who.GamePoint < n then
+          Result := True;
+    else
+      if who.GamePoint >= n then
+        Result := True;
+    end;
+  except
+  end;
+end;
+
+
+procedure TNormNpc.ActionOfWebBrowser(hum: TUserHuman; QuestActionInfo: pTQuestActionInfo);
+var
+  sWebSite                  : string;
+resourcestring
+  sHttp                     = 'http://';
+begin
+  sWebSite := QuestActionInfo.ActParam;
+  if Pos(sHttp, sWebSite) > 0 then
+    sWebSite := StringReplace(sWebSite, sHttp, '', [rfReplaceAll]);
+  hum.Def := MakeDefaultMsg(SM_SHELLEXECUTE, 0, 0, 0, 0);
+  hum.SendSocket(@hum.Def, sWebSite);
+end;
+
+procedure TNormNpc.NpcAddSkill(who: TCreature; pqa: pTQuestActionInfo);
+var
+  pdm: PTDefMagic;
+  pum: PTUserMagic;
+  Level: Integer;
+begin
+  Level := _MIN(7, Str_ToInt(pqa.ActTag, 0));
+  pdm := UserEngine.GetDefMagic(pqa.ActParam);
+  if pdm <> nil then
+  begin
+    if not who.IsMyMagic(pdm.MagicId) then
+    begin
+      New(pum);
+      pum.pDef := pdm;
+      pum.MagicId := pdm.MagicId;
+      pum.Key := #0;
+      pum.Level := Level;
+      pum.CurTrain := 0;
+      who.MagicList.Add(pum);
+      TUserHuman(who).SendAddMagic(pum);
+      who.RecalcAbilitys;
+      who.SysMsg('ÌáÊ¾: ' + pdm.MagicName + ' Á·Ï°³É¹¦.', 1);
+    end;
+  end;
+end;
+
+//changeHumAbilityÊôÐÔ¼Óµã
+procedure TNormNpc.ActionOfCHANGEHUMABILITY(who: TCreature; pqa: PTQuestActionInfo);
+ var
+  btWhere, nPoint: Integer;
+  cMethod: Char;
+begin
+  try
+    btWhere := pqa.ActParamVal - 1;
+    nPoint := Str_ToInt(pqa.ActExtra, -1);
+    //MainOutMessage(IntToStr(btWhere));
+    if not (btWhere in [0..20]) then
+    begin
+      //ScriptActionError(PlayObject, '', QuestActionInfo, sSC_CHANGEHUMABILITY);
+      MainOutMessage('{Òì³£} CHANGEHUMABILITY ½Å±¾´íÎó1');
+      exit;
+    end;
+    if (nPoint < 0) or (nPoint > High(byte)) then
+    begin
+      //ScriptActionError(PlayObject, '', QuestActionInfo, sSC_CHANGEHUMABILITY);
+      MainOutMessage('{Òì³£} CHANGEHUMABILITY ½Å±¾´íÎó2');
+      exit;
+    end;
+    cMethod := pqa.ActTag[1];
+    case cMethod of
+      '+':
+        begin
+          if (who.m_TempAbil[btWhere].nAddWord + nPoint) > High(Word)
+            then
+            who.m_TempAbil[btWhere].nAddWord := High(Word)
+          else
+            Inc(who.m_TempAbil[btWhere].nAddWord, nPoint);
+        end;
+      '-':
+        begin
+          if who.m_TempAbil[btWhere].nAddWord < nPoint then
+            who.m_TempAbil[btWhere].nAddWord := 0
+          else
+            Dec(who.m_TempAbil[btWhere].nAddWord, nPoint);
+        end;
+      '=': who.m_TempAbil[btWhere].nAddWord := nPoint;
+    else
+      begin
+        //ScriptActionError(PlayObject, '', QuestActionInfo, sSC_CHANGEHUMABILITY);
+        MainOutMessage('{Òì³£} CHANGEHUMABILITY ½Å±¾´íÎó3');
+        exit;
+      end;
+    end;
+    if (pqa.ActExtraVal2 > 0) and (who.m_TempAbil[btWhere].nAddWord
+      > 0) then
+    begin
+      who.m_TempAbil[btWhere].nAddTick := GetTickCount +
+        LongWord(pqa.ActExtraVal2 * 1000);
+    end
+    else
+      who.m_TempAbil[btWhere].nAddTick := 0;
+    who.RecalcAbilitys;
+    who.SendMsg(who, RM_ABILITY, 0, 0, 0, 0, '');
+  except
+    MainOutMessage('[Exception] TNormNpc.ActionOfChangeHumAbility');
+  end;
+end;
+
+procedure TNormNpc.NpcDelayGoto(who: TCreature; pqa: PTQuestActionInfo);
+var
+  ntime: Integer;
+  str: string;
+  ptl: PTTimeLabel;
+begin
+  if TUserHuman(who).TimeLabelList.Count < 30 then
+  begin
+    str := pqa.ActTag;
+    ntime := Str_ToInt(pqa.ActParam, -1);
+    if (ntime > 0) and (str <> '') then
+    begin
+      New(ptl);
+      ptl.boDelete := False;
+      ptl.idx := 0;
+      ptl.sLabel := str;
+      ptl.dwTime := GetTickCount + LongWord(ntime);
+      ptl.boChangeMapDelete := not ((pqa.ActExtra = '') or (pqa.ActExtra = '0'));
+      ptl.Npc := Self;
+      ptl.Envir := TUserHuman(who).PEnvir;
+      TUserHuman(who).TimeLabelList.Add(ptl);
+    end
+    else
+      MainOutMessage('½Å±¾´íÎó: DELAYGOTO.');
+  end;
+
+end;
+
+
+procedure TNormNpc.NpcDelSkill(who: TCreature; pqa: PTQuestActionInfo);
+var
+  i: Integer;
+  sname: string;
+  pdm: PTDefMagic;
+  pum: PTUserMagic;
+begin
+  sname := pqa.ActParam;
+  pdm := UserEngine.GetDefMagic(sname);
+  if pdm = nil then
+  begin
+    MainOutMessage('½Å±¾´íÎó: NpcDelSkill.');
+    exit;
+  end;
+  for i := 0 to who.MagicList.Count - 1 do
+  begin
+    pum := who.MagicList.Items[i];
+    if pum.pDef = pdm then
+    begin
+      who.MagicList.Delete(i);
+      TUserHuman(who).SendDelMagic(pum);
+      Dispose(pum);
+      who.RecalcAbilitys;
+      break;
+    end;
+  end;
+end;
+
+procedure TNormNpc.NpcDelNoJobSkill(who: TCreature);
+var
+  i: Integer;
+  pum: PTUserMagic;
+begin
+  for i := who.MagicList.Count - 1 downto 0 do
+  begin
+    pum := who.MagicList.Items[i];
+    if pum.pDef.Job <> who.Job then
+    begin
+      TUserHuman(who).SendDelMagic(pum);
+      Dispose(pum);
+      who.MagicList.Delete(i);
+    end;
+  end;
+end;
+
+procedure TNormNpc.NpcClearSkill(who: TCreature);
+var
+  i: Integer;
+  pum: PTUserMagic;
+begin
+  for i := who.MagicList.Count - 1 downto 0 do
+  begin
+    pum := who.MagicList.Items[i];
+    TUserHuman(who).SendDelMagic(pum);
+    Dispose(pum);
+    who.MagicList.Delete(i);
+  end;
+  who.RecalcAbilitys;
+end;
+
+procedure TNormNpc.NpcSkillLevel(who: TCreature; pqa: PTQuestActionInfo);
+var
+  i, n: Integer;
+  CmdNum: Char;
+  pdm: PTDefMagic;
+  pum: PTUserMagic;
+begin
+  try
+    n := Str_ToInt(pqa.ActExtra, 0);
+    if n < 0 then
+    begin
+      MainOutMessage('½Å±¾´íÎó: NpcSkillLevel.');
+      Exit;
+    end;
+    CmdNum := pqa.ActTag[1];
+    pdm := UserEngine.GetDefMagic(pqa.ActParam);
+    if pdm <> nil then
+    begin
+      for I := 0 to who.MagicList.Count - 1 do
+      begin
+        pum := who.MagicList.Items[I];
+        if pum.pDef = pdm then
+        begin
+          case CmdNum of
+            '=':
+              begin
+                if n >= 0 then
+                begin
+                  n := _MAX(7, n);
+                  pum.Level := n;
+                end;
+              end;
+            '-':
+              begin
+                if pum.Level >= n then
+                begin
+                  Dec(pum.Level, n);
+                end
+                else
+                begin
+                  pum.Level := 0;
+                end;
+              end;
+            '+':
+              begin
+                if pum.Level + n <= 7 then
+                begin
+                  Inc(pum.Level, n);
+                end
+                else
+                begin
+                  pum.Level := 7;
+                end;
+              end;
+          end;
+          who.SendDelayMsg(who, RM_MAGIC_LVEXP, 0, pum.pDef.MagicId, pum.Level, pum.CurTrain, '', 100);
+          Break;
+        end;
+      end;
+    end;
+  except
+  end;
+end;
+
+procedure TNormNpc.NPCMessageBox(who: TCreature; pqa: pTQuestActionInfo);
+var
+  str: string;
+begin
+  str := GetLineVariableText(TUserHuman(who), pqa.ActParam);
+  who.SendMsg(Self, RM_MENU_OK, 0, Integer(who), 0, 0, str);
+end;
+
+procedure TNormNpc.ActionOfGmExecute(hum: TUserHuman; pqa: pTQuestActionInfo);
+var
+  sData                     : string;
+  btOldPermission           : byte;
+  sParam1, sParam2, sParam3, sParam4, sParam5: string;
+begin
+
+  sParam1 := pqa.ActParam;
+  sParam2 := pqa.ActTag;
+  sParam3 := pqa.ActExtra;
+  sParam4 := pqa.ActTagEx;
+  sParam5 := pqa.ActTagEx2;
+  if CompareText(sParam2, 'Self') = 0 then
+    sParam2 := hum.UserName;
+  sData := Format('@%s %s %s %s %s', [sParam1, sParam2, sParam3, sParam4, sParam5]);
+
+  btOldPermission := hum.UserDegree;
+  try
+    hum.UserDegree := 10;
+    hum.Say(sData);
+  finally
+    hum.UserDegree := btOldPermission;
+  end;
+end;
+
+function TNormNpc.CHECKISCASTLEGUILD(who: TCreature; pqc: PTQuestConditionInfo): Boolean;
+begin
+   Result := False;
+     if UserCastle.IsOurCastle(TGuild(TUserHuman(who).MyGuild))  then
+   Result := True;
+end;
+
+function TNormNpc.CHECKISCASTLEMASTER(who: TCreature; pqc: PTQuestConditionInfo): Boolean;
+begin
+   Result := False;
+     if who.IsGuildMaster and UserCastle.IsOurCastle(TGuild(TUserHuman(who).MyGuild)) then
+   Result := True;
+end;
+
+function TNormNpc.CheckHaveGuild(who: TCreature; pqc: PTQuestConditionInfo): Boolean;
+begin
+   Result := False;
+  if who.MyGuild <> nil  then
+   Result := True;
+end;
+
+function TNormNpc.CheckInfo(who: TCreature; pqc: PTQuestConditionInfo): Boolean;
+var
+  n: Integer;
+  CmdNum: Char;
+  str: string;
+begin
+  Result := False;
+  try
+    str := pqc.IfParam;
+    if CompareText (str, 'currmap') = 0 then
+    begin
+      if CompareText (who.MapName, pqc.IfTag) = 0 then
+        Result := True;
+    end;
+  except
+  end;
+end;
+
+
+procedure TNormNpc.ActionOfGiveexItem(who: TCreature; pqa: PTQuestActionInfo);
+var
+  i, n: Integer;
+  pu: PTUserItem;
+  pstd: PTStdItem;
+  iname, sItemCount: string;
+  nItemCount: Integer;
+  nValueType, nValue: Integer;
+  szAbil, szType, szValue: string;
+
+  procedure PutAddValueItem();
+  var
+    sAddValue: string;
+  begin
+    sAddValue := pqa.ActExtra;
+    while sAddValue <> '' do
+    begin
+      sAddValue := GetValidStr3(sAddValue, szAbil, [',']);
+      if szAbil <> '' then
+      begin
+        szAbil := GetValidStr3(szAbil, szType, ['=']);
+        szAbil := GetValidStr3(szAbil, szValue, ['=']);
+
+        nValueType := Str_ToInt(szType, -1);
+        nValue := Str_ToInt(szValue, -1);
+
+        if (nValueType in [0..13]) and (nValue in [0..255]) then
+        begin
+          if nValueType > 13 then
+          begin
+            if nValueType = 14 then
+            begin
+              nValue := _MIN(65, nValue);
+              pu.Dura := nValue * 1000;
+            end
+            else
+              pu.Desc[nValueType] := nValue;
+          end
+          else
+            pu.Desc[nValueType] := nValue;
+        end;
+      end;
+    end;
+  end;
+begin
+  iname := pqa.ActParam;
+  sItemCount := pqa.ActTag;
+  nItemCount := Str_ToInt(sItemCount, 1);
+
+  if (iname = '') or (nItemCount <= 0) then
+  begin
+    MainOutMessage('½Å±¾´íÎó: GIVEEX');
+    Exit;
+  end;
+
+  if UserEngine.GetStdItemIndex(iname) > 0 then
+  begin
+    if not (nItemCount in [1..50]) then
+      nItemCount := 1;
+    for i := 0 to nItemCount - 1 do
+    begin
+      if who.IsEnoughBag then
+      begin
+        New(pu);
+        if UserEngine.CopyToUserItemFromName(iname, pu^) then
+        begin
+          pstd := UserEngine.GetStdItem(pu.Index);
+          if pstd.StdMode in [5, 6, 10..13, 15..24, 26..30, 51..54, 62..64] then
+          begin
+            PutAddValueItem();
+          end;
+
+          who.ItemList.Add(pu);
+          TUserHuman(who).SendAddItem(pu^);
+        end
+        else
+          Dispose(pu);
+      end
+      else
+      begin
+        New(pu);
+        if UserEngine.CopyToUserItemFromName(iname, pu^) then
+        begin
+          pstd := UserEngine.GetStdItem(pu.Index);
+
+          if pstd.StdMode in [5, 6, 10..13, 15..24, 26..30, 51..54, 62..64] then
+          begin
+            PutAddValueItem();
+          end;
+          who.DropItemDown(pu^, 3, False, nil, who, 0);
+        end;
+        Dispose(pu);
+      end;
+    end;
+  end;
+end;
+
+{-------------------- TMerchant ----------------------}
+
+constructor TMerchant.Create;
+begin
+   inherited Create;
+   RaceImage := RCC_MERCHANT;  //»óÀÎ
+   Appearance := 0;
+   PriceRate := 100;
+   NoSeal := FALSE;
+   BoCastleManage := FALSE;
+   BoHiddenNpc := FALSE;
+
+   DealGoods := TStringList.Create;
+   ProductList := TList.Create;
+   GoodsList := TList.Create;
+   PriceList := TList.Create;
+
+   UpgradingList := TList.Create;
+
+   checkrefilltime := GetTickCount;
+   checkverifytime := GetTickCount;
+
+   fSaveToFileCount := 0;
+   //specialrepairtime := 0;
+   //specialrepair := 0;
+   CreateIndex := 0;
+end;
+
+destructor TMerchant.Destroy;
+var
+   i, k: integer;
+   list: TList;
+begin
+   for i:=0 to ProductList.Count-1 do
+      Dispose (PTMarketProduct (ProductList[i]));
+   ProductList.Free;
+
+   for i:=0 to GoodsList.Count-1 do begin
+      list := TList (GoodsList[i]);
+      for k:=0 to list.Count-1 do begin
+         Dispose (PTUserItem (list[k]));
+      end;
+      list.Free;
+   end;
+   GoodsList.Free;
+   for i:=0 to PriceList.Count-1 do begin
+      Dispose (PTPricesInfo (PriceList[i]));
+   end;
+   PriceList.Free;
+   for i:=0 to UpgradingList.Count-1 do
+      Dispose (PTUpgradeInfo (UpgradingList[i]));
+   UpgradingList.Free;
+   inherited Destroy;
+end;
+
+procedure TMerchant.ClearMerchantInfos;
+var
+   i: integer;
+begin
+   for i:=0 to ProductList.Count-1 do
+      Dispose (PTMarketProduct (ProductList[i]));
+   ProductList.Clear;
+
+   DealGoods.Clear;
+
+   {inherited} ClearNpcInfos;  //°øÅëÀ¸·Î »ç¿ë
+end;
+
+procedure TMerchant.LoadMerchantInfos;
+var
+   i: integer;
+begin
+   NpcBaseDir := MARKETDEFDIR;
+   FrmDB.LoadMarketDef (self, MARKETDEFDIR, MarketName + '-' + MapName, TRUE);
+   //ArrangeSayStrings;
+   /////////////*****************
+   //for i:=0 to SayStrings.Count-1 do begin
+   //   if CompareText(SayStrings[i], '@makedrug') = 0 then begin
+   //      NoSeal := TRUE;  //¹°°ÇÀ» ¸¸µå´Â °÷¿¡¼­´Â ÆÇ¸Å´Â ¾ÈÇÔ.
+   //      break;
+   //   end;
+   //end;
+end;
+
+procedure TMerchant.LoadMarketSavedGoods;
+begin
+   FrmDB.LoadMarketSavedGoods (self, MarketName + '-' + MapName);
+   FrmDB.LoadMarketPrices (self, MarketName + '-' + MapName);
+   LoadUpgradeItemList;
+end;
+
+function  TMerchant.GetGoodsList (gindex: integer): TList;
+var
+   i: integer;
+   l: TList;
+   pstd: PTStdItem;
+begin
+   Result := nil;
+   if gindex > 0 then
+      try
+      for i:=0 to GoodsList.Count-1 do begin
+         l := TList(GoodsList[i]);
+         if l.Count > 0 then
+            if PTUserItem (l[0]).Index = gindex then begin
+               Result := l;
+               break;
+            end;
+      end;
+      except
+      end;
+end;
+
+procedure TMerchant.PriceUp (index: integer);
+var
+   i, price: integer;
+   pstd: PTStdItem;
+begin
+   for i:=0 to PriceList.Count-1 do begin
+      if PTPricesInfo(PriceList[i]).Index = index then begin
+         price := PTPricesInfo(PriceList[i]).SellPrice;
+         if price < Round(price * 1.1) then price := Round(price * 1.1)
+         else price := price + 1;
+         exit;
+      end;
+   end;
+   pstd := UserEngine.GetStdItem (index);
+   if pstd <> nil then
+      NewPrice (index, Round (pstd.Price * 1.1));
+end;
+
+procedure TMerchant.PriceDown (index: integer);
+var
+   i, price: integer;
+   pstd: PTStdItem;
+begin
+   for i:=0 to PriceList.Count-1 do begin
+      if PTPricesInfo(PriceList[i]).Index = index then begin
+         price := PTPricesInfo(PriceList[i]).SellPrice;
+         if price > Round(price / 1.1) then price := Round(price / 1.1)
+         else price := price - 1;
+         price := _MAX(2, price); //°¡°ÝÀº 2º¸´Ù ÀÛÀ» ¼ö ¾ø´Ù. //_MIN->_MAX·Î ¼öÁ¤(sonmg)
+         exit;
+      end;
+   end;
+   pstd := UserEngine.GetStdItem (index);
+   if pstd <> nil then
+      NewPrice (index, Round (pstd.Price * 1.1));
+end;
+
+procedure TMerchant.NewPrice (index, price: integer);
+var
+   pi: PTPricesInfo;
+begin
+   new (pi);
+   pi.Index := index;
+   pi.SellPrice := price;
+   PriceList.Add (pi);
+   FrmDB.WriteMarketPrices (self, MarketName + '-' + MapName);
+end;
+
+//¹°°ÇÀÇ ´ëÇ¥ °¡°Ý
+function  TMerchant.GetPrice (index: integer): integer; //-1: not found
+var
+   i, price: integer;
+   pstd: PTStdItem;
+begin
+   price := -2;
+   for i:=0 to PriceList.Count-1 do begin
+      if PTPricesInfo(PriceList[i]).Index = index then begin
+         price := PTPricesInfo(PriceList[i]).SellPrice;
+         break;
+      end;
+   end;
+   if price < 0 then begin
+      pstd := UserEngine.GetStdItem (index);
+      if (pstd <> nil) and IsDealingItem (pstd.StdMode, pstd.Shape ) then begin
+         price := pstd.Price;
+      end;
+   end;
+   Result := price;
+end;
+
+//¹°°ÇÀÇ °³º° °¡°Ý
+function  TMerchant.GetGoodsPrice (uitem: TUserItem): integer;
+var
+   i, price, upg: integer;
+   dam: Real;
+   pstd: PTStdItem;
+begin
+   price := GetPrice (uitem.Index);
+   if price > 0 then begin
+      pstd := UserEngine.GetStdItem (uitem.Index);
+      if pstd <> nil then
+         if (pstd.OverlapItem < 1) and (pstd.StdMode > 4) and (pstd.DuraMax > 0) and
+            (uitem.DuraMax > 0) and (pstd.StdMode <> 8) then begin   //ÃÊ´ëÀå Á¦¿Ü
+            //°í±â·ù
+            if pstd.StdMode = 40 then begin
+               if (uitem.Dura <= uitem.DuraMax) then begin //ÀÏ¹Ý °í±â
+                  dam := (price / 2 / uitem.DuraMax) * (uitem.DuraMax - uitem.Dura);
+                  price := _MAX(2, Round(price - dam));
+               end else begin //°íÇ°Áú ÁÁÀº °í±â
+                  price := price + Round((uitem.Dura-uitem.DuraMax) * (price/uitem.DuraMax*2)); //°¡°ÝÀÌ ¸¹ÀÌ ¿Ã¶ó°¨
+               end;
+            end;
+            //±¤¼®·ù
+            if pstd.StdMode = 43 then begin
+               if uitem.DuraMax < 10000 then uitem.DuraMax := 10000;
+               if uitem.Dura <= uitem.DuraMax then begin //ÀÏ¹Ý °í±â
+                  dam := (price / 2 / uitem.DuraMax) * (uitem.DuraMax - uitem.Dura);
+                  price := _MAX(2, Round(price - dam));
+               end else begin //°íÇ°Áú ÁÁÀº °í±â
+                  price := price + Round((uitem.Dura-uitem.DuraMax) * (price/uitem.DuraMax*1.3)); //°¡°ÝÀÌ ¸¹ÀÌ ¿Ã¶ó°¨
+               end;
+            end;
+            if (pstd.OverlapItem < 1) and (pstd.StdMode > 4) then begin //½Ã¾à,½ºÅ©·Ñ,À½½Ä Á¦¿Ü
+               //¾÷±×·¹ÀÌµå µÈ ´É·Â
+               // °¡°ÝÀÌ »ó½Â....
+               upg := 0;
+               for i:=0 to 7 do begin  //´É·ÂÄ¡ »ó½ÂÀº 0..7
+                  if (pstd.StdMode = 5) or (pstd.StdMode = 6) then begin //¹«±â·ù
+                     if (i = 4) or (i = 9) then continue; //ÀúÁÖ, ¾÷±×·¹ÀÌµå ½ÇÆÐ´Â Á¦¿Ü
+                     if i = 6 then begin
+                        if uitem.Desc[i] > 10 then //°ø°Ý ¼Óµµ (+)
+                           upg := upg + (uitem.Desc[i] - 10) * 2;
+                        continue; //°ø°Ý¼Óµµ(-)´Â Á¦¿Ü
+                     end;
+                     upg := upg + uitem.Desc[i];
+                  end else
+                     upg := upg + uitem.Desc[i];
+               end;
+               if upg > 0 then begin  //¾÷±×·¹ÀÌµå µÈ ¾ÆÀÌÅÛÀº ºñ½Î´Ù
+                  price := price + (price div 5) * upg;
+               end;
+
+               //ÀüÃ¼ ¸¶¸ðµµ °Ë»ç
+               price := Round ((price / pstd.DuraMax) * uitem.DuraMax);
+               //ÇöÀç ¸¶¸ðµµ °Ë»ç
+               dam := (price / 2 / uitem.DuraMax) * (uitem.DuraMax - uitem.Dura);
+               price := _MAX(2, Round(price - dam));
+            end;
+         end;
+   end;
+   Result := price;
+end;
+
+//whocret: ¹°°Ç°ªÀ» ¹°¾îº¸´ÂÀÌ, »ç¶÷¿¡ µû¶ó¼­ °¡°ÝÀÌ Æ²·ÁÁú ¼ö ÀÖ´Ù.
+//price: ¿ø·¡ °¡°Ý
+function  TMerchant.GetSellPrice (whocret: TUserHuman; price: integer): integer;
+var
+   prate: integer;
+begin
+   if BoCastleManage then begin //¼º¾È¿¡ÀÇ »óÁ¡, ¼ºÀ» Áö¹èÇÏ´Â ¹®ÆÄ¿øµé¿¡°Ô´Â
+                              //½Î°Ô ÁØ´Ù.
+      if UserCastle.IsOurCastle (TGuild(whocret.MyGuild)) then begin
+         prate := _MAX(60, Round (PriceRate * 0.8));
+         Result := Round (price / 100 * prate);
+      end else
+         Result := Round (price / 100 * PriceRate);
+   end else
+      Result := Round (price / 100 * PriceRate);
+end;
+
+function  TMerchant.GetBuyPrice (price: integer): integer;
+begin
+   Result := Round (price / 2);
+end;
+
+function  TMerchant.IsDealingItem (stdmode: integer ; shape :integer ): Boolean;
+var
+   i: integer;
+   _stdmode : integer;
+   _shape   : integer;
+   str1 , str2 : string;
+begin
+   Result := FALSE;
+   for i:=0 to DealGoods.Count-1 do begin
+      str2 := GetValidStr3 ( DealGoods.Strings[i], str1, [',',' ']);
+      _stdmode := Str_ToInt( str1 , -1 );
+      _shape   := Str_ToInt( str2 , -1 );
+      // Test 2003-09-20 PDS
+      // MainOutMessage( 'Merchant Dealing Stdmode,Shape:'+IntTostr(_stdmode)+','+IntTostr(_shape));
+      if ( _stdmode = stdmode )then
+      begin
+         if _shape <> -1 then
+         begin
+            if ( _shape = shape ) then
+            begin
+                result := TRUE;
+                break;
+            end;
+         end
+         else
+         begin
+           Result := TRUE;
+           break;
+         end;
+      end;
+   end;
+end;
+(*
+procedure TMerchant.RefillGoods; //¸®ÇÊ ½Ã°£ Ã¼Å©ÇØ¼­ ºÎÁ·ÇÑ »óÇ°À» º¸ÃæÇÏ°í ÇÊ¿äÇÏ¸é °¡°Ý Á¶Á¤
+   procedure WasteNow (var list: TList; wcount: integer);
+   var
+      i: integer;
+   begin
+      for i:=list.Count-1 downto 0 do
+      begin
+         if wcount <= 0 then break;
+         try
+         Dispose (PTUserItem (list[i]));
+         finally
+         list.Delete (i);
+         end;
+         Dec (wcount);
+      end;
+   end;
+var
+   i,j, k, stock, gindex: integer;
+   pp: PTMarketProduct;
+   list, l: TList;
+   flag : Boolean;
+   step,AllowMaxNum,AYaoAllowMaxNum : integer;
+   ItemChanged : Boolean;
+   StdItem:PTStdItem;
+begin
+  CheckProductList;
+  AllowMaxNum:=100;// NPC±£´æµÄ¼þÊý
+  AYaoAllowMaxNum:=2000;  //NPCÒ©±£´æµÄ¼þÊý
+  for j:=0 to GoodsList.Count-1 do
+  begin
+     l := TList(GoodsList[j]);
+     ItemChanged:=False;
+      for i:=0 to ProductList.Count-1 do
+      begin
+         step := 1;
+         pp := ProductList[i];
+         gindex := UserEngine.GetStdItemIndex (pp.GoodsName);  //ÀÌ¸§À¸·Î ¾ÆÀÌÅÛ ÀÎµ¦½º¸¦ ¾ò¾î¿È
+         if gindex = PTUserItem(l.Items[0]).Index then
+         begin
+               list := GetGoodsList (gindex);
+               stock := 0;
+               if list <> nil then
+                  stock := list.Count;
+               if stock > pp.Count then
+               begin //¹°°ÇÀÌ ³²¾Æ µ·´Ù. ¹ö¸°´Ù.
+                  step := 7;
+                  /////PriceDown (gindex);
+                  WasteNow (list, stock - pp.Count); //µÚ¿¡¼­ ºÎÅÍ ¹ö¸²
+                  ItemChanged:=True;
+               end;
+              Continue;
+         end;
+      end;
+      if not ItemChanged then
+         begin
+            StdItem:=UserEngine.GetStdItem(PTUserItem(l.Items[0]).Index);
+            //Ò©
+            if StdItem.StdMode=0 then
+               begin
+                 if (l.count>AYaoAllowMaxNum) then
+                    WasteNow (l, l.count - AYaoAllowMaxNum); //µÚ¿¡¼­ ºÎÅÍ ¹ö¸²
+               end
+               else
+               begin
+                 if (l.count>AllowMaxNum) then
+                    WasteNow (l, l.count - AllowMaxNum); //µÚ¿¡¼­ ºÎÅÍ ¹ö¸²
+               end;
+         end;
+  end;
+  if  (CanSell or CanBuy) then
+      begin
+         FrmDB.WriteMarketSavedGoods (self, MarketName + '-' + MapName);
+         FrmDB.WriteMarketPrices (self, MarketName + '-' + MapName);
+      end;
+
+end;*)
+procedure TMerchant.RefillGoods; //¸®ÇÊ ½Ã°£ Ã¼Å©ÇØ¼­ ºÎÁ·ÇÑ »óÇ°À» º¸ÃæÇÏ°í ÇÊ¿äÇÏ¸é °¡°Ý Á¶Á¤
+procedure RefillNow(var list: TList; itemname: string;
+  fcount: integer);
+   var
+      i: integer;
+      pu: PTUserItem;
+      ps: PTStdItem;
+   begin
+      if list = nil then begin
+         list := TList.Create;
+         GoodsList.Add (list);
+      end;
+      for i:=0 to fcount-1 do begin
+         new (pu);
+         if UserEngine.CopyToUserItemFromName (itemname, pu^) then begin
+            ps := UserEngine.GetStdItem(pu.Index);
+            if ps <> nil then
+            begin
+               // Ä«¿îÆ®¾ÆÀÌÅÛ
+               if ps.OverlapItem >= 1 then begin
+                  pu.Dura := 1;
+               end;
+
+               list.add(pu); //»õ°Å´Â Ã³À½ºÎÅÍ..
+            end//if ps <> nil then
+            else
+                Dispose(pu);
+         end else
+            Dispose (pu);
+      end;
+end;
+   procedure WasteNow (var list: TList; wcount: integer);
+   var
+      i: integer;
+   begin
+      for i:=list.Count-1 downto 0 do begin
+         if wcount <= 0 then break;
+         try
+         Dispose (PTUserItem (list[i]));
+         finally
+         list.Delete (i);
+         end;
+         Dec (wcount);
+      end;
+   end;
+var
+   i,j, k, stock, gindex, gamount, goverlap: integer;
+   pp: PTMarketProduct;
+   list, l: TList;
+   flag : Boolean;
+   step : integer;
+   ItemChanged : Boolean;
+begin
+   ItemChanged := false;
+   i    := 0;
+   step := 0;
+   try
+      step := 0;
+      for i:=0 to ProductList.Count-1 do begin
+         step := 1;
+         pp := ProductList[i];
+         if GetTickCount - pp.ZenTime > longword(pp.ZenHour) * 60 * 1000 then begin
+         // 2003/03/04 »óÁ¡ Á¨ Å¸ÀÓ Á¶Á¤ 1ºÐ -> 1½Ã°£
+//         if GetTickCount - pp.ZenTime > longword(pp.ZenHour) * 60 * 60 * 1000 then begin
+            step := 3;
+            pp.ZenTime := GetTickCount;
+            gindex := UserEngine.GetStdItemIndex (pp.GoodsName);  //ÀÌ¸§À¸·Î ¾ÆÀÌÅÛ ÀÎµ¦½º¸¦ ¾ò¾î¿È
+//            goverlap := UserEngine.GetStdItemOverlapItem (pp.GoodsName);
+//            gamount := pp.Amount;
+            if gindex >= 0 then begin
+               step := 4;
+               list := nil;
+               list := GetGoodsList (gindex);
+               stock := 0;
+               if list <> nil then stock := list.Count;
+               if stock < pp.Count then begin //¹°°ÇÀÌ ºÎÁ·
+                  step := 5;
+                  PriceUp (gindex);
+                  RefillNow (list, pp.GoodsName, pp.Count-stock);  //»õ·Î Ãß°¡´Â ¾Õ¿¡¼­ ºÎÅÍ
+
+//MainOutMessage('[[[Refill Goods...]]] NPC:' + UserName + '(' + IntToStr(CreateIndex) + ')'); // Lag Test
+                  ItemChanged := true;
+                  //ÀúÀå
+//                   FrmDB.WriteMarketSavedGoods (self, MarketName + '-' + MapName);
+//                   FrmDB.WriteMarketPrices (self, MarketName + '-' + MapName);
+                  step := 6;
+               end;
+               if stock > pp.Count then begin //¹°°ÇÀÌ ³²¾Æ µ·´Ù. ¹ö¸°´Ù.
+                  step := 7;
+                  /////PriceDown (gindex, pp.Amount);
+                  WasteNow (list, stock - pp.Count); //µÚ¿¡¼­ ºÎÅÍ ¹ö¸²
+//MainOutMessage('[[[Waste Goods...]]] NPC:' + UserName); // Lag Test
+                  ItemChanged := true;
+                  //ÀúÀå
+//                   FrmDB.WriteMarketSavedGoods (self, MarketName + '-' + MapName);
+//                   FrmDB.WriteMarketPrices (self, MarketName + '-' + MapName);
+                  step := 8;
+               end;
+            end;
+         end;
+      end;
+
+      if ItemChanged then begin
+         // 10 ¹ø¿¡ ÇÑ¹ø¾¿ ÀúÀåÀ» ÇÏ°ÔÇÑ´Ù 5ºÐ x 10 = 50 ºÐ¿¡ ÇÑ¹ø¾¿ ÀúÀåµÊ
+         if ( fSaveToFileCount >= 10 ) then begin
+            FrmDB.WriteMarketSavedGoods (self, MarketName + '-' + MapName);
+            FrmDB.WriteMarketPrices (self, MarketName + '-' + MapName);
+            fSaveToFileCount := 0;
+         end else begin
+            inc ( fSaveToFileCount );
+         end;
+      end;
+      //ÀÌ»óÁ¡¿¡¼­ ³ªÁö´Â ¾ÊÁö¸¸ »çµéÀÎ ¹°°ÇÁß¿¡¼­ 1000°³ ÀÌ»óÀÌ¸é ¹ö¸°´Ù.
+      //ÀÌ »óÁ¡¿¡¼­ ³ª´Â °ÍÀº 5000°³ ÀÌ»ó ¹ö¸²
+      for j:=0 to GoodsList.Count-1 do begin
+         step := 9;
+         l := TList(GoodsList[j]);
+         step := 10;
+         if l.Count > 1000 then begin
+            //ÀÌ »óÁ¡¿¡¼­ ³ª´Â°ÍÀº Á¦°ÅÇÏÁö ¾ÊÀ½.
+            flag := FALSE;
+            for k:=0 to ProductList.Count-1 do begin
+               step := 11;
+               pp := ProductList[k];
+               gindex := UserEngine.GetStdItemIndex (pp.GoodsName);  //ÀÌ¸§À¸·Î ¾ÆÀÌÅÛ ÀÎµ¦½º¸¦ ¾ò¾î¿È
+               if PTUserItem (l[0]).Index = gindex then begin
+                  step := 12;
+                  flag := TRUE; //
+                  break;
+               end;
+            end;
+            step := 13;
+            if not flag then begin
+               WasteNow (l, l.count - 1000); //µÚ¿¡¼­ ºÎÅÍ ¹ö¸²
+            end else
+               WasteNow (l, l.count - 5000); //µÚ¿¡¼­ ºÎÅÍ ¹ö¸²
+         end;
+      end;
+
+   except
+      MainOutMessage ('Merchant RefillGoods Exception..Step=('+IntToStr(step)+')' );
+   end;
+end;
+
+procedure TMerchant.RefillNow(var list: TList; itemname: string;
+  fcount: integer);
+   var
+      i: integer;
+      pu: PTUserItem;
+      ps: PTStdItem;
+   begin
+      if list = nil then begin
+         list := TList.Create;
+         GoodsList.Add (list);
+      end;
+      for i:=0 to fcount-1 do begin
+         new (pu);
+         if UserEngine.CopyToUserItemFromName (itemname, pu^) then begin
+            ps := UserEngine.GetStdItem(pu.Index);
+            if ps <> nil then
+            begin
+               // Ä«¿îÆ®¾ÆÀÌÅÛ
+               if ps.OverlapItem >= 1 then begin
+                  pu.Dura := 1;
+               end;
+
+               list.add(pu); //»õ°Å´Â Ã³À½ºÎÅÍ..
+            end//if ps <> nil then
+            else
+                Dispose(pu);
+         end else
+            Dispose (pu);
+      end;
+end;
+
+procedure TMerchant.CheckNpcSayCommand (hum: TUserHuman; var source: string; tag: string);
+begin
+   inherited CheckNpcSayCommand (hum, source, tag);
+   if tag = '$TUSERNAME' then begin
+      source := ChangeNpcSayTag (source, '<$TUSERNAME>', hum.GetFrontCret.UserName);
+   end;
+   if tag = '$PRICERATE' then begin
+      source := ChangeNpcSayTag (source, '<$PRICERATE>', IntToStr(PriceRate));
+   end;
+   if tag = '$UPGRADEWEAPONFEE' then begin
+      source := ChangeNpcSayTag (source, '<$UPGRADEWEAPONFEE>', IntToStr(g_seWeapongoldcoin{UPGRADEWEAPONFEE  Ô­°æ²ÎÊý}));
+   end;
+   if tag = '$USERWEAPON' then begin
+      if hum.UseItems[U_WEAPON].Index <> 0 then
+         source := ChangeNpcSayTag (source, '<$USERWEAPON>', UserEngine.GetStdItemName(hum.UseItems[U_WEAPON].Index))
+      else
+         source := ChangeNpcSayTag (source, '<$USERWEAPON>', 'ÎäÆ÷');
+   end;
+end;
+
+procedure TMerchant.CheckProductList(Add:boolean);
+var
+   i,j, k, stock, gindex: integer;
+   pp: PTMarketProduct;
+   list, l: TList;
+   flag : Boolean;
+   step : integer;
+begin
+   i    := 0;
+   step := 0;
+   try
+      step := 0;
+      for i:=0 to ProductList.Count-1 do
+      begin
+         step := 1;
+         pp := ProductList[i];
+       if Add or (GetTickCount - pp.ZenTime > longword(pp.ZenHour) * 60 * 1000)  then begin
+         // 2003/03/04 »óÁ¡ Á¨ Å¸ÀÓ Á¶Á¤ 1ºÐ -> 1½Ã°£
+//         if GetTickCount - pp.ZenTime > longword(pp.ZenHour) * 60 * 60 * 1000 then begin
+            step := 3;
+            pp.ZenTime := GetTickCount;
+            gindex := UserEngine.GetStdItemIndex (pp.GoodsName);  //ÀÌ¸§À¸·Î ¾ÆÀÌÅÛ ÀÎµ¦½º¸¦ ¾ò¾î¿È
+            if gindex >= 0 then begin
+               step := 4;
+               list := nil;
+               list := GetGoodsList (gindex);
+               stock := 0;
+               if list <> nil then stock := list.Count;
+               if stock < pp.Count then begin //¹°°ÇÀÌ ºÎÁ·
+                  step := 5;
+                  PriceUp (gindex);
+                  RefillNow (list, pp.GoodsName, pp.Count-stock);  //»õ·Î Ãß°¡´Â ¾Õ¿¡¼­ ºÎÅÍ
+                  step := 6;
+               end;
+            end;
+       end;
+      end;
+   except
+      MainOutMessage ('Merchant CheckSysProductList Exception..Step=('+IntToStr(step)+')' );
+   end;
+end;
+
+procedure TMerchant.UserCall (caller: TCreature);
+var
+   data: string;
+   n: integer;
+begin
+   NpcSayTitle (caller, '@main');
+end;
+
+procedure TMerchant.SaveUpgradeItemList;
+begin
+   try
+      FrmDB.WriteMarketUpgradeInfos (UserName, UpgradingList);
+   except
+      MainOutMessage ('Failure in saving upgradinglist - ' + UserName);
+   end;
+end;
+
+procedure TMerchant.LoadUpgradeItemList;
+var
+   i: integer;
+begin
+   for i:=0 to UpgradingList.Count-1 do
+      Dispose (PTUpgradeInfo (UpgradingList[i]));
+   UpgradingList.Clear;
+   try
+      FrmDB.LoadMarketUpgradeInfos (UserName, UpgradingList);
+   except
+      MainOutMessage ('Failure in loading upgradinglist - ' + UserName);
+   end;
+end;
+
+//30ºÐ¿¡ ÇÑ ¹ø¾¿ ³Ê¹« ¿À·¡‰ç´Âµ¥ ¾È Ã£¾Æ°¡´Â ¾ÆÀÌÅÛÀº »èÁ¦ÇÑ´Ù
+//7ÀÏ ÀÌ»ó ¾È Ã£¾Æ °¡´Â ¾ÆÀÌÅÛÀº »èÁ¦µÈ´Ù.
+procedure TMerchant.VerifyUpgradeList;
+var
+   i, old   : integer;
+   pup      : PTUpgradeInfo;
+   realdate : Real;
+begin
+   old := 0;
+   for i:=UpgradingList.Count-1 downto 0 do
+   begin
+      pup := PTUpgradeInfo (UpgradingList[i]);
+      // TO PDS: CHeck Null..
+      if pup <> Nil then begin
+
+         realdate := real(Date ) - real(pup.readydate);
+
+         try // Round ½Ã¿¡ ¼ýÀÚ ÄÁ¹öÆÃ ¿¡·¯ ¹ß»ý PDS
+            old := Round(realdate);
+         except
+            on EInvalidOp do old := 0;
+         end;
+
+         if old >= 8 then begin //7+1ÀÏ ÀÌ»ó Áö³­ °Í
+            Dispose (pup);
+            UpgradingList.Delete (i);
+         end;
+
+      end else begin
+         MainOutMessage ('pup Is Nil... ');
+      end;
+
+   end;
+end;
+
+procedure TMerchant.UserSelectUpgradeWeapon (hum: TUserHuman);
+   procedure PrepareWeaponUpgrade (ilist: TList; var adc, asc, amc, dura: byte);
+   var
+      i, k, d, s, m, dctop, dcsec, sctop, scsec, mctop, mcsec, durasum, duracount: integer;
+      ps: PTStdItem;
+      dellist: TStringList;
+      sumlist: TList;
+      std: TStdItem;
+   begin
+      dctop := 0; dcsec := 0;
+      sctop := 0; scsec := 0;
+      mctop := 0; mcsec := 0;
+      durasum := 0;
+      duracount := 0;
+      dellist := nil;
+      sumlist := TList.Create;
+
+      for i := ilist.Count-1 downto 0 do begin
+         if UserEngine.GetStdItemName(PTUserItem(ilist[i]).Index) = __BlackStone then begin
+            sumlist.Add (pointer(Round(PTUserItem(ilist[i]).dura / 1000)));
+            //durasum := durasum +
+            //Inc (duracount);
+
+            if dellist = nil then dellist := TStringList.Create;
+            dellist.AddObject(__BlackStone, TObject(PTUserItem(ilist[i]).MakeIndex));
+
+            Dispose(PTUserItem(ilist[i]));
+            ilist.Delete (i);
+         end else begin
+            if IsUpgradeWeaponStuff (PTUserItem(ilist[i]).Index) then begin
+               ps := UserEngine.GetStdItem (PTUserItem(ilist[i]).Index);
+               if ps <> nil then begin
+                  std := ps^;
+                  ItemMan.GetUpgradeStdItem (PTUserItem(ilist[i])^, std);
+
+                  d := 0;  s := 0;  m := 0;
+
+                  case std.StdMode of
+                     19,20,21: begin  //¸ñ°ÉÀÌ
+                           d := Lobyte(std.DC) + Hibyte(std.DC);
+                           s := Lobyte(std.SC) + Hibyte(std.SC);
+                           m := Lobyte(std.MC) + Hibyte(std.MC);
+                        end;
+                     22,23: begin     //¹ÝÁö
+                           d := Lobyte(std.DC) + Hibyte(std.DC);
+                           s := Lobyte(std.SC) + Hibyte(std.SC);
+                           m := Lobyte(std.MC) + Hibyte(std.MC);
+                        end;
+                     24,26: begin     //ÆÈÂî
+                           d := Lobyte(std.DC) + Hibyte(std.DC) + 1;
+                           s := Lobyte(std.SC) + Hibyte(std.SC) + 1;
+                           m := Lobyte(std.MC) + Hibyte(std.MC) + 1;
+                        end;
+                  end;
+
+                  if dctop < d then begin dcsec := dctop; dctop := d;
+                  end else if dcsec < d then dcsec := d;
+
+                  if sctop < s then begin scsec := sctop; sctop := s;
+                  end else if scsec < s then scsec := s;
+
+                  if mctop < m then begin mcsec := mctop; mctop := m;
+                  end else if mcsec < m then mcsec := m;
+
+                  if dellist = nil then dellist := TStringList.Create;
+                  dellist.AddObject(ps.Name, TObject(PTUserItem(ilist[i]).MakeIndex));
+
+                  //·Î±×³²±è
+                  AddUserLog ('26'#9 + //¾÷Àç_
+                              hum.MapName + ''#9 +
+                              IntToStr(hum.CX) + ''#9 +
+                              IntToStr(hum.CY) + ''#9 +
+                              hum.UserName + ''#9 +
+                              UserEngine.GetStdItemName (PTUserItem(ilist[i]).Index) + ''#9 +
+                              IntToStr(PTUserItem(ilist[i]).MakeIndex) + ''#9 +
+                              '1'#9 +
+                              ItemOptionToStr(PTUserItem(ilist[i]).desc));
+                  Dispose(PTUserItem(ilist[i]));
+                  ilist.Delete (i);
+               end;
+            end;
+         end;
+      end;
+      for i:=0 to sumlist.Count-1 do begin
+         for k:=sumlist.Count-1 downto i+1 do begin
+            if integer(sumlist[k]) > integer(sumlist[k-1]) then begin
+               sumlist.Exchange (k, k-1);
+            end;
+         end;
+      end;
+      for i:=0 to sumlist.Count-1 do begin
+         durasum := durasum + integer(sumlist[i]);
+         inc (duracount);
+         if duracount >= 5 then break;
+      end;
+
+      //³»±¸ Æò±Õ, 5°³ ±îÁö ¸¹ÀÌ ³ÖÀ¸¸é ¾îµåº¥Å×Áö
+      dura := Round(_MIN(5,duracount) + (durasum/duracount) / 5 * _MIN(5,duracount));
+
+      adc := dctop + dctop div 5 + dcsec div 3;  //ÆÄ±« 5ÀÌ»ó °¡ÁßÄ¡
+      asc := sctop + sctop div 5 + scsec div 3;
+      amc := mctop + mctop div 5 + mcsec div 3;
+
+      if dellist <> nil then begin
+         hum.SendMsg (hum, RM_DELITEMS, 0, integer(dellist), 0, 0, '');
+         //dellist ´Â RM_DELITEMS ¿¡¼­ FREE µÈ´Ù.
+      end;
+
+      if sumlist <> nil then sumlist.Free;
+   end;
+var
+   i: integer;
+   flag: Boolean;
+   pup: PTUpgradeInfo;
+   pstd: PTStdItem;
+begin
+   flag := FALSE;
+   //µé°í ÀÖ´Â ¹«±âÀÇ ¾÷±×·¹ÀÌµå¸¦ ¸Ã±ä´Ù.
+   for i:=0 to UpgradingList.Count-1 do begin
+      if hum.UserName = PTUpgradeInfo(UpgradingList[i]).UserName then begin
+         NpcSayTitle (hum, '~@upgradenow_ing');
+         exit;
+      end;
+   end;
+
+   if hum.UseItems[U_WEAPON].Index <> 0 then begin   //
+      //--------------------------------------
+      //À¯´ÏÅ©¾ÆÀÌÅÛÀº Á¦·Ã ¸ø¸Ã±â°Ô...
+      pstd := UserEngine.GetStdItem (hum.UseItems[U_WEAPON].Index);
+      if pstd <> nil then begin
+         // => UNIQUEITEM ÇÊµå°¡ 00000001(2Áø¼ö)¸¦ Æ÷ÇÔÇÏ¸é Á¦·ÃºÒ°¡(¾÷±×·¹ÀÌµå Æ÷ÇÔ) ¾ÆÀÌÅÛ(sonmg 2005/12/09)
+         if {pstd.UniqueItem = 1} (pstd.UniqueItem and $01) <> 0 then begin
+            {$IFDEF KOREA} hum.BoxMsg('¶ÀÌØµÄÏîÄ¿²»ÄÜÌáÁ¶', 0);
+            {$ELSE}        hum.BoxMsg('¶ÀÌØµÄÏîÄ¿²»ÄÜÌáÁ¶', 0);
+            {$ENDIF}
+            exit;
+         end;
+      end;
+      //--------------------------------------
+
+      if hum.Gold >= g_seWeapongoldcoin{UPGRADEWEAPONFEE Ô­°æ²ÎÊý} then begin  //µ·ÀÌ ÀÖ´ÂÁö
+         if hum.FindItemName (__BlackStone) <> nil then begin  //ÈæÃ¶À» °¡Áö°í ÀÖ´ÂÁö
+            hum.DecGold (g_seWeapongoldcoin{UPGRADEWEAPONFEE  Ô­°æ²ÎÊý});
+            if BoCastleManage then  //5%ÀÇ ¼¼±ÝÀÌ °ÈÈù´Ù.
+               UserCastle.PayTax (g_seWeapongoldcoin{UPGRADEWEAPONFEE  Ô­°æ²ÎÊý});
+            hum.GoldChanged;
+
+            //°¡¹æ¿¡ ÀÖ´Â ¾ÆÀÌÅÛÀ» ¸ù¶¥ ³Ö´Â´Ù.
+            new (pup);
+            pup.UserName := hum.UserName;
+            pup.uitem := hum.UseItems[U_WEAPON];
+
+            //·Î±×³²±è
+            AddUserLog ('25'#9 + //¾÷¸Â_ +
+                        hum.MapName + ''#9 +
+                        IntToStr(hum.CX) + ''#9 +
+                        IntToStr(hum.CY) + ''#9 +
+                        hum.UserName + ''#9 +
+                        UserEngine.GetStdItemName (hum.UseItems[U_WEAPON].Index) + ''#9 +
+                        IntToStr(hum.UseItems[U_WEAPON].MakeIndex) + ''#9 +
+                        '1'#9 +
+                        ItemOptionToStr(UseItems[U_WEAPON].desc));
+
+            hum.SendDelItem (hum.UseItems[U_WEAPON]); //Å¬¶óÀÌ¾ðÆ®¿¡ ¾ø¾îÁø°Å º¸³¿
+            hum.UseItems[U_WEAPON].Index := 0;
+            hum.RecalcAbilitys;
+            hum.FeatureChanged;
+            hum.SendMsg (hum, RM_ABILITY, 0, 0, 0, 0, '');
+            //hum.SendMsg (hum, RM_SUBABILITY, 0, 0, 0, 0, '');
+
+            PrepareWeaponUpgrade (hum.ItemList, pup^.updc, pup^.upsc, pup^.upmc, pup^.durapoint);
+
+            pup.readydate := Now;
+            pup.readycount := GetTickCount;
+
+            UpgradingList.Add (pup);
+            SaveUpgradeItemList;
+
+            flag := TRUE;
+         end;
+      end;
+
+   end;
+   if flag then
+      NpcSayTitle (hum, '~@upgradenow_ok')
+   else
+      NpcSayTitle (hum, '~@upgradenow_fail');
+end;
+
+procedure TMerchant.UserSelectGetBackUpgrade (hum: TUserHuman);
+var
+   i, per, n: integer;
+   state, rand: integer;
+   pup: PTUpgradeInfo;
+   pu: PTUserItem;
+begin
+   state := 0;
+   pup := nil;
+   if hum.CanAddItem then begin
+      for i:=0 to UpgradingList.Count-1 do begin
+         if hum.UserName = PTUpgradeInfo(UpgradingList[i]).UserName then begin
+            state := 1;  //¸Ã±ä °ÍÀÌ ÀÖÀ½
+            if (GetTickCount - PTUpgradeInfo(UpgradingList[i]).readycount > (g_Weapontime) * 60 * 1000) or
+               (hum.UserDegree >= UD_ADMIN)
+            then begin
+               //´Ù µÇ¾úÀ¸¸é
+               pup := PTUpgradeInfo(UpgradingList[i]);
+               UpgradingList.Delete (i);
+               SaveUpgradeItemList;
+               state := 2;
+               break;
+            end;
+         end;
+      end;
+      if (pup <> nil) then begin
+         //³»±¸ °áÁ¤
+         case pup.durapoint of
+            0..8:
+               begin
+//                  n := _MAX(3000, pup.uitem.DuraMax div 2);
+                  if pup.uitem.DuraMax > 3000 then pup.uitem.DuraMax := pup.uitem.DuraMax - 3000
+                  else pup.uitem.DuraMax := pup.uitem.DuraMax div 2;
+                  if pup.uitem.Dura > pup.uitem.DuraMax then
+                     pup.uitem.Dura := pup.uitem.DuraMax;
+               end;
+            9..15:
+               begin
+                  if Random(pup.durapoint) < 6 then
+                     pup.uitem.DuraMax := _MAX(0, pup.uitem.DuraMax - 1000);  //DURAMAX¼öÁ¤
+               end;
+            //16..19
+            18..255:
+               begin
+                  case Random(pup.durapoint-18) of
+                     1..4:  pup.uitem.DuraMax := pup.uitem.DuraMax + 1000;
+                     5..7: pup.uitem.DuraMax := pup.uitem.DuraMax + 2000;
+                     8..255: pup.uitem.DuraMax := pup.uitem.DuraMax + 4000;
+                  end;
+               end;
+         end;
+
+         if (pup.updc = pup.upmc) and (pup.upmc = pup.upsc) then begin
+            rand := Random(3);
+         end else rand := -1;
+
+         //É³°Í¿ËÎäÆ÷Éý¼¶³É¹¦¸ÅÂÊ
+         if (pup.updc >= pup.upmc) and (pup.updc >= pup.upsc) or (rand = 0) then begin //¹¥»÷
+            //¹«±âÀÇ Çà¿îµµ °ü·Ã ÀÖÀ½
+            per := _MIN(85, 10 + _MIN(11, pup.updc) * 7 +
+                            pup.uitem.Desc[3]{Çà¿î} - pup.uitem.Desc[4] +
+                            hum.BodyLuckLevel);
+            if Random((wqsjgj)) < per then begin //¼¸ÂÊÄ¬ÈÏÎª100
+               pup.uitem.Desc[10] := 10;
+               if (per > 63) and (Random(30) = 0) then pup.uitem.Desc[10] := 11;
+               if (per > 79) and (Random(200) = 0) then pup.uitem.Desc[10] := 12;
+            end else
+               pup.uitem.Desc[10] := 1;
+         end;
+         if (pup.upmc >= pup.updc) and (pup.upmc >= pup.upsc) or (rand = 1) then begin //Ä§·¨
+            //¹«±âÀÇ Çà¿îµµ °ü·Ã ÀÖÀ½
+            per := _MIN(85, 10 + _MIN(11, pup.upmc) * 7 +
+                            pup.uitem.Desc[3] - pup.uitem.Desc[4] +
+                            hum.BodyLuckLevel);
+            if Random((wqsjmf)) < per then begin //¼¸ÂÊÄ¬ÈÏÎª100
+               pup.uitem.Desc[10] := 20;
+               if (per > 63) and (Random(30) = 0) then pup.uitem.Desc[10] := 21;
+               if (per > 79) and (Random(200) = 0) then pup.uitem.Desc[10] := 22;
+            end else
+               pup.uitem.Desc[10] := 1;
+         end;
+         if (pup.upsc >= pup.upmc) and (pup.upsc >= pup.updc) or (rand = 2) then begin //µÀÊõ
+            //¹«±âÀÇ Çà¿îµµ °ü·Ã ÀÖÀ½
+            per := _MIN(85, 10 + _MIN(11, pup.upsc) * 7 +
+                            pup.uitem.Desc[3] - pup.uitem.Desc[4] +
+                            hum.BodyLuckLevel);
+            if Random((wqsjds)) < per then begin  //¼¸ÂÊÄ¬ÈÏÎª100
+               pup.uitem.Desc[10] := 30;
+               if (per > 63) and (Random(30) = 0) then pup.uitem.Desc[10] := 31;
+               if (per > 79) and (Random(200) = 0) then pup.uitem.Desc[10] := 32;
+            end else
+               pup.uitem.Desc[10] := 1;
+         end;
+
+         new (pu);
+         pu^ := pup.uitem;
+         Dispose (pup);
+
+         //·Î±×³²±è
+         AddUserLog ('24'#9 + //¾÷Ã£_ +
+                     hum.MapName + ''#9 +
+                     IntToStr(hum.CX) + ''#9 +
+                     IntToStr(hum.CY) + ''#9 +
+                     hum.UserName + ''#9 +
+                     UserEngine.GetStdItemName (pu.Index) + ''#9 +
+                     IntToStr(pu.MakeIndex) + ''#9 +
+                     '1'#9 +
+                     ItemOptionToStr(pu.desc));
+
+         hum.AddItem (pu);
+         hum.SendAddItem (pu^);
+
+      end;
+
+      case state of
+         2: NpcSayTitle (hum, '~@getbackupgnow_ok');  //¿Ï¼º
+         1: NpcSayTitle (hum, '~@getbackupgnow_ing');  //ÀÛ¾÷Áß
+         0: NpcSayTitle (hum, '~@getbackupgnow_fail');
+      end;
+   end else begin
+      {$IFDEF KOREA} hum.SysMsg ('Äã²»ÄÜÔÙÐ¯´ø', 0);
+      {$ELSE}        hum.SysMsg ('Äã²»ÄÜÔÙÐ¯´ø', 0);
+      {$ENDIF}
+      NpcSayTitle (hum, '@exit');
+   end;
+end;
+
+///////////////////////////////////////////////////////////////
+// UserSelect º°µµ ºÐ¸®.
+procedure TMerchant.SendGoodsEntry (who: TCreature; ltop: integer);  //
+var
+   i, count: integer;
+   cg: TClientGoods;
+   l: TList;
+   pstd: PTStdItem;
+   pu: PTUserItem;
+   data: string;
+begin
+   data := '';
+   count := 0;
+   for i:=ltop to GoodsList.Count-1 do begin
+      l := GoodsList[i];
+      pu := PTUserItem (l[0]);
+      pstd := UserEngine.GetStdItem (pu.Index);
+      if pstd <> nil then begin
+         cg.Name := pstd.Name;
+         cg.Price := GetSellPrice (TUserHuman(who), GetPrice (pu.Index));//´ëÇ¥ °¡°Ý, ¹°°¡¸¦ Àû¿ëÇÔ.
+         cg.Stock := l.Count;
+         if (pstd.StdMode <= 4) or (pstd.StdMode = 42) or (pstd.StdMode = 31) then cg.SubMenu := 0 //½Ã¾à,À½½Ä,µµ±¸·ù, ¾àÀç, ¹­À½¾à..
+         else cg.SubMenu := 1;
+
+         // Ä«¿îÆ® ¾ÆÀÌÅÛ
+         if pstd.OverlapItem >= 1 then
+            cg.SubMenu := 2;
+
+         data := data + cg.Name + '/' + IntToStr(cg.SubMenu) + '/' + IntToStr(cg.Price) + '/' + IntToStr(cg.Stock) + '/';
+         Inc (count);
+      end;
+   end;
+   who.SendMsg (self, RM_SENDGOODSLIST, 0, integer(self), count, 0, data);
+end;
+procedure TMerchant.SendSellGoods (who: TCreature); //ÆÈ±â ¸Þ´ºÁØ´Ù.
+begin
+   who.SendMsg (self, RM_SENDUSERSELL, 0, integer(self), 0, 0, '');
+end;
+procedure TMerchant.SendRepairGoods (who: TCreature); //¼ö¸®ÇÏ±â ¸Þ´º
+begin
+   who.SendMsg (self, RM_SENDUSERREPAIR, 0, integer(self), 0, 0, '');
+end;
+procedure TMerchant.SendSpecialRepairGoods (who: TCreature); //Æ¯¼ö¼ö¸®ÇÏ±â ¸Þ´º
+var
+   str: string;
+begin
+   //if specialrepair > 0 then begin
+      {$IFDEF KOREA}
+      str := 'ÄãÕâ¼Ò»ï£¡ÄãÌ«ÐÒÔËÁË£¡ÎÒÕýºÃÓÐËùÐè²ÄÁÏ¿É×öÌØÊâÐÞ²¹\' +
+             'µ«¼Û¸ñÂï£¡ÊÇÍ¨³£µÄÈý±¶£¡\ \ ' +
+             ' <·µ»Ø/@main> ';
+      {$ELSE}
+      str :=  'ÄãÕâ¼Ò»ï£¡ÄãÌ«ÐÒÔËÁË£¡ÎÒÕýºÃÓÐËùÐè²ÄÁÏ¿É×öÌØÊâÐÞ²¹\' +
+              'µ«¼Û¸ñÂï£¡ÊÇÍ¨³£µÄÈý±¶£¡\ \ ' +
+              ' <·µ»Ø/@main> ';
+      {$ENDIF}
+//      str := ReplaceChar (str, '\', char($a));
+//      NpcSay (who, str);
+      NpcSayTitle (who, '@ready_s_repair');
+      who.SendMsg (self, RM_SENDUSERSPECIALREPAIR, 0, integer(self), 0, 0, '');
+   //end else begin
+   //   {$IFDEF KOREA}
+   //      NpcSay (who, 'ÂìÂì... Àç·á°¡ ´Ù ¶³¾îÁ®¼­ Æ¯¼ö¼ö¸®´Â\' +
+   //             'Èûµé°Ú´Â°É, Àá½Ã¸¸ ±â´Ù·Á¾ß Àç·á¸¦ ±¸ÇÒ ¼ö\' +
+   //             'ÀÖ³×.. ¾Æ½±Áö¸¸ ±â´Ù·ÁÁÖ°Ô...\ \ <µÚ·Î/@main>');
+   //   {$ELSE}
+   //      NpcSay (who, 'Sorry, but we ran out of material for special repairs\' +
+   //             'Sorry but we have no materials for repairs, Please wait for a moment\' +
+   //             ' \ <back/@main>');
+   //   {$ENDIF}
+   //   whocret.LatestNpcCmd := '@repair';
+   //end;
+end;
+procedure TMerchant.SendStorageItemMenu (who: TCreature);
+begin
+   who.SendMsg (self, RM_SENDUSERSTORAGEITEM, 0, integer(self), 0, 0, '');
+end;
+procedure TMerchant.SendStorageItemList (who: TCreature; StorageType: Byte);
+begin
+   who.SendMsg (self, RM_SENDUSERSTORAGEITEMLIST, StorageType, integer(self), 0, 0, '');
+end;
+procedure TMerchant.SendMakeDrugItemList (who: TCreature);
+const
+   MAKEPRICE = 100;
+var
+   i, j: integer;
+   data: string;
+   cg: TClientGoods;
+   pu: PTUserItem;
+   pstd: PTStdItem;
+   L: TList;
+   sMakeItemName, sMakePrice: string;    
+begin
+   data := '';
+   for i:=0 to GoodsList.Count-1 do begin
+      L := GoodsList[i];
+      pu := PTUserItem (L[0]);
+      pstd := UserEngine.GetStdItem (pu.Index);
+      if pstd <> nil then begin
+         cg.Name := pstd.Name;
+         cg.Price := MAKEPRICE;  //GetSellPrice (GetPrice (pu.Index));//¾à¸¸µå´Â ºñ¿ë
+         for j:=0 to MakeItemList.Count-1 do begin
+            sMakePrice := GetValidStr3(MakeItemList[j], sMakeItemName, [':']);
+            if cg.Name = sMakeItemName then begin
+               cg.Price := Str_ToInt(sMakePrice, 0);
+               break;
+            end;
+         end;
+         cg.Stock := 1;    //l.Count;
+         cg.SubMenu := 0; //½Ã¾à,À½½Ä,µµ±¸·ù...
+
+         data := data + cg.Name + '/' + IntToStr(cg.SubMenu) + '/' + IntToStr(cg.Price) + '/' + IntToStr(cg.Stock) + '/';
+      end;
+   end;
+   if data <> '' then
+      who.SendMsg (self, RM_SENDUSERMAKEDRUGITEMLIST, 0, integer(self), 0, 0, data);
+end;
+///////////////////////////////////////////////////////
+procedure TMerchant.SendMakeFoodList (who: TCreature);
+const
+   MAKEPRICE = 100;
+var
+   i, j: integer;
+   data: string;
+   cg: TClientGoods;
+   pu: PTUserItem;
+   pstd: PTStdItem;
+   L: TList;
+   sMakeItemName, sMakePrice: string;
+begin
+   data := '';
+   for i := 0 to GoodsList.Count-1 do begin
+//      if i >= 12 then // MAKE FOOD
+//         break;
+      if i >= Str_ToInt(MakeItemIndexList[1], 0) - Str_ToInt(MakeItemIndexList[0], 0) then // MAKE FOOD
+         break;
+
+      L := GoodsList[i];
+      pu := PTUserItem (L[0]);
+      pstd := UserEngine.GetStdItem (pu.Index);
+      if pstd <> nil then begin
+         cg.Name := pstd.Name;
+         cg.Price := MAKEPRICE;  //GetSellPrice (GetPrice (pu.Index));//¾à¸¸µå´Â ºñ¿ë
+         for j:=0 to MakeItemList.Count-1 do begin
+            sMakePrice := GetValidStr3(MakeItemList[j], sMakeItemName, [':']);
+            if cg.Name = sMakeItemName then begin
+               cg.Price := Str_ToInt(sMakePrice, 0);
+               break;
+            end;
+         end;
+         cg.Stock := 1;    //l.Count;
+         cg.SubMenu := 0; //½Ã¾à,À½½Ä,µµ±¸·ù...
+
+         data := data + cg.Name + '/' + IntToStr(cg.SubMenu) + '/' + IntToStr(cg.Price) + '/' + IntToStr(cg.Stock) + '/';
+      end;
+   end;
+   if data <> '' then
+      who.SendMsg (self, RM_SENDUSERMAKEITEMLIST, 0, integer(self), 1{¸ðµå}, 0, data);
+end;
+///////////////////////////////////////////////////////
+procedure TMerchant.SendMakePotionList (who: TCreature);
+const
+   MAKEPRICE = 100;
+var
+   i, j: integer;
+   data: string;
+   cg: TClientGoods;
+   pu: PTUserItem;
+   pstd: PTStdItem;
+   L: TList;
+   sMakeItemName, sMakePrice: string;
+begin
+   data := '';
+   for i := Str_ToInt(MakeItemIndexList[1], 0) - Str_ToInt(MakeItemIndexList[0], 0) to GoodsList.Count-1 do begin
+//      if i >= 16 then // MAKE POTION
+//         break;
+      if i >= Str_ToInt(MakeItemIndexList[2], 0) - Str_ToInt(MakeItemIndexList[0], 0) then // MAKE FOOD
+         break;
+
+      L := GoodsList[i];
+      pu := PTUserItem (L[0]);
+      pstd := UserEngine.GetStdItem (pu.Index);
+      if pstd <> nil then begin
+         cg.Name := pstd.Name;
+         cg.Price := MAKEPRICE;  //GetSellPrice (GetPrice (pu.Index));//¾à¸¸µå´Â ºñ¿ë
+         for j:=0 to MakeItemList.Count-1 do begin
+            sMakePrice := GetValidStr3(MakeItemList[j], sMakeItemName, [':']);
+            if cg.Name = sMakeItemName then begin
+               cg.Price := Str_ToInt(sMakePrice, 0);
+               break;
+            end;
+         end;
+         cg.Stock := 1;    //l.Count;
+         cg.SubMenu := 0; //½Ã¾à,À½½Ä,µµ±¸·ù...
+
+         data := data + cg.Name + '/' + IntToStr(cg.SubMenu) + '/' + IntToStr(cg.Price) + '/' + IntToStr(cg.Stock) + '/';
+      end;
+   end;
+   if data <> '' then
+      who.SendMsg (self, RM_SENDUSERMAKEITEMLIST, 0, integer(self), 2{¸ðµå}, 0, data);
+end;
+///////////////////////////////////////////////////////
+procedure TMerchant.SendMakeGemList (who: TCreature);
+const
+   MAKEPRICE = 100;
+var
+   i, j: integer;
+   data: string;
+   cg: TClientGoods;
+   pu: PTUserItem;
+   pstd: PTStdItem;
+   L: TList;
+   sMakeItemName, sMakePrice: string;
+begin
+   data := '';
+   for i := Str_ToInt(MakeItemIndexList[2], 0) - Str_ToInt(MakeItemIndexList[0], 0) to GoodsList.Count-1 do begin
+//      if i >= 29 then // MAKE GEM
+//         break;
+      if i >= Str_ToInt(MakeItemIndexList[3], 0) - Str_ToInt(MakeItemIndexList[0], 0) then // MAKE FOOD
+         break;
+
+      L := GoodsList[i];
+      pu := PTUserItem (L[0]);
+      pstd := UserEngine.GetStdItem (pu.Index);
+      if pstd <> nil then begin
+         cg.Name := pstd.Name;
+         cg.Price := MAKEPRICE;  //GetSellPrice (GetPrice (pu.Index));//¾à¸¸µå´Â ºñ¿ë
+         for j:=0 to MakeItemList.Count-1 do begin
+            sMakePrice := GetValidStr3(MakeItemList[j], sMakeItemName, [':']);
+            if cg.Name = sMakeItemName then begin
+               cg.Price := Str_ToInt(sMakePrice, 0);
+               break;
+            end;
+         end;
+         cg.Stock := 1;    //l.Count;
+         cg.SubMenu := 0; //½Ã¾à,À½½Ä,µµ±¸·ù...
+
+         data := data + cg.Name + '/' + IntToStr(cg.SubMenu) + '/' + IntToStr(cg.Price) + '/' + IntToStr(cg.Stock) + '/';
+      end;
+   end;
+   if data <> '' then
+      who.SendMsg (self, RM_SENDUSERMAKEITEMLIST, 0, integer(self), 3{¸ðµå}, 0, data);
+end;
+///////////////////////////////////////////////////////
+procedure TMerchant.SendMakeItemList (who: TCreature);
+const
+   MAKEPRICE = 100;
+var
+   i, j: integer;
+   data: string;
+   cg: TClientGoods;
+   pu: PTUserItem;
+   pstd: PTStdItem;
+   L: TList;
+   sMakeItemName, sMakePrice: string;
+begin
+   data := '';
+   for i := Str_ToInt(MakeItemIndexList[3], 0) - Str_ToInt(MakeItemIndexList[0], 0) to GoodsList.Count-1 do begin
+//      if i >= 66 then // MAKE ITEM
+//         break;
+      if i >= Str_ToInt(MakeItemIndexList[4], 0) - Str_ToInt(MakeItemIndexList[0], 0) then // MAKE FOOD
+         break;
+
+      L := GoodsList[i];
+      pu := PTUserItem (L[0]);
+      pstd := UserEngine.GetStdItem (pu.Index);
+      if pstd <> nil then begin
+         cg.Name := pstd.Name;
+         cg.Price := MAKEPRICE;  //GetSellPrice (GetPrice (pu.Index));//¾à¸¸µå´Â ºñ¿ë
+         for j:=0 to MakeItemList.Count-1 do begin
+            sMakePrice := GetValidStr3(MakeItemList[j], sMakeItemName, [':']);
+            if cg.Name = sMakeItemName then begin
+               cg.Price := Str_ToInt(sMakePrice, 0);
+               break;
+            end;
+         end;
+         cg.Stock := 1;    //l.Count;
+         cg.SubMenu := 0; //½Ã¾à,À½½Ä,µµ±¸·ù...
+
+         data := data + cg.Name + '/' + IntToStr(cg.SubMenu) + '/' + IntToStr(cg.Price) + '/' + IntToStr(cg.Stock) + '/';
+      end;
+   end;
+   if data <> '' then
+      who.SendMsg (self, RM_SENDUSERMAKEITEMLIST, 0, integer(self), 4{¸ðµå}, 0, data);
+end;
+///////////////////////////////////////////////////////
+procedure TMerchant.SendMakeStuffList (who: TCreature);
+const
+   MAKEPRICE = 100;
+var
+   i, j: integer;
+   data: string;
+   cg: TClientGoods;
+   pu: PTUserItem;
+   pstd: PTStdItem;
+   L: TList;
+   sMakeItemName, sMakePrice: string;
+begin
+   data := '';
+   for i := Str_ToInt(MakeItemIndexList[4], 0) - Str_ToInt(MakeItemIndexList[0], 0) to GoodsList.Count-1 do begin
+      if i >= Str_ToInt(MakeItemIndexList[5], 0) - Str_ToInt(MakeItemIndexList[0], 0) then // MAKE STUFF
+         break;
+
+      L := GoodsList[i];
+      pu := PTUserItem (L[0]);
+      pstd := UserEngine.GetStdItem (pu.Index);
+      if pstd <> nil then begin
+         cg.Name := pstd.Name;
+         cg.Price := MAKEPRICE;  //GetSellPrice (GetPrice (pu.Index));//¾à¸¸µå´Â ºñ¿ë
+         for j:=0 to MakeItemList.Count-1 do begin
+            sMakePrice := GetValidStr3(MakeItemList[j], sMakeItemName, [':']);
+            if cg.Name = sMakeItemName then begin
+               cg.Price := Str_ToInt(sMakePrice, 0);
+               break;
+            end;
+         end;
+         cg.Stock := 1;    //l.Count;
+         cg.SubMenu := 0; //½Ã¾à,À½½Ä,µµ±¸·ù...
+
+         data := data + cg.Name + '/' + IntToStr(cg.SubMenu) + '/' + IntToStr(cg.Price) + '/' + IntToStr(cg.Stock) + '/';
+      end;
+   end;
+   if data <> '' then
+      who.SendMsg (self, RM_SENDUSERMAKEITEMLIST, 0, integer(self), 5{¸ðµå}, 0, data);
+end;
+///////////////////////////////////////////////////////
+procedure TMerchant.SendMakeEtcList (who: TCreature);
+const
+   MAKEPRICE = 100;
+var
+   i, j: integer;
+   data: string;
+   cg: TClientGoods;
+   pu: PTUserItem;
+   pstd: PTStdItem;
+   L: TList;
+   sMakeItemName, sMakePrice: string;
+begin
+   data := '';
+   for i := Str_ToInt(MakeItemIndexList[5], 0) - Str_ToInt(MakeItemIndexList[0], 0) to GoodsList.Count-1 do begin
+      L := GoodsList[i];
+      pu := PTUserItem (L[0]);
+      pstd := UserEngine.GetStdItem (pu.Index);
+      if pstd <> nil then begin
+         cg.Name := pstd.Name;
+         cg.Price := MAKEPRICE;  //GetSellPrice (GetPrice (pu.Index));//¾à¸¸µå´Â ºñ¿ë
+         for j:=0 to MakeItemList.Count-1 do begin
+            sMakePrice := GetValidStr3(MakeItemList[j], sMakeItemName, [':']);
+            if cg.Name = sMakeItemName then begin
+               cg.Price := Str_ToInt(sMakePrice, 0);
+               break;
+            end;
+         end;
+         cg.Stock := 1;    //l.Count;
+         cg.SubMenu := 0; //½Ã¾à,À½½Ä,µµ±¸·ù...
+
+         data := data + cg.Name + '/' + IntToStr(cg.SubMenu) + '/' + IntToStr(cg.Price) + '/' + IntToStr(cg.Stock) + '/';
+      end;
+   end;
+   if data <> '' then
+      who.SendMsg (self, RM_SENDUSERMAKEITEMLIST, 0, integer(self), 6{¸ðµå}, 0, data);
+end;
+///////////////////////////////////////////////////////////////
+
+procedure TMerchant.UserSelect (whocret: TCreature; selstr: string);
+var
+   sel, body, rmsg: string;
+   i: integer;
+   goflag: Boolean;
+   psayproc: PTSayingProcedure;
+begin
+   try
+      if (BoCastleManage and UserCastle.BoCastleUnderAttack) or
+         //»çºÏ¼º¾È¿¡ ÀÖ´Â »óÁ¡Àº °ø¼ºÀü Áß¿¡´Â ¹°°ÇÀ» ÆÈÁö ¾Ê´Â´Ù.
+         whocret.Death
+      then begin
+         ;
+      end else begin
+         body := GetValidStr3 (selstr, sel, [#13]);
+
+         if (sel <> '') then begin
+
+            goflag := TRUE;
+{
+            goflag := FALSE;
+            if (CompareText(sel, '@main') <> 0) then begin
+               if TUserHuman(whocret).CurSayProc <> nil then begin
+                  psayproc := PTSayingProcedure(TUserHuman(whocret).CurSayProc);
+                  for i:=0 to psayproc.AvailableCommands.Count-1 do begin
+                     if CompareText(sel, psayproc.AvailableCommands[i]) = 0 then begin
+                        goflag := TRUE;
+                        break;
+                     end;
+                  end;
+               end;
+            end else
+               goflag := TRUE;
+}
+
+            if (sel[1] = '@') then begin
+//          if goflag and (sel[1] = '@') then begin
+               rmsg := '';
+               while TRUE do begin
+                  whocret.LatestNpcCmd := sel;
+
+                  //---------------------------------------
+                  //µû·Î ¸»ÇÏ´Â °ÍÀÌ ÇÁ·Î±×·¥µÇ¾î ÀÖÀ½
+                  if CanSpecialRepair then
+                     if CompareText(sel, '@s_repair') = 0 then begin
+                        SendSpecialRepairGoods (whocret);
+                        break;
+                     end;
+                  if CanTotalRepair then
+                     if CompareText(sel, '@t_repair') = 0 then begin
+                        SendSpecialRepairGoods (whocret);
+                        break;
+                     end;
+
+                  if CompareText(sel, '@@marrywho') = 0 then begin   // Çó»é
+                    UserChkMarry(TUserHuman(whocret), body);
+                    break;
+                  end;
+
+                  if CompareText(sel, '@cancelmarry') = 0 then begin   // È¡Ïû½á»éÇëÇó
+                    UserUnChkMarry(TUserHuman(whocret));
+                    break;
+                  end;
+
+                  if CompareText(sel, '@agreemarry') = 0 then begin   // Í¬Òâ½á»é
+                    UserAgreeMarry(TUserHuman(whocret));
+                    break;
+                  end;
+
+                  if CompareText(sel, '@dgreemarry') = 0 then begin   // ¾Ü¾ø½á»é
+                    UserCancelMarry(TUserHuman(whocret));
+                    break;
+                  end;
+
+                  if CompareText(sel, '@divorceyes') = 0 then begin   // Àë»é
+                    UserLeftMarry(TUserHuman(whocret));
+                    break;
+                  end;
+
+
+                  // °ÝÊ¦
+                  if CompareText(sel, '@@inputmaster') = 0 then begin
+                    UserReqMaster (TUserHuman(whocret), body);
+                    break;
+                  end;
+
+                  if CompareText(sel, '@@agreebemaster') = 0 then begin
+                    UserAgreeBeMaster (TUserHuman(whocret), body);
+                    break;
+                  end;
+                  // ¸¶Ç®Àë¿ªÊ¦¸µ
+                  if CompareText(sel, '@moneyunbindmaster') = 0 then begin
+                    UserUnbindMaster(TUserHuman(whocret), body);
+                    break;
+                  end;
+                  // ¸¶Ç®Àë¿ªÊ¦¸µ
+                  if CompareText(sel, '@leftmaster') = 0 then begin
+                    UserUnbindMaster(TUserHuman(whocret), body);
+                    break;
+                  end;
+                  // °ÑÍ½µÜ¸Ï³öÊ¦ÃÅ
+                  if CompareText(sel, '@leftprentice1') = 0 then begin
+                    UserLeftPrentice(TUserHuman(whocret), 1);
+                    break;
+                  end;
+                  if CompareText(sel, '@leftprentice2') = 0 then begin
+                    UserLeftPrentice(TUserHuman(whocret), 2);
+                    break;
+                  end;
+                  if CompareText(sel, '@leftprentice3') = 0 then begin
+                    UserLeftPrentice(TUserHuman(whocret), 3);
+                    break;
+                  end;
+                  if CompareText(sel, '@leftprentice4') = 0 then begin
+                    UserLeftPrentice(TUserHuman(whocret), 4);
+                    break;
+                  end;
+                  if CompareText(sel, '@leftprentice5') = 0 then begin
+                    UserLeftPrentice(TUserHuman(whocret), 5);
+                    break;
+                  end;
+
+                  if CompareText(sel, '@@cancelbemaster') = 0 then begin
+                    UserCancelBeMaster (TUserHuman(whocret), body);
+                    break;
+                  end;
+                  //---------------------------------------
+
+                  //»óÀÎ¸»ÇÏ´Â Á¤º¸ ÀÐ¾î¼­ ¸»ÇÔ.
+                  NpcSayTitle (whocret, sel);
+
+                  if CanBuy then
+                     if CompareText(sel, '@buy') = 0 then begin
+                        //»óÇ° Á¤º¸¸¦ º¸³½´Ù.  10°³¾¿ ²÷¾î¼­ º¸³½´Ù.
+                        SendGoodsEntry (whocret, 0);
+                        break;
+                     end;
+                  if CanSell then
+                     if CompareText(sel, '@sell') = 0 then begin
+                        SendSellGoods (whocret);
+                        break;
+                     end;
+                  if CanRepair then
+                     if CompareText(sel, '@repair') = 0 then begin
+                        SendRepairGoods (whocret);
+                        break;
+                     end;
+                  if CanMakeDrug then
+                     if CompareText(sel, '@makedrug') = 0 then begin
+                        SendMakeDrugItemList (whocret);
+                        break;
+                     end;
+                  if CompareText(sel, '@prices') = 0 then begin
+                     //½Ã¼¼ º¸±â...
+                     break;
+                  end;
+                  if CanStorage then
+                     if CompareText(sel, '@storage') = 0 then begin
+                        SendStorageItemMenu (whocret);
+                        break;
+                     end;
+                  if CanGetBack then
+                     if CompareText(sel, '@getback') = 0 then begin
+                        SendStorageItemList (whocret);
+                        break;
+                     end;
+                 if CanGetBack then
+                     if CompareText(sel, '@storages') = 0 then begin
+                        SendStorageItemList (whocret, 255);
+                        break;
+                     end;
+                     //¹«±â ¾÷±×·¹ÀÌµå
+                  if CanUpgrade then begin
+                     if CompareText(sel, '@upgradenow') = 0 then begin
+                        UserSelectUpgradeWeapon (TUserHuman(whocret));
+                        break;
+                     end;
+                     if CompareText(sel, '@getbackupgnow') = 0 then begin
+                        UserSelectGetBackUpgrade (TUserHuman(whocret));
+                        break;
+                     end;
+                  end;
+
+                  // ¾ÆÀÌÅÛ Á¦Á¶
+                  if CanMakeItem then begin
+                     if CompareText(sel, '@makefood') = 0 then begin
+                        SendMakeFoodList (whocret);
+//                        rmsg := '~@makefood';
+//                        NpcSayTitle (whocret, rmsg);
+//                        UserSelectMakeFood (TUserHuman(whocret));
+                        break;
+                     end;
+                     if CompareText(sel, '@makepotion') = 0 then begin
+                        SendMakePotionList (whocret);
+//                        rmsg := '~@makepotion';
+//                        NpcSayTitle (whocret, rmsg);
+//                        UserSelectMakePotion (TUserHuman(whocret));
+                        break;
+                     end;
+                     if CompareText(sel, '@makegem') = 0 then begin
+                        SendMakeGemList (whocret);
+//                        rmsg := '~@makegem';
+//                        NpcSayTitle (whocret, rmsg);
+//                        UserSelectMakeGem (TUserHuman(whocret));
+                        break;
+                     end;
+                     if CompareText(sel, '@makeitem') = 0 then begin
+                        SendMakeItemList (whocret);
+//                        rmsg := '~@makeitem';
+//                        NpcSayTitle (whocret, rmsg);
+//                        UserSelectMakeItem (TUserHuman(whocret));
+                        break;
+                     end;
+                     if CompareText(sel, '@makestuff') = 0 then begin
+                        SendMakeStuffList (whocret);
+//                        rmsg := '~@makestuff';
+//                        NpcSayTitle (whocret, rmsg);
+//                        UserSelectMakeStuff (TUserHuman(whocret));
+                        break;
+                     end;
+                     if CompareText(sel, '@makeetc') = 0 then begin
+                        SendMakeEtcList (whocret);
+//                        rmsg := '~@makeetc';
+//                        NpcSayTitle (whocret, rmsg);
+//                        UserSelectMakeEtc (TUserHuman(whocret));
+                        break;
+                     end;
+                  end;
+
+                  //À§Å¹ÆÇ¸Å°ü·Ã...
+                  if CanItemMarket and ( whocret <> nil )and ( whocret.RaceServer = RC_USERHUMAN )then
+                  begin
+                    if  CompareText( sel, '@market_0') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_ALL,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_1') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_WEAPON,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_2') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_NECKLACE,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_3') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_RING,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_4') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_BRACELET,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_5') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_CHARM,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_6') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_HELMET,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_7') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_BELT,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_8') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_SHOES,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+
+                    if  CompareText( sel, '@market_9') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_ARMOR,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_10') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_DRINK,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_11') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_JEWEL,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_12') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_BOOK,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_13') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_MINERAL,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_14') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_QUEST,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+                    if  CompareText( sel, '@market_15') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_ETC,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+
+                    if  CompareText( sel, '@market_100') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_SET,  USERMARKET_MODE_BUY );
+                        break;
+                    end;
+
+                    if  CompareText( sel, '@market_200') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_MINE,  USERMARKET_MODE_INQUIRY );
+                        break;
+                    end;
+
+                    if  CompareText( sel, '@market_sell') = 0 then
+                    begin
+                        SendUserMarket( TUserHuman ( whocret ) ,USERMARKET_TYPE_ALL,  USERMARKET_MODE_SELL );
+                        break;
+                    end;
+
+                  end;
+
+                  // ¹®ÆÄ Àå¿ø
+                  if CanAgitUsage and {(ServerIndex = 0) and} (whocret <> nil) then begin
+                     if CompareText( sel, '@agitreg') = 0 then begin
+                        TUserHuman(whocret).CmdGuildAgitRegistration;
+                     end;
+                     if CompareText( sel, '@agitmove') = 0 then begin
+                        TUserHuman(whocret).CmdGuildAgitAutoMove;
+                     end;
+                     if CompareText( sel, '@agitbuy') = 0 then begin
+                        TUserHuman(whocret).CmdGuildAgitBuy ( 1 );
+                     end;
+                     if CompareText( sel, '@agittrade') = 0 then begin
+                        TUserHuman(whocret).BoGuildAgitDealTry := TRUE; //Àå¿ø°Å·¡½ÃÀÛ
+                        TUserHuman(whocret).CmdTryGuildAgitTrade;
+                     end;
+                  end;
+                  // ¹®ÆÄ Àå¿ø(°ü¸®)
+                  if CanAgitManage and {(ServerIndex = 0) and} (whocret <> nil) then begin
+                     if CompareText( sel, '@agitextend') = 0 then begin
+                        TUserHuman(whocret).CmdGuildAgitExtendTime( 1 );
+                     end;
+                     if CompareText( sel, '@agitremain') = 0 then begin
+                        TUserHuman(whocret).CmdGuildAgitRemainTime;
+                     end;
+                     if CompareText( sel, '@@agitonerecall') = 0 then begin
+                        TUserHuman(whocret).CmdGuildAgitRecall (body, FALSE);
+                     end;
+                     if CompareText( sel, '@agitrecall') = 0 then begin
+                        TUserHuman(whocret).CmdGuildAgitRecall ('', TRUE);
+                     end;
+                     if CompareText( sel, '@@agitforsale') = 0 then begin
+                        TUserHuman(whocret).CmdGuildAgitSale ( body );
+                     end;
+                     if CompareText( sel, '@agitforsalecancel') = 0 then begin
+                        TUserHuman(whocret).CmdGuildAgitSaleCancel;
+                     end;
+                     if CompareText( sel, '@gaboardlist') = 0 then begin
+                        TUserHuman(whocret).CmdGaBoardList ( 1 );
+                     end;
+                     if CompareText( sel, '@@guildagitdonate') = 0 then begin
+                        TUserHuman(whocret).CmdGuildAgitDonate (body);
+                     end;
+                     if CompareText( sel, '@viewdonation') = 0 then begin
+                        TUserHuman(whocret).CmdGuildAgitViewDonation;
+                     end;
+                     if CompareText( sel, '@gaboarddelall') = 0 then begin
+                        TUserHuman(whocret).CmdGaBoardDelAll;
+                     end;
+//                     if CompareText( sel, '@apprentice') = 0 then begin
+//                        TUserHuman(whocret).SendDefMessage(SM_Master, 11, 0, 0, 0, '');
+//                     end;
+//                     if CompareText( sel, '@marry') = 0 then begin
+//                        TUserHuman(whocret).SendDefMessage(SM_Master, 1, 0, 0, 0, '');
+//                     end;
+                  end;
+                  // Àå¿ø²Ù¹Ì±â
+                  if CanBuyDecoItem and (whocret <> nil) then begin
+                     if CompareText( sel, '@ga_decoitem_buy') = 0 then begin
+                        SendDecoItemListShow(whocret);
+                     end;
+                     if CompareText( sel, '@ga_decomon_count') = 0 then begin
+                        TUserHuman(whocret).CmdAgitDecoMonCountHere;
+                     end;
+                  end;
+                  // ¸í¼ºÄ¡
+                  if CanDoingEtc and (whocret <> nil) then begin
+                     if CompareText( sel, '@@freepkother') = 0 then begin
+                        //PkPoint ÇØÁ¦
+                        if TUserHuman(whocret).CmdDeletePKPoint (body) then begin
+                           //¸í¼ºÄ¡ ¸ðµÎ °¨¼Ò
+                           TUserHuman(whocret).ZeroFamePoint;
+                           TUserHuman(whocret).BoxMsg('ÄãµÄÉùÓþ´ú¼Û' + body + 'µÄÓþÎª»Ö¸´ÁË', 0);
+                        end;
+                     end;
+                  end;
+
+                  if CompareText(sel, '@exit') = 0 then begin
+                     whocret.SendMsg (self, RM_MERCHANTDLGCLOSE, 0, integer(self), 0, 0, '');
+                     break;
+                  end;
+                  break;
+               end;
+            end;
+         end;
+      end;
+   except
+      MainOutMessage ('[Exception] TMerchant.UserSelect... ');
+   end;
+end;
+
+// Á¦Á¶ ¾ÆÀÌÅÛ Àç·á ¼³¸í.
+procedure TMerchant.SayMakeItemMaterials (whocret: TCreature; selstr: string);
+var
+   rmsg: string;
+begin
+   rmsg := '@';
+
+   // selstr is itemname...
+   rmsg := rmsg + selstr;
+
+   NpcSayTitle (whocret, rmsg);
+end;
+
+procedure TMerchant.QueryPrice (whocret: TCreature; uitem: TUserItem);
+var
+   i, buyprice: integer;
+begin
+   buyprice := GetBuyPrice (GetGoodsPrice (uitem));  //±¸ÀÔ °¡°ÝÀ» ¾Ë·ÁÁÜ
+   if buyprice >= 0 then begin
+      whocret.SendMsg (self, RM_SENDBUYPRICE, 0, buyprice, 0, 0, '');
+   end else
+      whocret.SendMsg (self, RM_SENDBUYPRICE, 0, 0, 0, 0, '');  //¾øÀ½..
+end;
+
+function  TMerchant.AddGoods (uitem: TUserItem): Boolean;
+var
+   pu: PTUserItem;
+   list: TList;
+   pstd: PTStdItem;
+begin
+   if uitem.DuraMax > 0 then begin //³»±¸¼ºÀÌ 0ÀÎ°ÍÀº ¼Õ½Ç Ã³¸®ÇÑ´Ù. (¾²·¡±â ¹æÁö)
+      list := GetGoodsList (uitem.Index);
+      if list = nil then begin
+         list := TList.Create;
+         GoodsList.Add (list);
+      end;
+      new (pu);
+      // 2003/06/12 »ç¿ëÀÚ°¡ ÆÈÀº ¹°°ÇÀÇ ³»±¸¼ºÀº ÃÖ´ë³»±¸·Î ¼öÁ¤ÇÏ¿©
+      // ½Ñ °¡°Ý¿¡ µÇ»ì¼ö ¾øµµ·Ï ¼öÁ¤
+      pstd := UserEngine.GetStdItem (uitem.Index);
+      if pstd <> nil then begin
+         //Àâ»óÀÎÀÇÈ¶ºÒ,µ¶°¡·çÀÇ ³»±¸¸¦ ÃÖ´ë·Î ¼öÁ¤ÇÏÁö ¾Ê´Â´Ù(sonmg 2004/07/16)
+         if(pstd.StdMode = 0) or (pstd.StdMode = 31) or
+          ((pstd.StdMode = 3) and ((pstd.Shape = 1) or (pstd.Shape = 2) or (pstd.Shape = 3) or (pstd.Shape = 5) or (pstd.Shape = 9)))
+           {or (pstd.StdMode = 25)} or ((pstd.StdMode = 30) and (pstd.Shape = 0)) then begin
+            uitem.Dura := uitem.DuraMax;
+         end;
+      end;
+      pu^ := uitem;
+      list.Insert (0, pu);
+   end;
+   Result := TRUE;
+end;
+
+function  TMerchant.UserSellItem (whocret: TCreature; uitem: TUserItem): Boolean;
+   function CanSell (pu: PTUserItem): Boolean;
+   var
+      pstd: PTStdItem;
+   begin
+      Result := TRUE;
+      pstd := UserEngine.GetStdItem (pu.Index);
+      if pstd <> nil then begin
+         if (pstd.UniqueItem and $08) <> 0 then Result := FALSE; //UNIQUEITEM ÇÊµå°¡ 00001000(2Áø¼ö)¸¦ Æ÷ÇÔÇÏ¸é ±³È¯ ¹× »óÁ¡°Å·¡ ÇÒ ¼ö ¾ø´Â ¾ÆÀÌÅÛ(sonmg 2005/03/14)
+         if (pstd.StdMode = 25) or (pstd.StdMode = 30) then begin
+            if pu.Dura < 4000 then
+               Result := FALSE;
+         end else if (pstd.StdMode = 8) then begin   //ÃÊ´ëÀåÀº ÆÈ ¼ö ¾ø´Ù.
+            Result := FALSE;
+         end;
+      end;
+   end;
+var
+   i, buyprice: integer;
+   pstd : PTStdItem;
+begin
+   Result := FALSE;
+   buyprice := GetBuyPrice (GetGoodsPrice (uitem));  //¹°°Ç ±¸ÀÔ °¡°Ý
+   if (buyprice >= 0) and (not NoSeal) and CanSell(@uitem) then begin    //»ç¿ëÀÚ°¡ ¹°°ÇÀ» ÆÈÀ½. »óÇ° ±¸ÀÔµµ ¾ÈÇÔ
+      if whocret.IncGold (buyprice) then begin
+
+         //»çºÏ¼º¾ÈÀÇ »óÁ¡ÀÎ °æ¿ì
+         if BoCastleManage then  //5%ÀÇ ¼¼±ÝÀÌ °ÈÈù´Ù.
+            UserCastle.PayTax (buyprice);
+
+         whocret.SendMsg (self, RM_USERSELLITEM_OK, 0, whocret.Gold, 0, 0, '');
+         //»óÇ°¿¡ Ãß°¡
+         AddGoods (uitem);
+
+         //·Î±×³²±è
+         pstd := UserEngine.GetStdItem(uitem.Index);
+         if ( pstd <> nil ) and ( not IsCheapStuff (pstd.StdMode) ) then begin
+            AddUserLog ('10'#9 + //ÆÇ¸Å_ +
+                        whocret.MapName + ''#9 +
+                        IntToStr(whocret.CX) + ''#9 +
+                        IntToStr(whocret.CY) + ''#9 +
+                        whocret.UserName + ''#9 +
+                        UserEngine.GetStdItemName (uitem.Index) + ''#9 +
+                        IntToStr(uitem.MakeIndex) + ''#9 +
+                        '1'#9 +
+                        UserName);
+         end;
+
+         Result := TRUE;
+      end else //µ·ÀÌ ³Ê¹« ¸¹À½.
+         whocret.SendMsg (self, RM_USERSELLITEM_FAIL, 0, 0, 1, 0, '');
+   end else //Ãë±Þ ¾ÈÇÔ
+      whocret.SendMsg (self, RM_USERSELLITEM_FAIL, 0, 0, 0, 0, '');
+end;
+
+//Ä«¿îÆ® ¾ÆÀÌÅÛ
+function  TMerchant.UserCountSellItem (whocret: TCreature; uitem: TUserItem; sellcnt: integer): Boolean;
+var
+   remain: integer;
+   i, buyprice: integer;
+   pstd: PTStdItem;
+begin
+   Result := FALSE;
+   buyprice := -1;
+
+   pstd := UserEngine.GetStdItem(uitem.Index);
+   if pstd <> nil then begin
+      if IsDealingItem(pstd.StdMode, pstd.Shape) then
+         buyprice := GetBuyPrice(GetGoodsPrice(uitem)) * sellcnt; //¹°°Ç ±¸ÀÔ °¡°Ý
+   end;
+
+   remain := uitem.Dura - sellcnt;
+
+   if (buyprice >= 0) and (not NoSeal) and (remain >= 0) then begin //»ç¿ëÀÚ°¡ ¹°°ÇÀ» ÆÈÀ½. »óÇ° ±¸ÀÔµµ ¾ÈÇÔ
+      if whocret.IncGold (buyprice) then begin
+
+         //»çºÏ¼º¾ÈÀÇ »óÁ¡ÀÎ °æ¿ì
+         if BoCastleManage then  //5%ÀÇ ¼¼±ÝÀÌ °ÈÈù´Ù.
+            UserCastle.PayTax (buyprice);
+
+         whocret.SendMsg (self, RM_USERSELLCOUNTITEM_OK, 0, whocret.Gold, remain, sellcnt, '');
+
+         //»óÇ°¿¡ Ãß°¡
+//         AddGoods (uitem);
+         //·Î±×³²±è
+         AddUserLog ('10'#9 + //ÆÇ¸Å_ +
+                     whocret.MapName + ''#9 +
+                     IntToStr(whocret.CX) + ''#9 +
+                     IntToStr(whocret.CY) + ''#9 +
+                     whocret.UserName + ''#9 +
+                     UserEngine.GetStdItemName (uitem.Index) + ''#9 +
+                     IntToStr(uitem.MakeIndex) + ''#9 +
+                     '1'#9 +
+                     UserName);
+         Result := TRUE;
+      end else //µ·ÀÌ ³Ê¹« ¸¹À½.
+         whocret.SendMsg (self, RM_USERSELLCOUNTITEM_FAIL, 0, 0, 0, 0, '');
+   end else //Ãë±Þ ¾ÈÇÔ
+      whocret.SendMsg (self, RM_USERSELLCOUNTITEM_FAIL, 0, 0, 0, 0, '');
+end;
+
+procedure TMerchant.QueryRepairCost (whocret: TCreature; uitem: TUserItem);
+var
+   i, price, cost: integer;
+begin
+   price := GetSellPrice (TUserHuman(whocret), GetGoodsPrice (uitem)); //ÆÇ¸Å°¡°ÝÀ¸·Î È¯»êÇÔ.
+   if price > 0 then begin
+      if (whocret.LatestNpcCmd = '@s_repair') or (whocret.LatestNpcCmd = '@t_repair') then begin //Æ¯¼ö¼ö¸®
+         price := price * 3;
+         //if specialrepair > 0 then
+         //else whocret.LatestNpcCmd := '@fail_s_repair';     //Æ¯¼ö¼ö¸® Àç·á ºÎÁ·..
+      end;
+
+      if uitem.DuraMax > 0 then
+         cost := Round(((price div 3) / uitem.DuraMax) * _MAX(0, uitem.DuraMax-uitem.Dura))  //DURAMAX¼öÁ¤
+      else
+         cost := 0;//price;
+
+      whocret.SendMsg (self, RM_SENDREPAIRCOST, 0, cost, 0, 0, '');
+   end else
+      whocret.SendMsg (self, RM_SENDREPAIRCOST, 0, -1, 0, 0, '');  //¾øÀ½..
+end;
+
+function  TMerchant.UserRepairItem (whocret: TCreature; puitem: PTUserItem): Boolean;
+var
+   i, price, cost: integer;
+   pstd: PTStdItem;
+   repair_type : integer;
+   str: string;
+begin
+   Result := FALSE;
+   repair_type := 0;
+   if whocret.LatestNpcCmd = '@fail_s_repair' then begin
+      //Æ¯¼ö¼ö¸® ¸øÇÔ.
+      {$IFDEF KOREA}
+         str := '¶Ô²»Æð£¬ÎÒÃÇ¸ÕÓÃÍêÁËÌØÊâÐÞ²¹µÄ²ÄÁÏ¡­¡­\ ' +
+                        ' \ \<·µ»Ø/@main> ';
+      {$ELSE}
+         str := 'Sorry, but we have no material for special repairs at the moment..\ ' +
+                        ' \ \<·µ»Ø/@main> ';
+      {$ENDIF}
+      str := ReplaceChar (str, '\', char($a));
+      NpcSay (whocret, str);
+      whocret.SendMsg (self, RM_USERREPAIRITEM_FAIL, 0, 0, 0, 0, '');
+      exit;
+   end;
+
+   pstd := UserEngine.GetStdItem (puitem.Index);
+   if pstd = nil then exit;
+
+   price := GetSellPrice (TUserHuman(whocret), GetGoodsPrice (puitem^));
+   if CanSpecialRepair and (whocret.LatestNpcCmd = '@s_repair') then begin //Æ¯¼ö¼ö¸®
+      price := price * 3;
+      if (pstd.StdMode <> 5) and (pstd.StdMode <> 6) then begin
+         {$IFDEF KOREA}// MainOutMessage('ÌØÊâÐÞÀí(X): ' + whocret.UserName + ' - ' + pstd.Name);
+         {$ELSE}      //  MainOutMessage('Special Repair(X): ' + whocret.UserName + ' - ' + pstd.Name);
+         {$ENDIF}
+         whocret.SendMsg (self, RM_USERREPAIRITEM_FAIL, 0, 0, 0, 0, '');
+         exit; // gadget:¹«±â°¡ ¾Æ´Ï¸é Æ¯¼ö¼ö¸® ¾øÀ½.
+      end else begin
+         {$IFDEF KOREA} // MainOutMessage('ÌØÊâÐÞÀí: ' + whocret.UserName + '(' + whocret.MapName + ':' + IntToStr(whocret.CX) + ',' + IntToStr(whocret.CY) + ')' + ' - ' + pstd.Name);
+         {$ELSE}
+         {$ENDIF}
+      end;
+   end;
+
+   if CanTotalRepair and (whocret.LatestNpcCmd = '@t_repair') then begin //Àý´ë¼ö¸®
+      price := price * 3;
+      // Àý´ë¼ö¸® ÀÌº¥Æ® 2003-06-26
+      case pstd.StdMode of
+      5,6,10,11,15,19,20,21,22,23,24,25,26,30,52,54: //ÌØÊâÐÞÀí¶ÔÓ¦STDMODEÖµ
+         begin
+            {$IFDEF KOREA} // MainOutMessage('ÌØÊâÎ¬ÐÞ»î¶¯: ' + whocret.UserName + '(' + whocret.MapName + ':' + IntToStr(whocret.CX) + ',' + IntToStr(whocret.CY) + ')' + ' - ' + pstd.Name)
+            {$ELSE}
+            {$ENDIF}
+         end;
+      else
+         {$IFDEF KOREA} // MainOutMessage('ÌØÊâÎ¬ÐÞ»î¶¯(X): ' + whocret.UserName + ' - ' + pstd.Name);
+         {$ELSE}        MainOutMessage('Perfect Repair(X): ' + whocret.UserName + ' - ' + pstd.Name);
+         {$ENDIF}
+         whocret.SendMsg (self, RM_USERREPAIRITEM_FAIL, 0, 0, 0, 0, '');
+         exit; // pds:ÀÌº¥Æ® Àý´ë¼ö¸®
+      end;
+
+   end;
+
+   // À¯´ÏÅ©¾ÆÀÌÅÛ ÇÊµå°¡ 3ÀÌ¸é ¼ö¸®ºÒ°¡.
+   // or -> and (sonmg's bug 2003/12/03)
+   if ((price > 0) and (pstd.StdMode <> 43)) and {(pstd.UniqueItem <> 3)} ((pstd.UniqueItem and $02) = 0) then begin  //Ãë±ÞÇÏÁö ¾Ê´Â °ÍÀº ¼ö¸® ¾ÈµÊ
+      if puitem.DuraMax > 0 then
+         cost := Round(((price div 3) / puitem.DuraMax) * _MAX(0, puitem.DuraMax-puitem.Dura))  //DURAMAX¼öÁ¤
+      else
+         cost := 0;//price;
+
+      if ( cost > 0 ) and whocret.DecGold (cost) then begin
+
+         //»çºÏ¼º¾ÈÀÇ »óÁ¡ÀÎ °æ¿ì
+         if BoCastleManage then  //5%ÀÇ ¼¼±ÝÀÌ °ÈÈù´Ù.
+            UserCastle.PayTax (cost);
+
+         if (CanSpecialRepair and (whocret.LatestNpcCmd = '@s_repair'))
+            or (CanTotalRepair and (whocret.LatestNpcCmd = '@t_repair')) then begin //Æ¯¼ö¼ö¸®
+            //Dec (specialrepair);
+            //Æ¯¼ö¼ö¸®´Â ³»±¸°¡ ¾àÇØÁöÁö ¾ÊÀ½
+            //puitem.DuraMax := puitem.DuraMax - _MAX(0, puitem.DuraMax-puitem.Dura) div 100;  //DURAMAX¼öÁ¤
+            puitem.Dura := puitem.DuraMax;
+
+            whocret.SendMsg (self, RM_USERREPAIRITEM_OK, 0, whocret.Gold, puitem.Dura, puitem.DuraMax, '');
+
+            {$IFDEF KOREA} str := 'Ëü¿´ÉÏÈ¥ÒÑ¾­ÐÞºÃÁË¡­¡­\ ' + 'ÇëºÃºÃÊ¹ÓÃËü¡£\ \<·µ»Ø/@main> ';
+            {$ELSE}        str := 'It seems to be repaired perfectly ...\use it well .\ \<back/@main>';
+            {$ENDIF}
+//            str := ReplaceChar (str, '\', char($a));
+//            NpcSay (whocret, str);
+            NpcSayTitle (whocret, '@succeed_s_repair');
+            repair_type := 2;
+         end else begin
+            //ÀÏ¹Ý ¼ö¸®, ³»±¸¼ºÀÌ ¸¹ÀÌ ¾àÇØÁü
+            puitem.DuraMax := puitem.DuraMax - _MAX(0, puitem.DuraMax-puitem.Dura) div 30;   //DURAMAX¼öÁ¤
+            puitem.Dura := puitem.DuraMax;
+
+            whocret.SendMsg (self, RM_USERREPAIRITEM_OK, 0, whocret.Gold, puitem.Dura, puitem.DuraMax, '');
+            NpcSayTitle (whocret, '~@repair');
+            repair_type := 1;
+         end;
+         Result := TRUE;
+
+         //¼ö¸® ·Î±× ³²±è
+         AddUserLog ('36'#9 + //¼ö¸®_ +
+                 whocret.MapName + ''#9 +
+                 IntToStr(cost) + ''#9 +
+                 IntToStr(whocret.Gold) + ''#9 +
+                 whocret.UserName + ''#9 +
+                 intToStr(puitem.DuraMax) + ''#9 +
+                 IntToStr(puitem.MakeIndex) + ''#9 +
+                 intToStr(Repair_type)+#9 +
+                 '0');
+
+
+      end else //µ·ÀÌ ¾øÀ½
+         whocret.SendMsg (self, RM_USERREPAIRITEM_FAIL, 0, 0, 0, 0, '');
+   end else
+      whocret.SendMsg (self, RM_USERREPAIRITEM_FAIL, 0, 0, 0, 0, '');
+end;
+
+procedure TMerchant.UserBuyItem (whocret: TUserHuman; itmname: string; serverindex, BuyCount: integer);
+var
+   i, k, sellprice, rcode: integer;
+   list: TList;
+   pstd: PTStdItem;
+   pu: PTUserItem;
+   done: Boolean;
+   CheckWeight : integer;
+   iname : String;
+   InviteResult : Boolean;
+begin
+   done := FALSE;
+   InviteResult := TRUE;
+   rcode := 1;  //»óÇ°ÀÌ ´Ù ÆÈ·È½À´Ï´Ù.
+   for i:=0 to GoodsList.Count-1 do begin
+      if done then break;
+      if NoSeal then break;  //¹°°ÇÀ» ¾ÈÆÄ´Â °¡°Ô
+      list := GoodsList[i];
+      pu := PTUserItem (list[0]);
+      pstd := UserEngine.GetStdItem (pu.Index);
+      if pstd <> nil then begin
+         // Ä«¿îÆ®¾ÆÀÌÅÛ
+         if pstd.OverlapItem = 1 then
+            CheckWeight := pstd.Weight + pstd.Weight * (BuyCount div 10)
+         else if pstd.OverlapItem >= 2 then
+            CheckWeight := pstd.Weight * BuyCount
+         else
+            CheckWeight := pstd.Weight;
+
+         if whocret.IsAddWeightAvailable (CheckWeight) then begin
+            if pstd.Name = itmname then begin
+               for k:=0 to list.Count-1 do begin     //»ç¿ëÀÚ°¡ ¹°°ÇÀ» »ç°¨
+                  pu := PTUserItem (list[k]);
+                  if (pstd.StdMode <= 4) or (pstd.StdMode = 42) or (pstd.StdMode = 31) or (pu.MakeIndex = serverindex)  or (pstd.OverlapItem >= 1) then begin
+                     //µ·À» ÃæºÐÀÌ °¡Áö°í ÀÖ¾î¾ßÇÔ.
+                     //if pstd.StdMode <= 4 then sellprice := GetPrice (pu.Index) //´ëÇ¥°¡°Ý
+                     sellprice := GetSellPrice (whocret, GetGoodsPrice (pu^)) * BuyCount; //°³º° °¡°Ý
+                     if (whocret.Gold >= sellprice) and (sellprice > 0) then begin
+                        if pstd.OverlapItem >= 1 then begin
+                           pu.Dura := _MIN(1000, BuyCount);
+                        end;
+
+                        // 2003/03/04 »óÁ¡ Á¨ Å¸ÀÓ Á¶Á¤ 1ºÐ -> 1½Ã°£<- ÀÌ ¸®¸¶Å©·Î ÄÚµùµÇ¾î ÀÖ´Â Å×½ºÆ® ¼­¹ö ÄÚµå
+{
+                        // 2003/03/04 ¾à¹°, Àü¼­·ù, È¶ºÒ, ¾à¹­À½, ºÎÀû Á¾·ù´Â »õ·Î ¸¸µé¾î º¸³»ÁØ´Ù
+                        if(pstd.StdMode = 0) or //(pstd.StdMode = 25) or //µ¶°¡·ç Á¦¿Ü
+                         ((pstd.StdMode = 3) and ((pstd.Shape = 1) or (pstd.Shape = 2) or (pstd.Shape = 3) or (pstd.Shape = 5) or (pstd.Shape = 9))) or
+                          ((pstd.StdMode = 30) and (pstd.Shape = 0)) or (pstd.StdMode = 31) then begin
+                           iname := pstd.Name;
+                           new(pu);
+                           if UserEngine.CopyToUserItemFromName(iname, pu^) then begin
+                              if whocret.AddItem(pu) then begin
+//                                 whocret.Gold := whocret.Gold - sellprice;
+                                 whocret.DecGold( sellprice );
+                                 whocret.SendAddItem(pu^);
+                                 //»çºÏ¼º¾ÈÀÇ »óÁ¡ÀÎ °æ¿ì
+                                 if BoCastleManage then  //5%ÀÇ ¼¼±ÝÀÌ °ÈÈù´Ù.
+                                    UserCastle.PayTax (sellprice);
+                                 //·Î±×³²±è
+                                 AddUserLog ('9'#9 + //±¸ÀÔ_
+                                             whocret.MapName + ''#9 +
+                                             IntToStr(whocret.CX) + ''#9 +
+                                             IntToStr(whocret.CY) + ''#9 +
+                                             whocret.UserName + ''#9 +
+                                             UserEngine.GetStdItemName (pu.Index) + ''#9 +
+                                             IntToStr(pu.MakeIndex) + ''#9 +
+                                             '1'#9 +
+                                             UserName);
+                                 rcode := 0;
+                              end else begin
+                                 Dispose(pu);
+                                 rcode := 2;
+                              end;
+                           end else begin
+                              Dispose(pu);
+                              rcode := 2;
+                           end;
+                        end else begin
+}
+
+                           // Ä«¿îÆ® ¾ÆÀÌÅÛ
+                           if pstd.OverlapItem >= 1 then begin
+                              if whocret.UserCounterItemAdd(pstd.StdMode, pstd.Looks, BuyCount, pstd.Name, FALSE) then begin
+//                                 whocret.Gold := whocret.Gold - sellprice;
+                                 whocret.DecGold( sellprice );
+
+//                                 Dispose(list[k]);    //¸·¾Æº¸ÀÚ...
+
+                                 list.Delete(k);
+                                 if list.Count = 0 then begin
+                                    list.Free;
+                                    GoodsList.Delete(i);
+                                 end;
+
+                                 whocret.WeightChanged;
+
+                                 rcode := 0;
+                                 done := TRUE;
+                                 break;
+                              end;
+                           end;
+
+                           InviteResult := TRUE;
+                           //ÃÊ´ëÀå ¼ÂÆÃ.
+                           if (pstd.StdMode = 8) and (pstd.Shape = SHAPE_OF_INVITATION) then begin
+                              InviteResult := whocret.GuildAgitInvitationItemSet(pu);
+                              if not InviteResult then begin
+                                 {$IFDEF KOREA} whocret.SysMsg('ÄãÖ»ÄÜÔÚÄãµÄÐÐ»áÁìµØÊÕµ½ÑûÇë', 0);
+                                 {$ELSE}        whocret.SysMsg('You can get an Invitation only in your guild territory.', 0);
+                                 {$ENDIF}
+                              end;
+                           end;
+
+                           if InviteResult then begin
+                              if whocret.AddItem (pu) then begin
+//                                 whocret.Gold := whocret.Gold - sellprice;
+                                 whocret.DecGold( sellprice );
+
+                                 //»çºÏ¼º¾ÈÀÇ »óÁ¡ÀÎ °æ¿ì
+                                 if BoCastleManage then  //5%ÀÇ ¼¼±ÝÀÌ °ÈÈù´Ù.
+                                    UserCastle.PayTax (sellprice);
+
+                                 whocret.SendAddItem (pu^);  //»ç±â ¼º°ø
+
+                                 // Áß¿äµµ°¡ ¶³¾îÁö´Â ¾ÆÀÌÅÛÀº ·Î±×¸¦ ³²±âÁö ¾Ê´Â´Ù.
+                                 if not IsCheapStuff (pstd.StdMode) then begin
+                                    AddUserLog ('9'#9 + //±¸ÀÔ_
+                                                whocret.MapName + ''#9 +
+                                                IntToStr(whocret.CX) + ''#9 +
+                                                IntToStr(whocret.CY) + ''#9 +
+                                                whocret.UserName + ''#9 +
+                                                UserEngine.GetStdItemName (pu.Index) + ''#9 +
+                                                IntToStr(pu.MakeIndex) + ''#9 +
+                                                '1'#9 +
+                                                UserName);
+                                 end;
+
+                                 list.Delete (k);
+                                 if list.Count = 0 then begin
+                                    list.Free;
+                                    GoodsList.Delete (i);
+                                 end;
+                                 rcode := 0;
+                              end else
+                                 rcode := 2;
+                           end else begin
+                              //ÃÊ´ëÀåÀ» »ì ¼ö ¾øÀ¸¸é ºüÁ®³ª°¨.
+                              exit;
+                           end;
+                        // 2003/03/04 ¾à¹°, Àü¼­·ù, È¶ºÒ, ¾à¹­À½, ºÎÀû Á¾·ù´Â »õ·Î ¸¸µé¾î º¸³»ÁØ´Ù
+                        // end;
+                     end else
+                        rcode := 3; //µ·ÀÌ ºÎÁ·ÇÔ.
+                     done := TRUE;
+                     break;
+                  end;
+               end;
+            end;
+         end else begin
+            rcode := 2;  //´õ ÀÌ»ó µé ¼ö ¾øÀ½.
+         end;
+      end;
+   end;
+   if rcode = 0 then begin
+      whocret.SendMsg (self, RM_BUYITEM_SUCCESS, 0, whocret.Gold, serverindex{ÆÈ¸° ¾ÆÀÌÅÛ}, 0, '');
+   end else begin
+      whocret.SendMsg (self, RM_BUYITEM_FAIL, 0, rcode, 0, 0, '');
+   end;
+end;
+
+procedure TMerchant.UserWantDetailItems (whocret: TCreature; itmname: string; menuindex: integer);
+var
+   i, k, count, grade: integer;
+   rr: Real;
+   data: string;
+   list: TList;
+   pstd: PTStdItem;
+   pu: PTUserItem;
+   cg: TClientGoods;
+   citem: TClientItem;
+begin
+   count := 0;
+   for i:=0 to GoodsList.Count-1 do begin
+      list := GoodsList[i];
+      pu := PTUserItem (list[0]);
+      pstd := UserEngine.GetStdItem (pu.Index);
+      if pstd <> nil then begin
+         if pstd.Name = itmname then begin
+            if menuindex > list.Count-1 then menuindex := _MAX(0, list.Count-10);
+            for k:=menuindex to list.Count-1 do begin
+               pu := PTUserItem (list[k]);
+               citem.S := pstd^;
+
+               //¹ÌÁöÀÇ¼Ó¼º ÇÁ¸® ¾ÈµÈ °Íµé ¼û±â±â
+               if pstd.StdMode in [15,19,20,21,22,23,24,26,52,53,54] then begin
+                  if pu.Desc[8] = 0 then begin //¼Ó¼ºÀÌ ÇÁ¸®µÊ(sonmg 2005/04/07 ¼öÁ¤)
+                     citem.S.ItemDesc := citem.S.ItemDesc and (not IDC_UNIDENTIFIED);//$01;
+                  end else begin
+                     citem.S.ItemDesc := citem.S.ItemDesc or IDC_UNIDENTIFIED;//$01;
+                  end;
+               end;
+
+               citem.UpgradeOpt := 0;
+               citem.Dura := pu.Dura;
+               citem.DuraMax := GetSellPrice (TUserHuman(whocret), GetGoodsPrice (pu^));  //°³º° ÀÚ¼¼ÇÑ °¡°Ý
+               citem.MakeIndex := pu.MakeIndex;
+               data := data + EncodeBuffer (@citem, sizeof(TClientItem)) + '/';
+
+               Inc (count);
+               if count >= 10 then break;
+            end;
+            break;
+         end;
+      end;
+   end;
+   whocret.SendMsg (self, RM_SENDDETAILGOODSLIST, 0, integer(self), count, menuindex, data);
+end;
+
+//////////////////////////////////////////
+// Á¦Á¶ °ü·Ã »ó¼ö
+//////////////////////////////////////////
+const
+   MAX_SOURCECNT    = 6;
+   //---------------//
+   // Á¶°Ç °á°ú
+   COND_FAILURE     = 0;
+   COND_GEMFAIL     = 1;
+   COND_SUCCESS     = 2;
+   COND_MINERALFAIL = 3;
+   COND_NOMONEY     = 4;
+   COND_BAGFULL     = 5;
+   //---------------//
+   // ¼öÈ£¼® µî±Þ
+   GSG_ERROR       = 0;
+   GSG_SMALL       = 1; //(¼Ò)
+   GSG_MEDIUM      = 2; //(Áß)
+   GSG_LARGE       = 3; //(´ë)
+   GSG_GREATLARGE  = 4; //(Æ¯)
+   GSG_SUPERIOR    = 5; //Áö¼® or ½Å¼®
+   //---------------//
+//////////////////////////////////////////
+
+procedure TMerchant.UserMakeNewItem (whocret: TUserHuman; itmname: string);
+{
+const
+   COND_FAILURE = 0;
+//   COND_GEMFAIL = 1;
+   COND_SUCCESS = 2;
+//   COND_MINERALFAIL = 3;
+   COND_NOMONEY = 4;
+   //---------------//
+}
+   function CheckCondition (hum: TUserHuman; itemname: string; var iPrice: Integer): Integer;
+   var
+      list: TStringList;
+      k, i, sourcecount: integer;
+      sourcename: string;
+      condition: Integer;
+      dellist: TStringList;
+      pu: PTUserItem;
+      ps: PTStdItem;
+   begin
+      condition := COND_FAILURE;
+      list := GetMakeItemCondition (itemname, iPrice);
+
+      if (hum.Gold < iPrice) then begin
+         Result := COND_NOMONEY;
+         exit;
+      end;
+
+      if list <> nil then begin
+         condition := COND_SUCCESS;
+         for k:=0 to list.Count-1 do begin  //¸¸µå´Âµ¥ ÇÊ¿äÇÑ Àç·á
+            sourcename := list[k];
+            sourcecount := integer (list.Objects[k]);
+            for i:=0 to hum.ItemList.Count-1 do begin //³» °¡¹æ¿¡ ¾ÆÀÌÅÛÀÌ ÀÖ´ÂÁö °Ë»ç
+               pu := PTUserItem (hum.ItemList[i]);
+               if sourcename = UserEngine.GetStdItemName(pu.Index) then begin
+                  ps := UserEngine.GetStdItem (pu.Index);
+                  if ps <> nil then
+                  begin
+                     // Ä«¿îÆ® ¾ÆÀÌÅÛ.
+                     if ps.OverlapItem >= 1 then
+                        sourcecount := sourcecount - _MIN(pu.Dura, sourcecount)
+                     else
+                        dec (sourcecount);  //°¹¼ö °Ë»ç..
+                  end;
+               end;
+            end;
+            if sourcecount > 0 then begin
+               condition := COND_FAILURE;  //°¹¼ö ¹Ì´ÞÀÌ¸é Á¶°Ç ¾È¸ÂÀ½°£ÁÖ.
+               break;
+            end;
+         end;
+         if condition = COND_SUCCESS then begin //Á¶°ÇÀÌ ¸ÂÀ¸¸é Àç·á´Â »ç¶óÁø´Ù.
+            dellist := nil;
+            for k:=0 to list.Count-1 do begin
+               sourcename := list[k];
+               sourcecount := integer (list.Objects[k]);
+               for i:=hum.ItemList.Count-1 downto 0 do begin
+                  pu := PTUserItem (hum.ItemList[i]);
+                  if sourcecount > 0 then begin
+                     if sourcename = UserEngine.GetStdItemName(pu.Index) then begin
+                        ps := UserEngine.GetStdItem (pu.Index);
+                        if ps <> nil then
+                        begin
+                           //Ä«¿îÆ® ¾ÆÀÌÅÛ.
+                           if ps.OverlapItem >= 1 then begin
+                              if pu.Dura < Integer(list.Objects[k]) then
+                                 pu.Dura := 0
+                              else
+                                 pu.Dura := pu.Dura - Integer(list.Objects[k]);
+
+                              if pu.Dura > 0 then begin
+                                 hum.SendMsg(self, RM_COUNTERITEMCHANGE, 0, pu.MakeIndex, pu.Dura, 0, ps.Name);
+                                 continue;
+                              end;
+                           end;
+                           //ÀÏ¹Ý ¾ÆÀÌÅÛ ¶Ç´Â Ä«¿îÆ® ¾ÆÀÌÅÛ »èÁ¦
+                           if dellist = nil then dellist := TStringList.Create;
+                           dellist.AddObject(sourcename, TObject(PTUserItem (hum.ItemList[i]).MakeIndex));
+                           Dispose (PTUserItem(hum.ItemList[i]));
+                           hum.ItemList.Delete (i);
+                           dec (sourcecount);
+                        end;
+                     end;
+                  end else
+                     break;
+               end;
+            end;
+            if dellist <> nil then //dellistÀº  RM_DELITEMS¿¡¼­ FreeµÊ.
+               hum.SendMsg (self, RM_DELITEMS, 0, integer(dellist), 0, 0, '');
+         end;
+      end;
+      Result := condition;
+   end;
+const
+   MAKEPRICE = 100;
+var
+   i, rcode: integer;
+   done: Boolean;
+   list: TList;
+   pu, newpu: PTUserItem;
+   pstd: PTStdItem;
+   iMakePrice: Integer;
+   iCheckResult: Integer;
+begin
+   iMakePrice := MAKEPRICE;
+
+   done := FALSE;
+   rcode := 1;
+   for i:=0 to GoodsList.Count-1 do begin
+      if done then break;
+      list := GoodsList[i];
+      pu := PTUserItem (list[0]);
+      pstd := UserEngine.GetStdItem (pu.Index);
+      if pstd <> nil then begin
+         if pstd.Name = itmname then begin
+            //¾ÆÀÌÅÛ ¸¸µå´Â ºñ¿ëµµ ÇÔ²² Ã¼Å©ÇÑ´Ù.
+            iCheckResult := CheckCondition (whocret, itmname, iMakePrice);
+            if iCheckResult <> COND_NOMONEY then begin
+               if iCheckResult = COND_SUCCESS then begin
+                  new (newpu);
+                  UserEngine.CopyToUserItemFromName (itmname, newpu^);
+                  if whocret.AddItem (newpu) then begin
+//                     whocret.Gold := whocret.Gold - iMakePrice;
+                     whocret.DecGold( iMakePrice );
+                     whocret.SendAddItem (newpu^);  //¸¸µé±â ¼º°ø...
+                     //·Î±×³²±è
+                     AddUserLog ('2'#9 + //Á¦ÀÛ_
+                                 whocret.MapName + ''#9 +
+                                 IntToStr(whocret.CX) + ''#9 +
+                                 IntToStr(whocret.CY) + ''#9 +
+                                 whocret.UserName + ''#9 +
+                                 UserEngine.GetStdItemName (newpu.Index) + ''#9 +
+                                 IntToStr(newpu.MakeIndex) + ''#9 +
+                                 '1'#9 +
+                                 UserName);
+                     rcode := 0;
+                  end else begin
+                     Dispose (newpu);
+                     rcode := 2;
+                  end;
+               end else
+                  rcode := 4;
+            end else
+               rcode := 3;
+         end;
+      end;
+   end;
+   if rcode = 0 then begin
+      whocret.SendMsg (self, RM_MAKEDRUG_SUCCESS, 0, whocret.Gold, 0, 0, '');
+   end else begin
+      whocret.SendMsg (self, RM_MAKEDRUG_FAIL, 0, rcode, 0, 0, '');
+   end;
+end;
+
+// ¾ÆÀÌÅÛ Á¦Á¶ ÇÁ·Î½ÃÁ®.
+procedure TMerchant.UserManufactureItem (whocret: TUserHuman; itmname: string);
+const
+   MAKEPRICE = 100;
+var
+   i, j, rcode: integer;
+   done: Boolean;
+   list: TList;
+   pu, newpu: PTUserItem;
+   pstd: PTStdItem;
+   sMakeItemName: string;
+   sItemMakeIndex: array [1..MAX_SOURCECNT] of string;
+   sItemName: array [1..MAX_SOURCECNT] of string;
+   sItemCount: array [1..MAX_SOURCECNT] of string;
+   iCheckResult: Integer;
+   iMakePrice, iMakeCount: integer;
+   strSourceLog: string;
+begin
+   iMakePrice := MAKEPRICE;
+   strSourceLog := '';
+
+   try
+      // RightStr := GetValidStr3 (OrgStr, LeftStr of Separator, Separator);
+      itmname := GetValidStr3 (itmname, sMakeItemName, ['/']);
+      for i:= 1 to MAX_SOURCECNT do begin
+         itmname := GetValidStr3 (itmname, sItemMakeIndex[i], [':']);
+         itmname := GetValidStr3 (itmname, sItemName[i], [':']);
+         itmname := GetValidStr3 (itmname, sItemCount[i], ['/']);
+      end;
+      ///////////////////////////////////////////
+{$IFDEF DEBUG}   //sonmg
+      whocret.SysMsg (sMakeItemName, 0);
+      for i := 1 to MAX_SOURCECNT do begin
+         whocret.SysMsg (sItemMakeIndex[i] + sItemName[i] + sItemCount[i], 0);
+         //Á¦Á¶ Àç·á ·Î±×
+         strSourceLog := strSourceLog + sItemName[i];
+         if i <> MAX_SOURCECNT then
+            strSourceLog := strSourceLog + ','; //¸¶Áö¸· Àç·á°¡ ¾Æ´Ï¸é ','¸¦ ºÙÀÎ´Ù.
+      end;
+{$ENDIF}
+      ///////////////////////////////////////////
+
+      done := FALSE;
+      rcode := 1;
+      for i:=0 to GoodsList.Count-1 do begin
+         if done then break;
+         list := GoodsList[i];
+         pu := PTUserItem (list[0]);
+         pstd := UserEngine.GetStdItem (pu.Index);
+         if pstd <> nil then begin
+            if pstd.Name = sMakeItemName then begin
+               //¾ÆÀÌÅÛ ¸¸µå´Â ºñ¿ëµµ ÇÔ²² Ã¼Å©ÇÑ´Ù.
+               iCheckResult := CheckMakeItemCondition (whocret, sMakeItemName, sItemMakeIndex, sItemName, sItemCount, iMakePrice, iMakeCount);
+               if iCheckResult <> COND_NOMONEY then begin
+                  if iCheckResult = COND_SUCCESS then begin
+                     for j:=0 to iMakeCount-1 do begin
+                        new (newpu);
+                        UserEngine.CopyToUserItemFromName (sMakeItemName, newpu^);
+                        if whocret.AddItem (newpu) then begin
+//                           whocret.Gold := whocret.Gold - iMakePrice;
+                           whocret.DecGold( iMakePrice );
+                           whocret.SendAddItem (newpu^);  //¸¸µé±â ¼º°ø...
+
+                           // Á¦Á¶ ¼º°ø ·Î±×
+{
+                           MainOutMessage( '[Manufacture Á¦Á¶] ' + whocret.UserName + ' ' + UserEngine.GetStdItemName (newpu.Index) + '(' + IntToStr(newpu.MakeIndex) + ') '
+                              + '=> »èÁ¦µÈ Àç·á:' + sItemName[1] + ', ' + sItemName[2]
+                              + ', ' + sItemName[3] + ', ' + sItemName[4]
+                              + ', ' + sItemName[5] + ', ' + sItemName[6] );
+}
+
+                           //·Î±×³²±è
+                           AddUserLog ('2'#9 + //Á¦ÀÛ_
+                                       whocret.MapName + ''#9 +
+                                       IntToStr(whocret.CX) + ''#9 +
+                                       IntToStr(whocret.CY) + ''#9 +
+                                       whocret.UserName + ''#9 +
+                                       UserEngine.GetStdItemName (newpu.Index) + ''#9 +
+                                       IntToStr(newpu.MakeIndex) + ''#9 +
+                                       '1'#9 +
+                                       UserName);
+                           rcode := 0;
+                        end else begin
+                           Dispose (newpu);
+                           rcode := 2;
+                        end;
+                     end;
+                  end else if iCheckResult = COND_GEMFAIL then begin
+                     // º¸¿Á Á¦Á¶ ½ÇÆÐ½Ã¿¡µµ µ·Àº ºüÁ® ³ª°£´Ù.
+//                     whocret.Gold := whocret.Gold - iMakePrice;
+                     whocret.DecGold( iMakePrice );
+                     whocret.GoldChanged;
+
+                     //·Î±×³²±è
+                     AddUserLog ('2'#9 + //Á¦ÀÛ_½ÇÆÐ
+                                 whocret.MapName + ''#9 +
+                                 IntToStr(whocret.CX) + ''#9 +
+                                 IntToStr(whocret.CY) + ''#9 +
+                                 whocret.UserName + ''#9 +
+                                 'FAIL'#9 +
+                                 '0'#9 +
+                                 '1'#9 +
+                                 UserName);
+                     rcode := 5;
+                  end else if iCheckResult = COND_MINERALFAIL then begin
+                     rcode := 6;
+                  end else if iCheckResult = COND_BAGFULL then begin
+                     rcode := 7;
+                  end else
+                     rcode := 4;
+               end else
+                  rcode := 3;
+            end;
+         end;
+      end;
+
+      if rcode = 0 then begin
+         whocret.SendMsg (self, RM_MAKEDRUG_SUCCESS, 0, whocret.Gold, 0, 0, '');
+      end else begin
+         whocret.SendMsg (self, RM_MAKEDRUG_FAIL, 0, rcode, 0, 0, '');
+      end;
+   except
+      MainOutMessage ('[Exception] TMerchant.UserManufactureItem');
+   end;
+end;
+
+////////////////////////////////////////////////////////////
+// ¼öÈ£¼®ÀÇ µî±ÞÀ» ¾ò¾î³»´Â ÇÔ¼ö.
+function TMerchant.GetGradeOfGuardStoneByName ( strGuardStone: string ): Integer;
+begin
+   Result := GSG_ERROR;
+
+   //Compare String...
+   if ENGLISHVERSION or PHILIPPINEVERSION then begin
+      if CompareBackLStr(strGuardStone, '(S)', 3) = TRUE then begin
+         Result := GSG_SMALL;
+      end else if CompareBackLStr(strGuardStone, '(M)', 3) = TRUE then begin
+         Result := GSG_MEDIUM;
+      end else if CompareBackLStr(strGuardStone, '(L)', 3) = TRUE then begin
+         Result := GSG_LARGE;
+      end else if (CompareBackLStr(strGuardStone, '(XL)', 4) = TRUE) or
+          (CompareBackLStr(strGuardStone, 'XL', 2) = TRUE) then begin
+         Result := GSG_GREATLARGE;
+      end else if CompareBackLStr(strGuardStone, 'STONE', 5) = TRUE then begin
+         Result := GSG_SUPERIOR;
+      end else begin
+         Result := GSG_ERROR;
+      end;
+   end else if KOREANVERSION then begin
+      if CompareBackLStr(strGuardStone, '(Ð¡)', 4) = TRUE then begin
+         Result := GSG_SMALL;
+      end else if CompareBackLStr(strGuardStone, '(ÖÐ)', 4) = TRUE then begin
+         Result := GSG_MEDIUM;
+      end else if CompareBackLStr(strGuardStone, '(´ó)', 4) = TRUE then begin
+         Result := GSG_LARGE;
+      end else if CompareBackLStr(strGuardStone, '(ÌØ)', 4) = TRUE then begin
+         Result := GSG_GREATLARGE;
+      end else if CompareBackLStr(strGuardStone, 'Ê¥Ê¯', 4) = TRUE then begin
+         Result := GSG_SUPERIOR;
+      end else if CompareBackLStr(strGuardStone, 'ÉñÊ¯', 4) = TRUE then begin
+         Result := GSG_SUPERIOR;
+      end else begin
+         Result := GSG_ERROR;
+      end;
+   end else begin
+      //±âº»°ª
+      if CompareBackLStr(strGuardStone, '(Ð¡)', 4) = TRUE then begin
+         Result := GSG_SMALL;
+      end else if CompareBackLStr(strGuardStone, '(ÖÐ)', 4) = TRUE then begin
+         Result := GSG_MEDIUM;
+      end else if CompareBackLStr(strGuardStone, '(´ó)', 4) = TRUE then begin
+         Result := GSG_LARGE;
+      end else if CompareBackLStr(strGuardStone, '(ÌØ)', 4) = TRUE then begin
+         Result := GSG_GREATLARGE;
+      end else if CompareBackLStr(strGuardStone, 'Ê¥Ê¯', 4) = TRUE then begin
+         Result := GSG_SUPERIOR;
+      end else if CompareBackLStr(strGuardStone, 'ÉñÊ¯', 4) = TRUE then begin
+         Result := GSG_SUPERIOR;
+      end else begin
+         Result := GSG_ERROR;
+      end;
+   end;
+end;
+
+
+procedure TMerchant.UserChkMarry(whocret: TUserHuman; smname: string);
+var
+  wm : TUserHuman;
+  falg: Integer;
+  i: Integer;
+  pstd: PTStdItem;
+begin
+  falg := -1;
+  wm := UserEngine.GetUserHuman(smname);
+  whocret.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+
+  if wm = nil then begin
+    whocret.SysMsg('[Ê§°Ü] ¶Ô·½²»ÔÚÓÐÐ§·¶Î§ÄÚ»ò¶Ô·½ÉèÖÃ²»½ÓÊÜÈÎºÎÇó»é£¡', 1);
+    Exit;
+  end;
+
+  if (whocret.sex = 0) and (wm.Sex = 0) then
+  begin
+  whocret.SysMsg('[Ê§°Ü] ¶Ô·½ÊÇÄÐÐÔ£¬ÄãÎÞ·¨Ïò¶Ô·½Çó»é', 1);
+  exit;
+  end;
+  if whocret.m_btCreditPoint < 5 then begin
+    whocret.SysMsg('[Ê§°Ü] Çó»éÕß±ØÐëÂú×ã£ºÎ´»é£¬ÄÐÐÔ£¬ÖÁÉÙ5µãÉùÍû£¬Åå´øÇó»é½äÖ¸', 1);
+    Exit;
+  end;
+
+
+  for i:=0 to U_TRANS do begin
+     pstd := UserEngine.GetStdItem(whocret.UseItems[i].Index);
+     if pstd <> nil then begin
+        if (pstd.StdMode = 22) and (pstd.Name = 'Çó»é½äÖ¸') then begin
+          falg := 0;
+          break;
+        end;
+     end;
+  end;
+
+
+  if whocret.Sex <> 0 then falg := -1;
+
+  if falg = -1 then begin
+    whocret.SysMsg('[Ê§°Ü] Çó»éÕß±ØÐëÂú×ã£ºÎ´»é£¬ÄÐÐÔ£¬ÖÁÉÙ5µãÉùÍû£¬Åå´øÇó»é½äÖ¸', 1);
+    Exit;
+  end;
+
+  if wm.fLover.GetLoverName <> '' then begin
+    whocret.SysMsg('[Ê§°Ü]¶Ô·½ÒÑ¾­½á»éÁË£¬ÄãÎÞ·¨ÏòËýÇó»é£¡', 1);
+    Exit;
+  end;
+
+  if whocret.fLover.GetLoverName <> '' then falg := 1;
+
+  if (wm.flover.GetEnable(RsState_Lover) <> 1) or (wm.GetFrontCret <> whocret) then begin
+    whocret.SysMsg('[Ê§°Ü] ¶Ô·½²»ÔÚÓÐÐ§·¶Î§ÄÚ»ò¶Ô·½ÉèÖÃ²»½ÓÊÜÈÎºÎÇó»é£¡', 1);
+    exit;
+  end;
+
+  if falg = 0 then begin
+    if wm.PEnvir <> whocret.PEnvir then begin
+      whocret.BoxMsg('ÄãºÍÇó»é¶ÔÏó±ØÐë¶¼ÔÚ½á»éÉñµî.', 0);
+      Exit;
+    end;
+
+    if wm.fLover.ReqName <> '' then begin
+      if wm.fLover.ReqName = whocret.UserName then
+      begin
+        NpcSayTitle(whocret,'@dblmarryreq');
+        NpcSayTitle(wm,'@requestmarry');
+        whocret.SysMsg('[³É¹¦]ÄãµÄÇó»éÇëÇóÒÑ·¢ËÍ£¬ÕýµÈºò¶Ô·½´¦Àí...', 1);
+      end else
+        NpcSayTitle(whocret,'@existsmarryreq');
+      Exit;
+    end;
+    whocret.fLover.ReqName := smname;
+    wm.fLover.ReqName := whocret.UserName;
+    NpcSayTitle(wm,'@requestmarry');
+    whocret.SysMsg('[³É¹¦]ÄãµÄÇó»éÇëÇóÒÑ·¢ËÍ£¬ÕýµÈºò¶Ô·½´¦Àí...', 1);
+  end else begin
+    whocret.SysMsg('[Ê§°Ü] ¶Ô·½²»ÔÚÓÐÐ§·¶Î§ÄÚ»ò¶Ô·½ÉèÖÃ²»½ÓÊÜÈÎºÎÇó»é£¡', 1);
+  end;
+end;
+
+
+
+procedure TMerchant.UserUnChkMarry(whocret: TUserHuman);   // Í¬Òâ½á»é
+var
+  Target    : TUserHuman;
+begin
+  Target := UserEngine.GetUserHuman(whocret.fLover.ReqName);
+  if Target <> nil then Target.fLover.ReqName := '';
+  whocret.fLover.ReqName := '';    
+end;
+
+procedure TMerchant.UserAgreeMarry(whocret: TUserHuman);   // Í¬Òâ½á»é
+var
+  Target    : TUserHuman;
+  ListCount : Integer;
+  Date, str : string;
+  msgstr    : string;
+  i, falg: Integer;
+  pstd: PTStdItem;
+begin
+  falg := -1;
+  Target := UserEngine.GetUserHuman(whocret.fLover.ReqName);
+  whocret.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+  if Target = nil then begin
+    NpcSayTitle(whocret,'@reqmanlose');
+    Exit;
+  end;
+
+  if Target = nil then begin
+    whocret.SysMsg('[Ê§°Ü] ¶Ô·½²»ÔÚÓÐÐ§·¶Î§ÄÚ»ò¶Ô·½ÉèÖÃ²»½ÓÊÜÈÎºÎÇó»é£¡', 1);
+    Exit;
+  end;
+
+  if Target.m_btCreditPoint < 5 then begin
+    Target.SysMsg('[Ê§°Ü] Çó»éÕß±ØÐëÂú×ã£ºÎ´»é£¬ÄÐÐÔ£¬ÖÁÉÙ5µãÉùÍû£¬Åå´øÇó»é½äÖ¸', 1);
+    whocret.fLover.ReqName := '';
+    Target.fLover.ReqName := '';
+    Exit;
+  end;
+
+
+  for i:=0 to U_TRANS do begin
+     pstd := UserEngine.GetStdItem(Target.UseItems[i].Index);
+     if pstd <> nil then begin
+        if (pstd.StdMode = 22) and (pstd.Name = 'Çó»é½äÖ¸') then begin
+          falg := 0;
+          break;
+        end;
+     end;
+  end;
+
+
+  if whocret.fLover.GetLoverName <> '' then begin
+    Target.SysMsg('[Ê§°Ü]¶Ô·½ÒÑ¾­½á»éÁË£¬ÄãÎÞ·¨ÏòËýÇó»é£¡', 1);
+    whocret.fLover.ReqName := '';
+    Target.fLover.ReqName := '';
+    Exit;
+  end;
+
+  if Target.fLover.GetLoverName <> '' then falg := 1;
+
+  if (whocret.flover.GetEnable(RsState_Lover) <> 1) or (whocret.GetFrontCret <> Target) then begin
+    Target.SysMsg('[Ê§°Ü] ¶Ô·½²»ÔÚÓÐÐ§·¶Î§ÄÚ»ò¶Ô·½ÉèÖÃ²»½ÓÊÜÈÎºÎÇó»é£¡', 1);
+    whocret.SysMsg('[Ê§°Ü] ¶Ô·½²»ÔÚÓÐÐ§·¶Î§ÄÚ»ò¶Ô·½ÉèÖÃ²»½ÓÊÜÈÎºÎÇó»é£¡', 1);
+    whocret.fLover.ReqName := '';
+    Target.fLover.ReqName := '';
+    exit;
+  end;
+
+  if (whocret.GetFrontCret <> Target) then begin
+    Target.SysMsg('[Ê§°Ü] ¶Ô·½²»ÔÚ¶ÔÃæ£¡', 1);
+    exit;
+  end;
+
+  if falg = 0 then begin
+    if whocret.PEnvir <> whocret.PEnvir then begin
+      Target.BoxMsg('ÄãºÍÇó»é¶ÔÏó±ØÐë¶¼ÔÚ½á»éÉñµî.', 0);
+      Exit;
+    end;
+
+    for i:=0 to U_TRANS do begin
+      pstd := UserEngine.GetStdItem(Target.UseItems[i].Index);
+      if pstd <> nil then begin
+        if (pstd.StdMode = 22) and (pstd.Name = 'Çó»é½äÖ¸') then begin
+
+          g_DBSQL.DelCreditPoint(Target.UserName, 5);
+          Target.SendDelItem (Target.UseItems[i]);
+          Target.UseItems[i].Index := 0;
+          Target.FeatureChanged;
+
+          Target.RecalcAbilitys;
+          Target.SendMsg (self, RM_ABILITY, 0, 0, 0, 0, '');
+          Target.SendMsg (self, RM_SUBABILITY, 0, 0, 0, 0, '');
+
+          break;
+        end;
+      end;
+    end;
+
+    Target.SendCreditPoint;
+  Date := '';
+  whocret.fLover.ReqSequence := RsREq_None;
+  whocret.flover.Add( whocret.UserName , Target.Username , RsState_Lover , Target.WAbil.Level , Target.Sex , Date , '');
+  whocret.fLover.ReqName := '';
+  msgstr := whocret.fLover.GetListmsg( RsState_Lover , listCount);
+  whocret.SendDefMessage (SM_LM_LIST, 0,ListCount, 0, 0, msgstr);
+  whocret.SendDefMessage (SM_LM_RESULT,0, RsState_Lover, RsError_SuccessJoin, 0, Target.UserName);
+  whocret.UserNameChanged;
+  // ÀÚ½ÅÀ» Å¸°Ù¿¡ µî·ÏÇÑ´Ù.
+  Target.fLover.ReqSequence := RsREq_None;
+  Target.flover.Add( Target.UserName , whocret.Username , RsState_Lover , Self.WAbil.Level , Self.Sex , Date , '');
+  Target.fLover.ReqName := '';
+  msgstr := Target.fLover.GetListmsg( RsState_Lover , listCount);
+  Target.SendDefMessage (SM_LM_LIST, 0,ListCount, 0, 0, msgstr);
+  Target.SendDefMessage (SM_LM_RESULT,0, RsState_Lover, RsError_SuccessJoined, 0, Self.UserName);
+  Target.UserNameChanged;
+//  Target.BoxMsg(whocret.UserName + ' Í¬Òâ½á»é.¹§Ï²,ÄãÃÇÒÑ¾­ÊÇºÏ·¨·òÆÞÁË.',0);
+  // DB ¿¡ ÀúÀåÇÑ´Ù. ÇÑ¸í¸¸ ÀúÀåÇÏ¸é ³ª¸ÓÁö»ç¶÷Àº ¾Ë¾Æ¼­ ÀúÀåµÈ´Ù.
+  whocret.SendMsg (whocret,RM_LM_DBADD,0, 0, 0, 0, Target.UserName+':'+IntToStr(RsState_Lover)+':'+Date+'/');
+
+
+  UserEngine.SysMsgAll( '[ÔÂÀÏ]¹§Ï²: '+whocret.UserName +' Óë '+target.UserName+' Ï²½áÁ¼Ôµ£¬×£Ô¸ËûÃÇ°×Í·ÙÉÀÏ£¡');
+
+  NpcSayTitle(whocret,'@Femalefireworks');
+  NpcSayTitle(Target,'@Malefireworks');
+  if str <> '' then
+  UserEngine.CryCry (RM_SYSMSG_PINK, PEnvir, CX, CY, 300, str);
+  end else begin
+    whocret.fLover.ReqName := '';
+    Target.fLover.ReqName := '';
+    Target.SysMsg('[Ê§°Ü] Çó»éÕß±ØÐëÂú×ã£ºÎ´»é£¬ÄÐÐÔ£¬ÖÁÉÙ5µãÉùÍû£¬Åå´øÇó»é½äÖ¸', 1);
+    whocret.SysMsg('[Ê§°Ü] ÄÐ·½Çó»é½äÖ¸»òÒÑ¶ªÊ§£¡', 1);
+  end;
+end;
+
+procedure TMerchant.UserCancelMarry(whocret: TUserHuman);   // ¾ö¾ø½á»é
+var
+  Target    : TUserHuman;
+  ListCount : Integer;
+  Date, str : string;
+  msgstr    : string;
+begin
+  Target := UserEngine.GetUserHuman(whocret.fLover.ReqName);
+  whocret.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+  if Target <> nil then begin
+    Target.fLover.ReqName := '';
+    Target.SysMsg('[Ê§°Ü]¶Ô·½¾Ü¾øÁËÄãµÄÇó»é£¡', 0);
+  end;
+  whocret.fLover.ReqName := '';
+  whocret.SysMsg('[ÌáÊ¾]Äã¾Ü¾øÁË¶Ô·½µÄÇó»é£¡', 1);
+//  NpcSayTitle(Target, '@reqbecancel');
+end;
+
+procedure TMerchant.UserLeftMarry(whocret: TUserHuman);   // Àë»é
+var
+  Target    : TUserHuman;
+begin
+  whocret.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+  if (whocret.fLover.GetLoverName = '') or (whocret.Gold < 1000000) then begin
+    whocret.SysMsg('ÄãÎÞÅäÅ¼»òËùÐ¯´øµÄ½ð±Ò²»¹»£¬²»ÄÜÀë»é!', 1);
+    Exit;                                                 
+  end;
+
+  whocret.DecGold(1000000);
+  whocret.GoldChanged;
+  Target := UserEngine.GetUserHuman(whocret.fLover.GetLoverName);
+
+  if whocret <> nil then
+  begin
+                // »óÅÂ º¯°æ(µÐÈ­)
+    whocret.MakePoison(POISON_SLOW, 3, 1);
+              // HP, MP º¯°æ(50%)
+    whocret.WAbil.HP := _MAX(1, whocret.WAbil.HP div 2);
+    whocret.WAbil.MP := _MAX(1, whocret.WAbil.MP div 2);
+
+              // Ãæ°Ý ¸Þ½ÃÁö
+  whocret.SysMsg('¸ÐÇéÆÆÁÑÁË£¬½«Ôì³É×ÔÉíµÄ³å»÷¡£', 0);
+
+  if Target <> nil then
+  begin
+                  // »óÅÂ º¯°æ(µÐÈ­)
+    Target.MakePoison(POISON_SLOW, 3, 1);
+                  // HP, MP º¯°æ(50%)
+    Target.WAbil.HP := _MAX(1, Target.WAbil.HP div 2);
+    Target.WAbil.MP := _MAX(1, Target.WAbil.MP div 2);
+
+                  // Ãæ°Ý ¸Þ½ÃÁö
+    Target.SysMsg('¸ÐÇéÆÆÁÑÁË£¬½«Ôì³É×ÔÉíµÄ³å»÷¡£', 0);
+  end
+  end;
+  if Target <> nil then begin
+    Target.RelationShipDeleteOther( RsState_Lover , whocret.UserName );
+    Target.UserNameChanged;
+  end else begin
+    //whocret.SendMsg (Self,RM_LM_DBEDIT,0, 0, 0, 0, whocret.fLover.GetLoverName+':'+IntToStr(RsState_LoverEnd)+'/');
+    g_DBSQL.ObRelation(whocret.fLover.GetLoverName, whocret.UserName,'30');
+  end;
+  whocret.RelationShipDeleteOther(RsState_Lover,whocret.fLover.GetLoverName);
+  whocret.UserNameChanged;
+end;
+
+
+ // °ÝÊ¦,ÊÕÍ½
+procedure TMerchant.UserReqMaster(whocret: TUserHuman; smname: string);
+var
+  mhum : TUserHuman;
+begin
+  mhum := UserEngine.GetUserHuman(smname);
+
+  if mhum = nil then
+  begin
+    whocret.SysMsg('[Ê§°Ü] ¶Ô·½²»ÔÚÓÐÐ§·¶Î§»ò¶Ô·½ÒÑÉèÖÃ¾Ü¾øÊÕÍ½',1);
+    Exit;
+  end;
+
+  if mhum <> whocret.GetFrontCret then
+  begin
+    whocret.SysMsg('[Ê§°Ü] ¶Ô·½²»ÔÚÓÐÐ§·¶Î§»ò¶Ô·½ÒÑÉèÖÃ¾Ü¾øÊÕÍ½',1);
+    Exit;
+  end;
+
+  if (whocret.Abil.Level >= (baishidengji)) or (whocret.fMaster.MasterName <> '') then begin  //°ÝÊ¦µÈ¼¶
+    whocret.SysMsg('[Ê§°Ü] °ÝÊ¦±ØÐëÂú×ã£ºÎÞÊ¦¸µ£¬µÈ¼¶²»¸ßÓÚ°ÝÊ¦µÄµÈ¼¶',1);
+    Exit;
+  end;
+
+  // ¶Ô·½²»ÔÊÐíÊÕÍ½
+  if not mhum.fMaster.EnableBeMaster then begin
+    whocret.SysMsg('[Ê§°Ü] ¶Ô·½²»ÔÚÓÐÐ§·¶Î§»ò¶Ô·½ÒÑÉèÖÃ¾Ü¾øÊÕÍ½',1);
+    Exit;
+  end;
+
+  if mhum.fMaster.SonCount >= MAX_APPRENTICECOUNT then begin
+    whocret.SysMsg('[Ê§°Ü]¶Ô·½ÊÕÍ½Ãû¶îÒÑÂú£¬ÄãÎÞ·¨°Ý¶Ô·½ÎªÊ¦ÁË£¡',1);
+    Exit;
+  end;
+
+  if mhum.Abil.Level < chushidengji{28} then begin  //Ê¦¸µµÈ¼¶
+    whocret.SysMsg('[Ê§°Ü]¶Ô·½µÈ¼¶Ð¡ÓÚÊÕÍ½ÒªÇó£¬ÄãÎÞ·¨°Ý¶Ô·½ÎªÊ¦£¡',2);
+    Exit;
+  end;
+
+  mhum.SendMsg (self, RM_MAA_SONNAME, 0, integer(self), 0, 0, whocret.UserName);
+
+  NpcSayTitle (mhum, '@requestmaster');
+//  NpcSayTitle (whocret, '@waitforreq');
+  whocret.SysMsg('[³É¹¦]ÄãµÄ°ÝÊ¦ÇëÇóÒÑ·¢³ö£¬ÕýµÈºò¶Ô·½´¦Àí...', 1);
+  //·¢ËÍÏûÏ¢,ÈÃ¿Í»§¶Ë¹Ø±Õ¶Ô»°¿ò
+  whocret.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+end;
+
+procedure TMerchant.UserUnbindMaster(whocret: TUserHuman; smname: string);
+var
+  maas, maas2: TUserHuman;
+  sDate : string;
+  mname : string;
+  I: Integer;
+  Info: TRelationShipInfo;
+  nno : Integer;
+begin
+  mname := whocret.fMaster.MasterName;
+
+  if (UNBINDMASTERGOLD > whocret.Gold) or (mname = '') then begin
+//    whocret.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+    whocret.SysMsg('ÄãÉÐÎÞÊ¦³Ð»òÐ¯´øµÄ½ð±Ò²»¹», ²»ÄÜÀë¿ª£¡',1);
+    Exit;
+  end;
+
+  maas := UserEngine.GetUserHuman(mname);//È¡Ê¦¸µ
+  nno := whocret.fMaster.SonNumber;
+  if whocret.DecGold(UNBINDMASTERGOLD) then begin
+    whocret.GoldChanged;
+
+    whocret.fMaster.MasterName := '';
+    if maas <> nil then begin
+       maas.fMaster.DelChild(whocret.UserName, nno);
+       maas.SysMsg('ÄãµÄÍ½µÜ '+whocret.UserName+' ×ÔÐÐÀë¿ªÊ¦ÃÅ£¡',2);
+       g_DBSQL.ObMaster(mname, whocret.UserName,'30');
+       g_DBSQL.LoadMaaListEx2(mname, whocret.UserName);
+      if maas.fmaster.Items.Count > 0 then
+      begin
+        for i := nno - 1 to maas.fmaster.Items.Count - 1 do
+        begin
+          Info := maas.fmaster.Items.Items[i];
+          if Info <> nil then
+          begin
+            maas2 := UserEngine.GetUserHuman(Info.Name);
+            if maas2 <> nil then
+            begin
+              maas2.fMaster.SonNumber := maas2.fMaster.SonNumber - 1;
+              g_DBSQL.ObMaster2(maas.UserName,maas2.UserName,IntToStr(maas2.fMaster.SonNumber));
+              maas2.UserNameChanged;
+            end
+            else
+            begin
+              g_DBSQL.ObMaster2(maas.UserName,Info.Name,IntToStr(Info.SonNumber));
+            end;
+          end;
+        end;
+      end;
+    end else begin
+      g_DBSQL.ObMaster(mname, whocret.UserName,'30');
+      if whocret.fmaster.Items.Count > 0 then
+      begin
+        for i := 0 to whocret.fmaster.Items.Count - 1 do
+        begin
+          Info := whocret.fmaster.Items.Items[i];
+          if Info <> nil then
+          begin
+            maas2 := UserEngine.GetUserHuman(Info.Name);
+            if maas2 <> nil then
+            begin
+              if nno < maas2.fMaster.SonNumber then
+              begin
+                maas2.fMaster.SonNumber := maas2.fMaster.SonNumber - 1;
+                g_DBSQL.ObMaster2(mname,maas2.UserName,IntToStr(maas2.fMaster.SonNumber));
+                maas2.UserNameChanged;
+              end;
+            end
+            else
+            begin
+              if nno < Info.SonNumber then
+                g_DBSQL.ObMaster2(mname,Info.Name,IntToStr(Info.SonNumber - 1));
+            end;
+          end;
+        end;
+      end;
+    end;
+    whocret.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+    whocret.SysMsg('[ÌáÊ¾]ÄãÒÑ±³ÅÑÊ¦ÃÅ£¡',2);
+  end;
+  whocret.UserNameChanged;
+//  whocret.SendMaaList;
+//  if maas <> nil then maas.SendMaaList;
+end;
+
+procedure TMerchant.UserAgreeBeMaster(whocret: TUserHuman; smname: string);
+var
+  mason, mason2: TUserHuman;
+  sDate : string;
+  i: Integer;
+  Info: TRelationShipInfo;
+begin
+  mason := UserEngine.GetUserHuman(smname);
+  // ·¢ËÍÏûÏ¢,ÈÃ¿Í»§¶Ë¹Ø±Õ¶Ô»°¿ò
+  whocret.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+  mason.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+  if mason = nil then
+  begin
+    Exit;
+  end;
+
+  sDate := FormatDateTime('yyyy-mm-dd hh:mm:ss',now);
+  mason.fMaster.MasterName := whocret.UserName;
+  whocret.fMaster.AddChild(mason.UserName);
+//  g_DBSQL.SaveMaaList(whocret.UserName,mason.UserName,'10','1',sDate);
+//  whocret.SendMaaList;
+  mason.fMaster.SonNumber := whocret.fMaster.SonCount;
+  g_DBSQL.SaveMaaList(whocret.UserName,mason.UserName,'10',IntToStr(mason.fMaster.SonNumber),sDate);
+//  mason.SendMaaList;
+  mason.UserNameChanged;
+
+  if (whocret.fmaster.Items.Count > 0) then
+  begin
+    for i := whocret.fmaster.Items.Count - 1 downto 0 do
+    begin
+      Info := whocret.fmaster.Items.Items[i];
+      if Info <> nil then
+      begin
+        mason2 := UserEngine.GetUserHuman(Info.Name);
+        if (mason2 <> nil) then
+          mason2.SendMsg(mason2, RM_MAA_DBWANTLIST2, 0, 0, 0, 0, '');    // Ê¦Í½Êý¾Ý
+      end;
+    end;
+  end;
+
+  NpcSayTitle (mason, '@masterok');
+  NpcSayTitle (whocret, '@masterok');
+//  maas.BoxMsg('¹§Ï²:'+whocret.UserName + 'ÒÑ½ÓÊÜÄãµÄÇëÇó,ÄãÃÇÒÑ¾­ÊÇÊ¦Í½¹ØÏµÁË.',0);
+//  whocret.BoxMsg('¹§Ï²ÄãÊÕµÃÍ½µÜ:'+smname,0);
+  UserEngine.SysMsgAll('¹§Ï²£º'+ whocret.UserName +' ÐÂÊÕÈëµÜ×Ó '+smname);
+end;
+
+procedure TMerchant.UserLeftPrentice(whocret: TUserHuman;nno : Integer);
+var
+  cld : string;
+  mason, maas2: TUserHuman;
+  Info: TRelationShipInfo;
+  i: Integer;
+begin
+  cld := whocret.fMaster.GetChildNameByNo(nno);
+  if cld <> '' then begin
+    if whocret.DecGold(UNBINDMASTERGOLD2) then begin
+      whocret.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+      whocret.GoldChanged;
+
+      whocret.fMaster.DelChild(cld, nno);
+      whocret.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+      whocret.SysMsg('[ÌáÊ¾]ÄãÒÑ½« '+cld+' Öð³öÊ¦ÃÅ£¡',2);
+      mason := UserEngine.GetUserHuman(cld);
+      if mason <> nil then
+      begin
+        mason.SysMsg('[ÌáÊ¾]ÄãµÄÊ¦¸µÒÑ½«ÄãÖð³öÊ¦ÃÅ',2);
+        mason.fMaster.MasterName := '';
+        mason.UserNameChanged;
+        g_DBSQL.ObMaster(whocret.UserName,cld,'30');
+        g_DBSQL.LoadMaaListEx2(whocret.UserName, cld);
+      end else begin
+        g_DBSQL.ObMaster(whocret.UserName,cld,'40');
+      end;
+      if whocret.fmaster.Items.Count > 0 then
+      begin
+        for i := nno - 1 to whocret.fmaster.Items.Count - 1 do
+        begin
+          Info := whocret.fmaster.Items.Items[i];
+          if Info <> nil then
+          begin
+            maas2 := UserEngine.GetUserHuman(Info.Name);
+            if maas2 <> nil then
+            begin
+              maas2.fMaster.SonNumber := maas2.fMaster.SonNumber - 1;
+              g_DBSQL.ObMaster2(whocret.UserName,maas2.UserName,IntToStr(maas2.fMaster.SonNumber));
+              maas2.UserNameChanged;
+              //maas2.SendMsg(maas2, RM_MAA_DBWANTLIST2, 0, 0, 0, 0, '');    // Ê¦Í½Êý¾Ý
+            end
+            else
+            begin
+               g_DBSQL.ObMaster2(whocret.UserName,Info.Name,IntToStr(Info.SonNumber));
+            end;
+          end;
+        end;
+      end;
+    end else begin
+      whocret.SysMsg('[Ê§°Ü]ÄãÄ¿Ç°Ð¯´øµÄ½ð±Ò²»¹», ÎÞ·¨²Ù×÷£¡',2);
+    end;
+  end;
+end;
+
+procedure TMerchant.UserCancelBeMaster(whocret: TUserHuman; smname: string);
+var
+  maas : TUserHuman;
+begin
+  maas := UserEngine.GetUserHuman(smname);
+  //·¢ËÍÏûÏ¢,ÈÃ¿Í»§¶Ë¹Ø±Õ¶Ô»°¿ò
+  whocret.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+  maas.SendMsg (whocret, RM_MERCHANTDLGCLOSE, 0, 0, 0, 0, '');
+  if maas = nil then
+  begin
+    Exit;
+  end;
+  whocret.SysMsg('[ÌáÊ¾]Äã¾Ü¾øÁË '+ smname +' µÄ°ÝÊ¦ÇëÇó£¡',2);
+  maas.SysMsg('[Ê§°Ü]¶Ô·½¾Ü¾øÁËÄãµÄ°ÝÊ¦ÇëÇó£¡',2);
+end;
+
+procedure TNormNpc.SetRankLevelName(who: TCreature; pqa: PTQuestActionInfo);
+var
+  RankName: string;
+begin
+  RankName := pqa.ActParam;
+
+  if RankName = '' then
+  begin
+    RankName := RankLevelName;
+  end
+  else if Pos('%s', RankName) <= 0 then
+  begin
+    RankName := '%s\' + RankName;
+  end;
+  who.RankLevelName := RankName;
+  who.UserNameChanged;
+end;
+
+
+////////////////////////////////////////////////////////////
+// Á¦Á¶´ë»ó¿¡ ÇÊ¿äÇÑ ¸ñ·Ï°ú Àü¼Û¹ÞÀº ¸ñ·ÏÀ» ºñ±³ÇÏ¿©
+// Á¶°Ç¿¡ ¸Â´ÂÁö ¾Æ´ÑÁö Ã¼Å©ÇÏ°í ¾ÆÀÌÅÛÀ» »èÁ¦ÇÏ´Â ÇÔ¼ö.
+function TMerchant.CheckMakeItemCondition (hum: TUserHuman; itemname: string; sItemMakeIndex, sItemName, sItemCount: array of string; var iPrice, iMakeCount: Integer): Integer;
+var
+   list: TStringList;
+   k, i, j, icnt: integer;
+   sourcecount, counteritmcount, itemp: integer;
+   sourcemindex: integer;
+   sourcename: string;
+   condition: Integer;
+   dellist: TStringList;
+   pu: PTUserItem;
+   ps: PTStdItem;
+   iGuardStoneGrade: integer;
+   iProbability: Integer;
+   fTemporary: Real;
+   iRequiredGuardStoneGrade: Integer;
+   iSumOutfitAbil, iOutfitGrade: Integer;
+   // »õ·Î¿î List
+   sNewName: array [0..MAX_SOURCECNT-1] of string;
+   sNewCount: array [0..MAX_SOURCECNT-1] of string;
+   sNewMIndex: array [0..MAX_SOURCECNT-1] of string;
+   iListDoubleCount: array [0..MAX_SOURCECNT-1] of Integer;
+   checkcount: integer;
+   bCheckMIndex: Boolean;
+   // ½ºÅ©¸³Æ® ¹®ÀÚ¿­ Á¤ÀÇ
+   strPendant, strGuardStone, strGuardStone15, strGuardStoneXLHigher : string;
+   delitemname : string;
+begin
+   strPendant := '';
+   strGuardStone := '';
+   strGuardStone15 := '';
+   strGuardStoneXLHigher := '';
+
+   if ENGLISHVERSION or PHILIPPINEVERSION then begin
+      strPendant := '<PENDANT>';
+      strGuardStone := '<GUARDSTONE>';
+      strGuardStone15 := '<GUARDSTONE15>';
+      strGuardStoneXLHigher := '<GUARDSTONE(XL)HIGHER>';
+   end else if KOREANVERSION then begin
+      strPendant := '<Ê×ÊÎ>';
+      strGuardStone := '<ÊØ»¤Ê¯>';
+      strGuardStone15 := '<ÊØ»¤Ê¯15>';
+      strGuardStoneXLHigher := '<ÊØ»¤Ê¯£¨ÌØ£©ÒÔÉÏ>';
+   end else begin
+      //±âº»°ª
+      strPendant := '<Ê×ÊÎ>';
+      strGuardStone := '<ÊØ»¤Ê¯>';
+      strGuardStone15 := '<ÊØ»¤Ê¯15>';
+      strGuardStoneXLHigher := '<ÊØ»¤Ê¯£¨ÌØ£©ÒÔÉÏ>';
+   end;
+
+   iProbability := 0;
+   fTemporary := 0;
+   condition := COND_FAILURE;
+   iRequiredGuardStoneGrade := 0;  //¼öÈ£¼® Ãß°¡ È®·ü µî±Þ
+   iOutfitGrade := 0;   //Àå½Å±¸ Ãß°¡ È®·ü µî±Þ
+   iSumOutfitAbil := 0;
+   iGuardStoneGrade := GSG_ERROR;
+
+   list := GetMakeItemCondition (itemname, iPrice);
+
+   // °¡¹æÃ¢ ¿©ºÐÀÇ °ø°£ È®ÀÎ
+   if hum.CanAddItem = FALSE then begin
+      Result := COND_BAGFULL;
+      {$IFDEF KOREA} hum.SysMsg('ÄãµÄ°üÂúÁË', 0);
+      {$ELSE}        hum.SysMsg('Your bag is full.', 0);
+      {$ENDIF}
+      exit;
+   end;
+
+   if list <> nil then begin
+      // Àü¼Û¹®ÀÚ¿­ ÀÎÀÚ¼öº¸´Ù Å©¸é ¾ÈµÊ.
+      if list.Count > MAX_SOURCECNT then
+         MainOutMessage ('[Caution!] list.Count Overflow in TMerchant.UserManufactureItem');
+
+      condition := COND_SUCCESS;
+
+      // º¸¿Á Å¸ÀÔ °Ë»ç(¼öÈ£¼®ÀÇ Á¾·ù·Î °Ë»ç sonmg)
+      for j:= 0 to list.Count-1 do begin
+         if UPPERCASE(list[j]) = strGuardStone then begin
+            iRequiredGuardStoneGrade := 1;  // Å¸ÀÔ A
+         end else if UPPERCASE(list[j]) = strGuardStoneXLHigher then begin
+            iRequiredGuardStoneGrade := 2;  // Å¸ÀÔ B
+         end else if UPPERCASE(list[j]) = strGuardStone15 then begin
+            iRequiredGuardStoneGrade := 3;  // Å¸ÀÔ C (¼öÈ£¼®Àº ÀÏ¹Ý, ±¤¼®¼øµµ 15ÀÌ»ó)
+         end;
+      end;
+
+      //------ Àç·á °Ë»ç ------//
+      // 1.Àü¼Û¹®ÀÚ¿­ÀÌ °¡¹æÃ¢¿¡ ¸ðµÎ ÀÖ´ÂÁö(Name°ú MakeIndex) °Ë»ç
+      // ÀÖÀ¸¸é List¿¡¼­ ÇØ´ç ¾ÆÀÌÅÛ ÀÌ¸§°ú MakeIndex ¾÷µ¥ÀÌÆ®(StdModeÂüÁ¶)
+      for k:=0 to MAX_SOURCECNT-1 do begin  //Àü¼Û¹®ÀÚ¿­
+         sourcemindex := Str_ToInt(sItemMakeIndex[k], 0);
+         sourcename := sItemName[k];
+         sourcecount := Str_ToInt(sItemCount[k], 0);
+
+         for i:=0 to hum.ItemList.Count-1 do begin
+            pu := PTUserItem (hum.ItemList[i]);
+            // ¾ÆÀÌÅÛ ÀÌ¸§ ºñ±³
+            if sItemName[k] = UserEngine.GetStdItemName(pu.Index) then begin
+               ps := UserEngine.GetStdItem (pu.Index);
+               if ps <> nil then
+               begin
+                  // Ä«¿îÆ® ¾ÆÀÌÅÛ.
+                  if ps.OverlapItem >= 1 then begin
+                     if pu.Dura < sourcecount then begin
+                        sourcecount := sourcecount - pu.Dura;
+                     end else begin
+                        itemp := sourcecount;
+                        sourcecount := _MAX(0, itemp - pu.Dura);
+                     end;
+
+                     if sourcecount <= 0 then begin
+                        for j:= 0 to list.Count-1 do begin
+                           if list[j] = sourcename then begin
+                              sNewMIndex[j] := sItemMakeIndex[k];
+                              sNewName[j] := sourcename;
+                              sNewCount[j] := sItemCount[k];
+                           end;
+                        end;
+
+                        break;
+                     end;
+                  end else begin
+                     // MakeIndex ºñ±³
+                     if sourcemindex = pu.MakeIndex then begin
+                        for j:= 0 to list.Count-1 do begin
+                           if list[j] = sourcename then begin
+                              // °°Àº ¾ÆÀÌÅÛÀÌ µÎ°³ ÀÌ»ó ÀÖÀ» °æ¿ì Ä«¿îÆ® Áõ°¡
+                              if sNewName[j] = sourcename then begin
+                                 sNewCount[j] := IntToStr( Str_ToInt(sNewCount[j], 0) + 1 );
+                              end else begin
+                                 sNewCount[j] := sItemCount[k];
+                                 sNewMIndex[j] := sItemMakeIndex[k];
+                              end;
+
+                              sNewName[j] := sourcename;
+                           end;
+                        end;
+
+                        // <Àå½Å±¸> <¼öÈ£¼®> <¼öÈ£¼®(Æ¯)ÀÌ»ó> ¾ÆÀÌÅÛÀÌ ÀÖÀ¸¸é
+                        // Àü¼Û¹®ÀÚ¿­¿¡ ÀÖ´Â ¾ÆÀÌÅÛÀ» list¿¡ µî·ÏÇÑ´Ù.
+                        if ps.StdMode in [19,20,21, 22,23, 24,26] then begin
+                           for j:= 0 to list.Count-1 do begin
+                              if UPPERCASE(list[j]) = strPendant then begin
+                                 sNewMIndex[j] := sItemMakeIndex[k];
+                                 sNewName[j] := sourcename;
+                                 sNewCount[j] := sItemCount[k];
+
+                                 // Àå½Å±¸ ÆÄ±«,¸¶·Â,µµ·Â ÃÑÇÕ¿¡ µû¶ó µî±Þ °áÁ¤...
+                                 iSumOutfitAbil := HIBYTE(ps.DC) + HIBYTE(ps.MC) + HIBYTE(ps.SC);
+                                 if ps.StdMode in [22,23] then begin //¹ÝÁö
+                                    if iSumOutfitAbil <= 3 then
+                                       iOutfitGrade := 0   //°¡±º
+                                    else if iSumOutfitAbil = 4 then
+                                       iOutfitGrade := 1   //³ª±º
+                                    else
+                                       iOutfitGrade := 2;   //´Ù±º
+                                 end else if ps.StdMode in [24,26] then begin //ÆÈÂî
+                                    if HIBYTE(ps.DC) > 0 then begin //ÆÄ±« ºÙÀº ÆÈÂî
+                                       if iSumOutfitAbil = 1 then
+                                          iOutfitGrade := 0   //°¡±º
+                                       else if iSumOutfitAbil = 2 then
+                                          iOutfitGrade := 1   //³ª±º
+                                       else
+                                          iOutfitGrade := 2;   //´Ù±º
+                                    end else begin
+                                       if iSumOutfitAbil = 1 then
+                                          iOutfitGrade := 0   //°¡±º
+                                       else if iSumOutfitAbil in [2,3] then
+                                          iOutfitGrade := 1   //³ª±º
+                                       else
+                                          iOutfitGrade := 2;   //´Ù±º
+                                    end;
+                                 end else begin //¸ñ°ÉÀÌ
+                                    if iSumOutfitAbil <= 3 then
+                                       iOutfitGrade := 0   //°¡±º
+                                    else if iSumOutfitAbil in [4,5] then
+                                       iOutfitGrade := 1   //³ª±º
+                                    else
+                                       iOutfitGrade := 2;   //´Ù±º
+                                 end;
+                              end;
+                           end;
+                        end;
+                        if ps.StdMode = 53 then begin
+                           // ¼öÈ£¼® µî±ÞÀ» ¾ò¾î³½´Ù.
+                           iGuardStoneGrade := GetGradeOfGuardStoneByName( sourcename );
+
+                           for j := 0 to list.Count-1 do begin
+                              if iGuardStoneGrade < GSG_GREATLARGE then begin
+                                 if (UPPERCASE(list[j]) = strGuardStone) or (UPPERCASE(list[j]) = strGuardStone15) then begin
+                                    sNewMIndex[j] := sItemMakeIndex[k];
+                                    sNewName[j] := sourcename;
+                                    sNewCount[j] := sItemCount[k];
+                                 end;
+                              end else if iGuardStoneGrade >= GSG_GREATLARGE then begin
+                                 if (UPPERCASE(list[j]) = strGuardStone) or (UPPERCASE(list[j]) = strGuardStone15) or (UPPERCASE(list[j]) = strGuardStoneXLHigher) then begin
+                                    sNewMIndex[j] := sItemMakeIndex[k];
+                                    sNewName[j] := sourcename;
+                                    sNewCount[j] := sItemCount[k];
+                                 end;
+                              end else begin
+                                 // ¼öÈ£¼® ÀÌ¸§ÀÌ ÀÌ»óÇÏ´Ù¸é Error : È®ÀÎÇØ ºÁ¾ßÇÔ.
+                                 MainOutMessage('[Caution!] TMerchant.UserManufactureItem iGuardStoneGrade = GSG_ERROR');
+                              end;
+                           end;
+                        end;
+
+                        //------ ±¤¼® ¼øµµ °Ë»ç ------//
+                        if ps.StdMode = 43 then begin //±¤¼®
+                           if iRequiredGuardStoneGrade = 1 then begin  // Å¸ÀÔ A
+                              if pu.Dura < 11500 then begin // ¼øµµ 12
+                                 condition := COND_MINERALFAIL;
+                              end;
+                           end else if iRequiredGuardStoneGrade = 2 then begin  // Å¸ÀÔ B
+                              if pu.Dura < 14500 then begin // ¼øµµ 15
+                                 condition := COND_MINERALFAIL;
+                              end;
+                           end else if iRequiredGuardStoneGrade = 3 then begin  // Å¸ÀÔ C
+                              if pu.Dura < 14500 then begin // ¼øµµ 15
+                                 condition := COND_MINERALFAIL;
+                              end;
+                           end;
+                        end;
+
+                        dec (sourcecount);  //°¹¼ö °¨¼Ò..
+                     end;
+                  end;
+               end;//if ps <> nil then
+            end;
+         end;
+
+         if sourcecount > 0 then begin
+            condition := COND_FAILURE;  //°¹¼ö ¹Ì´ÞÀÌ¸é Á¶°Ç ¾È¸ÂÀ½°£ÁÖ.
+            break;
+         end;
+      end;
+
+{$IFDEF DEBUG}
+      for k:=0 to list.Count-1 do begin
+         hum.SysMsg(sNewMIndex[k] + ' ' + sNewName[k] + ' ' + sNewCount[k], 2);
+      end;
+{$ENDIF}
+
+      // 2.»õ·Î¿î List°¡ listÀÇ Á¶°Ç¿¡ ¸¸Á·ÇÏ´ÂÁö °Ë»ç
+      // ¸î °³±îÁö ¸¸µé ¼ö ÀÖ´ÂÁö È®ÀÎ
+      if (condition = COND_SUCCESS) or (condition = COND_MINERALFAIL) then begin
+         checkcount := list.Count;
+         for k:=0 to list.Count-1 do begin  //»õ·Î¿î List
+            sourcename := sNewName[k];
+            sourcecount := Str_ToInt(sNewCount[k], 0);
+
+            if (sourcename = list[k]) and (sourcecount >= Integer(list.Objects[k])) then begin
+               iListDoubleCount[k] := sourcecount div Integer(list.Objects[k]);
+               Dec(checkcount);
+            end else if ( (UPPERCASE(list[k]) = strPendant) or (UPPERCASE(list[k]) = strGuardStone) or (UPPERCASE(list[k]) = strGuardStone15)
+            or (UPPERCASE(list[k]) = strGuardStoneXLHigher) ) and (sourcecount >= Integer(list.Objects[k])) then begin
+               iListDoubleCount[k] := sourcecount div Integer(list.Objects[k]);
+               Dec(checkcount);
+            end;
+         end;
+
+         if checkcount > 0 then
+            condition := COND_FAILURE;  //°¹¼ö ¹Ì´ÞÀÌ¸é Á¶°Ç ¾È¸ÂÀ½°£ÁÖ.
+      end;
+
+      //------ Àç·á »èÁ¦ ------//
+      // °¡¹æÃ¢¿¡¼­ »õ·Î¿î List¿¡ ÇØ´çÇÏ´Â ¾ÆÀÌÅÛÀ» »èÁ¦ÇÑ´Ù.
+      // ¸¸µé ¼ö ÀÖ´Â °³¼ö¸¸Å­ »èÁ¦ÇÏ°í ³ª¸ÓÁö´Â »èÁ¦ÇÏÁö ¾ÊÀ½...
+      if condition = COND_SUCCESS then begin
+         //------ ¸¸µé ¼ö ÀÖ´Â °³¼ö °è»ê(ÃÖ¼Ò°ª) -----//
+         iMakeCount := iListDoubleCount[0];
+         for k:=0 to list.Count-1 do begin
+            if iMakeCount > iListDoubleCount[k] then
+               iMakeCount := iListDoubleCount[k];
+//               hum.SysMsg(IntToStr(iListDoubleCount[k]), 1);
+         end;
+//            hum.SysMsg('¸¸µå´Â ¾ÆÀÌÅÛ °³¼ö : ' + IntToStr(iMakeCount), 2);
+
+         // ÇÊ¿äÇÑ ±ÝÀüÀÌ ÀÖ´ÂÁö È®ÀÎ
+         if (hum.Gold < iPrice * iMakeCount) then begin
+            Result := COND_NOMONEY;
+            exit;
+         end;
+
+         // °¡¹æÃ¢ ¿©ºÐÀÌ ÀÖ´ÂÁö È®ÀÎ (sonmg 2004/02/21)
+         if hum.Itemlist.Count + iMakeCount > MAXBAGITEM then begin
+            Result := COND_BAGFULL;
+            {$IFDEF KOREA} hum.SysMsg('ÄãµÄ°üÂúÁË', 0);
+            {$ELSE}        hum.SysMsg('Your bag is full.', 0);
+            {$ENDIF}
+            exit;
+         end;
+
+         //ÃÊ±âÈ­
+         dellist := nil;
+
+         // ÀÏ´Ü »õ·Î¿î List Ç×¸ñ ¹«Á¶°Ç »èÁ¦
+         // Á¦Á¶´Â ¸¸µå´Â ¾ÆÀÌÅÛ °³¼ö¸¸Å­ Loop.
+         // => Ä«¿îÆ®´Â listÀÇ Ä«¿îÆ®¸¸Å­ »èÁ¦
+         // ==> Ä«¿îÆ® ¾ÆÀÌÅÛÀÌ ¾Æ´Ñµ¥ 2°³ ÀÌ»ó ÀÖ´Â °æ¿ì´Â MakeIndex¸¦
+         //     Àü¼Û¸®½ºÆ®(sMakeItemIndex)¿¡¼­ ÂüÁ¶ÇÑ´Ù.
+         //
+         // ¾Ë¾ÆµÑ °Í : ¼öÈ£¼®ÀÌ³ª Àå½Å±¸°¡ Æ÷ÇÔµÈ Á¦Á¶´Â µÎ °³ ÀÌ»ó ÇÑ²¨¹ø¿¡
+         // Á¦Á¶°¡ ¾ÈµÇ°í ³ªÁß¿¡ ¿Ã·ÁÁø ¾ÆÀÌÅÛÀ¸·Î Á¦Á¶°¡ µÈ´Ù.(sonmg 2003/12/19)
+         for j:=0 to iMakeCount-1 do begin
+            for k:=0 to list.Count-1 do begin  //»õ·Î¿î List
+               sourcemindex := Str_ToInt(sNewMIndex[k], 0);
+               sourcename := sNewName[k];
+               // Ä«¿îÆ®´Â listÀÇ Ä«¿îÆ®¸¸Å­ »èÁ¦(ÇÊ¿äÇÑ ¸¸Å­¸¸ »èÁ¦)
+               sourcecount := Integer(list.Objects[k]);
+               counteritmcount := Integer(list.Objects[k]);
+
+               for i:=hum.ItemList.Count-1 downto 0 do begin
+                  pu := PTUserItem (hum.ItemList[i]);
+                  if sourcecount > 0 then begin
+                     if sourcename = UserEngine.GetStdItemName(pu.Index) then begin
+                        ps := UserEngine.GetStdItem (pu.Index);
+                        if ps <> nil then
+                        begin
+                           //Ä«¿îÆ® ¾ÆÀÌÅÛ.
+                           if ps.OverlapItem >= 1 then begin
+                              if pu.Dura < counteritmcount then begin
+                                 counteritmcount := counteritmcount - pu.Dura;
+                                 pu.Dura := 0;
+                              end else begin
+                                 itemp := counteritmcount;
+                                 counteritmcount := _MAX(0, itemp - pu.Dura);
+                                 pu.Dura := pu.Dura - itemp;
+                              end;
+
+                              if pu.Dura > 0 then begin
+                                 hum.SendMsg(self, RM_COUNTERITEMCHANGE, 0, pu.MakeIndex, pu.Dura, 0, ps.Name);
+                                 continue;
+                              end;
+                           end else begin
+                              // MakeIndex ºñ±³
+                              if pu.MakeIndex <> Str_ToInt(sNewMIndex[k], 0) then begin
+                                 bCheckMIndex := FALSE;
+                                 for icnt:= 0 to MAX_SOURCECNT-1 do begin
+                                    if pu.MakeIndex = Str_ToInt(sItemMakeIndex[icnt], 0) then begin
+                                       bCheckMIndex := TRUE;
+                                       break;
+                                    end;
+                                 end;
+
+                                 if bCheckMIndex = FALSE then
+                                    continue;
+                              end;
+                           end;
+
+                           //ÀÏ¹Ý ¾ÆÀÌÅÛ ¶Ç´Â Ä«¿îÆ® ¾ÆÀÌÅÛ »èÁ¦
+                           if dellist = nil then dellist := TStringList.Create;
+                           delitemname := UserEngine.GetStdItemName(pu.Index);
+                           dellist.AddObject(delitemname, TObject(PTUserItem (hum.ItemList[i]).MakeIndex));
+
+                           //·Î±×³²±è
+                           AddUserLog ('44'#9 + //Á¦Á¶»è_
+                                       hum.MapName + ''#9 +
+                                       IntToStr(hum.CX) + ''#9 +
+                                       IntToStr(hum.CY) + ''#9 +
+                                       hum.UserName + ''#9 +
+                                       delitemname + ''#9 +
+                                       IntToStr(PTUserItem (hum.ItemList[i]).MakeIndex) + ''#9 +
+                                       '1'#9 +
+                                       UserName);
+
+                           Dispose (PTUserItem(hum.ItemList[i]));
+                           hum.ItemList.Delete (i);
+                           dec (sourcecount);
+                        end;//if ps <> nil then
+                     end;
+                  end else
+                     break;
+               end;
+            end;
+         end;
+         if dellist <> nil then //dellistÀº  RM_DELITEMS¿¡¼­ FreeµÊ.
+            hum.SendMsg (self, RM_DELITEMS, 0, integer(dellist), 0, 0, '');
+
+         // °øÅë(1Â÷) º¸¿Á Á¦Á¶ È®·ü Àû¿ë...
+         if iRequiredGuardStoneGrade > 0 then begin
+            fTemporary := (hum.BodyLuck - hum.PlayerKillingPoint) / 250;
+
+            if iRequiredGuardStoneGrade = 1 then
+               iProbability := 50
+            else if iRequiredGuardStoneGrade = 2 then
+               iProbability := 50
+            else if iRequiredGuardStoneGrade = 3 then
+               iProbability := 50;
+
+            if fTemporary >= 100 then
+               iProbability := iProbability + 5
+            else if (fTemporary < 100) and (fTemporary >= 50) then
+               iProbability := iProbability + 3;
+
+            // ¼öÈ£¼®º° Ãß°¡ È®·ü Àû¿ë (sonmg 2003/12/19)
+            case iGuardStoneGrade of
+               GSG_SMALL         : iProbability := iProbability + 5;
+               GSG_MEDIUM        : iProbability := iProbability + 10;
+               GSG_LARGE         : iProbability := iProbability + 15;
+               GSG_GREATLARGE    : iProbability := iProbability + 30;
+               GSG_SUPERIOR      : iProbability := iProbability + 50;
+            end;
+         end;
+
+         // 2Â÷ º¸¿Á Á¦Á¶ È®·ü Àû¿ë...
+         if (iRequiredGuardStoneGrade = 1) or (iRequiredGuardStoneGrade = 3) then begin
+            // º¸¿Á Å¸ÀÔA Á¦Á¶ È®·ü Àû¿ë...
+            if iOutfitGrade = 0 then begin
+               iProbability := iProbability + 10;
+            end else if iOutfitGrade = 1 then begin
+               iProbability := iProbability + 20;
+            end else if iOutfitGrade = 2 then begin
+               iProbability := iProbability + 40;
+            end;
+
+{$IFDEF DEBUG}
+            // test
+            hum.SysMsg('BodyLuck:' + FloatToStr(hum.BodyLuck) +
+               ' - PKPoint:' + FloatToStr(hum.PlayerKillingPoint) +
+               ' = ' + FloatToStr(fTemporary) + ', iProbability:' + IntToStr(iProbability) +
+               ', DC/MC/SC SUM :' + IntToStr(iSumOutfitAbil), 0);
+{$ENDIF}
+
+            if Random(100) < iProbability then begin
+               condition := COND_SUCCESS;
+            end else begin
+               condition := COND_GEMFAIL;
+            end;
+         end else if iRequiredGuardStoneGrade = 2 then begin
+            // º¸¿Á Å¸ÀÔB Á¦Á¶ È®·ü Àû¿ë...
+            // 2Â÷ È®·ü ¾øÀ½.
+
+{$IFDEF DEBUG}
+            // test
+            hum.SysMsg('BodyLuck:' + FloatToStr(hum.BodyLuck) +
+               ' - PKPoint:' + FloatToStr(hum.PlayerKillingPoint) +
+               ' = ' + FloatToStr(fTemporary) + ', iProbability:' + IntToStr(iProbability), 0);
+{$ENDIF}
+
+            if Random(100) < iProbability then begin
+               condition := COND_SUCCESS;
+            end else begin
+               condition := COND_GEMFAIL;
+            end;
+         end;
+      end;
+   end;
+
+{
+   if condition = COND_GEMFAIL then begin
+      // º¸¿Á Á¦Á¶ ½ÇÆÐ ·Î±×
+      MainOutMessage( '[Gem Manufacture Failure º¸¿ÁÁ¦Á¶½ÇÆÐ] ' + hum.UserName + ' ' + itemname + ' '
+         + '=> Deleted Items(»èÁ¦µÈ Àç·á):' + sNewName[0] + ', ' + sNewName[1]
+         + ', ' + sNewName[2] + ', ' + sNewName[3]
+         + ', ' + sNewName[4] + ', ' + sNewName[5] + ' '
+         + 'BodyLuck:' + FloatToStr(hum.BodyLuck)
+         + ' - PK Point:' + FloatToStr(hum.PlayerKillingPoint)
+         + ' / 250 = ' + FloatToStr(fTemporary) + ', Prob.Manufacture Gem(º¸¿ÁÁ¦Á¶È®·ü):' + IntToStr(iProbability) );
+   end;
+}
+
+   if condition = COND_SUCCESS then begin
+      // Á¦Á¶ ¼º°ø ·Î±× -> Ãà¼Ò
+      MainOutMessage( '[ÖÆÔì³É¹¦] ' + hum.UserName + ' ' + itemname + '(' + IntToStr(iMakeCount) + '¸ö)');
+{
+         + ' ' + '=> Deleted Items(»èÁ¦µÈ Àç·á):' + sNewName[0] + ', ' + sNewName[1]
+         + ', ' + sNewName[2] + ', ' + sNewName[3]
+         + ', ' + sNewName[4] + ', ' + sNewName[5] + ' '
+         + 'BodyLuck:' + FloatToStr(hum.BodyLuck)
+         + ' - PK Point:' + FloatToStr(hum.PlayerKillingPoint)
+         + ' / 250 = ' + FloatToStr(fTemporary) + ', Prob.Manufacture Gem(º¸¿ÁÁ¦Á¶È®·ü):' + IntToStr(iProbability) );
+}
+   end;
+
+   Result := condition;
+end;
+
+// À§Å¹»óÁ¡
+// Mode : 0 = ÀüÃ¼ , 1~13 Á¾·ùº° , 100 = ¼ÂÆ®¾ÆÀÌÅÛ , 200 = ÀÚ°¡ÀÚ½ÅÀÌ ¿Ã¸°°Å
+procedure TMerchant.SendUserMarket( hum : TuserHuman ; ItemType : integer ; UserMode : integer );
+begin
+    case UserMode of
+    USERMARKET_MODE_BUY,    // »ç´Â¸ðµå
+    USERMARKET_MODE_INQUIRY:// Á¶È¸¸ðµå
+        hum.RequireLoadUserMarket( ServerName+'_'+UserName , ItemType , Usermode , '','' );
+    USERMARKET_MODE_SELL:   // ÆÇ¸Å¸ðµå
+        hum.SendUserMarketSellReady( self); // NPC ¸¦ ³Ñ°ÜÁØ´Ù.
+    end;
+end;
+
+procedure TMerchant.RunMsg (msg: TMessageInfo);
+begin
+   inherited RunMsg (msg);
+end;
+
+procedure TMerchant.Run;
+var
+   flag : integer;
+   dwCurrentTick: longword;
+   dwDelayTick: longword;
+begin
+   flag := 0;
+   try
+      //--------------------------------
+      //Merchant ºÎÇÏ ºÐ»ê ÄÚµå(sonmg 2005/02/01)
+      dwCurrentTick := GetTickCount;
+      dwDelayTick   := CreateIndex * 500;
+      if dwCurrentTick < dwDelayTick then
+         dwDelayTick := 0;
+      //--------------------------------
+
+      if (dwCurrentTick - checkrefilltime > 1 * 60 * 1000 + dwDelayTick)  then begin  //NPC±£´æÊ±¼ä  ·ÖÖÓ£¬Ãë£¬ºÁÃë
+         checkrefilltime := dwCurrentTick - dwDelayTick;
+         flag := 1;
+         RefillGoods;
+         flag := 2;
+         if GoodsList.Count > 0 then begin
+           FrmDB.WriteMarketSavedGoods (self, MarketName + '-' + MapName);
+           FrmDB.WriteMarketPrices (self, MarketName + '-' + MapName);
+         end;
+         // TEST_TIME
+         if g_TestTime = 10 then mainOutMessage( 'RefillGoods:'+IntToStr(dwCurrentTick - checkrefilltime) );
+      end;
+      if dwCurrentTick - checkverifytime > 601 {10 * 60} * 1000 then begin
+         checkverifytime := dwCurrentTick;
+         flag := 3;
+         VerifyUpgradeList;
+         flag := 4;
+         // TEST_TIME
+         if g_TestTime = 11 then mainOutMessage( 'VerifyUpgradeList:'+IntToStr(dwCurrentTick - checkverifytime) );
+
+      end;
+      //if GetTickCount - specialrepairtime > 10 * 60 * 1000 then begin  //10ºÐ¿¡ 30¹ø
+      //   specialrepairtime := GetTickCount;
+      //   Inc (specialrepair, 100);
+      //end;
+      if Random(50) = 0{ÕâÀïÊÇËæ»ú0-50¸öÊý£¬Èç¹ûËæ»úÊý=0¾ÍÖ´ÐÐ×ªÏò} then Turn (Random(8){Ëæ»ú×ªÏò8¸ö·½Ïò})
+      else if Random(80) = 0{ÕâÀïÊÇËæ»ú0-80¸öÊý£¬Èç¹ûËæ»úÊý=0¾ÍÖ´ÐÐ¹¥»÷ÃüÁîÏàµ±ÓÚNPCÄÇ¸ö²Áº¹¶¯×÷ } then
+         SendRefMsg (RM_HIT, Dir, CX, CY, 0, '');  //NPCÍâ¹ÛÉèÖÃ
+
+      if BoCastleManage and UserCastle.BoCastleUnderAttack then begin
+         flag := 5;
+         //ÀüÀïÁß¿¡ »çºÏ¼º¾ÈÀÇ »óÁ¡Àº ¹®À» ´Ý´Â´Ù.
+         if not HideMode then begin
+            SendRefMsg (RM_DISAPPEAR, 0, 0, 0, 0, '');
+            HideMode := TRUE;
+         end;
+         flag := 6;
+      end else begin
+         if not BoHiddenNpc then begin
+            //Æò»ó½Ã
+            if HideMode then begin
+               HideMode := FALSE;
+               SendRefMsg (RM_HIT, Dir, CX, CY, 0, '');
+            end;
+         end;
+      end;
+
+   except
+      MainOutMessage ('[Exception] Merchant.Run (' + IntToStr(flag) + ') ' + MarketName + '-' + MapName);
+   end;
+   inherited Run;
+end;
+
+//Àå¿ø²Ù¹Ì±â ¾ÆÀÌÅÛ ¸ñ·Ï º¸³»±â
+procedure TMerchant.SendDecoItemListShow (who: TCreature);
+var
+   i, count: integer;
+   data: string;
+begin
+   data := '';
+   count := 0;
+   who.SendMsg (self, RM_DECOITEM_LISTSHOW, 0, integer(self), count, 0, data);
+end;
+
+
+{-----------------------------------------------------------------}
+
+
+constructor TGuildOfficial.Create;
+begin
+   inherited Create;
+   RaceImage := RCC_MERCHANT;  //»óÀÎ
+   Appearance := 8;
+end;
+
+destructor TGuildOfficial.Destroy;
+begin
+   inherited Destroy;
+end;
+
+procedure TGuildOfficial.UserCall (caller: TCreature);
+begin
+   NpcSayTitle (caller, '@main');
+   //NpcSay (caller, SayString);
+end;
+
+function  TGuildOfficial.UserBuildGuildNow (hum: TUserHuman; gname: string): integer;
+var
+   i: integer;
+   pu: PTUserItem;
+begin
+   Result := 0;
+   //¹®ÆÄ¸¦ ¸¸µé ÀÚ°ÝÀÌ ÀÖ´ÂÁö °Ë»ç
+   //¹®ÆÄ¿¡ °¡ÀÔÇÑ ÀûÀÌ ¾ø°í
+   //µ·100¸¸¿ø, ¿ì¸é±Í¿ÕÀÇ »Ô
+   gname := Trim(gname);
+   pu := nil;
+   if gname = '' then Result := -4;
+   if hum.MyGuild = nil then begin
+      if hum.Gold >= BUILDGUILDFEE then begin
+         pu := hum.FindItemName (__WomaHorn);
+         if pu <> nil then begin
+            ;//Á¶°Ç ¼º¸³
+         end else Result := -3; //Á¶°Ç ¾ÆÀÌÅÛÀÌ ¾øÀ½
+      end else Result := -2; //µ·ÀÌ ºÎÁ·
+   end else Result := -1; //ÀÌ¹Ì ¹®ÆÄ¿¡ °¡ÀÔµÇ¾î ÀÖÀ½.
+
+   //¹®ÆÄ¸¦ ¸¸µç´Ù.
+   if Result = 0 then begin
+      if GuildMan.AddGuild (gname, hum.UserName) then begin
+         UserEngine.SendInterMsg (ISM_ADDGUILD, ServerIndex, gname + '/' + hum.UserName);
+         hum.SendDelItem (pu^); //Å¬¶óÀÌ¾ðÆ®¿¡ º¸³¿
+         hum.DelItem (pu.MakeIndex, __WomaHorn);
+         hum.DecGold (BUILDGUILDFEE);
+         hum.GoldChanged;
+         //¹®ÆÄÁ¤º¸¸¦ ´Ù½Ã ÀÐ´Â´Ù.
+         hum.MyGuild := GuildMan.GetGuildFromMemberName (hum.UserName);
+         if hum.MyGuild <> nil then begin  //±æµå¿¡ °¡ÀÔµÇ¾î ÀÖ´Â °æ¿ì
+            hum.GuildRankName := TGuild (hum.MyGuild).MemberLogin (hum, hum.GuildRank);
+            //hum.SendMsg (self, RM_CHANGEGUILDNAME, 0, 0, 0, 0, '');
+         end;
+
+         //-----------------------
+         //¸í¼ºÄ¡ È¹µæ(¹®ÆÄ»ý¼º:+1000)
+         if ENABLE_FAME_SYSTEM then begin
+            hum.IncFamePoint( 1000 );
+         end;
+         //-----------------------
+      end else
+         Result := -4;
+   end;
+
+   case Result of
+      0: hum.SendMsg (self, RM_BUILDGUILD_OK, 0, 0, 0, 0, '');
+      else
+         hum.SendMsg (self, RM_BUILDGUILD_FAIL, 0, Result, 0, 0, '');
+   end;
+end;
+
+function  TGuildOfficial.UserDeclareGuildWarNow (hum: TUserHuman; gname: string): integer;
+begin
+   if GuildMan.GetGuild(gname) <> nil then begin
+      if hum.Gold >= GUILDWARFEE then begin
+         if hum.GuildDeclareWar (gname) = TRUE then begin
+            hum.DecGold (GUILDWARFEE);
+            hum.GoldChanged;
+         end;
+      end else begin
+         {$IFDEF KOREA} hum.SysMsg ('½ð±ÒÈ±·¦', 0);
+         {$ELSE}        hum.SysMsg ('Lack of Gold.', 0);
+         {$ENDIF}
+      end;
+   end else begin
+      {$IFDEF KOREA} hum.SysMsg (gname + ' ÕÒ²»µ½ÐÐ»á', 0);
+      {$ELSE}        hum.SysMsg (gname + ' Cannot find Guild.', 0);
+      {$ENDIF}
+   end;
+   Result := 1;
+end;
+
+{
+function TGuildOfficial.UserGuildMemberRecall (hum: TUserHuman; man: string): Boolean;
+var
+   recallhum: TUserHuman;
+   nx, ny, dx, dy: integer;
+begin
+   Result := FALSE;
+
+   if hum.IsGuildMaster then begin   //¹®ÁÖÀü¿ë
+      recallhum := UserEngine.GetUserHuman (man);
+      if recallhum <> nil then begin
+         if hum.MyGuild = recallhum.MyGuild then begin
+            if GetFrontPosition (hum, nx, ny) then begin
+               if hum.GetRecallPosition (nx, ny, 3, dx, dy) then begin
+                  recallhum.SendRefMsg (RM_SPACEMOVE_HIDE, 0, 0, 0, 0, '');
+                  recallhum.SpaceMove (MapName, dx, dy, 0); //°ø°£ÀÌµ¿
+                  Result := TRUE;
+               end;
+            end else
+               hum.SysMsg ('¼ÒÈ¯À» ½ÇÆÐÇß½À´Ï´Ù.', 0);
+         end;
+      end else
+         hum.SysMsg (man + '´ÔÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù.', 0);
+   end else begin
+      hum.BoxMsg('¹®ÁÖ¸¸ »ç¿ëÇÒ ¼ö ÀÖ´Â ¸í·ÉÀÔ´Ï´Ù.', 0);
+   end;
+end;
+}
+
+function  TGuildOfficial.UserFreeGuild (hum: TUserHuman): integer;
+begin
+   Result := 1;
+end;
+
+procedure TGuildOfficial.UserDonateGold (hum: TUserHuman);
+begin
+   hum.SendMsg (self, RM_DONATE_FAIL, 0, 0, 0, 0, '');
+end;
+
+procedure TGuildOfficial.UserRequestCastleWar (hum: TUserHuman);
+var
+   pu: PTUserItem;
+begin
+   if hum.IsGuildMaster and (not UserCastle.IsOurCastle (TGuild(hum.MyGuild))) then begin
+      pu := hum.FindItemName (__ZumaPiece);
+      if pu <> nil then begin
+         if UserCastle.ProposeCastleWar (TGuild(hum.MyGuild)) then begin
+            hum.SendDelItem (pu^); //Å¬¶óÀÌ¾ðÆ®¿¡ º¸³¿
+            hum.DelItem (pu.MakeIndex, __ZumaPiece);
+
+            //·Î±× ³²±è(ÁÖ¸¶¿ÕÀÇÁ¶°¢)(sonmg 2005/04/08)
+            AddUserLog ('10'#9 + //ÆÇ¸Å_ +
+                        hum.MapName + ''#9 +
+                        IntToStr(hum.CX) + ''#9 +
+                        IntToStr(hum.CY) + ''#9 +
+                        hum.UserName + ''#9 +
+                        __ZumaPiece + ''#9 +
+                        '0' + ''#9 +
+                        '1'#9 +
+                        UserName);
+
+            //-----------------------
+            //¸í¼ºÄ¡ È¹µæ(°ø¼º½ÅÃ»:+500)
+            if ENABLE_FAME_SYSTEM then begin
+               hum.IncFamePoint( 500 );
+            end;
+            //-----------------------
+
+            NpcSayTitle (hum, '~@request_ok');
+         end else begin
+            //Áßº¹ ½ÅÃ»µÆ°Å³ª, ÇöÀç °ø¼ºÀü ÁßÀÎ °æ¿ì
+            {$IFDEF KOREA} hum.SysMsg ('ÄãÒÑ¾­Ìá½»¹ýÍ·ÏñÁË', 0);
+            {$ELSE}        hum.SysMsg ('You can not request at the moment.', 0);
+            {$ENDIF}
+         end;
+      end else begin
+         {$IFDEF KOREA} hum.SysMsg ('ÄãÃ»ÓÐ×æÂêÍ·Ïñ', 0);
+         {$ELSE}        hum.SysMsg ('You have not a Piece of Zumataurus.', 0);
+         {$ENDIF}
+      end;
+   end else begin
+      //¹®ÆÄ°¡ ¾ø°Å³ª, ¼ºÀÇ ÁÖÀÎ¹®ÆÄ°¡ ½ÅÃ»ÇÑ °æ¿ì
+      {$IFDEF KOREA} hum.SysMsg ('ÄãµÄÇëÇó±»È¡Ïû', 0);
+      {$ELSE}        hum.SysMsg ('Your request cancelled.', 0);
+      {$ENDIF}
+   end;
+   hum.SendMsg (self, RM_MENU_OK, 0, 0, 0, 0, '');
+end;
+
+procedure TGuildOfficial.UserSelect (whocret: TCreature; selstr: string);
+var
+   sel, body: string;
+begin
+   try
+      if selstr <> '' then begin
+         if selstr[1] = '@' then begin
+            body := GetValidStr3 (selstr, sel, [#13]);
+
+            NpcSayTitle (whocret, sel);
+
+            if CompareText(sel, '@@buildguildnow') = 0 then begin
+               UserBuildGuildNow (TUserHuman(whocret), body);
+            end;
+            if CompareText(sel, '@@guildwar') = 0 then begin
+               UserDeclareGuildWarNow (TUserHuman(whocret), body);
+            end;
+            if CompareText(sel, '@@donate') = 0 then begin
+               UserDonateGold (TUserHuman(whocret));
+            end;
+            if CompareText(sel, '@requestcastlewarnow') = 0 then begin
+               UserRequestCastleWar (TUserHuman(whocret));
+            end;
+
+            if CompareText(sel, '@exit') = 0 then begin
+               whocret.SendMsg (self, RM_MERCHANTDLGCLOSE, 0, integer(self), 0, 0, '');
+            end;
+         end;
+      end;
+   except
+      MainOutMessage ('[Exception] TGuildOfficial.UserSelect... ');
+   end;
+end;
+
+procedure TGuildOfficial.Run;
+begin
+   if Random(40) = 0 then Turn (Random(8))
+   else if Random(30) = 0 then
+      SendRefMsg (RM_HIT, Dir, CX, CY, 0, '');
+   inherited Run;
+end;
+
+
+{-------------------------------------------------------}
+
+constructor TTrainer.Create;
+begin
+   inherited Create;
+   strucktime := GetTickCount;
+   damagesum := 0;
+   struckcount := 0;
+end;
+
+procedure TTrainer.RunMsg (msg: TMessageInfo);
+var
+   str: string;
+begin
+   case msg.Ident of
+      RM_REFMESSAGE:
+         begin
+            if (Integer(msg.Sender) = RM_STRUCK) and (msg.wParam <> 0) then begin
+               damagesum := damagesum + msg.wParam;
+               strucktime := GetTickCount;
+               Inc (struckcount);
+               {$IFDEF KOREA} Say ('ÆÆ»µÁ¦ ' + IntToStr(msg.wParam) + ', Æ½¾ù ' + IntToStr(damagesum div struckcount));
+               {$ELSE}        Say ('Destructive power is ' + IntToStr(msg.wParam) + ', Average  is ' + IntToStr(damagesum div struckcount));
+               {$ENDIF}
+            end;
+         end;
+(*
+      RM_STRUCK:
+         begin
+            if (msg.Sender = self) and (msg.lParam3 <> 0) then begin
+               damagesum := damagesum + msg.wParam;
+               strucktime := GetTickCount;
+               Inc (struckcount);
+               {$IFDEF KOREA} Say ('ÆÄ±«·ÂÀº ' + IntToStr(msg.wParam) + ', Æò±ÕÀº ' + IntToStr(damagesum div struckcount));
+               {$ELSE}        Say ('Destructive power is ' + IntToStr(msg.wParam) + ', Average  is ' + IntToStr(damagesum div struckcount));
+               {$ENDIF}
+            end;
+         end;
+*)
+      RM_MAGSTRUCK:
+         begin
+            if {(msg.Sender = self) and} (msg.lParam1 <> 0) then begin
+                  damagesum := damagesum + msg.lParam1;
+                  strucktime := GetTickCount;
+                  Inc (struckcount);
+                  {$IFDEF KOREA} Say ('ÆÆ»µÁ¦' + IntToStr(msg.lParam1) + ', Æ½¾ùÖµ' + IntToStr(damagesum div struckcount));
+                  {$ELSE}        Say ('Destructive power is ' + IntToStr(msg.lParam1) + ', Average  is ' + IntToStr(damagesum div struckcount));
+                  {$ENDIF}
+            end;
+         end;
+   end;
+end;
+
+procedure TTrainer.Run;
+begin
+   if struckcount > 0 then begin
+      if GetTickCount - strucktime > 3 * 1000 then begin
+         {$IFDEF KOREA} Say ('×ÜÆÆ»µÁ¦' + IntToStr(damagesum) + 'Æ½¾ùÆÆ»µÁ¦' + IntToStr(damagesum div struckcount));
+         {$ELSE}        Say ('Total destructive power is ' + IntToStr(damagesum) + ' Average destructive power is ' + IntToStr(damagesum div struckcount));
+         {$ENDIF}
+         struckcount := 0;
+         damagesum := 0;
+      end;
+   end;
+   inherited Run;
+end;
+
+
+//
+// TCastleManager, (»çºÏ¼º¿¡¸¸ ÇØ´çµÊ)
+// ¹®¿øµé¿¡°Ô¸¸ Å¬¸¯ÀÌ µÇ°Ô ÇÏ°í, ¼ºÁÖ¿¡°Ô¸¸ µ· ÀÔ±Ý, Ãâ±ÝÀ»
+// ÇÒ ¼ö ÀÖ°Ô ÇÑ´Ù.
+//
+
+constructor TCastleManager.Create;
+begin
+   inherited Create;
+end;
+
+procedure TCastleManager.CheckNpcSayCommand (hum: TUserHuman; var source: string; tag: string);
+var
+   str: string;
+begin
+   inherited CheckNpcSayCommand (hum, source, tag);
+   if tag = '$CASTLEGOLD' then begin
+      source := ChangeNpcSayTag (source, '<$CASTLEGOLD>', IntToStr(UserCastle.TotalGold));
+   end;
+   if tag = '$TODAYINCOME' then begin
+      source := ChangeNpcSayTag (source, '<$TODAYINCOME>', IntToStr(UserCastle.TodayIncome));
+   end;
+   if tag = '$CASTLEDOORSTATE' then begin
+      with TCastleDoor(UserCastle.MainDoor.UnitObj) do begin
+         {$IFDEF KOREA}
+            if Death then str := 'ÆÆ»µÁË'
+            else if BoOpenState then str := '´ò¿ª'
+            else str := '¹Ø±Õ';
+         {$ELSE}
+            if Death then str := 'destroyed'
+            else if BoOpenState then str := 'opened'
+            else str := 'closed';
+         {$ENDIF}
+      end;
+      source := ChangeNpcSayTag (source, '<$CASTLEDOORSTATE>', str);
+   end;
+   if tag = '$REPAIRDOORGOLD' then begin
+      source := ChangeNpcSayTag (source, '<$REPAIRDOORGOLD>', IntToStr(CASTLEMAINDOORREPAREGOLD));
+   end;
+   if tag = '$REPAIRWALLGOLD' then begin
+      source := ChangeNpcSayTag (source, '<$REPAIRWALLGOLD>', IntToStr(CASTLECOREWALLREPAREGOLD));
+   end;
+   if tag = '$GUARDFEE' then begin
+      source := ChangeNpcSayTag (source, '<$GUARDFEE>', IntToStr(CASTLEGUARDEMPLOYFEE));
+   end;
+   if tag = '$ARCHERFEE' then begin
+      source := ChangeNpcSayTag (source, '<$ARCHERFEE>', IntToStr(CASTLEARCHEREMPLOYFEE));
+   end;
+
+   if tag = '$GUARDRULE' then begin
+
+   end;
+
+end;
+
+procedure TCastleManager.RepaireCastlesMainDoor (hum: TUserHuman);
+begin
+   if UserCastle.TotalGold >= CASTLEMAINDOORREPAREGOLD then begin
+      if UserCastle.RepairCastleDoor then begin
+         UserCastle.TotalGold := UserCastle.TotalGold - CASTLEMAINDOORREPAREGOLD;
+         {$IFDEF KOREA} hum.SysMsg ('ÒÑÐÞ¸´', 1);
+         {$ELSE}        hum.SysMsg ('repaired.', 1);
+         {$ENDIF}
+      end else begin
+         {$IFDEF KOREA} hum.SysMsg ('ÄãÏÖÔÚÎÞ·¨ÐÞ¸´Ëü', 0);
+         {$ELSE}        hum.SysMsg ('You cannot repair it now.', 0);
+         {$ENDIF}
+      end;
+   end else begin
+      {$IFDEF KOREA} hum.SysMsg ('Î§Ç½×Ê½ð²»¹»', 0);
+      {$ELSE}        hum.SysMsg ('Fund of wall is not sufficient.', 0);
+      {$ENDIF}
+   end;
+end;
+
+procedure TCastleManager.RepaireCoreCastleWall (wall: integer; hum: TUserHuman);
+var
+   n: integer;
+begin
+   if UserCastle.TotalGold >= CASTLECOREWALLREPAREGOLD then begin
+      n := UserCastle.RepairCoreCastleWall (wall);
+      if n = 1 then begin
+         UserCastle.TotalGold := UserCastle.TotalGold - CASTLECOREWALLREPAREGOLD;
+         {$IFDEF KOREA} hum.SysMsg ('ÒÑÐÞ¸´', 1);
+         {$ELSE}        hum.SysMsg ('repaired.', 1);
+         {$ENDIF}
+      end else begin
+         {$IFDEF KOREA} hum.SysMsg ('ÄãÏÖÔÚÎÞ·¨ÐÞ¸´Ëü', 0);
+         {$ELSE}        hum.SysMsg ('You cannot repair it now.', 0);
+         {$ENDIF}
+      end;
+   end else begin
+      {$IFDEF KOREA} hum.SysMsg ('Î§Ç½×Ê½ð²»¹»', 0);
+      {$ELSE}        hum.SysMsg ('Fund of wall is not sufficient.', 0);
+      {$ENDIF}
+   end;
+end;
+
+procedure TCastleManager.HireCastleGuard (numstr: string; hum: TUserHuman);
+var
+   gnum, mrace: integer;
+begin
+   if UserCastle.TotalGold >= CASTLEGUARDEMPLOYFEE then begin
+      gnum := Str_ToInt(numstr, 0) - 1;
+      if gnum in [0..MAXGUARD-1] then begin
+         if UserCastle.Guards[gnum].UnitObj = nil then begin
+            if not UserCastle.BoCastleUnderAttack then begin
+               with UserCastle.Guards[gnum] do begin
+                  UnitObj := UserEngine.AddCreatureSysop (
+                                             UserCastle.CastleMapName,
+                                             X,
+                                             Y,
+                                             UnitName);
+                  if UnitObj <> nil then begin
+                     UserCastle.TotalGold := UserCastle.TotalGold - CASTLEGUARDEMPLOYFEE;
+                     //TGuardUnit(UnitObj).OriginX := X;
+                     //TGuardUnit(UnitObj).OriginY := Y;
+                     //TGuardUnit(UnitObj).OriginDir := 3;
+                     {$IFDEF KOREA} hum.SysMsg ('¹ÍÓÃÎÀÊ¿', 1);
+                     {$ELSE}        hum.SysMsg ('hired guard.', 1);
+                     {$ENDIF}
+                  end;
+               end;
+            end else begin
+               {$IFDEF KOREA} hum.SysMsg ('ÄãÏÖÔÚ²»ÄÜ¹ÍÓÃËü', 0);
+               {$ELSE}        hum.SysMsg ('You cannot hire it right now.', 0);
+               {$ENDIF}
+            end;
+         end else begin
+            if not UserCastle.Guards[gnum].UnitObj.Death then begin
+               {$IFDEF KOREA} hum.SysMsg ('ÊØÎÀÒÑ¾­´æÔÚÓÚÄÇ¸öµØ·½', 0);
+               {$ELSE}        hum.SysMsg ('Guard already exists in that place.', 0);
+               {$ENDIF}
+            end else begin
+               {$IFDEF KOREA} hum.SysMsg ('ÄãÏÖÔÚ²»ÄÜ¹ÍÓÃËü', 0);
+               {$ELSE}        hum.SysMsg ('You cannot hire it right now.', 0);
+               {$ENDIF}
+            end;
+         end;
+      end else begin
+         {$IFDEF KOREA} hum.SysMsg ('´íÎóµÄÃüÁî', 0);
+         {$ELSE}        hum.SysMsg ('Wrong command.', 0);
+         {$ENDIF}
+      end;
+   end else begin
+      {$IFDEF KOREA} hum.SysMsg ('³ÇÄÚ×Ê½ð²»¹»', 0);
+      {$ELSE}        hum.SysMsg ('Fund of wall is not sufficient.', 0);
+      {$ENDIF}
+   end;
+end;
+
+procedure TCastleManager.HireCastleArcher (numstr: string; hum: TUserHuman);
+var
+   gnum, mrace: integer;
+begin
+   if UserCastle.TotalGold >= CASTLEARCHEREMPLOYFEE then begin
+      gnum := Str_ToInt(numstr, 0) - 1;
+      if gnum in [0..MAXARCHER-1] then begin
+         if UserCastle.Archers[gnum].UnitObj = nil then begin
+            if not UserCastle.BoCastleUnderAttack then begin
+               with UserCastle.Archers[gnum] do begin
+                  UnitObj := UserEngine.AddCreatureSysop (
+                                             UserCastle.CastleMapName,
+                                             X,
+                                             Y,
+                                             UnitName);
+                  if UnitObj <> nil then begin
+                     UserCastle.TotalGold := UserCastle.TotalGold - CASTLEARCHEREMPLOYFEE;
+                     TGuardUnit(UnitObj).Castle := UserCastle;
+                     TGuardUnit(UnitObj).OriginX := X;
+                     TGuardUnit(UnitObj).OriginY := Y;
+                     TGuardUnit(UnitObj).OriginDir := 3;
+                     {$IFDEF KOREA} hum.SysMsg ('Äã¹ÍÓ¶ÁË¹­¼ýÊÖ', 1);
+                     {$ELSE}        hum.SysMsg ('You hired archer.', 1);
+                     {$ENDIF}
+                  end;
+               end;
+            end else begin
+               {$IFDEF KOREA} hum.SysMsg ('ÄãÏÖÔÚ²»ÄÜ¹ÍÓÃËü', 0);
+               {$ELSE}        hum.SysMsg ('You cannot hire it right now.', 0);
+               {$ENDIF}
+            end;
+         end else begin
+            if not UserCastle.Archers[gnum].UnitObj.Death then begin
+               {$IFDEF KOREA} hum.SysMsg ('ÊØÎÀÒÑ¾­´æÔÚÓÚÄÇ¸öµØ·½', 0);
+               {$ELSE}        hum.SysMsg ('Guard already exists in that place.', 0);
+               {$ENDIF}
+            end else begin
+               {$IFDEF KOREA} hum.SysMsg ('ÄãÏÖÔÚ²»ÄÜ¹ÍÓ¶Ëü', 0);
+               {$ELSE}        hum.SysMsg ('You cannot hire it right now.', 0);
+               {$ENDIF}
+            end;
+         end;
+      end else begin
+         {$IFDEF KOREA} hum.SysMsg ('´íÎóµÄÃüÁî', 0);
+         {$ELSE}        hum.SysMsg ('Wrong command.', 0);
+         {$ENDIF}
+      end;
+   end else begin
+      {$IFDEF KOREA} hum.SysMsg ('³ÇÄÚ×Ê½ð²»¹»', 0);
+      {$ELSE}        hum.SysMsg ('Fund of wall is not sufficient.', 0);
+      {$ENDIF}
+   end;
+end;
+
+
+
+procedure TCastleManager.UserCall (caller: TCreature);
+begin
+   if UserCastle.IsOurCastle (TGuild(caller.MyGuild)) then begin
+      inherited UserCall (caller);
+   end;
+end;
+
+procedure TCastleManager.UserSelect (whocret: TCreature; selstr: string);
+var
+   body, sel, rmsg: string;
+begin
+   try
+      if selstr <> '' then begin
+         if selstr[1] = '@' then begin
+            body := GetValidStr3 (selstr, sel, [#13]);
+            rmsg := '';
+            while TRUE do begin
+               whocret.LatestNpcCmd := selstr;
+
+               NpcSayTitle (whocret, sel);
+
+               //»çºÏ¼º¿¡¼­ÀÇ ¹®ÁÖ¸í·É
+               if UserCastle.IsOurCastle(TGuild(whocret.MyGuild)) and (whocret.IsGuildMaster) then begin
+                  if CompareText(sel, '@@withdrawal') = 0 then begin
+                     case UserCastle.GetBackCastleGold (TUserHuman(whocret), abs(Str_ToInt(body,0))) of
+                        -1:
+                           begin
+                              {$IFDEF KOREA} rmsg := UserCastle.OwnerGuildName + 'Ö»ÓÐÒÔÏÂÐÐ»áµÄÁìÐä²ÅÄÜÊ¹ÓÃ';
+                              {$ELSE}                  rmsg := 'It is available only for Guild chief of' + UserCastle.OwnerGuildName;
+                              {$ENDIF}
+                           end;
+                        -2:
+                           begin
+                              {$IFDEF KOREA} rmsg := '¸Ã³ÇÄÚÃ»ÓÐÕâÃ´¶à½ð±Ò';
+                              {$ELSE}                  rmsg := 'That amount of Gold is not in this wall.';
+                              {$ENDIF}
+                           end;
+                        -3:
+                           begin
+                              {$IFDEF KOREA} rmsg := 'ÄúÎÞ·¨Ð¯´ø¸ü¶àµÄ¶«Î÷';
+                              {$ELSE}                  rmsg := 'You cannot carry any more.';
+                              {$ENDIF}
+                           end;
+                        1: UserSelect (whocret, '@main');
+                     end;
+                     whocret.SendMsg (self, RM_MENU_OK, 0, integer(self), 0, 0, rmsg);
+                     break;
+                  end;
+                  if CompareText(sel, '@@receipts') = 0 then begin
+                     case UserCastle.TakeInCastleGold (TUserHuman(whocret), abs(Str_ToInt(body,0))) of
+                        -1:
+                           begin
+                              {$IFDEF KOREA} rmsg := UserCastle.OwnerGuildName + 'Ö»ÓÐÒÔÏÂÐÐ»áµÄÁìÐä²ÅÄÜÊ¹ÓÃ';
+                              {$ELSE}                  rmsg := 'It is available only for Guild chief of ' + UserCastle.OwnerGuildName;
+                              {$ENDIF}
+                           end;
+                        -2:
+                           begin
+                              {$IFDEF KOREA} rmsg := 'ÄúÃ»ÓÐÄÇÃ´¶à½ð±Ò';
+                              {$ELSE}                  rmsg := 'You have not Gold of that amount.';
+                              {$ENDIF}
+                           end;
+                        -3:
+                           begin
+                              {$IFDEF KOREA} rmsg := 'ÄúÒÑ¾­´ïµ½ÔÚ³ÇÄÚ´æ·ÅÎïÆ·µÄÏÞÖÆÁË';
+                              {$ELSE}                  rmsg := 'It exceeds the limit of custody to the wall.';
+                              {$ENDIF}
+                           end;
+                        1: UserSelect (whocret, '@main');
+                     end;
+                     whocret.SendMsg (self, RM_MENU_OK, 0, integer(self), 0, 0, rmsg);
+                     break;
+                  end;
+                  if CompareText(sel, '@openmaindoor') = 0 then begin
+                     UserCastle.ActivateMainDoor (FALSE);
+                     break;
+                  end;
+                  if CompareText(sel, '@closemaindoor') = 0 then begin
+                     UserCastle.ActivateMainDoor (TRUE);
+                     break;
+                  end;
+                  if CompareText(sel, '@repairdoornow') = 0 then begin
+                     RepaireCastlesMainDoor (TUserHuman(whocret));
+                     UserSelect (whocret, '@main');
+                     break;
+                  end;
+                  if CompareText(sel, '@repairwallnow1') = 0 then begin
+                     RepaireCoreCastleWall (1, TUserHuman(whocret));
+                     UserSelect (whocret, '@main');
+                     break;
+                  end;
+                  if CompareText(sel, '@repairwallnow2') = 0 then begin
+                     RepaireCoreCastleWall (2, TUserHuman(whocret));
+                     UserSelect (whocret, '@main');
+                     break;
+                  end;
+                  if CompareText(sel, '@repairwallnow3') = 0 then begin
+                     RepaireCoreCastleWall (3, TUserHuman(whocret));
+                     UserSelect (whocret, '@main');
+                     break;
+                  end;
+
+                  if CompareLStr(sel, '@hireguardnow', 13) then begin
+                     HireCastleGuard (Copy(sel,14,Length(sel)), TUserHuman(whocret));
+                     UserSelect (whocret, '@hireguards');
+                  end;
+
+                  if CompareLStr(sel, '@hirearchernow', 14) then begin
+                     HireCastleArcher (Copy(sel,15,Length(sel)), TUserHuman(whocret));
+                     //UserSelect (whocret, '@hirearchers');
+                     whocret.SendMsg (self, RM_MENU_OK, 0, integer(self), 0, 0, '');
+                  end;
+
+                  if CompareText(sel, '@exit') = 0 then begin
+                     whocret.SendMsg (self, RM_MERCHANTDLGCLOSE, 0, integer(self), 0, 0, '');
+                     break;
+                  end;
+               end else begin
+                  {$IFDEF KOREA}
+                     whocret.SendMsg (self, RM_MENU_OK, 0, integer(self), 0, 0, 'ÄãÃ»ÓÐÊ¹ÓÃÈ¨ÏÞ');
+                  {$ELSE}
+                     whocret.SendMsg (self, RM_MENU_OK, 0, integer(self), 0, 0, 'You have no right.');
+                  {$ENDIF}
+               end;
+
+               break;
+            end;
+         end;
+      end;
+   except
+      MainOutMessage ('[Exception] TMerchant.UserSelect... ');
+   end;
+end;
+
+
+{---------------------------HiddenNpc-----------------------------}
+
+constructor THiddenNpc.Create;
+begin
+   inherited Create;
+   RunDone := FALSE;
+   ViewRange := 7;
+   RunNextTick := 250;
+   SearchRate := 2500 + longword(Random(1500));
+   SearchTime := GetTickCount;
+   DigupRange := 4;
+   DigdownRange := 4;
+   HideMode := TRUE;
+   StickMode := TRUE;
+   BoHiddenNpc := TRUE;
+end;
+
+destructor THiddenNpc.Destroy;
+begin
+   inherited destroy;
+end;
+
+procedure THiddenNpc.ComeOut;
+begin
+   HideMode := FALSE;
+//   SendRefMsg (RM_DIGUP, Dir, CX, CY, 0, '');
+   SendRefMsg (RM_HIT, Dir, CX, CY, 0, '');
+end;
+
+procedure THiddenNpc.ComeDown;
+var
+   i: integer;
+begin
+//   SendRefMsg (RM_DIGDOWN, {Dir}0, CX, CY, 0, '');
+   SendRefMsg (RM_DISAPPEAR, 0, 0, 0, 0, '');
+   try
+      for i:=0 to VisibleActors.Count-1 do
+         Dispose (PTVisibleActor(VisibleActors[i]));
+      VisibleActors.Clear;
+   except
+      MainOutMessage ('[Exception] THiddenNpc VisbleActors Dispose(..)');
+   end;
+   HideMode := TRUE;
+end;
+
+procedure THiddenNpc.CheckComeOut;
+var
+   i: integer;
+   cret: TCreature;
+begin
+   for i:=0 to VisibleActors.Count-1 do begin
+      cret := TCreature (PTVisibleActor(VisibleActors[i]).cret);
+      if (not cret.Death) and (IsProperTarget(cret)) and (not cret.BoHumHideMode or BoViewFixedHide) then begin
+         if (abs(CX-cret.CX) <= DigupRange) and (abs(CY-cret.CY) <= DigupRange) then begin
+            ComeOut; //¹ÛÀ¸·Î ³ª¿À´Ù. º¸ÀÎ´Ù.
+            break;
+         end;
+      end;
+   end;
+end;
+
+procedure THiddenNpc.RunMsg (msg: TMessageInfo);
+begin
+   inherited RunMsg (msg);
+end;
+
+procedure THiddenNpc.Run;
+var
+   boidle: Boolean;
+   nearcret : TCreature;
+begin
+   nearcret := nil;
+   
+//   if (not BoGhost) and (not Death) and
+//      (StatusArr[POISON_STONE] = 0) and (StatusArr[POISON_ICE] = 0) and
+//      (StatusArr[POISON_STUN] = 0) then begin
+   if IsMoveAble then begin
+      if GetCurrentTime - WalkTime > GetNextWalkTime then begin
+         WalkTime := GetCurrentTime;
+         if HideMode then begin //¾ÆÁ÷ ¸ð½ÀÀ» ³ªÅ¸³»Áö ¾Ê¾ÒÀ½.
+            CheckComeOut;
+         end else begin
+            if GetCurrentTime - HitTime > GetNextHitTime then begin //»ó¼Ó¹ÞÀº run ¿¡¼­ HitTime Àç¼³Á¤ÇÔ.
+//               HitTime := GetTickCount; //¾Æ·¡ AttackTarget¿¡¼­ ÇÔ.
+               nearcret := GetNearMonster;
+            end;
+
+            boidle := FALSE;
+            if nearcret <> nil then begin
+               if (abs(nearcret.CX-CX) > DigdownRange) or (abs(nearcret.CY-CY) > DigdownRange) then
+                  boidle := TRUE;
+            end else boidle := TRUE;
+
+            if boidle then begin
+               ComeDown; //´Ù½Ã µé¾î°£´Ù.
+            end;
+         end;
+      end;
+   end;
+
+   inherited Run;
+end;
+
+end.
+
+

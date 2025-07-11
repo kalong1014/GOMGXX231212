@@ -1,0 +1,335 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="DX9Canvas" platform="Win32">
+  <class name="TDX9Canvas" file="DX9Canvas.pas" line="55">
+    <ancestor name="TAsphyreCanvas" namespace="AbstractCanvas">
+      <methodref name="InitHexLookup" visibility="private" />
+      <methodref name="OnDeviceCreate" visibility="private" />
+      <methodref name="OnDeviceDestroy" visibility="private" />
+      <methodref name="OnDeviceReset" visibility="private" />
+      <methodref name="OnDeviceLost" visibility="private" />
+      <methodref name="OnBeginScene" visibility="private" />
+      <methodref name="OnEndScene" visibility="private" />
+      <methodref name="GetClipRect" visibility="private" />
+      <methodref name="SetClipRect" visibility="private" />
+      <methodref name="WuHoriz" visibility="private" />
+      <methodref name="WuVert" visibility="private" />
+      <methodref name="HandleDeviceCreate" visibility="protected" procflags="virtual" />
+      <methodref name="HandleDeviceDestroy" visibility="protected" procflags="virtual" />
+      <methodref name="HandleDeviceReset" visibility="protected" procflags="virtual" />
+      <methodref name="HandleDeviceLost" visibility="protected" procflags="virtual" />
+      <methodref name="HandleBeginScene" visibility="protected" procflags="abstract virtual" />
+      <methodref name="HandleEndScene" visibility="protected" procflags="abstract virtual" />
+      <methodref name="GetViewport" visibility="protected" procflags="abstract virtual" />
+      <methodref name="SetViewport" visibility="protected" procflags="abstract virtual" />
+      <methodref name="GetAntialias" visibility="protected" procflags="abstract virtual" />
+      <methodref name="SetAntialias" visibility="protected" procflags="abstract virtual" />
+      <methodref name="GetMipMapping" visibility="protected" procflags="abstract virtual" />
+      <methodref name="SetMipMapping" visibility="protected" procflags="abstract virtual" />
+      <methodref name="NextDrawCall" visibility="protected" />
+      <propertyref name="CacheStall" visibility="public" />
+      <propertyref name="ClipRect" visibility="public" />
+      <propertyref name="Antialias" visibility="public" />
+      <propertyref name="MipMapping" visibility="public" />
+      <methodref name="PutPixel" visibility="public" procflags="abstract overload virtual" />
+      <methodref name="PutPixel" visibility="public" procflags="overload" />
+      <methodref name="Line" visibility="public" procflags="abstract overload virtual" />
+      <methodref name="Line" visibility="public" procflags="overload" />
+      <methodref name="Line" visibility="public" procflags="overload" />
+      <methodref name="LineArray" visibility="public" procflags="virtual" />
+      <methodref name="WuLine" visibility="public" />
+      <methodref name="Ellipse" visibility="public" />
+      <methodref name="Circle" visibility="public" />
+      <methodref name="DrawIndexedTriangles" visibility="public" procflags="abstract virtual" />
+      <methodref name="FillTri" visibility="public" />
+      <methodref name="FillQuad" visibility="public" />
+      <methodref name="WireQuad" visibility="public" />
+      <methodref name="FillRect" visibility="public" procflags="overload" />
+      <methodref name="FillRect" visibility="public" procflags="overload" />
+      <methodref name="FillRect" visibility="public" procflags="overload" />
+      <methodref name="FrameRect" visibility="public" procflags="overload" />
+      <methodref name="FrameRect" visibility="public" procflags="overload" />
+      <methodref name="HorizLine" visibility="public" procflags="overload" />
+      <methodref name="HorizLine" visibility="public" procflags="overload" />
+      <methodref name="VertLine" visibility="public" procflags="overload" />
+      <methodref name="VertLine" visibility="public" procflags="overload" />
+      <methodref name="FillHexagon" visibility="public" />
+      <methodref name="FrameHexagon" visibility="public" />
+      <methodref name="FillArc" visibility="public" procflags="overload" />
+      <methodref name="FillArc" visibility="public" procflags="overload" />
+      <methodref name="FillEllipse" visibility="public" />
+      <methodref name="FillCircle" visibility="public" />
+      <methodref name="FillRibbon" visibility="public" procflags="overload" />
+      <methodref name="FillRibbon" visibility="public" procflags="overload" />
+      <methodref name="QuadHole" visibility="public" procflags="overload" />
+      <methodref name="UseTexture" visibility="public" procflags="abstract virtual" />
+      <methodref name="UseTexturePx" visibility="public" />
+      <methodref name="UseImage" visibility="public" />
+      <methodref name="UseImagePt" visibility="public" procflags="overload" />
+      <methodref name="UseImagePt" visibility="public" procflags="overload" />
+      <methodref name="UseImagePx" visibility="public" />
+      <methodref name="TexMap" visibility="public" procflags="abstract virtual" />
+      <methodref name="Flush" visibility="public" procflags="abstract virtual" />
+      <methodref name="ResetStates" visibility="public" procflags="virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor virtual" />
+      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="VertexBuffer" type="IDirect3DVertexBuffer9" visibility="private" size="4" offset="56" file="DX9Canvas.pas" line="57" />
+      <field name="IndexBuffer" type="IDirect3DIndexBuffer9" visibility="private" size="4" offset="60" file="DX9Canvas.pas" line="58" />
+      <field name="VertexArray" type="Pointer" visibility="private" size="4" offset="64" file="DX9Canvas.pas" line="60" />
+      <field name="IndexArray" type="Pointer" visibility="private" size="4" offset="68" file="DX9Canvas.pas" line="61" />
+      <field name="CanvasTopology" type="TDX9CanvasTopology" visibility="private" size="4" offset="72" file="DX9Canvas.pas" line="63" />
+      <field name="FVertexCache" type="Integer" visibility="private" size="4" offset="76" file="DX9Canvas.pas" line="65" />
+      <field name="FIndexCache" type="Integer" visibility="private" size="4" offset="80" file="DX9Canvas.pas" line="66" />
+      <field name="FVertexCount" type="Integer" visibility="private" size="4" offset="84" file="DX9Canvas.pas" line="67" />
+      <field name="FIndexCount" type="Integer" visibility="private" size="4" offset="88" file="DX9Canvas.pas" line="68" />
+      <field name="FPrimitives" type="Integer" visibility="private" size="4" offset="92" file="DX9Canvas.pas" line="70" />
+      <field name="FMaxPrimitives" type="Integer" visibility="private" size="4" offset="96" file="DX9Canvas.pas" line="71" />
+      <field name="ActiveTex" type="TAsphyreCustomTexture" visibility="private" size="4" offset="100" file="DX9Canvas.pas" line="73" />
+      <field name="CachedTex" type="TAsphyreCustomTexture" visibility="private" size="4" offset="104" file="DX9Canvas.pas" line="74" />
+      <field name="CachedEffect" type="TBlendingEffect" visibility="private" size="1" offset="108" file="DX9Canvas.pas" line="75" />
+      <field name="QuadMapping" type="TPoint4" visibility="private" size="32" offset="112" file="DX9Canvas.pas" line="76" />
+      <field name="FPixelShaderBuffer" type="ID3DXBuffer" visibility="private" size="4" offset="144" file="DX9Canvas.pas" line="78" />
+      <field name="FPixelShader" type="IDirect3DPixelShader9" visibility="private" size="4" offset="148" file="DX9Canvas.pas" line="79" />
+      <procedure name="InitCacheSpec" visibility="private" file="DX9Canvas.pas" line="81">
+      </procedure>
+      <procedure name="PrepareVertexArray" visibility="private" file="DX9Canvas.pas" line="82">
+      </procedure>
+      <procedure name="CreateSystemBuffers" visibility="private" file="DX9Canvas.pas" line="84">
+      </procedure>
+      <procedure name="DestroySystemBuffers" visibility="private" file="DX9Canvas.pas" line="85">
+      </procedure>
+      <function name="CreateVideoBuffers" visibility="private" file="DX9Canvas.pas" line="87">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DestroyVideoBuffers" visibility="private" file="DX9Canvas.pas" line="88">
+      </procedure>
+      <function name="UploadVertexBuffer" visibility="private" file="DX9Canvas.pas" line="90">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="UploadIndexBuffer" visibility="private" file="DX9Canvas.pas" line="91">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DrawBuffers" visibility="private" file="DX9Canvas.pas" line="92">
+      </procedure>
+      <function name="NextVertexEntry" visibility="private" file="DX9Canvas.pas" line="94">
+        <parameters>
+          <retval type="Pointer" />
+        </parameters>
+      </function>
+      <procedure name="AddIndexEntry" visibility="private" file="DX9Canvas.pas" line="95">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+        </parameters>
+      </procedure>
+      <function name="RequestCache" visibility="private" file="DX9Canvas.pas" line="96">
+        <parameters>
+          <parameter name="Mode" type="TDX9CanvasTopology" />
+          <parameter name="Vertices" type="Integer" />
+          <parameter name="Indices" type="Integer" />
+          <parameter name="Effect" type="TBlendingEffect" />
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="SetEffectStates" visibility="private" file="DX9Canvas.pas" line="99">
+        <parameters>
+          <parameter name="Effect" type="TBlendingEffect" />
+        </parameters>
+      </procedure>
+      <function name="HandleDeviceCreate" visibility="protected" procflags="override" file="DX9Canvas.pas" line="101">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="HandleDeviceDestroy" visibility="protected" procflags="override" file="DX9Canvas.pas" line="102">
+      </procedure>
+      <function name="HandleDeviceReset" visibility="protected" procflags="override" file="DX9Canvas.pas" line="103">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="HandleDeviceLost" visibility="protected" procflags="override" file="DX9Canvas.pas" line="104">
+      </procedure>
+      <procedure name="HandleBeginScene" visibility="protected" procflags="override" file="DX9Canvas.pas" line="106">
+      </procedure>
+      <procedure name="HandleEndScene" visibility="protected" procflags="override" file="DX9Canvas.pas" line="107">
+      </procedure>
+      <procedure name="GetViewport" visibility="protected" procflags="override" file="DX9Canvas.pas" line="109">
+        <parameters>
+          <parameter name="x" type="Integer" paramflags="out" />
+          <parameter name="y" type="Integer" paramflags="out" />
+          <parameter name="Width" type="Integer" paramflags="out" />
+          <parameter name="Height" type="Integer" paramflags="out" />
+        </parameters>
+      </procedure>
+      <procedure name="SetViewport" visibility="protected" procflags="override" file="DX9Canvas.pas" line="110">
+        <parameters>
+          <parameter name="x" type="Integer" />
+          <parameter name="y" type="Integer" />
+          <parameter name="Width" type="Integer" />
+          <parameter name="Height" type="Integer" />
+        </parameters>
+      </procedure>
+      <function name="GetAntialias" visibility="protected" procflags="override" file="DX9Canvas.pas" line="112">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="SetAntialias" visibility="protected" procflags="override" file="DX9Canvas.pas" line="113">
+        <parameters>
+          <parameter name="Value" type="Boolean" paramflags="const" />
+        </parameters>
+      </procedure>
+      <function name="GetMipMapping" visibility="protected" procflags="override" file="DX9Canvas.pas" line="114">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="SetMipMapping" visibility="protected" procflags="override" file="DX9Canvas.pas" line="115">
+        <parameters>
+          <parameter name="Value" type="Boolean" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="PutPixel" visibility="public" procflags="overload override" file="DX9Canvas.pas" line="117">
+        <parameters>
+          <parameter name="Point" type="TPoint2" paramflags="const" />
+          <parameter name="Color" type="Cardinal" />
+        </parameters>
+      </procedure>
+      <procedure name="Line" visibility="public" procflags="overload override" file="DX9Canvas.pas" line="118">
+        <parameters>
+          <parameter name="Src" type="TPoint2" paramflags="const" />
+          <parameter name="Dest" type="TPoint2" paramflags="const" />
+          <parameter name="Color1" type="Cardinal" />
+          <parameter name="Color2" type="Cardinal" />
+        </parameters>
+      </procedure>
+      <procedure name="DrawIndexedTriangles" visibility="public" procflags="override" file="DX9Canvas.pas" line="120">
+        <parameters>
+          <parameter name="Vertices" type="PPoint2" />
+          <parameter name="Colors" type="PLongWord" />
+          <parameter name="Indices" type="PLongInt" />
+          <parameter name="NoVertices" type="Integer" />
+          <parameter name="NoTriangles" type="Integer" />
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="UseTexture" visibility="public" procflags="override" file="DX9Canvas.pas" line="124">
+        <parameters>
+          <parameter name="Texture" type="TAsphyreCustomTexture" />
+          <parameter name="Mapping" type="TPoint4" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="TexMap" visibility="public" procflags="override" file="DX9Canvas.pas" line="127">
+        <parameters>
+          <parameter name="Points" type="TPoint4" paramflags="const" />
+          <parameter name="Colors" type="TColor4" paramflags="const" />
+          <parameter name="Effect" type="TBlendingEffect">
+            <value>
+              beNormal
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="Flush" visibility="public" procflags="override" file="DX9Canvas.pas" line="130">
+      </procedure>
+      <procedure name="ResetStates" visibility="public" procflags="override" file="DX9Canvas.pas" line="131">
+      </procedure>
+      <constructor name="Create" visibility="public" file="DX9Canvas.pas" line="133">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="DX9Canvas.pas" line="134">
+        <parameters>
+        </parameters>
+      </destructor>
+    </members>
+  </class>
+</namespace>

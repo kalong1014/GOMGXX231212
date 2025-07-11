@@ -1,0 +1,272 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="DX9SwapChains" platform="Win32">
+  <class name="TDX9SwapChain" file="DX9SwapChains.pas" line="46">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FInitialized" type="Boolean" visibility="private" size="1" offset="4" file="DX9SwapChains.pas" line="48" />
+      <field name="FD3DSwapChain" type="IDirect3DSwapChain9" visibility="private" size="4" offset="8" file="DX9SwapChains.pas" line="50" />
+      <field name="FPresentParams" type="_D3DPRESENT_PARAMETERS_" visibility="private" size="56" offset="12" file="DX9SwapChains.pas" line="51" />
+      <field name="FDepthStencil" type="IDirect3DSurface9" visibility="private" size="4" offset="68" file="DX9SwapChains.pas" line="52" />
+      <field name="DepthStencilFormat" type="_D3DFORMAT" visibility="private" size="4" offset="72" file="DX9SwapChains.pas" line="54" />
+      <field name="SavedBackBuffer" type="IDirect3DSurface9" visibility="private" size="4" offset="76" file="DX9SwapChains.pas" line="56" />
+      <field name="SavedDepthStencil" type="IDirect3DSurface9" visibility="private" size="4" offset="80" file="DX9SwapChains.pas" line="57" />
+      <function name="MakePresentParams" visibility="private" file="DX9SwapChains.pas" line="59">
+        <parameters>
+          <parameter name="UserDesc" type="PSwapChainDesc" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="CreateSwapChain" visibility="private" file="DX9SwapChains.pas" line="61">
+        <parameters>
+          <parameter name="UserDesc" type="PSwapChainDesc" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DestroySwapChain" visibility="private" file="DX9SwapChains.pas" line="62">
+      </procedure>
+      <function name="CreateDepthStencil" visibility="private" file="DX9SwapChains.pas" line="64">
+        <parameters>
+          <parameter name="UserDesc" type="PSwapChainDesc" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DestroyDepthStencil" visibility="private" file="DX9SwapChains.pas" line="65">
+      </procedure>
+      <function name="SaveRenderBuffers" visibility="private" file="DX9SwapChains.pas" line="67">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="RestoreRenderBuffers" visibility="private" file="DX9SwapChains.pas" line="68">
+      </procedure>
+      <function name="SetRenderBuffers" visibility="private" file="DX9SwapChains.pas" line="70">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <property name="Initialized" visibility="public" read="FInitialized" type="Boolean" file="DX9SwapChains.pas" line="72" />
+      <property name="D3DSwapChain" visibility="public" read="FD3DSwapChain" type="IDirect3DSwapChain9" file="DX9SwapChains.pas" line="74" />
+      <property name="PresentParams" visibility="public" read="FPresentParams" type="_D3DPRESENT_PARAMETERS_" file="DX9SwapChains.pas" line="75" />
+      <property name="DepthStencil" visibility="public" read="FDepthStencil" type="IDirect3DSurface9" file="DX9SwapChains.pas" line="77" />
+      <function name="Initialize" visibility="public" file="DX9SwapChains.pas" line="79">
+        <parameters>
+          <parameter name="UserDesc" type="PSwapChainDesc" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="Finalize" visibility="public" file="DX9SwapChains.pas" line="80">
+      </procedure>
+      <function name="BeginDraw" visibility="public" file="DX9SwapChains.pas" line="82">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="EndDraw" visibility="public" file="DX9SwapChains.pas" line="83">
+      </procedure>
+      <function name="Present" visibility="public" file="DX9SwapChains.pas" line="85">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <constructor name="Create" visibility="public" file="DX9SwapChains.pas" line="87">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="DX9SwapChains.pas" line="88">
+        <parameters>
+        </parameters>
+      </destructor>
+    </members>
+  </class>
+  <class name="TDX9SwapChains" file="DX9SwapChains.pas" line="92">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="Data" type=":TDX9SwapChains.:1" visibility="private" size="4" offset="4" file="DX9SwapChains.pas" line="94" />
+      <function name="GetCount" visibility="private" file="DX9SwapChains.pas" line="96">
+        <parameters>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetItem" visibility="private" file="DX9SwapChains.pas" line="97">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <retval type="TDX9SwapChain" />
+        </parameters>
+      </function>
+      <property name="Count" visibility="public" read="GetCount" type="Integer" file="DX9SwapChains.pas" line="99" />
+      <property name="Items[Index]" visibility="public" read="GetItem" type="TDX9SwapChain" file="DX9SwapChains.pas" line="100" />
+      <function name="Add" visibility="public" file="DX9SwapChains.pas" line="102">
+        <parameters>
+          <parameter name="UserDesc" type="PSwapChainDesc" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <procedure name="RemoveAll" visibility="public" file="DX9SwapChains.pas" line="103">
+      </procedure>
+      <function name="CreateAll" visibility="public" file="DX9SwapChains.pas" line="105">
+        <parameters>
+          <parameter name="UserChains" type="TAsphyreSwapChains" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <constructor name="Create" visibility="public" file="DX9SwapChains.pas" line="107">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="DX9SwapChains.pas" line="108">
+        <parameters>
+        </parameters>
+      </destructor>
+    </members>
+  </class>
+</namespace>

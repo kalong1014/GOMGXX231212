@@ -1,0 +1,558 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsWinSock" platform="Win32">
+  <struct name="in_addr" alias="Winapi.WinSock.in_addr" size="4" file="OverbyteIcsWinsock.pas" line="53">
+    <field name="S_un_b" type="SunB" visibility="public" variant="true" size="4" offset="0" file="Winapi.WinSock.pas" line="292">
+    </field>
+    <field name="S_un_w" type="SunW" visibility="public" variant="true" size="4" offset="0" file="Winapi.WinSock.pas" line="293">
+    </field>
+    <field name="S_addr" type="Integer" visibility="public" variant="true" size="4" offset="0" file="Winapi.WinSock.pas" line="294">
+    </field>
+  </struct>
+  <struct name="TInAddr" alias="Winapi.WinSock.in_addr" size="4" file="OverbyteIcsWinsock.pas" line="55">
+    <field name="S_un_b" type="SunB" visibility="public" variant="true" size="4" offset="0" file="Winapi.WinSock.pas" line="292">
+    </field>
+    <field name="S_un_w" type="SunW" visibility="public" variant="true" size="4" offset="0" file="Winapi.WinSock.pas" line="293">
+    </field>
+    <field name="S_addr" type="Integer" visibility="public" variant="true" size="4" offset="0" file="Winapi.WinSock.pas" line="294">
+    </field>
+  </struct>
+  <pointer name="PInAddr" alias="Winapi.WinSock.PInAddr" type="in_addr" indircnt="1" file="Winapi.WinSock.pas" line="288" />
+  <struct name="TSockAddr" alias="Winapi.WinSock.sockaddr_in" size="16" file="OverbyteIcsWinsock.pas" line="59">
+    <field name="sin_family" type="Word" visibility="public" variant="true" size="2" offset="0" file="Winapi.WinSock.pas" line="302">
+    </field>
+    <field name="sin_port" type="Word" visibility="public" variant="true" size="2" offset="2" file="Winapi.WinSock.pas" line="303">
+    </field>
+    <field name="sin_addr" type="in_addr" visibility="public" variant="true" size="4" offset="4" file="Winapi.WinSock.pas" line="304">
+    </field>
+    <field name="sin_zero" visibility="public" variant="true" size="8" offset="8" file="Winapi.WinSock.pas" line="305">
+      <array name="sin_zero" visibility="public" low="0" high="7">
+        <element type="AnsiChar" />
+      </array>
+    </field>
+    <field name="sa_family" type="Word" visibility="public" variant="true" size="2" offset="0" file="Winapi.WinSock.pas" line="306">
+    </field>
+    <field name="sa_data" visibility="public" variant="true" size="14" offset="2" file="Winapi.WinSock.pas" line="307">
+      <array name="sa_data" visibility="public" low="0" high="13">
+        <element type="AnsiChar" />
+      </array>
+    </field>
+  </struct>
+  <pointer name="PSockAddr" alias="Winapi.WinSock.PSOCKADDR" type="sockaddr_in" indircnt="1" file="Winapi.WinSock.pas" line="570" />
+  <struct name="TSockAddrIn" alias="Winapi.WinSock.sockaddr_in" size="16" file="OverbyteIcsWinsock.pas" line="63">
+    <field name="sin_family" type="Word" visibility="public" variant="true" size="2" offset="0" file="Winapi.WinSock.pas" line="302">
+    </field>
+    <field name="sin_port" type="Word" visibility="public" variant="true" size="2" offset="2" file="Winapi.WinSock.pas" line="303">
+    </field>
+    <field name="sin_addr" type="in_addr" visibility="public" variant="true" size="4" offset="4" file="Winapi.WinSock.pas" line="304">
+    </field>
+    <field name="sin_zero" visibility="public" variant="true" size="8" offset="8" file="Winapi.WinSock.pas" line="305">
+      <array name="sin_zero" visibility="public" low="0" high="7">
+        <element type="AnsiChar" />
+      </array>
+    </field>
+    <field name="sa_family" type="Word" visibility="public" variant="true" size="2" offset="0" file="Winapi.WinSock.pas" line="306">
+    </field>
+    <field name="sa_data" visibility="public" variant="true" size="14" offset="2" file="Winapi.WinSock.pas" line="307">
+      <array name="sa_data" visibility="public" low="0" high="13">
+        <element type="AnsiChar" />
+      </array>
+    </field>
+  </struct>
+  <struct name="TLinger" alias="Winapi.WinSock.linger" size="4" file="OverbyteIcsWinsock.pas" line="65">
+    <field name="l_onoff" type="Word" visibility="public" size="2" offset="0" file="Winapi.WinSock.pas" line="642">
+    </field>
+    <field name="l_linger" type="Word" visibility="public" size="2" offset="2" file="Winapi.WinSock.pas" line="643">
+    </field>
+  </struct>
+  <type name="u_int" type="integer" loBound="-2147483648" hiBound="2147483647" file="System.pas" line="12" />
+  <type name="u_short" type="word" loBound="0" hiBound="65535" file="System.pas" line="12" />
+  <type name="u_long" type="integer" loBound="-2147483648" hiBound="2147483647" file="System.pas" line="12" />
+  <type name="u_char" type="Char" file="System.pas" line="12" />
+  <struct name="sockaddr_in" alias="Winapi.WinSock.sockaddr_in" size="16" file="OverbyteIcsWinsock.pas" line="75">
+    <field name="sin_family" type="Word" visibility="public" variant="true" size="2" offset="0" file="Winapi.WinSock.pas" line="302">
+    </field>
+    <field name="sin_port" type="Word" visibility="public" variant="true" size="2" offset="2" file="Winapi.WinSock.pas" line="303">
+    </field>
+    <field name="sin_addr" type="in_addr" visibility="public" variant="true" size="4" offset="4" file="Winapi.WinSock.pas" line="304">
+    </field>
+    <field name="sin_zero" visibility="public" variant="true" size="8" offset="8" file="Winapi.WinSock.pas" line="305">
+      <array name="sin_zero" visibility="public" low="0" high="7">
+        <element type="AnsiChar" />
+      </array>
+    </field>
+    <field name="sa_family" type="Word" visibility="public" variant="true" size="2" offset="0" file="Winapi.WinSock.pas" line="306">
+    </field>
+    <field name="sa_data" visibility="public" variant="true" size="14" offset="2" file="Winapi.WinSock.pas" line="307">
+      <array name="sa_data" visibility="public" low="0" high="13">
+        <element type="AnsiChar" />
+      </array>
+    </field>
+  </struct>
+  <struct name="TTimeVal" alias="Winapi.WinSock.timeval" size="8" file="OverbyteIcsWinsock.pas" line="77">
+    <field name="tv_sec" type="Integer" visibility="public" size="4" offset="0" file="Winapi.WinSock.pas" line="91">
+    </field>
+    <field name="tv_usec" type="Integer" visibility="public" size="4" offset="4" file="Winapi.WinSock.pas" line="92">
+    </field>
+  </struct>
+  <struct name="TWSADATA" alias="Winapi.WinSock.WSAData" size="400" file="OverbyteIcsWinsock.pas" line="79">
+    <field name="wVersion" type="Word" visibility="public" size="2" offset="0" file="Winapi.WinSock.pas" line="330">
+    </field>
+    <field name="wHighVersion" type="Word" visibility="public" size="2" offset="2" file="Winapi.WinSock.pas" line="331">
+    </field>
+    <field name="szDescription" visibility="public" size="257" offset="4" file="Winapi.WinSock.pas" line="339">
+      <array name="szDescription" visibility="public" low="0" high="256">
+        <element type="AnsiChar" />
+      </array>
+    </field>
+    <field name="szSystemStatus" visibility="public" size="129" offset="261" file="Winapi.WinSock.pas" line="340">
+      <array name="szSystemStatus" visibility="public" low="0" high="128">
+        <element type="AnsiChar" />
+      </array>
+    </field>
+    <field name="iMaxSockets" type="Word" visibility="public" size="2" offset="390" file="Winapi.WinSock.pas" line="341">
+    </field>
+    <field name="iMaxUdpDg" type="Word" visibility="public" size="2" offset="392" file="Winapi.WinSock.pas" line="342">
+    </field>
+    <field name="lpVendorInfo" type="PAnsiChar" visibility="public" size="4" offset="396" file="Winapi.WinSock.pas" line="343">
+    </field>
+  </struct>
+  <pointer name="PHostEnt" alias="Winapi.WinSock.PHostEnt" type="hostent" indircnt="1" file="Winapi.WinSock.pas" line="127" />
+  <pointer name="PServEnt" alias="Winapi.WinSock.PServEnt" type="servent" indircnt="1" file="Winapi.WinSock.pas" line="150" />
+  <pointer name="PProtoEnt" alias="Winapi.WinSock.PProtoEnt" type="protoent" indircnt="1" file="Winapi.WinSock.pas" line="165" />
+  <type name="TSocket" type="integer" loBound="-2147483648" hiBound="2147483647" file="System.pas" line="12" />
+  <const name="MAXGETHOSTSTRUCT" type="Integer" file="OverbyteIcsWinsock.pas" line="91">
+    <value>
+      $400
+    </value>
+  </const>
+  <const name="AF_INET" type="Integer" file="OverbyteIcsWinsock.pas" line="93">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="PF_INET" type="Integer" file="OverbyteIcsWinsock.pas" line="95">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="INADDR_NONE" type="Integer" file="OverbyteIcsWinsock.pas" line="97">
+    <value>
+      $FFFFFFFF
+    </value>
+  </const>
+  <const name="INADDR_BROADCAST" type="Integer" file="OverbyteIcsWinsock.pas" line="99">
+    <value>
+      $FFFFFFFF
+    </value>
+  </const>
+  <const name="IPPROTO_IP" type="Integer" file="OverbyteIcsWinsock.pas" line="101">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="IPPROTO_TCP" type="Integer" file="OverbyteIcsWinsock.pas" line="103">
+    <value>
+      $6
+    </value>
+  </const>
+  <const name="IPPROTO_UDP" type="Integer" file="OverbyteIcsWinsock.pas" line="105">
+    <value>
+      $11
+    </value>
+  </const>
+  <const name="IPPROTO_RAW" type="Integer" file="OverbyteIcsWinsock.pas" line="107">
+    <value>
+      $FF
+    </value>
+  </const>
+  <const name="SOCK_STREAM" type="Integer" file="OverbyteIcsWinsock.pas" line="109">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="SOCK_DGRAM" type="Integer" file="OverbyteIcsWinsock.pas" line="111">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="SOCK_RAW" type="Integer" file="OverbyteIcsWinsock.pas" line="113">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="SOL_SOCKET" type="Integer" file="OverbyteIcsWinsock.pas" line="115">
+    <value>
+      $FFFF
+    </value>
+  </const>
+  <const name="SO_LINGER" type="Integer" file="OverbyteIcsWinsock.pas" line="117">
+    <value>
+      $80
+    </value>
+  </const>
+  <const name="SO_BROADCAST" type="Integer" file="OverbyteIcsWinsock.pas" line="119">
+    <value>
+      $20
+    </value>
+  </const>
+  <const name="SO_REUSEADDR" type="Integer" file="OverbyteIcsWinsock.pas" line="121">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="SO_KEEPALIVE" type="Integer" file="OverbyteIcsWinsock.pas" line="123">
+    <value>
+      $8
+    </value>
+  </const>
+  <const name="SO_SNDBUF" type="Integer" file="OverbyteIcsWinsock.pas" line="125">
+    <value>
+      $1001
+    </value>
+  </const>
+  <const name="SO_RCVBUF" type="Integer" file="OverbyteIcsWinsock.pas" line="127">
+    <value>
+      $1002
+    </value>
+  </const>
+  <const name="TCP_NODELAY" type="Integer" file="OverbyteIcsWinsock.pas" line="129">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="INVALID_SOCKET" type="Integer" file="OverbyteIcsWinsock.pas" line="131">
+    <value>
+      $FFFFFFFF
+    </value>
+  </const>
+  <const name="SOCKET_ERROR" type="Integer" file="OverbyteIcsWinsock.pas" line="133">
+    <value>
+      $FFFFFFFF
+    </value>
+  </const>
+  <const name="IP_DEFAULT_MULTICAST_TTL" type="Integer" file="OverbyteIcsWinsock.pas" line="135">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="IP_MULTICAST_TTL" type="Integer" file="OverbyteIcsWinsock.pas" line="137">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="IP_MULTICAST_IF" type="Integer" file="OverbyteIcsWinsock.pas" line="139">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="IP_ADD_MEMBERSHIP" type="Integer" file="OverbyteIcsWinsock.pas" line="141">
+    <value>
+      $5
+    </value>
+  </const>
+  <const name="FD_READ" type="Integer" file="OverbyteIcsWinsock.pas" line="143">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="FD_WRITE" type="Integer" file="OverbyteIcsWinsock.pas" line="145">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="FD_CLOSE" type="Integer" file="OverbyteIcsWinsock.pas" line="147">
+    <value>
+      $20
+    </value>
+  </const>
+  <const name="FD_CONNECT" type="Integer" file="OverbyteIcsWinsock.pas" line="149">
+    <value>
+      $10
+    </value>
+  </const>
+  <const name="FD_ACCEPT" type="Integer" file="OverbyteIcsWinsock.pas" line="151">
+    <value>
+      $8
+    </value>
+  </const>
+  <const name="FIONREAD" type="Integer" file="OverbyteIcsWinsock.pas" line="153">
+    <value>
+      $4004667F
+    </value>
+  </const>
+  <const name="MSG_PEEK" type="Integer" file="OverbyteIcsWinsock.pas" line="155">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="MSG_OOB" type="Integer" file="OverbyteIcsWinsock.pas" line="157">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="WSABASEERR" type="Integer" file="OverbyteIcsWinsock.pas" line="159">
+    <value>
+      $2710
+    </value>
+  </const>
+  <const name="WSAECONNRESET" type="Integer" file="OverbyteIcsWinsock.pas" line="161">
+    <value>
+      $2746
+    </value>
+  </const>
+  <const name="WSAENOTSOCK" type="Integer" file="OverbyteIcsWinsock.pas" line="163">
+    <value>
+      $2736
+    </value>
+  </const>
+  <const name="WSAENOTCONN" type="Integer" file="OverbyteIcsWinsock.pas" line="165">
+    <value>
+      $2749
+    </value>
+  </const>
+  <const name="WSAEINVAL" type="Integer" file="OverbyteIcsWinsock.pas" line="167">
+    <value>
+      $2726
+    </value>
+  </const>
+  <const name="WSAECONNABORTED" type="Integer" file="OverbyteIcsWinsock.pas" line="169">
+    <value>
+      $2745
+    </value>
+  </const>
+  <const name="WSAEWOULDBLOCK" type="Integer" file="OverbyteIcsWinsock.pas" line="171">
+    <value>
+      $2733
+    </value>
+  </const>
+  <const name="WSAEINTR" type="Integer" file="OverbyteIcsWinsock.pas" line="173">
+    <value>
+      $2714
+    </value>
+  </const>
+  <const name="WSANOTINITIALISED" type="Integer" file="OverbyteIcsWinsock.pas" line="175">
+    <value>
+      $276D
+    </value>
+  </const>
+  <const name="WSAEBADF" type="Integer" file="OverbyteIcsWinsock.pas" line="177">
+    <value>
+      $2719
+    </value>
+  </const>
+  <const name="WSAEACCES" type="Integer" file="OverbyteIcsWinsock.pas" line="179">
+    <value>
+      $271D
+    </value>
+  </const>
+  <const name="WSAEFAULT" type="Integer" file="OverbyteIcsWinsock.pas" line="181">
+    <value>
+      $271E
+    </value>
+  </const>
+  <const name="WSAEMFILE" type="Integer" file="OverbyteIcsWinsock.pas" line="183">
+    <value>
+      $2728
+    </value>
+  </const>
+  <const name="WSAEINPROGRESS" type="Integer" file="OverbyteIcsWinsock.pas" line="185">
+    <value>
+      $2734
+    </value>
+  </const>
+  <const name="WSAEALREADY" type="Integer" file="OverbyteIcsWinsock.pas" line="187">
+    <value>
+      $2735
+    </value>
+  </const>
+  <const name="WSAEDESTADDRREQ" type="Integer" file="OverbyteIcsWinsock.pas" line="189">
+    <value>
+      $2737
+    </value>
+  </const>
+  <const name="WSAEMSGSIZE" type="Integer" file="OverbyteIcsWinsock.pas" line="191">
+    <value>
+      $2738
+    </value>
+  </const>
+  <const name="WSAEPROTOTYPE" type="Integer" file="OverbyteIcsWinsock.pas" line="193">
+    <value>
+      $2739
+    </value>
+  </const>
+  <const name="WSAENOPROTOOPT" type="Integer" file="OverbyteIcsWinsock.pas" line="195">
+    <value>
+      $273A
+    </value>
+  </const>
+  <const name="WSAEPROTONOSUPPORT" type="Integer" file="OverbyteIcsWinsock.pas" line="197">
+    <value>
+      $273B
+    </value>
+  </const>
+  <const name="WSAESOCKTNOSUPPORT" type="Integer" file="OverbyteIcsWinsock.pas" line="199">
+    <value>
+      $273C
+    </value>
+  </const>
+  <const name="WSAEOPNOTSUPP" type="Integer" file="OverbyteIcsWinsock.pas" line="201">
+    <value>
+      $273D
+    </value>
+  </const>
+  <const name="WSAEPFNOSUPPORT" type="Integer" file="OverbyteIcsWinsock.pas" line="203">
+    <value>
+      $273E
+    </value>
+  </const>
+  <const name="WSAEAFNOSUPPORT" type="Integer" file="OverbyteIcsWinsock.pas" line="205">
+    <value>
+      $273F
+    </value>
+  </const>
+  <const name="WSAEADDRINUSE" type="Integer" file="OverbyteIcsWinsock.pas" line="207">
+    <value>
+      $2740
+    </value>
+  </const>
+  <const name="WSAEADDRNOTAVAIL" type="Integer" file="OverbyteIcsWinsock.pas" line="209">
+    <value>
+      $2741
+    </value>
+  </const>
+  <const name="WSAENETDOWN" type="Integer" file="OverbyteIcsWinsock.pas" line="211">
+    <value>
+      $2742
+    </value>
+  </const>
+  <const name="WSAENETUNREACH" type="Integer" file="OverbyteIcsWinsock.pas" line="213">
+    <value>
+      $2743
+    </value>
+  </const>
+  <const name="WSAENETRESET" type="Integer" file="OverbyteIcsWinsock.pas" line="215">
+    <value>
+      $2744
+    </value>
+  </const>
+  <const name="WSAENOBUFS" type="Integer" file="OverbyteIcsWinsock.pas" line="217">
+    <value>
+      $2747
+    </value>
+  </const>
+  <const name="WSAEISCONN" type="Integer" file="OverbyteIcsWinsock.pas" line="219">
+    <value>
+      $2748
+    </value>
+  </const>
+  <const name="WSAESHUTDOWN" type="Integer" file="OverbyteIcsWinsock.pas" line="221">
+    <value>
+      $274A
+    </value>
+  </const>
+  <const name="WSAETOOMANYREFS" type="Integer" file="OverbyteIcsWinsock.pas" line="223">
+    <value>
+      $274B
+    </value>
+  </const>
+  <const name="WSAETIMEDOUT" type="Integer" file="OverbyteIcsWinsock.pas" line="225">
+    <value>
+      $274C
+    </value>
+  </const>
+  <const name="WSAECONNREFUSED" type="Integer" file="OverbyteIcsWinsock.pas" line="227">
+    <value>
+      $274D
+    </value>
+  </const>
+  <const name="WSAELOOP" type="Integer" file="OverbyteIcsWinsock.pas" line="229">
+    <value>
+      $274E
+    </value>
+  </const>
+  <const name="WSAENAMETOOLONG" type="Integer" file="OverbyteIcsWinsock.pas" line="231">
+    <value>
+      $274F
+    </value>
+  </const>
+  <const name="WSAEHOSTDOWN" type="Integer" file="OverbyteIcsWinsock.pas" line="233">
+    <value>
+      $2750
+    </value>
+  </const>
+  <const name="WSAEHOSTUNREACH" type="Integer" file="OverbyteIcsWinsock.pas" line="235">
+    <value>
+      $2751
+    </value>
+  </const>
+  <const name="WSAENOTEMPTY" type="Integer" file="OverbyteIcsWinsock.pas" line="237">
+    <value>
+      $2752
+    </value>
+  </const>
+  <const name="WSAEPROCLIM" type="Integer" file="OverbyteIcsWinsock.pas" line="239">
+    <value>
+      $2753
+    </value>
+  </const>
+  <const name="WSAEUSERS" type="Integer" file="OverbyteIcsWinsock.pas" line="241">
+    <value>
+      $2754
+    </value>
+  </const>
+  <const name="WSAEDQUOT" type="Integer" file="OverbyteIcsWinsock.pas" line="243">
+    <value>
+      $2755
+    </value>
+  </const>
+  <const name="WSAESTALE" type="Integer" file="OverbyteIcsWinsock.pas" line="245">
+    <value>
+      $2756
+    </value>
+  </const>
+  <const name="WSAEREMOTE" type="Integer" file="OverbyteIcsWinsock.pas" line="247">
+    <value>
+      $2757
+    </value>
+  </const>
+  <const name="WSASYSNOTREADY" type="Integer" file="OverbyteIcsWinsock.pas" line="249">
+    <value>
+      $276B
+    </value>
+  </const>
+  <const name="WSAVERNOTSUPPORTED" type="Integer" file="OverbyteIcsWinsock.pas" line="251">
+    <value>
+      $276C
+    </value>
+  </const>
+  <const name="WSAHOST_NOT_FOUND" type="Integer" file="OverbyteIcsWinsock.pas" line="253">
+    <value>
+      $2AF9
+    </value>
+  </const>
+  <const name="WSATRY_AGAIN" type="Integer" file="OverbyteIcsWinsock.pas" line="255">
+    <value>
+      $2AFA
+    </value>
+  </const>
+  <const name="WSANO_RECOVERY" type="Integer" file="OverbyteIcsWinsock.pas" line="257">
+    <value>
+      $2AFB
+    </value>
+  </const>
+  <const name="WSANO_DATA" type="Integer" file="OverbyteIcsWinsock.pas" line="259">
+    <value>
+      $2AFC
+    </value>
+  </const>
+  <const name="SizeOfTSockAddrIn" type="Integer" file="OverbyteIcsWinsock.pas" line="261">
+    <value>
+      $10
+    </value>
+  </const>
+  <const name="SizeOfTSockAddr" type="Integer" file="OverbyteIcsWinsock.pas" line="263">
+    <value>
+      $10
+    </value>
+  </const>
+</namespace>

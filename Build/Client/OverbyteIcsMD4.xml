@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsMD4" platform="Win32">
+  <const name="IcsMD4Version" type="Integer" file="OverbyteIcsMD4.pas" line="78">
+    <value>
+      $65
+    </value>
+  </const>
+  <variable name="CopyRight" type="string" visibility="public" file="OverbyteIcsMD4.pas" line="79" />
+  <class name="MD4Exception" file="OverbyteIcsMD4.pas" line="85">
+    <ancestor name="Exception" namespace="System.SysUtils">
+      <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+      </methodref>
+      <methodref name="Destroy@" visibility="class private" procflags="class destructor noself">
+      </methodref>
+      <methodref name="SetInnerException" visibility="protected">
+      </methodref>
+      <methodref name="SetStackInfo" visibility="protected">
+      </methodref>
+      <methodref name="GetStackTrace" visibility="protected">
+      </methodref>
+      <methodref name="RaisingException" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmt" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmtHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="GetBaseException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="override">
+      </methodref>
+      <propertyref name="BaseException" visibility="public">
+      </propertyref>
+      <propertyref name="HelpContext" visibility="public">
+      </propertyref>
+      <propertyref name="InnerException" visibility="public">
+      </propertyref>
+      <propertyref name="Message" visibility="public">
+      </propertyref>
+      <propertyref name="StackTrace" visibility="public">
+      </propertyref>
+      <propertyref name="StackInfo" visibility="public">
+      </propertyref>
+      <methodref name="RaiseOuterException" visibility="public" procflags="static">
+      </methodref>
+      <methodref name="ThrowOuterException" visibility="public" procflags="static">
+      </methodref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+  </class>
+  <array name="TMD4Digest" low="0" high="15">
+    <element type="Byte" />
+  </array>
+  <pointer name="PMD4Digest" type="TMD4Digest" indircnt="1" file="OverbyteIcsMD4.pas" line="87" />
+  <struct name="TMD4Context" size="96" file="OverbyteIcsMD4.pas" line="88">
+    <field name="FInitialized" type="Boolean" visibility="public" size="1" offset="0" file="OverbyteIcsMD4.pas" line="89" />
+    <field name="LenHi" type="Cardinal" visibility="public" size="4" offset="4" file="OverbyteIcsMD4.pas" line="90" />
+    <field name="LenLo" type="Cardinal" visibility="public" size="4" offset="8" file="OverbyteIcsMD4.pas" line="90" />
+    <field name="Index" type="Cardinal" visibility="public" size="4" offset="12" file="OverbyteIcsMD4.pas" line="91" />
+    <field name="CurrentHash" visibility="public" size="16" offset="16" file="OverbyteIcsMD4.pas" line="92">
+      <array name="CurrentHash" visibility="public" low="0" high="3">
+        <element type="Cardinal" />
+      </array>
+    </field>
+    <field name="HashBuffer" visibility="public" size="64" offset="32" file="OverbyteIcsMD4.pas" line="93">
+      <array name="HashBuffer" visibility="public" low="0" high="63">
+        <element type="Byte" />
+      </array>
+    </field>
+  </struct>
+  <procedure name="MD4Burn" visibility="public" file="OverbyteIcsMD4.pas" line="120">
+    <parameters>
+      <parameter name="MD4Context" type="TMD4Context" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="MD4Init" visibility="public" file="OverbyteIcsMD4.pas" line="141">
+    <parameters>
+      <parameter name="MD4Context" type="TMD4Context" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="MD4Update" visibility="public" file="OverbyteIcsMD4.pas" line="189">
+    <parameters>
+      <parameter name="MD4Context" type="TMD4Context" paramflags="var" />
+      <parameter name="Buffer" paramflags="const" />
+      <parameter name="Size" type="Cardinal" />
+    </parameters>
+  </procedure>
+  <procedure name="MD4Compress" visibility="public" file="OverbyteIcsMD4.pas" line="220">
+    <parameters>
+      <parameter name="MD4Context" type="TMD4Context" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="MD4Final" visibility="public" file="OverbyteIcsMD4.pas" line="313">
+    <parameters>
+      <parameter name="MD4Context" type="TMD4Context" paramflags="var" />
+      <parameter name="Digest" type="TMD4Digest" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="MD4UpdateStr" visibility="public" file="OverbyteIcsMD4.pas" line="345">
+    <parameters>
+      <parameter name="MD4Context" type="TMD4Context" paramflags="var" />
+      <parameter name="Str" type="AnsiString" paramflags="const" />
+    </parameters>
+  </procedure>
+  <function name="MD4String" visibility="public" file="OverbyteIcsMD4.pas" line="367">
+    <parameters>
+      <parameter name="Value" type="AnsiString" paramflags="const" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+</namespace>

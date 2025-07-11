@@ -1,0 +1,298 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="uDControls" platform="Win32">
+  <class name="TDFont" file="uDControls.pas" line="7">
+    <ancestor name="TPersistent" namespace="System.Classes">
+      <methodref name="AssignError" visibility="private">
+      </methodref>
+      <methodref name="AssignTo" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="DefineProperties" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="GetOwner" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="Assign" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetNamePath" visibility="public" procflags="dynamic">
+      </methodref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FOnChange" type="TNotifyEvent" visibility="private" size="8" offset="8" file="uDControls.pas" line="9" />
+      <field name="FColor" type="TColor" visibility="private" size="4" offset="16" file="uDControls.pas" line="10" />
+      <field name="FBColor" type="TColor" visibility="private" size="4" offset="20" file="uDControls.pas" line="11" />
+      <field name="FName" type="TFontName" visibility="private" size="4" offset="24" file="uDControls.pas" line="12" />
+      <field name="FStyle" type="TFontStyles" visibility="private" size="1" offset="28" file="uDControls.pas" line="13" />
+      <field name="FSize" type="Integer" visibility="private" size="4" offset="32" file="uDControls.pas" line="14" />
+      <field name="FBold" type="Boolean" visibility="private" size="1" offset="36" file="uDControls.pas" line="15" />
+      <procedure name="SetColor" visibility="private" file="uDControls.pas" line="16">
+        <parameters>
+          <parameter name="Value" type="TColor" />
+        </parameters>
+      </procedure>
+      <procedure name="SetBColor" visibility="private" file="uDControls.pas" line="17">
+        <parameters>
+          <parameter name="Value" type="TColor" />
+        </parameters>
+      </procedure>
+      <procedure name="SetName" visibility="private" file="uDControls.pas" line="18">
+        <parameters>
+          <parameter name="Value" type="TFontName" />
+        </parameters>
+      </procedure>
+      <procedure name="SetSize" visibility="private" file="uDControls.pas" line="19">
+        <parameters>
+          <parameter name="Value" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="SetStyle" visibility="private" file="uDControls.pas" line="20">
+        <parameters>
+          <parameter name="Value" type="TFontStyles" />
+        </parameters>
+      </procedure>
+      <procedure name="SetBold" visibility="private" file="uDControls.pas" line="21">
+        <parameters>
+          <parameter name="Value" type="Boolean" />
+        </parameters>
+      </procedure>
+      <procedure name="Changed" visibility="protected" file="uDControls.pas" line="23">
+      </procedure>
+      <constructor name="Create" visibility="public" file="uDControls.pas" line="25">
+        <parameters>
+        </parameters>
+      </constructor>
+      <procedure name="Assign" visibility="public" procflags="override" file="uDControls.pas" line="26">
+        <parameters>
+          <parameter name="Source" type="TPersistent" />
+        </parameters>
+      </procedure>
+      <event name="OnChange" visibility="public" read="FOnChange" write="FOnChange" type="TNotifyEvent" file="uDControls.pas" line="27" />
+      <property name="Color" visibility="published" read="FColor" write="SetColor" type="TColor" file="uDControls.pas" line="29" />
+      <property name="BColor" visibility="published" read="FBColor" write="SetBColor" type="TColor" file="uDControls.pas" line="30" />
+      <property name="Name" visibility="published" read="FName" write="SetName" type="TFontName" default="0" file="uDControls.pas" line="31" />
+      <property name="Size" visibility="published" read="FSize" write="SetSize" type="Integer" file="uDControls.pas" line="32" />
+      <property name="Style" visibility="published" read="FStyle" write="SetStyle" type="TFontStyles" file="uDControls.pas" line="33" />
+      <property name="Bold" visibility="published" read="FBold" write="SetBold" type="Boolean" file="uDControls.pas" line="34" />
+    </members>
+  </class>
+  <class name="TDCaptionColor" file="uDControls.pas" line="36">
+    <ancestor name="TPersistent" namespace="System.Classes">
+      <methodref name="AssignError" visibility="private">
+      </methodref>
+      <methodref name="AssignTo" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="DefineProperties" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="GetOwner" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="Assign" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetNamePath" visibility="public" procflags="dynamic">
+      </methodref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FOnChange" type="TNotifyEvent" visibility="private" size="8" offset="8" file="uDControls.pas" line="38" />
+      <field name="FUp" type="TDFont" visibility="private" size="4" offset="16" file="uDControls.pas" line="39" />
+      <field name="FHot" type="TDFont" visibility="private" size="4" offset="20" file="uDControls.pas" line="40" />
+      <field name="FDown" type="TDFont" visibility="private" size="4" offset="24" file="uDControls.pas" line="41" />
+      <field name="FDisabled" type="TDFont" visibility="private" size="4" offset="28" file="uDControls.pas" line="42" />
+      <procedure name="SetUp" visibility="private" file="uDControls.pas" line="43">
+        <parameters>
+          <parameter name="Value" type="TDFont" />
+        </parameters>
+      </procedure>
+      <procedure name="SetHot" visibility="private" file="uDControls.pas" line="44">
+        <parameters>
+          <parameter name="Value" type="TDFont" />
+        </parameters>
+      </procedure>
+      <procedure name="SetDown" visibility="private" file="uDControls.pas" line="45">
+        <parameters>
+          <parameter name="Value" type="TDFont" />
+        </parameters>
+      </procedure>
+      <procedure name="SetDisabled" visibility="private" file="uDControls.pas" line="46">
+        <parameters>
+          <parameter name="Value" type="TDFont" />
+        </parameters>
+      </procedure>
+      <procedure name="FontChange" visibility="private" file="uDControls.pas" line="47">
+        <parameters>
+          <parameter name="Sender" type="TObject" />
+        </parameters>
+      </procedure>
+      <constructor name="Create" visibility="public" file="uDControls.pas" line="51">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="uDControls.pas" line="52">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="Assign" visibility="public" procflags="override" file="uDControls.pas" line="53">
+        <parameters>
+          <parameter name="Source" type="TPersistent" />
+        </parameters>
+      </procedure>
+      <event name="OnChange" visibility="public" read="FOnChange" write="FOnChange" type="TNotifyEvent" file="uDControls.pas" line="54" />
+      <property name="Up" visibility="published" read="FUp" write="SetUp" type="TDFont" file="uDControls.pas" line="56" />
+      <property name="Hot" visibility="published" read="FHot" write="SetHot" type="TDFont" file="uDControls.pas" line="57" />
+      <property name="Down" visibility="published" read="FDown" write="SetDown" type="TDFont" file="uDControls.pas" line="58" />
+      <property name="Disabled" visibility="published" read="FDisabled" write="SetDisabled" type="TDFont" file="uDControls.pas" line="59" />
+    </members>
+  </class>
+</namespace>

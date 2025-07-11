@@ -1,0 +1,575 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="GList" platform="Win32">
+  <class name="TGList" file="GList.pas" line="9">
+    <ancestor name="TList" namespace="System.Classes">
+      <methodref name="Get" visibility="protected">
+      </methodref>
+      <methodref name="Grow" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Put" visibility="protected">
+      </methodref>
+      <methodref name="Notify" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="SetCapacity" visibility="protected">
+      </methodref>
+      <methodref name="SetCount" visibility="protected">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="Add" visibility="public">
+      </methodref>
+      <methodref name="Clear" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Delete" visibility="public">
+      </methodref>
+      <methodref name="Error" visibility="public" procflags="class overload virtual">
+      </methodref>
+      <methodref name="Error" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="Exchange" visibility="public">
+      </methodref>
+      <methodref name="Expand" visibility="public">
+      </methodref>
+      <methodref name="Extract" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ExtractItem" visibility="public">
+      </methodref>
+      <methodref name="First" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="GetEnumerator" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="IndexOf" visibility="public">
+      </methodref>
+      <methodref name="IndexOfItem" visibility="public">
+      </methodref>
+      <methodref name="Insert" visibility="public">
+      </methodref>
+      <methodref name="Last" visibility="public">
+      </methodref>
+      <methodref name="Move" visibility="public">
+      </methodref>
+      <methodref name="Remove" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="RemoveItem" visibility="public">
+      </methodref>
+      <methodref name="Pack" visibility="public">
+      </methodref>
+      <methodref name="Sort" visibility="public">
+      </methodref>
+      <methodref name="SortList" visibility="public">
+      </methodref>
+      <methodref name="Assign" visibility="public">
+      </methodref>
+      <propertyref name="Capacity" visibility="public">
+      </propertyref>
+      <propertyref name="Count" visibility="public">
+      </propertyref>
+      <propertyref name="Items" visibility="public">
+      </propertyref>
+      <propertyref name="List" visibility="public">
+      </propertyref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FLock" type="_RTL_CRITICAL_SECTION" visibility="private" size="24" offset="16" file="GList.pas" line="11" />
+      <constructor name="Create" visibility="public" file="GList.pas" line="13">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="GList.pas" line="14">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="Lock" visibility="public" file="GList.pas" line="15">
+      </procedure>
+      <procedure name="UnLock" visibility="public" file="GList.pas" line="16">
+      </procedure>
+    </members>
+  </class>
+  <class name="TGStringList" file="GList.pas" line="19">
+    <ancestor name="TStringList" namespace="System.Classes">
+      <methodref name="Grow" visibility="private">
+      </methodref>
+      <methodref name="QuickSort" visibility="private">
+      </methodref>
+      <methodref name="SetSorted" visibility="private">
+      </methodref>
+      <methodref name="SetCaseSensitive" visibility="private">
+      </methodref>
+      <methodref name="InternalStrComp" visibility="private" procflags="static inline">
+      </methodref>
+      <methodref name="LinearIndexOfName" visibility="private">
+      </methodref>
+      <methodref name="SortedIndexOfName" visibility="private">
+      </methodref>
+      <methodref name="Changed" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Changing" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="ExchangeItems" visibility="protected">
+      </methodref>
+      <methodref name="Get" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="GetCapacity" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="GetCount" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="GetObject" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="Put" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="PutObject" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="SetCapacity" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="SetUpdateState" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="CompareStrings" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="InsertItem" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="Add" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="AddObject" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="AddStrings" visibility="public" procflags="overload override">
+      </methodref>
+      <methodref name="Assign" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="Clear" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="Delete" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="Exchange" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="Find" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="IndexOf" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="IndexOfName" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="IndexOfObject" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="Insert" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="InsertObject" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="Sort" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="CustomSort" visibility="public" procflags="virtual">
+      </methodref>
+      <propertyref name="Duplicates" visibility="public">
+      </propertyref>
+      <propertyref name="Sorted" visibility="public">
+      </propertyref>
+      <propertyref name="CaseSensitive" visibility="public">
+      </propertyref>
+      <eventref name="OnChange" visibility="public">
+      </eventref>
+      <eventref name="OnChanging" visibility="public">
+      </eventref>
+      <propertyref name="OwnsObjects" visibility="public">
+      </propertyref>
+      <ancestor name="TStrings" namespace="System.Classes">
+        <methodref name="GetCommaText" visibility="private">
+        </methodref>
+        <methodref name="GetDelimitedText" visibility="private">
+        </methodref>
+        <methodref name="GetName" visibility="private">
+        </methodref>
+        <methodref name="GetValue" visibility="private">
+        </methodref>
+        <methodref name="ReadData" visibility="private">
+        </methodref>
+        <methodref name="SetCommaText" visibility="private">
+        </methodref>
+        <methodref name="SetDelimitedText" visibility="private">
+        </methodref>
+        <methodref name="SetStringsAdapter" visibility="private">
+        </methodref>
+        <methodref name="SetValue" visibility="private">
+        </methodref>
+        <methodref name="WriteData" visibility="private">
+        </methodref>
+        <methodref name="GetStrictDelimiter" visibility="private" procflags="inline">
+        </methodref>
+        <methodref name="SetStrictDelimiter" visibility="private">
+        </methodref>
+        <methodref name="GetValueFromIndex" visibility="private">
+        </methodref>
+        <methodref name="SetValueFromIndex" visibility="private">
+        </methodref>
+        <methodref name="SetDefaultEncoding" visibility="private">
+        </methodref>
+        <methodref name="GetTrailingLineBreak" visibility="private" procflags="inline">
+        </methodref>
+        <methodref name="SetTrailingLineBreak" visibility="private">
+        </methodref>
+        <methodref name="GetUseLocale" visibility="private" procflags="inline">
+        </methodref>
+        <methodref name="SetUseLocale" visibility="private">
+        </methodref>
+        <methodref name="GetWriteBOM" visibility="private" procflags="inline">
+        </methodref>
+        <methodref name="SetWriteBOM" visibility="private">
+        </methodref>
+        <methodref name="GetUpdating" visibility="private" procflags="inline">
+        </methodref>
+        <methodref name="GetKeyName" visibility="private">
+        </methodref>
+        <methodref name="DefineProperties" visibility="protected" procflags="override">
+        </methodref>
+        <methodref name="Error" visibility="protected" procflags="overload">
+        </methodref>
+        <methodref name="Error" visibility="protected" procflags="overload">
+        </methodref>
+        <methodref name="ExtractName" visibility="protected" procflags="overload inline">
+        </methodref>
+        <methodref name="ExtractName" visibility="protected" procflags="overload">
+        </methodref>
+        <methodref name="Get" visibility="protected" procflags="abstract virtual">
+        </methodref>
+        <methodref name="GetCapacity" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="GetCount" visibility="protected" procflags="abstract virtual">
+        </methodref>
+        <methodref name="GetObject" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="GetTextStr" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="Put" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="PutObject" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="SetCapacity" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="SetEncoding" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="SetTextStr" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="SetUpdateState" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="CompareStrings" visibility="protected" procflags="virtual">
+        </methodref>
+        <propertyref name="UpdateCount" visibility="protected">
+        </propertyref>
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor override">
+        </methodref>
+        <methodref name="Add" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AddPair" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="AddPair" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="AddObject" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Append" visibility="public">
+        </methodref>
+        <methodref name="AddStrings" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="AddStrings" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="AddStrings" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="Assign" visibility="public" procflags="override">
+        </methodref>
+        <methodref name="SetStrings" visibility="public">
+        </methodref>
+        <methodref name="BeginUpdate" visibility="public">
+        </methodref>
+        <methodref name="Clear" visibility="public" procflags="abstract virtual">
+        </methodref>
+        <methodref name="Delete" visibility="public" procflags="abstract virtual">
+        </methodref>
+        <methodref name="EndUpdate" visibility="public">
+        </methodref>
+        <methodref name="Equals" visibility="public">
+        </methodref>
+        <methodref name="Exchange" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetEnumerator" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="GetText" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="IndexOf" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="IndexOfName" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="IndexOfObject" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Insert" visibility="public" procflags="abstract virtual">
+        </methodref>
+        <methodref name="InsertObject" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="LoadFromFile" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="LoadFromFile" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="LoadFromStream" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="LoadFromStream" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="Move" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SaveToFile" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="SaveToFile" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="SaveToStream" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="SaveToStream" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="SetText" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToStringArray" visibility="public">
+        </methodref>
+        <methodref name="ToObjectArray" visibility="public">
+        </methodref>
+        <propertyref name="Updating" visibility="public">
+        </propertyref>
+        <propertyref name="Capacity" visibility="public">
+        </propertyref>
+        <propertyref name="CommaText" visibility="public">
+        </propertyref>
+        <propertyref name="Count" visibility="public">
+        </propertyref>
+        <propertyref name="DefaultEncoding" visibility="public">
+        </propertyref>
+        <propertyref name="Delimiter" visibility="public">
+        </propertyref>
+        <propertyref name="DelimitedText" visibility="public">
+        </propertyref>
+        <propertyref name="Encoding" visibility="public">
+        </propertyref>
+        <propertyref name="LineBreak" visibility="public">
+        </propertyref>
+        <propertyref name="Names" visibility="public">
+        </propertyref>
+        <propertyref name="KeyNames" visibility="public">
+        </propertyref>
+        <propertyref name="Objects" visibility="public">
+        </propertyref>
+        <propertyref name="QuoteChar" visibility="public">
+        </propertyref>
+        <propertyref name="Values" visibility="public">
+        </propertyref>
+        <propertyref name="ValueFromIndex" visibility="public">
+        </propertyref>
+        <propertyref name="NameValueSeparator" visibility="public">
+        </propertyref>
+        <propertyref name="StrictDelimiter" visibility="public">
+        </propertyref>
+        <propertyref name="Strings" visibility="public">
+        </propertyref>
+        <propertyref name="Text" visibility="public">
+        </propertyref>
+        <propertyref name="StringsAdapter" visibility="public">
+        </propertyref>
+        <propertyref name="WriteBOM" visibility="public">
+        </propertyref>
+        <propertyref name="TrailingLineBreak" visibility="public">
+        </propertyref>
+        <propertyref name="UseLocale" visibility="public">
+        </propertyref>
+        <propertyref name="Options" visibility="public">
+        </propertyref>
+        <ancestor name="TPersistent" namespace="System.Classes">
+          <methodref name="AssignError" visibility="private">
+          </methodref>
+          <methodref name="AssignTo" visibility="protected" procflags="virtual">
+          </methodref>
+          <methodref name="DefineProperties" visibility="protected" procflags="virtual">
+          </methodref>
+          <methodref name="GetOwner" visibility="protected" procflags="dynamic">
+          </methodref>
+          <methodref name="Destroy" visibility="public" procflags="destructor override">
+          </methodref>
+          <methodref name="Assign" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="GetNamePath" visibility="public" procflags="dynamic">
+          </methodref>
+          <ancestor name="TObject" namespace="System">
+            <methodref name="Create" visibility="public" procflags="constructor">
+            </methodref>
+            <methodref name="Free" visibility="public">
+            </methodref>
+            <methodref name="DisposeOf" visibility="public" procflags="inline">
+            </methodref>
+            <methodref name="InitInstance" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="CleanupInstance" visibility="public">
+            </methodref>
+            <methodref name="ClassType" visibility="public" procflags="inline">
+            </methodref>
+            <methodref name="ClassName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="ClassNameIs" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="ClassParent" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="ClassInfo" visibility="public" procflags="class inline">
+            </methodref>
+            <methodref name="InstanceSize" visibility="public" procflags="class inline">
+            </methodref>
+            <methodref name="InheritsFrom" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="MethodAddress" visibility="public" procflags="class overload">
+            </methodref>
+            <methodref name="MethodAddress" visibility="public" procflags="class overload">
+            </methodref>
+            <methodref name="MethodName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="QualifiedClassName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="FieldAddress" visibility="public" procflags="overload">
+            </methodref>
+            <methodref name="FieldAddress" visibility="public" procflags="overload">
+            </methodref>
+            <methodref name="GetInterface" visibility="public">
+            </methodref>
+            <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+            </methodref>
+            <methodref name="UnitName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="UnitScope" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="Equals" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="GetHashCode" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="ToString" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="SafeCallException" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="Dispatch" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="NewInstance" visibility="public" procflags="class virtual">
+            </methodref>
+            <methodref name="FreeInstance" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+            </methodref>
+            <methodref name="GetDisposed" visibility="protected" procflags="inline">
+            </methodref>
+            <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+            </methodref>
+            <propertyref name="Disposed" visibility="protected">
+            </propertyref>
+          </ancestor>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FLock" type="_RTL_CRITICAL_SECTION" visibility="private" size="24" offset="72" file="GList.pas" line="21" />
+      <constructor name="Create" visibility="public" file="GList.pas" line="23">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="GList.pas" line="24">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="Lock" visibility="public" file="GList.pas" line="25">
+      </procedure>
+      <procedure name="UnLock" visibility="public" file="GList.pas" line="26">
+      </procedure>
+    </members>
+  </class>
+</namespace>

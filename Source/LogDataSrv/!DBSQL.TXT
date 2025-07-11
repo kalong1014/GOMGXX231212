@@ -1,0 +1,1 @@
+ConnectInfo=Provider=SQLOLEDB.1;Password=sa;Persist Security Info=True;User ID=sa;Initial Catalog=Game;Data Source=(LOCAL)

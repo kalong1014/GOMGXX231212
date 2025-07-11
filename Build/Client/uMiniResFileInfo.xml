@@ -1,0 +1,432 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="uMiniResFileInfo" platform="Win32">
+  <variable name="MINIDATA_CHECKCODE" type="Cardinal" visibility="public" file="uMiniResFileInfo.pas" line="7" />
+  <variable name="MINIWZL_CHECKCODE" type="Cardinal" visibility="public" file="uMiniResFileInfo.pas" line="8" />
+  <const name="wNone" type="TWZLDATAFormat" file="uMiniResFileInfo.pas" line="10">
+    <value>
+      wNone
+    </value>
+  </const>
+  <const name="wWZL" type="TWZLDATAFormat" file="uMiniResFileInfo.pas" line="10">
+    <value>
+      wWZL
+    </value>
+  </const>
+  <const name="wDATA" type="TWZLDATAFormat" file="uMiniResFileInfo.pas" line="10">
+    <value>
+      wDATA
+    </value>
+  </const>
+  <const name="sfNone" type="TSoundFormat" file="uMiniResFileInfo.pas" line="11">
+    <value>
+      sfNone
+    </value>
+  </const>
+  <const name="sfWav" type="TSoundFormat" file="uMiniResFileInfo.pas" line="11">
+    <value>
+      sfWav
+    </value>
+  </const>
+  <const name="sfMp3" type="TSoundFormat" file="uMiniResFileInfo.pas" line="11">
+    <value>
+      sfMp3
+    </value>
+  </const>
+  <const name="sfOgg" type="TSoundFormat" file="uMiniResFileInfo.pas" line="11">
+    <value>
+      sfOgg
+    </value>
+  </const>
+  <const name="psEmpty" type="TPartState" file="uMiniResFileInfo.pas" line="24">
+    <value>
+      psEmpty
+    </value>
+  </const>
+  <const name="psDowing" type="TPartState" file="uMiniResFileInfo.pas" line="24">
+    <value>
+      psDowing
+    </value>
+  </const>
+  <const name="PsMerge" type="TPartState" file="uMiniResFileInfo.pas" line="24">
+    <value>
+      PsMerge
+    </value>
+  </const>
+  <const name="PsOk" type="TPartState" file="uMiniResFileInfo.pas" line="24">
+    <value>
+      PsOk
+    </value>
+  </const>
+  <const name="psError" type="TPartState" file="uMiniResFileInfo.pas" line="24">
+    <value>
+      psError
+    </value>
+  </const>
+  <enum name="TWZLDATAFormat" file="uMiniResFileInfo.pas" line="10">
+    <element value="0" name="wNone" file="uMiniResFileInfo.pas" line="10" />
+    <element value="1" name="wWZL" file="uMiniResFileInfo.pas" line="10" />
+    <element value="2" name="wDATA" file="uMiniResFileInfo.pas" line="10" />
+  </enum>
+  <enum name="TSoundFormat" file="uMiniResFileInfo.pas" line="11">
+    <element value="0" name="sfNone" file="uMiniResFileInfo.pas" line="11" />
+    <element value="1" name="sfWav" file="uMiniResFileInfo.pas" line="11" />
+    <element value="2" name="sfMp3" file="uMiniResFileInfo.pas" line="11" />
+    <element value="3" name="sfOgg" file="uMiniResFileInfo.pas" line="11" />
+  </enum>
+  <struct name="TMiniResFileInfoItem" size="8" packed="true" file="uMiniResFileInfo.pas" line="13">
+    <field name="FileSize" type="Integer" visibility="public" size="4" offset="0" file="uMiniResFileInfo.pas" line="14" />
+    <field name="FileNameSize" type="Integer" visibility="public" size="4" offset="4" file="uMiniResFileInfo.pas" line="15" />
+  </struct>
+  <struct name="TPartStartEnd" size="8" packed="true" file="uMiniResFileInfo.pas" line="20">
+    <field name="StartIndex" type="Integer" visibility="public" size="4" offset="0" file="uMiniResFileInfo.pas" line="21" />
+    <field name="EndIndex" type="Integer" visibility="public" size="4" offset="4" file="uMiniResFileInfo.pas" line="21" />
+  </struct>
+  <enum name="TPartState" file="uMiniResFileInfo.pas" line="24">
+    <element value="0" name="psEmpty" file="uMiniResFileInfo.pas" line="24" />
+    <element value="1" name="psDowing" file="uMiniResFileInfo.pas" line="24" />
+    <element value="2" name="PsMerge" file="uMiniResFileInfo.pas" line="24" />
+    <element value="3" name="PsOk" file="uMiniResFileInfo.pas" line="24" />
+    <element value="4" name="psError" file="uMiniResFileInfo.pas" line="24" />
+  </enum>
+  <class name="TImageFilePartInfo" file="uMiniResFileInfo.pas" line="26">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FImageIndexPart" type=":TImageFilePartInfo.:1" visibility="private" size="4" offset="4" file="uMiniResFileInfo.pas" line="28" />
+      <field name="FPartStartEnd" type=":TImageFilePartInfo.:2" visibility="private" size="4" offset="8" file="uMiniResFileInfo.pas" line="29" />
+      <field name="FPartCount" type="Integer" visibility="private" size="4" offset="12" file="uMiniResFileInfo.pas" line="30" />
+      <field name="FPartDownState" type=":TImageFilePartInfo.:3" visibility="private" size="4" offset="16" file="uMiniResFileInfo.pas" line="31" />
+      <field name="FImageCount" type="Integer" visibility="private" size="4" offset="20" file="uMiniResFileInfo.pas" line="32" />
+      <field name="FMD5" type="string" visibility="private" size="4" offset="24" file="uMiniResFileInfo.pas" line="33" />
+      <field name="FFormat" type="TWZLDATAFormat" visibility="private" size="1" offset="28" file="uMiniResFileInfo.pas" line="34" />
+      <field name="FDataHeader" visibility="private" size="80" offset="29" file="uMiniResFileInfo.pas" line="35">
+        <array name="FDataHeader" visibility="private" low="1" high="80">
+          <element type="Byte" />
+        </array>
+      </field>
+      <field name="FFileName" type="string" visibility="private" size="4" offset="112" file="uMiniResFileInfo.pas" line="36" />
+      <field name="FPartRequestTime" type=":TImageFilePartInfo.:4" visibility="private" size="4" offset="116" file="uMiniResFileInfo.pas" line="37" />
+      <function name="GetPartState" visibility="private" file="uMiniResFileInfo.pas" line="38">
+        <parameters>
+          <parameter name="index" type="Integer" />
+          <retval type="TPartState" />
+        </parameters>
+      </function>
+      <procedure name="SetPartStat" visibility="private" file="uMiniResFileInfo.pas" line="39">
+        <parameters>
+          <parameter name="index" type="Integer" />
+          <parameter name="value" type="TPartState" />
+        </parameters>
+      </procedure>
+      <function name="GetPartRequestTime" visibility="private" file="uMiniResFileInfo.pas" line="40">
+        <parameters>
+          <parameter name="PartIndex" type="Word" />
+          <retval type="Cardinal" />
+        </parameters>
+      </function>
+      <procedure name="SetPartRequestTime" visibility="private" file="uMiniResFileInfo.pas" line="41">
+        <parameters>
+          <parameter name="PartIndex" type="Word" />
+          <parameter name="Time" type="Cardinal" />
+        </parameters>
+      </procedure>
+      <constructor name="Create" visibility="public" file="uMiniResFileInfo.pas" line="43">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="uMiniResFileInfo.pas" line="44">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="LoadFromStream" visibility="public" file="uMiniResFileInfo.pas" line="45">
+        <parameters>
+          <parameter name="Stream" type="TStream" />
+        </parameters>
+      </procedure>
+      <function name="GetIndexPart" visibility="public" file="uMiniResFileInfo.pas" line="46">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <procedure name="writeDataHeader" visibility="public" file="uMiniResFileInfo.pas" line="47">
+        <parameters>
+          <parameter name="Stream" type="TStream" />
+        </parameters>
+      </procedure>
+      <function name="GetPartIndex" visibility="public" file="uMiniResFileInfo.pas" line="48">
+        <parameters>
+          <parameter name="Part" type="Integer" />
+          <parameter name="StartIndex" type="Integer" paramflags="var" />
+          <parameter name="EndIndex" type="Integer" paramflags="var" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <property name="MD5" visibility="public" read="FMD5" type="string" default="0" file="uMiniResFileInfo.pas" line="49" />
+      <property name="Format" visibility="public" read="FFormat" type="TWZLDATAFormat" file="uMiniResFileInfo.pas" line="50" />
+      <property name="PartState[index]" visibility="public" read="GetPartState" write="SetPartStat" type="TPartState" file="uMiniResFileInfo.pas" line="51" />
+      <property name="ImageCount" visibility="public" read="FImageCount" type="Integer" file="uMiniResFileInfo.pas" line="52" />
+      <property name="FileName" visibility="public" read="FFileName" write="FFileName" type="string" default="0" file="uMiniResFileInfo.pas" line="53" />
+      <property name="PartCount" visibility="public" read="FPartCount" write="FPartCount" type="Integer" file="uMiniResFileInfo.pas" line="54" />
+      <property name="PartRequestTime[Index]" visibility="public" read="GetPartRequestTime" write="SetPartRequestTime" type="Cardinal" file="uMiniResFileInfo.pas" line="55" />
+    </members>
+  </class>
+  <anonMethod name="TEnumImagePartProc" file="uMiniResFileInfo.pas" line="59">
+    <procedure name="Invoke" visibility="public" procflags="abstract virtual" file="uMiniResFileInfo.pas" line="59">
+      <parameters>
+        <parameter name="FileName" type="string" paramflags="const" />
+        <parameter name="Stream" type="TImageFilePartInfo" />
+      </parameters>
+    </procedure>
+  </anonMethod>
+  <anonMethod name="TEnumFileName" file="uMiniResFileInfo.pas" line="60">
+    <procedure name="Invoke" visibility="public" procflags="abstract virtual" file="uMiniResFileInfo.pas" line="60">
+      <parameters>
+        <parameter name="FileName" type="string" paramflags="const" />
+        <parameter name="FileMD5" type="string" paramflags="const" />
+      </parameters>
+    </procedure>
+  </anonMethod>
+  <class name="TMiniResFilePackage" file="uMiniResFileInfo.pas" line="61">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FRoot" type="string" visibility="private" size="4" offset="4" file="uMiniResFileInfo.pas" line="63" />
+      <field name="FImagePartHash" type="TDictionary&lt;System.string,uMiniResFileInfo.TImageFilePartInfo&gt;" visibility="private" size="4" offset="8" file="uMiniResFileInfo.pas" line="64" />
+      <field name="FFileMD5" type="TDictionary&lt;System.string,System.string&gt;" visibility="private" size="4" offset="12" file="uMiniResFileInfo.pas" line="65" />
+      <field name="FPassWordMD5" type="AnsiString" visibility="private" size="4" offset="16" file="uMiniResFileInfo.pas" line="66" />
+      <field name="FInited" type="Boolean" visibility="private" size="1" offset="20" file="uMiniResFileInfo.pas" line="67" />
+      <field name="FCheckPassword" type="Boolean" visibility="private" size="1" offset="21" file="uMiniResFileInfo.pas" line="68" />
+      <function name="EqualPassword" visibility="private" file="uMiniResFileInfo.pas" line="69">
+        <parameters>
+          <parameter name="S" type="string" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <constructor name="Create" visibility="public" file="uMiniResFileInfo.pas" line="71">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="uMiniResFileInfo.pas" line="72">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="SetRoot" visibility="public" file="uMiniResFileInfo.pas" line="73">
+        <parameters>
+          <parameter name="Path" type="string" />
+        </parameters>
+      </procedure>
+      <function name="BuildPackage" visibility="public" file="uMiniResFileInfo.pas" line="75">
+        <parameters>
+          <parameter name="FileList" type="TStrings" />
+          <parameter name="DstFileName" type="string" paramflags="const" />
+          <parameter name="Password" type="string" paramflags="const" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="LoadPackageFromFile" visibility="public" file="uMiniResFileInfo.pas" line="77">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Password" type="string" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="LoadPackageFromStream" visibility="public" file="uMiniResFileInfo.pas" line="78">
+        <parameters>
+          <parameter name="Stream" type="TStream" />
+          <parameter name="Password" type="string" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="EachImage" visibility="public" file="uMiniResFileInfo.pas" line="79">
+        <parameters>
+          <parameter name="Proc" type="TEnumImagePartProc" />
+        </parameters>
+      </procedure>
+      <procedure name="EachFileMD5" visibility="public" file="uMiniResFileInfo.pas" line="80">
+        <parameters>
+          <parameter name="Proc" type="TEnumFileName" />
+        </parameters>
+      </procedure>
+      <function name="IncludeImageFile" visibility="public" file="uMiniResFileInfo.pas" line="81">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <retval type="TWZLDATAFormat" />
+        </parameters>
+      </function>
+      <function name="IncludeFile" visibility="public" file="uMiniResFileInfo.pas" line="82">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="IncludeSoundFile" visibility="public" file="uMiniResFileInfo.pas" line="83">
+        <parameters>
+          <parameter name="SoudFileName" type="string" paramflags="const" />
+          <retval type="TSoundFormat" />
+        </parameters>
+      </function>
+      <function name="TryGetImagePartInfo" visibility="public" file="uMiniResFileInfo.pas" line="84">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="PartInfo" type="TImageFilePartInfo" paramflags="var" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <property name="Inited" visibility="public" read="FInited" type="Boolean" file="uMiniResFileInfo.pas" line="85" />
+      <property name="CheckPassword" visibility="public" read="FCheckPassword" write="FCheckPassword" type="Boolean" file="uMiniResFileInfo.pas" line="86" />
+    </members>
+  </class>
+  <function name="GetImageFileHashKeyName" visibility="public" file="uMiniResFileInfo.pas" line="95">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+</namespace>

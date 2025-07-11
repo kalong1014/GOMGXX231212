@@ -1,0 +1,301 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsNtlmMsgs" platform="Win32">
+  <const name="IcsNtlmMsgsVersion" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="154">
+    <value>
+      $25F
+    </value>
+  </const>
+  <variable name="CopyRight" type="string" visibility="public" file="OverbyteIcsNtlmMsgs.pas" line="155" />
+  <const name="Flags_Negotiate_Unicode" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="158">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="Flags_Negotiate_OEM" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="159">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="Flags_Request_Target" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="160">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="Flags_Negotiate_8" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="161">
+    <value>
+      $8
+    </value>
+  </const>
+  <const name="Flags_Negotiate_Sign" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="162">
+    <value>
+      $10
+    </value>
+  </const>
+  <const name="Flags_Negotiate_Seal" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="163">
+    <value>
+      $20
+    </value>
+  </const>
+  <const name="Flags_Negotiate_Datagram_Style" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="164">
+    <value>
+      $40
+    </value>
+  </const>
+  <const name="Flags_Negotiate_LAN_Manager_Key" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="165">
+    <value>
+      $80
+    </value>
+  </const>
+  <const name="Flags_Negotiate_100" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="166">
+    <value>
+      $100
+    </value>
+  </const>
+  <const name="Flags_Negotiate_NTLM" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="167">
+    <value>
+      $200
+    </value>
+  </const>
+  <const name="Flags_Negotiate_400" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="168">
+    <value>
+      $400
+    </value>
+  </const>
+  <const name="Flags_Negotiate_800" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="169">
+    <value>
+      $800
+    </value>
+  </const>
+  <const name="Flags_Negotiate_Domain_Supplied" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="170">
+    <value>
+      $1000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_Workstation_Supplied" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="171">
+    <value>
+      $2000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_Local_Call" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="172">
+    <value>
+      $4000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_Allways_Sign" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="173">
+    <value>
+      $8000
+    </value>
+  </const>
+  <const name="Flags_Target_Type_Domain" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="174">
+    <value>
+      $10000
+    </value>
+  </const>
+  <const name="Flags_Target_Type_Server" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="175">
+    <value>
+      $20000
+    </value>
+  </const>
+  <const name="Flags_Target_Type_Share" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="176">
+    <value>
+      $40000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_NTLM2_Key" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="177">
+    <value>
+      $80000
+    </value>
+  </const>
+  <const name="Flags_Request_Init_Response" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="178">
+    <value>
+      $100000
+    </value>
+  </const>
+  <const name="Flags_Request_Accept_Response" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="179">
+    <value>
+      $200000
+    </value>
+  </const>
+  <const name="Flags_Request_Non_NT_Session_Key" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="180">
+    <value>
+      $400000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_Target_Info" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="181">
+    <value>
+      $800000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_1000000" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="182">
+    <value>
+      $1000000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_Version" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="183">
+    <value>
+      $2000000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_4000000" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="184">
+    <value>
+      $4000000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_8000000" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="185">
+    <value>
+      $8000000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_10000000" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="186">
+    <value>
+      $10000000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_128_Bit_Encryption" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="187">
+    <value>
+      $20000000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_Key_Exchange" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="188">
+    <value>
+      $40000000
+    </value>
+  </const>
+  <const name="Flags_Negotiate_56_Bit_Encryption" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="189">
+    <value>
+      $80000000
+    </value>
+  </const>
+  <const name="TIB_Type_Server" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="192">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="TIB_Type_Domain" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="193">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="TIB_Type_DNS_Full" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="194">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="TIB_Type_DNS_Domain" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="195">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="TIB_Type_ask_microsoft_or_god" type="Integer" file="OverbyteIcsNtlmMsgs.pas" line="196">
+    <value>
+      $5
+    </value>
+  </const>
+  <array name="TNTLM_OSVersion" low="0" high="7">
+    <element type="Byte" />
+  </array>
+  <struct name="TNTLM_SecBuff" size="8" packed="true" file="OverbyteIcsNtlmMsgs.pas" line="201">
+    <field name="Length" type="Word" visibility="public" size="2" offset="0" file="OverbyteIcsNtlmMsgs.pas" line="202" />
+    <field name="Space" type="Word" visibility="public" size="2" offset="2" file="OverbyteIcsNtlmMsgs.pas" line="203" />
+    <field name="Offset" type="Cardinal" visibility="public" size="4" offset="4" file="OverbyteIcsNtlmMsgs.pas" line="204" />
+  </struct>
+  <struct name="TNTLM_Message1" size="32" packed="true" file="OverbyteIcsNtlmMsgs.pas" line="208">
+    <field name="Protocol" type="TArrayOf8Bytes" visibility="public" size="8" offset="0" file="OverbyteIcsNtlmMsgs.pas" line="209" />
+    <field name="MsgType" type="Cardinal" visibility="public" size="4" offset="8" file="OverbyteIcsNtlmMsgs.pas" line="210" />
+    <field name="Flags" type="Cardinal" visibility="public" size="4" offset="12" file="OverbyteIcsNtlmMsgs.pas" line="211" />
+    <field name="Domain" type="TNTLM_SecBuff" visibility="public" size="8" offset="16" file="OverbyteIcsNtlmMsgs.pas" line="212" />
+    <field name="Host" type="TNTLM_SecBuff" visibility="public" size="8" offset="24" file="OverbyteIcsNtlmMsgs.pas" line="213" />
+  </struct>
+  <struct name="TNTLM_Message2" size="48" packed="true" file="OverbyteIcsNtlmMsgs.pas" line="223">
+    <field name="Protocol" type="TArrayOf8Bytes" visibility="public" size="8" offset="0" file="OverbyteIcsNtlmMsgs.pas" line="224" />
+    <field name="MsgType" type="Cardinal" visibility="public" size="4" offset="8" file="OverbyteIcsNtlmMsgs.pas" line="225" />
+    <field name="TargetName" type="TNTLM_SecBuff" visibility="public" size="8" offset="12" file="OverbyteIcsNtlmMsgs.pas" line="226" />
+    <field name="Flags" type="Cardinal" visibility="public" size="4" offset="20" file="OverbyteIcsNtlmMsgs.pas" line="227" />
+    <field name="Challenge" type="TArrayOf8Bytes" visibility="public" size="8" offset="24" file="OverbyteIcsNtlmMsgs.pas" line="228" />
+    <field name="Context" type="TArrayOf8Bytes" visibility="public" size="8" offset="32" file="OverbyteIcsNtlmMsgs.pas" line="229" />
+    <field name="TargetInfo" type="TNTLM_SecBuff" visibility="public" size="8" offset="40" file="OverbyteIcsNtlmMsgs.pas" line="230" />
+  </struct>
+  <struct name="TNTLM_Msg2_Info" size="32" file="OverbyteIcsNtlmMsgs.pas" line="242">
+    <field name="SrvRespOk" type="Boolean" visibility="public" size="1" offset="0" file="OverbyteIcsNtlmMsgs.pas" line="243" />
+    <field name="Unicode" type="Boolean" visibility="public" size="1" offset="1" file="OverbyteIcsNtlmMsgs.pas" line="244" />
+    <field name="Target" type="string" visibility="public" size="4" offset="4" file="OverbyteIcsNtlmMsgs.pas" line="245" />
+    <field name="Domain" type="string" visibility="public" size="4" offset="8" file="OverbyteIcsNtlmMsgs.pas" line="246" />
+    <field name="Server" type="string" visibility="public" size="4" offset="12" file="OverbyteIcsNtlmMsgs.pas" line="247" />
+    <field name="Challenge" type="TArrayOf8Bytes" visibility="public" size="8" offset="16" file="OverbyteIcsNtlmMsgs.pas" line="248" />
+    <field name="Flags" type="Cardinal" visibility="public" size="4" offset="24" file="OverbyteIcsNtlmMsgs.pas" line="249" />
+    <field name="TargetInfoBlock" type="TBytes" visibility="public" size="4" offset="28" file="OverbyteIcsNtlmMsgs.pas" line="250" />
+  </struct>
+  <struct name="TNTLM_Message3" size="64" packed="true" file="OverbyteIcsNtlmMsgs.pas" line="254">
+    <field name="Protocol" type="TArrayOf8Bytes" visibility="public" size="8" offset="0" file="OverbyteIcsNtlmMsgs.pas" line="255" />
+    <field name="MsgType" type="Cardinal" visibility="public" size="4" offset="8" file="OverbyteIcsNtlmMsgs.pas" line="256" />
+    <field name="LM" type="TNTLM_SecBuff" visibility="public" size="8" offset="12" file="OverbyteIcsNtlmMsgs.pas" line="257" />
+    <field name="NTLM" type="TNTLM_SecBuff" visibility="public" size="8" offset="20" file="OverbyteIcsNtlmMsgs.pas" line="258" />
+    <field name="Domain" type="TNTLM_SecBuff" visibility="public" size="8" offset="28" file="OverbyteIcsNtlmMsgs.pas" line="259" />
+    <field name="User" type="TNTLM_SecBuff" visibility="public" size="8" offset="36" file="OverbyteIcsNtlmMsgs.pas" line="260" />
+    <field name="Host" type="TNTLM_SecBuff" visibility="public" size="8" offset="44" file="OverbyteIcsNtlmMsgs.pas" line="261" />
+    <field name="SessionKey" type="TNTLM_SecBuff" visibility="public" size="8" offset="52" file="OverbyteIcsNtlmMsgs.pas" line="262" />
+    <field name="Flags" type="Cardinal" visibility="public" size="4" offset="60" file="OverbyteIcsNtlmMsgs.pas" line="263" />
+  </struct>
+  <procedure name="NtlmParseUserCode" visibility="public" file="OverbyteIcsNtlmMsgs.pas" line="308">
+    <parameters>
+      <parameter name="AUserCode" type="string" paramflags="const" />
+      <parameter name="Domain" type="string" paramflags="out" />
+      <parameter name="UserName" type="string" paramflags="out" />
+      <parameter name="NtlmV2" type="Boolean" paramflags="const">
+        <value>
+          False
+        </value>
+      </parameter>
+    </parameters>
+  </procedure>
+  <function name="NtlmGetMessage1" visibility="public" file="OverbyteIcsNtlmMsgs.pas" line="617">
+    <parameters>
+      <parameter name="AHost" type="string" paramflags="const" />
+      <parameter name="ADomain" type="string" paramflags="const" />
+      <parameter name="ALmCompatLevel" type="Integer">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="NtlmGetMessage2" visibility="public" file="OverbyteIcsNtlmMsgs.pas" line="700">
+    <parameters>
+      <parameter name="AServerReply" type="string" paramflags="const" />
+      <retval type="TNTLM_Msg2_Info" />
+    </parameters>
+  </function>
+  <function name="NtlmGetMessage3" visibility="public" procflags="overload" file="OverbyteIcsNtlmMsgs.pas" line="884" symflags="deprecated">
+    <parameters>
+      <parameter name="ADomain" type="string" paramflags="const" />
+      <parameter name="AHost" type="string" paramflags="const" />
+      <parameter name="AUser" type="string" paramflags="const" />
+      <parameter name="APassword" type="string" paramflags="const" />
+      <parameter name="AChallenge" type="TArrayOf8Bytes" />
+      <parameter name="ASrcCodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <parameter name="UnicodeFlag" type="Boolean">
+        <value>
+          True
+        </value>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="NtlmGetMessage3" visibility="public" procflags="overload" file="OverbyteIcsNtlmMsgs.pas" line="1001">
+    <parameters>
+      <parameter name="ADomain" type="string" paramflags="const" />
+      <parameter name="AHost" type="string" paramflags="const" />
+      <parameter name="AUser" type="string" paramflags="const" />
+      <parameter name="APassword" type="string" paramflags="const" />
+      <parameter name="Msg2Info" type="TNTLM_Msg2_Info" paramflags="const" />
+      <parameter name="ASrcCodePage" type="Cardinal" />
+      <parameter name="ALmCompatLevel" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+</namespace>

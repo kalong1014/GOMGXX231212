@@ -1,0 +1,401 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsCsc" platform="Win32">
+  <const name="ICS_ERR_EINVAL" type="Integer" file="OverbyteIcsCsc.pas" line="98">
+    <value>
+      $FFFFFFFF
+    </value>
+  </const>
+  <const name="ICS_ERR_E2BIG" type="Integer" file="OverbyteIcsCsc.pas" line="99">
+    <value>
+      $FFFFFFFE
+    </value>
+  </const>
+  <const name="ICS_ERR_EILSEQ" type="Integer" file="OverbyteIcsCsc.pas" line="100">
+    <value>
+      $FFFFFFF6
+    </value>
+  </const>
+  <const name="ictSbcs" type="TIcsCharsetType" file="OverbyteIcsCsc.pas" line="113">
+    <value>
+      ictSbcs
+    </value>
+  </const>
+  <const name="ictDbcs" type="TIcsCharsetType" file="OverbyteIcsCsc.pas" line="113">
+    <value>
+      ictDbcs
+    </value>
+  </const>
+  <const name="ictMbcs" type="TIcsCharsetType" file="OverbyteIcsCsc.pas" line="113">
+    <value>
+      ictMbcs
+    </value>
+  </const>
+  <const name="ictMbcsUnicode" type="TIcsCharsetType" file="OverbyteIcsCsc.pas" line="113">
+    <value>
+      ictMbcsUnicode
+    </value>
+  </const>
+  <const name="ictUnicode" type="TIcsCharsetType" file="OverbyteIcsCsc.pas" line="113">
+    <value>
+      ictUnicode
+    </value>
+  </const>
+  <const name="ncfSkipEILSEQ" type=":1" file="OverbyteIcsCsc.pas" line="115">
+    <value>
+      ncfSkipEILSEQ
+    </value>
+  </const>
+  <const name="ncfSkipEINVAL" type=":1" file="OverbyteIcsCsc.pas" line="115">
+    <value>
+      ncfSkipEINVAL
+    </value>
+  </const>
+  <enum name="TIcsCharsetType" file="OverbyteIcsCsc.pas" line="113">
+    <element value="0" name="ictSbcs" file="OverbyteIcsCsc.pas" line="113" />
+    <element value="1" name="ictDbcs" file="OverbyteIcsCsc.pas" line="113" />
+    <element value="2" name="ictMbcs" file="OverbyteIcsCsc.pas" line="113" />
+    <element value="3" name="ictMbcsUnicode" file="OverbyteIcsCsc.pas" line="113" />
+    <element value="4" name="ictUnicode" file="OverbyteIcsCsc.pas" line="113" />
+  </enum>
+  <set name="TIcsNextCodePointFlags">
+    <element name="ncfSkipEILSEQ" />
+    <element name="ncfSkipEINVAL" />
+  </set>
+  <class name="TIcsCsc" file="OverbyteIcsCsc.pas" line="122">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FCodePage" type="Cardinal" visibility="private" size="4" offset="4" file="OverbyteIcsCsc.pas" line="124" />
+      <field name="FCharSetType" type="TIcsCharsetType" visibility="private" size="1" offset="8" file="OverbyteIcsCsc.pas" line="125" />
+      <field name="FDefaultUnicodeChar" type="Char" visibility="private" size="2" offset="10" file="OverbyteIcsCsc.pas" line="126" />
+      <field name="FDefaultAnsiChar" type="AnsiChar" visibility="private" size="1" offset="12" file="OverbyteIcsCsc.pas" line="127" />
+      <field name="FMinCpSize" type="Integer" visibility="private" size="4" offset="16" file="OverbyteIcsCsc.pas" line="128" />
+      <field name="FLeadBytes" type="TSysCharSet" visibility="private" size="32" offset="20" file="OverbyteIcsCsc.pas" line="129" />
+      <field name="FToWcFunc" type="TIcsConvertFunc" visibility="private" size="4" offset="52" file="OverbyteIcsCsc.pas" line="130" />
+      <field name="FFromWcFunc" type="TIcsConvertFunc" visibility="private" size="4" offset="56" file="OverbyteIcsCsc.pas" line="131" />
+      <field name="FCpSizeFunc" type="TIcsCpSizeFunc" visibility="private" size="4" offset="60" file="OverbyteIcsCsc.pas" line="132" />
+      <field name="FToWcShiftState" type="Cardinal" visibility="protected" size="4" offset="64" file="OverbyteIcsCsc.pas" line="137" />
+      <field name="FFromWcShiftState" type="Cardinal" visibility="protected" size="4" offset="68" file="OverbyteIcsCsc.pas" line="138" />
+      <procedure name="SetCodePage" visibility="protected" procflags="virtual" file="OverbyteIcsCsc.pas" line="143">
+        <parameters>
+          <parameter name="Value" type="Cardinal" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="Init" visibility="protected" procflags="virtual" file="OverbyteIcsCsc.pas" line="144">
+      </procedure>
+      <constructor name="Create" visibility="public" file="OverbyteIcsCsc.pas" line="146">
+        <parameters>
+          <parameter name="CodePage" type="Cardinal" />
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="OverbyteIcsCsc.pas" line="147">
+        <parameters>
+        </parameters>
+      </destructor>
+      <function name="GetBomBytes" visibility="public" file="OverbyteIcsCsc.pas" line="148">
+        <parameters>
+          <retval type="TBytes" />
+        </parameters>
+      </function>
+      <function name="GetBufferEncoding" visibility="public" file="OverbyteIcsCsc.pas" line="149">
+        <parameters>
+          <parameter name="Buf" type="Pointer" paramflags="const" />
+          <parameter name="BufSize" type="Integer" />
+          <parameter name="Detect" type="Boolean" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <procedure name="ClearToWcShiftState" visibility="public" file="OverbyteIcsCsc.pas" line="151">
+      </procedure>
+      <procedure name="ClearFromWcShiftState" visibility="public" file="OverbyteIcsCsc.pas" line="152">
+      </procedure>
+      <procedure name="ClearAllShiftStates" visibility="public" file="OverbyteIcsCsc.pas" line="153">
+      </procedure>
+      <function name="GetNextCodePointSize" visibility="public" file="OverbyteIcsCsc.pas" line="155">
+        <parameters>
+          <parameter name="Buf" type="Pointer" />
+          <parameter name="BufSize" type="Integer" />
+          <parameter name="Flags" type="TIcsNextCodePointFlags">
+            <value>
+              [ncfSkipEILSEQ]
+            </value>
+          </parameter>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetNextCodePoint" visibility="public" file="OverbyteIcsCsc.pas" line="156">
+        <parameters>
+          <parameter name="Buf" type="Pointer" />
+          <parameter name="BufSize" type="Integer" />
+          <parameter name="Flags" type="TIcsNextCodePointFlags">
+            <value>
+              [ncfSkipEILSEQ]
+            </value>
+          </parameter>
+          <retval type="Pointer" />
+        </parameters>
+      </function>
+      <function name="FromWc" visibility="public" procflags="virtual" file="OverbyteIcsCsc.pas" line="158">
+        <parameters>
+          <parameter name="Flags" type="Cardinal" />
+          <parameter name="InBuf" type="Pointer" />
+          <parameter name="InSize" type="Integer" />
+          <parameter name="OutBuf" type="Pointer" />
+          <parameter name="OutSize" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="ToWc" visibility="public" procflags="virtual" file="OverbyteIcsCsc.pas" line="159">
+        <parameters>
+          <parameter name="Flags" type="Cardinal" />
+          <parameter name="InBuf" type="Pointer" />
+          <parameter name="InSize" type="Integer" />
+          <parameter name="OutBuf" type="Pointer" />
+          <parameter name="OutSize" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <property name="CharSetType" visibility="public" read="FCharSetType" type="TIcsCharsetType" file="OverbyteIcsCsc.pas" line="161" />
+      <property name="LeadBytes" visibility="public" read="FLeadBytes" type="TSysCharSet" file="OverbyteIcsCsc.pas" line="162" />
+      <property name="CodePage" visibility="public" read="FCodePage" write="SetCodePage" type="Cardinal" file="OverbyteIcsCsc.pas" line="163" />
+      <property name="DefaultUnicodeChar" visibility="public" read="FDefaultUnicodeChar" type="Char" file="OverbyteIcsCsc.pas" line="164" />
+      <property name="DefaultAnsiChar" visibility="public" read="FDefaultAnsiChar" type="AnsiChar" file="OverbyteIcsCsc.pas" line="165" />
+      <property name="MinCpSize" visibility="public" read="FMinCpSize" type="Integer" file="OverbyteIcsCsc.pas" line="166" />
+    </members>
+  </class>
+  <class name="TIcsCscStr" file="OverbyteIcsCsc.pas" line="169">
+    <ancestor name="TIcsCsc" namespace="OverbyteIcsCsc">
+      <methodref name="SetCodePage" visibility="protected" procflags="virtual" />
+      <methodref name="Init" visibility="protected" procflags="virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor virtual" />
+      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+      <methodref name="GetBomBytes" visibility="public" />
+      <methodref name="GetBufferEncoding" visibility="public" />
+      <methodref name="ClearToWcShiftState" visibility="public" />
+      <methodref name="ClearFromWcShiftState" visibility="public" />
+      <methodref name="ClearAllShiftStates" visibility="public" />
+      <methodref name="GetNextCodePointSize" visibility="public" />
+      <methodref name="GetNextCodePoint" visibility="public" />
+      <methodref name="FromWc" visibility="public" procflags="virtual" />
+      <methodref name="ToWc" visibility="public" procflags="virtual" />
+      <propertyref name="CharSetType" visibility="public" />
+      <propertyref name="LeadBytes" visibility="public" />
+      <propertyref name="CodePage" visibility="public" />
+      <propertyref name="DefaultUnicodeChar" visibility="public" />
+      <propertyref name="DefaultAnsiChar" visibility="public" />
+      <propertyref name="MinCpSize" visibility="public" />
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <function name="GetNextCodePointIndex" visibility="public" procflags="overload" file="OverbyteIcsCsc.pas" line="171">
+        <parameters>
+          <parameter name="S" type="RawByteString" paramflags="const" />
+          <parameter name="Index" type="Integer" />
+          <parameter name="Flags" type="TIcsNextCodePointFlags">
+            <value>
+              [ncfSkipEILSEQ]
+            </value>
+          </parameter>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetNextCodePointIndex" visibility="public" procflags="overload" file="OverbyteIcsCsc.pas" line="172">
+        <parameters>
+          <parameter name="S" type="string" paramflags="const" />
+          <parameter name="Index" type="Integer" />
+          <parameter name="Flags" type="TIcsNextCodePointFlags">
+            <value>
+              [ncfSkipEILSEQ]
+            </value>
+          </parameter>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+    </members>
+  </class>
+  <function name="IcsCscGetWideCharCount" visibility="public" file="OverbyteIcsCsc.pas" line="1446">
+    <parameters>
+      <parameter name="Csc" type="TIcsCsc" />
+      <parameter name="Buf" type="Pointer" paramflags="const" />
+      <parameter name="BufSize" type="Integer" />
+      <parameter name="BytesLeft" type="Integer" paramflags="out" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsCscGetWideChars" visibility="public" file="OverbyteIcsCsc.pas" line="1474">
+    <parameters>
+      <parameter name="Csc" type="TIcsCsc" />
+      <parameter name="Buf" type="Pointer" paramflags="const" />
+      <parameter name="BufSize" type="Integer" />
+      <parameter name="Chars" type="PWideChar" />
+      <parameter name="WCharCount" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsCscBufferToUnicodeString" visibility="public" file="OverbyteIcsCsc.pas" line="1483">
+    <parameters>
+      <parameter name="Csc" type="TIcsCsc" />
+      <parameter name="Buf" type="Pointer" paramflags="const" />
+      <parameter name="BufSize" type="Integer" />
+      <parameter name="BytesLeft" type="Integer" paramflags="out" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsCscToWcString" visibility="public" file="OverbyteIcsCsc.pas" line="1504">
+    <parameters>
+      <parameter name="Csc" type="TIcsCsc" />
+      <parameter name="Buf" type="Pointer" paramflags="const" />
+      <parameter name="BufSize" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+</namespace>

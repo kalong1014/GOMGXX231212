@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsMLang" platform="Win32">
+  <function name="Load_MLang" visibility="public" file="OverbyteIcsMLang.pas" line="105">
+    <parameters>
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="ConvertINetString" visibility="public" file="OverbyteIcsMLang.pas" line="138">
+    <parameters>
+      <parameter name="lpdwMode" type="Cardinal" paramflags="var" />
+      <parameter name="dwSrcEncoding" type="Cardinal" />
+      <parameter name="dwDstEncoding" type="Cardinal" />
+      <parameter name="lpSrcStr" type="PAnsiChar" />
+      <parameter name="lpnSrcSize" type="Integer" paramflags="var" />
+      <parameter name="lpDstStr" type="PByte" />
+      <parameter name="lpnDstSize" type="Integer" paramflags="var" />
+      <retval type="HRESULT" />
+    </parameters>
+  </function>
+  <function name="ConvertINetMultibyteToUnicode" visibility="public" file="OverbyteIcsMLang.pas" line="159">
+    <parameters>
+      <parameter name="lpdwMode" type="Cardinal" paramflags="var" />
+      <parameter name="dwSrcEncoding" type="Cardinal" />
+      <parameter name="lpSrcStr" type="PAnsiChar" />
+      <parameter name="lpnMultiCharCount" type="Integer" paramflags="var" />
+      <parameter name="lpDstStr" type="PWideChar" />
+      <parameter name="lpnWideCharCount" type="Integer" paramflags="var" />
+      <retval type="HRESULT" />
+    </parameters>
+  </function>
+  <function name="ConvertINetUnicodeToMultibyte" visibility="public" file="OverbyteIcsMLang.pas" line="180">
+    <parameters>
+      <parameter name="lpdwMode" type="Cardinal" paramflags="var" />
+      <parameter name="dwEncoding" type="Cardinal" />
+      <parameter name="lpSrcStr" type="PWideChar" />
+      <parameter name="lpnWideCharCount" type="Integer" paramflags="var" />
+      <parameter name="lpDstStr" type="PAnsiChar" />
+      <parameter name="lpnMultiCharCount" type="Integer" paramflags="var" />
+      <retval type="HRESULT" />
+    </parameters>
+  </function>
+  <function name="IsConvertINetStringAvailable" visibility="public" file="OverbyteIcsMLang.pas" line="197">
+    <parameters>
+      <parameter name="dwSrcEncoding" type="Cardinal" />
+      <parameter name="dwDstEncoding" type="Cardinal" />
+      <retval type="HRESULT" />
+    </parameters>
+  </function>
+</namespace>

@@ -1,0 +1,2961 @@
+unit svMain;
+
+interface
+
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ScktComp, RunSock,
+  syncobjs, StdCtrls, ExtCtrls, FrnEngn, UsrEngn, Envir, IniFiles, itmunit, Magic, NoticeM,
+  Guild, MudUtil, Event, Grobal2, FSrvValue, InterServerMsg, InterMsgClient, HUtil32, Buttons,
+  M2Share, Castle, MfdbDef, ObjNpc , UserMgrEngn , DragonSystem, SQLEngn, DBSQL, EDcode,
+  IdBaseComponent, IdComponent, IdUDPBase, IdUDPClient, Menus, ObjRobot, GList;
+
+const
+   ENGLISHVERSION = FALSE;    //捞怕府(蜡反)
+   PHILIPPINEVERSION = FALSE; //鞘府巧
+   CHINAVERSION = FALSE;
+   TAIWANVERSION = FALSE;
+   KOREANVERSION = TRUE;      //茄惫
+
+   SENDBLOCK: integer = 1024; //2048;  //霸捞飘客 烹脚窍扁 锭巩俊 喉钒捞 农促.
+   SENDCHECKBLOCK: integer = 4096; //2048;      //某农 脚龋甫 焊辰促.
+   SENDAVAILABLEBLOCK: integer = 7999; //4096;  //某农 脚龋啊 绝绢档 捞沥档绰 焊辰促.
+   GATELOAD: integer = 10; //10KB
+   LINENOTICEFILE = 'Notice\LineNotice.txt';
+   LINEHELPFILE = 'LineHelp.txt';
+   BUILDGUILDFEE: integer = 1000000;
+   sRunPassword = 'qq350001574';   //M2启动密码设置
+
+type
+  TFrmMain = class(TForm)
+    GateSocket: TServerSocket;
+    Memo1: TMemo;
+    Timer1: TTimer;
+    RunTimer: TTimer;
+    DBSocket: TClientSocket;
+    ConnectTimer: TTimer;
+    StartTimer: TTimer;
+    Panel1: TPanel;
+    SaveVariableTimer: TTimer;
+    LbRunTime: TLabel;
+    TCloseTimer: TTimer;
+    LbUserCount: TLabel;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Panel2: TPanel;
+    SpeedButton1: TSpeedButton;
+    Label4: TLabel;
+    LbTimeCount: TLabel;
+    Label5: TLabel;
+    MainMenu1: TMainMenu;
+    N1: TMenuItem;
+    FrmDBLoadDefaultNpc1: TMenuItem;
+    GM1: TMenuItem;
+    N3: TMenuItem;
+    N4: TMenuItem;
+    NPC1: TMenuItem;
+    N5: TMenuItem;
+    N6: TMenuItem;
+    N7: TMenuItem;
+    QFunction1: TMenuItem;
+    N8: TMenuItem;
+    N9: TMenuItem;
+    N10: TMenuItem;
+    img1: TImage;
+    GM2: TMenuItem;
+    GM3: TMenuItem;
+    GM4: TMenuItem;
+    N12: TMenuItem;
+    N2: TMenuItem;
+    N11: TMenuItem;
+    N13: TMenuItem;
+    procedure GateSocketClientConnect(Sender: TObject;
+      Socket: TCustomWinSocket);
+    procedure GateSocketClientDisconnect(Sender: TObject;
+      Socket: TCustomWinSocket);
+    procedure GateSocketClientError(Sender: TObject;
+      Socket: TCustomWinSocket; ErrorEvent: TErrorEvent;
+      var ErrorCode: Integer);
+    procedure GateSocketClientRead(Sender: TObject;
+      Socket: TCustomWinSocket);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
+    procedure RunTimerTimer(Sender: TObject);
+    procedure ConnectTimerTimer(Sender: TObject);
+    procedure DBSocketConnect(Sender: TObject; Socket: TCustomWinSocket);
+    procedure DBSocketDisconnect(Sender: TObject;
+      Socket: TCustomWinSocket);
+    procedure DBSocketError(Sender: TObject; Socket: TCustomWinSocket;
+      ErrorEvent: TErrorEvent; var ErrorCode: Integer);
+    procedure DBSocketRead(Sender: TObject; Socket: TCustomWinSocket);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure N2Click(Sender: TObject);
+    procedure StartTimerTimer(Sender: TObject);
+    procedure SaveVariableTimerTimer(Sender: TObject);
+    procedure TCloseTimerTimer(Sender: TObject);
+    procedure Panel1DblClick(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
+    procedure GM1Click(Sender: TObject);
+    procedure MAGICDBClick(Sender: TObject);
+    procedure ITEMDBClick(Sender: TObject);
+    procedure MONSTERDBClick(Sender: TObject);
+    procedure N3Click(Sender: TObject);
+    procedure N4Click(Sender: TObject);
+    procedure NPC1Click(Sender: TObject);
+    procedure N5Click(Sender: TObject);
+    procedure N6Click(Sender: TObject);
+    procedure N7Click(Sender: TObject);
+    procedure QFunction1Click(Sender: TObject);
+    procedure N8Click(Sender: TObject);
+    procedure N9Click(Sender: TObject);
+    procedure N10Click(Sender: TObject);
+    procedure N11Click(Sender: TObject);
+    procedure Memo1DblClick(Sender: TObject);
+    procedure N13Click(Sender: TObject);
+  private
+    procedure MakeStoneMines;
+    procedure StartServer;
+    procedure OnProgramException (Sender: TObject; E: Exception);
+    function LoadClientFileCheckSum: Boolean;
+  public
+    procedure SaveItemNumber;
+    procedure RefreshForm;
+  end;
+
+
+procedure MainOutMessage (str: string);
+procedure AddUserLog (str: string);  //敲贰捞绢狼 青悼阑 扁废
+procedure AddUserConAlarmLog (str: string);
+procedure AddConLog (str: string);  //立加 扁废阑 肺弊肺 巢辫
+procedure AddChatLog (str: string);  //盲泼 扁废阑 肺弊肺 巢辫
+function  GetCertifyNumber: integer;
+function  GetItemServerIndex: integer;
+function  DBConnected: Boolean;
+procedure LoadMultiServerTables;
+function  GetMultiServerAddrPort (servernum: byte; var addr: string; var port: integer): Boolean;
+function  GetUnbindItemName (shape: integer): string;
+function  LoadLineNotice (flname: string): Boolean;
+function  LoadLineHelp (flname: string): Boolean;
+function  GetStartPointMapName (index: integer): string;
+function  DecodeStringPassword( var src: string; key: integer ): string;
+procedure LoadSetupIniInfo;
+
+var
+  FrmMain: TFrmMain;
+  RunSocket: TRunSocket;
+  FrontEngine: TFrontEngine;
+  UserEngine: TUserEngine;
+  UserMgrEngine : TUserMgrEngine;
+  GrobalEnvir: TEnvirList;
+  ItemMan: TItemUnit;
+  MagicMan: TMagicManager;
+  NoticeMan: TNoticeManager;
+  GuildMan: TGuildManager;
+  GuildAgitMan: TGuildAgitManager;  //巩颇厘盔(sonmg)
+  GuildAgitBoardMan: TGuildAgitBoardManager;  //厘盔霸矫魄(sonmg)
+  GuildAgitStartNumber: integer;   //巩颇厘盔 矫累锅龋(MapInfo俊辑 佬绢咳).
+  GuildAgitMaxNumber: integer;   //巩颇厘盔 弥措俺荐(MapInfo俊辑 佬绢咳).
+  EventMan: TEventManager;
+  UserCastle: TUserCastle;
+  boUserCastleInitialized : Boolean;
+  gFireDragon: TDragonSystem;
+
+  DecoItemList: TStringList;  //厘盔操固扁
+  MakeItemList: TStringList;  // list of TStringList;
+  MakeItemIndexList: TStringList;  // 力炼 酒捞袍 备盒 Index 府胶飘.
+  StartPoints: TStringList;
+  SafePoints: TStringList;
+  MultiServerList: TList;
+  ShutUpList: TQuickList; //盲泼陛瘤 府胶飘
+  MiniMapList: TStringList;
+  UnbindItemList: TStringList;
+  LineNoticeList: TStringList;
+  LineHelpList: TStringList;
+  QuestDiaryList: TList;  //list of TList of TList(PTQDDinfo)
+                                      //TQDDinfo // [n] index or unit index
+                                                 // TStringList
+  g_MonSayMsgList: TStringList; //怪物说明信息列表
+  StartupQuestNpc: TMerchant;
+  DefaultNpc: TMerchant;
+  QFunctionNpc: TMerchant;
+  g_RobotNPC: TNormNpc;
+  g_RobotManage: TRobotManage;
+
+  EventItemList: TStringList;   //蜡聪农 酒捞袍 捞亥飘甫 困茄 府胶飘
+  EventItemGifeBaseNumber: integer;
+  GrobalQuestParams: array[0..99] of integer;
+  GlobaDyMval: array[0..99] of integer;
+  GlobaDyTval: array[0..99] of string;
+  HGlobalVal: array[0..99] of integer;
+
+  ErrorLogFile: string;
+  MirDayTime: integer;  //固福狼 矫埃... 泅角 矫埃狼 2硅 狐抚
+  ServerIndex: integer;
+  ServerName: string;
+  ServerNumber: integer;
+
+  BoVentureServer: Boolean;
+  BoTestServer: Boolean;
+  BoClientTest: Boolean;
+  TestLevel: integer;
+  TestGold: integer;
+  TestServerMaxUser: integer;
+  BoServiceMode: Boolean;
+  BoNonPKServer: Boolean;
+  BoViewHackCode: Boolean;
+  //-
+  bosafe摆摊,bo摆摊:boolean;
+  int摆摊等级:integer;
+  g_WeightSet:Byte;
+  g_SuperPoisonMagic:boolean;
+  g_boMirShop:boolean;
+  //-
+{------------------------------------------------------------------------------}
+  g_bofuguHP: Boolean;
+  g_bozuduihp: Boolean;
+  boMirNg: boolean;
+  boExpDouble: Boolean = False;
+  g_nExpDouble: Integer = 1;//倍数
+  g_boMirDark: Boolean;
+  g_boMirShowHp: Boolean;
+  g_bochksigedu: Boolean;
+  g_boMirShowNumber: Boolean;
+  g_bo免助跑: boolean;
+  g_bo稳如泰山: boolean;
+  g_bo绝对泰山: boolean;
+  g_bo刀刀刺杀: boolean;
+  g_bo技能备注: boolean;
+  g_bo物品窗口: boolean;
+  g_bo主界面: boolean;
+  g_bo锁定人物: boolean;
+  g_bo锁定怪物: boolean;
+  g_bo极品蓝字: boolean;
+  g_bo私聊等级: boolean;
+  g_boHighLevelKillMonFixExp: boolean;
+  g_bo自动换符: boolean;
+  g_bo自动换毒: boolean;
+  g_bo地图雷达: boolean;
+  g_bo悬浮信息: boolean;
+  g_bo人物四格: boolean;
+  g_bo大地图开关: boolean;
+  g_bo小地图迷宫入口显示: boolean;
+  g_boHelp: boolean;
+  g_boHostpot: boolean;
+  g_boQuestions: boolean;
+  g_boChinese: boolean;
+  g_boWhisperWin: boolean;
+  g_boRelationWin: boolean;
+  g_bosjcd: boolean;
+  g_bozdfy: boolean;
+  g_Deatheject: boolean;
+  g_boHostpotWeb: string;
+  g_boQuestionsWeb: string;
+
+  g_AllMsgType : Byte;
+  g_AllMsgmomey : Integer;
+
+  g_ExtraLowLevel1 : Integer;
+  g_ExtraHighquantity : Integer;
+  g_ExtraMoneyPer : Integer;
+  g_ExtraItemPer :  Integer;
+  g_NoviceguildEXPSZ : Integer;
+
+  g_TopAllMsgType : Byte;
+  g_TopAllMsgmomey : Integer;
+
+  g_seWeapongoldcoin : Integer;
+  g_Weapontime : Integer;
+
+  g_AllMsgStr: string;
+  g_TopAllMsgStr: string;
+
+  g_nMsgFColor: Byte;
+  g_nMsgBColor: Byte;
+  g_nMsgDFColor: Byte;
+  g_nMsgDBColor: Byte;
+
+  g_Taoistbabycontrol: boolean;
+  g_Magebabycontrol: boolean;
+  g_LIMITLESSQiswitch: boolean;
+  g_Allowablelevel: boolean;
+  g_WemadeGoldEvent: boolean;
+  g_WemadeItemEvent: boolean;
+  g_NoviceguildEXP : boolean;
+
+  BADMANHOMEMAP: string;   //红名回城地图  3
+  BADMANSTARTX : Integer;    //红名回城X坐标  845
+  BADMANSTARTY : Integer;    //红名回城Y坐标  674
+  Bbpb : Integer;     //宝宝叛变  4
+  youhuojilv : Integer;     //宝宝诱惑等级几率
+  youhuoxueliang : Integer;     //宝宝诱惑血量几率
+  huoweili : Integer;    //烈火威力
+  bingpaoxiao : Integer; //冰咆哮范围
+  cishaweili : Integer;    //刺杀威力
+  lvduweili : Integer;    //绿毒威力
+  hongduweili : Integer;    //红毒威力
+  zbchijiu : Integer;    //装备持久
+  sdfanwei : Integer;    //装备持久
+  wqsjgj : Integer;    //武器升级攻击概率
+  wqsjmf : Integer;    //武器升级魔法概率
+  wqsjds : Integer;    //武器升级道术概率
+  erjizhufu : Integer;   //二级祝福油概率
+  erjidianshu : Integer;   //二级点数概率
+  sanjizhufu : Integer;   //三级祝福油概率
+  sanjidianshu : Integer;   //三级点数概率
+  zhufuzuzhou : Integer;   //祝福油被诅咒概率
+  g_Powerfulblessingoil : Integer; //强效祝福控制
+  g_PPowerfulblessingoil : Integer; //强效祝福二级几率控制
+  g_WPowerfulblessingoil : Integer; //强效祝福三级点数控制
+  g_EPowerfulblessingoil : Integer; //强效祝福三级几率控制
+  baishidengji : Integer;  //拜师等级
+  chushidengji : Integer;    //出师等级
+  chushi1 : Integer;    //出师奖励初
+  chushi2 : Integer;   //出师奖励终
+  shitucanshu : Integer;  //出师参数
+  xingyunxl : Integer;  //幸运项链
+  jipingailv : Integer;    //极品属性的概率
+  jpzonggailv : Integer;    //极品属性的总概率  取决于出不出极品
+  jipindianshu : Integer;    //极品点数最大值
+  dianshugailv : Integer;   //极品点数概率
+  xingyunxlds : Integer;  //幸运项链点数
+  wakuang1 : Integer;  //挖矿1
+  wakuang2 : Integer;  //挖矿2
+  Pkzhi : Integer;  //PK值
+  siwangbaolv : Integer;  //死亡爆率
+  hongmingbaolv : Integer;  //红名死亡爆率
+  beibaobaolv : Integer;  //背包死亡爆率
+  g_MONLEVELTIAOJIE : Integer;//怪物停顿等级
+  g_seMONJISHU : Integer;//怪物停顿时间
+  g_seMONSUIJIZHI : Integer;//怪物停顿随机时间
+  HFJL : Integer;//火符打跑动中的人物几率
+  g_YinYangDharmaring : Integer;//阴阳法环回血几率
+  g_YinYangDharmaring1 : Integer;//阴阳法环回血点数
+  g_YinYangDharmaring2 : Integer;//阴阳法环回抵消伤害
+  g_seCurse : Integer;//
+  g_seCurse1 : Integer;//
+  g_seCurse2 : Integer;//
+  g_seCurse3 : Integer;//
+  g_seTIEBUSHAN : Integer;
+  g_Bloodbreakingcrazykilling : Integer;
+  g_seGALECHOP : Integer;
+  g_bopaobusudu : Integer;
+  g_MAGICSPEED : Integer;
+  g_ATTACKSPEED : Integer;
+  g_Taoistbabyattackpower : Integer;    //宝宝道术控制攻击力点数
+  g_Magebabyattack : Integer;    //宝宝魔法控制攻击力点数
+  g_MagebabyFoundation : Integer;    //宝宝基础攻击
+{------------------------------------------------------------------------------}
+  BoViewAdmissionfail: Boolean;
+  BoGetGetNeedNotice: Boolean;
+  GetGetNoticeTime: longword;
+
+  UserFullCount: integer;
+  ZenFastStep: integer;
+  BoSysHasMission: Boolean;    //捞亥飘侩, 固记捞 乐绰瘤
+  SysMission_Map: string;
+  SysMission_X: integer;
+  SysMission_Y: integer;
+  TotalUserCount: integer;  //傈辑滚甫 烹判篮 荤侩磊荐
+
+  csMsgLock: TCriticalSection;
+  csTimerLock: TCriticalSection;
+  csObjMsgLock: TCriticalSection;
+  csSendMsgLock: TCriticalSection;
+  csShare: TCriticalSection;  //悼扁拳 矫埃捞 篮 傍蜡函荐俊 荤侩秦具 窃.
+  csDelShare: TCriticalSection;  //悼扁拳 矫埃捞 篮 傍蜡函荐俊 荤侩秦具 窃.
+  csSocLock: TCriticalSection;
+  usLock: TCriticalSection;   //user engine thread
+  usIMLock: TCriticalSection;   //user engine thread
+  ruLock: TCriticalSection;   // run sock
+  ruSendLock: TCriticalSection;   // run sock
+  ruCloseLock: TCriticalSection;   // run sock
+  socstrLock: TCriticalSection;
+  fuLock: TCriticalSection;   //front engine thread
+  fuOpenLock: TCriticalSection;   //front engine thread
+  fuCloseLock: TCriticalSection;   //front engine thread
+  humanLock: TCriticalSection;   // human sendbufer
+  umLock: TCriticalSection;   //User Manager engine thread
+  SQLock: TCriticalSection;   // SQL Engine Thread
+
+  MainMsg: TStringList;
+  UserLogs: TStringList;  //敲贰捞绢狼 青悼 肺弊
+  UserConAlarmLogs: TStringList;  //漂沥 青悼 蜡历狼 立加/青悼 肺弊
+  UserConLogs: TStringList;  //立加 肺弊
+  UserChatLog: TStringList;  //盲泼 肺弊
+  DiscountForNightTime: Boolean;
+  HalfFeeStart: integer;  //且牢矫埃 矫累
+  HalfFeeEnd: integer;   //且牢矫埃 场
+
+  ServerReady: Boolean;       //辑滚啊 荤侩磊甫 罐阑 霖厚啊 登菌绰啊?
+  ServerClosing: Boolean;
+  FCertify, FItemNumber: integer;
+  RDBSocData: string;
+  ReadyDBReceive: Boolean;
+  RunFailCount: integer;
+  MirUserLoadCount: integer;
+  MirUserSaveCount: integer;
+  CurrentDBloadingTime: longword;
+  BoEnableAbusiveFilter: Boolean;
+  LottoSuccess, LottoFail: integer;
+  Lotto1, Lotto2, Lotto3, Lotto4, Lotto5, Lotto6: integer;
+
+  MsgServerAddress: string;
+  MsgServerPort: integer;
+//  LogServerAddress: string;
+//  LogServerPort: integer;
+  ShareBaseDir: string;
+  ShareVentureDir: string;
+  ShareFileNameNum: integer;
+  ConLogBaseDir: string;  //立加 矫埃 肺弊
+  ChatLogBaseDir: string;  //立加 矫埃 肺弊
+
+  DefHomeMap: string;  //阿 辑滚付促 怖 乐绢具 窍绰 甘
+  DefHomeX: integer;
+  DefHomeY: integer;
+  GuildDir: string;
+  GuildFile: string;
+  GuildBaseDir: string;
+  GuildAgitFile: string;
+  CastleDir: string;
+  EnvirDir: string;
+  MapDir: string;
+
+  CurrentMonthlyCard: integer;    //岿沥咀 荤侩磊 荐
+  TotalTimeCardUsage: integer;  //矫埃力 墨靛 荤侩磊狼 荤侩 醚 矫埃 //矫埃
+  LastMonthTotalTimeCardUsage: integer;   //矫埃
+  GrossTimeCardUsage: integer;    //矫埃
+  GrossResetCount: integer;
+
+  serverruntime: longword;
+  runstart: longword;
+  rcount: integer;
+  minruncount: integer;
+  curruncount: integer;
+  maxsoctime: integer;
+  cursoctime: integer;
+  maxusrtime: integer;
+  curusrcount: integer;
+  curhumtime: integer;
+  maxhumtime: integer;
+  curmontime: integer;
+  maxmontime: integer;
+  humrotatetime: longword;
+  curhumrotatetime: integer;
+  maxhumrotatetime: integer;
+  humrotatecount: integer;
+  LatestGenStr: string[30];
+  LatestMonStr: string[30];
+
+  HumLimitTime: longword;
+  MonLimitTime: longword;
+  ZenLimitTime: longword;
+  NpcLimitTime: longword;
+  SocLimitTime: longword;
+  DecLimitTime: longword;
+
+  //捞抚甸
+  __ClothsForMan: string;
+  __ClothsForWoman: string;
+  __WoodenSword: string;
+  __Candle: string;
+  __BasicDrug: string;
+
+  __GoldStone: string;
+  __SilverStone: string;
+  __SteelStone: string;
+  __CopperStone: string;
+  __BlackStone: string;
+  __Gem1Stone: string;
+  __Gem2Stone: string;
+  __Gem3Stone: string;
+  __Gem4Stone: string;
+
+  __ZumaMonster1: string;
+  __ZumaMonster2: string;
+  __ZumaMonster3: string;
+  __ZumaMonster4: string;
+
+  __Bee             : string;
+  __Spider          : string;
+  __WhiteSkeleton   : string;
+  __ShinSu          : string;
+  __ShinSu1         : string;
+  __AngelMob        : string;
+  __CloneMob        : string;
+  __WomaHorn        : string;
+  __ZumaPiece       : string;
+
+  __GoldenImugi     : string;
+  __WhiteSnake      : string;
+
+  __VomaAncestor     : string;
+  __WermaBrothers     : string;
+  __WermaBrothers1     : string;
+
+
+  ClientFileName1: string;
+  ClientFileName2: string;
+  ClientFileName3: string;
+  ClientCheckSumValue1: integer;
+  ClientCheckSumValue2: integer;
+  ClientCheckSumValue3: integer;
+
+  UserSendAllMsgType: integer;
+  UserSendAllMsgGold: integer;
+  UserSendAllMsgPotCash: integer;
+  ExtraMsgInfo: string;
+
+  ExtraExp: array [0..7] of word;
+  ExtraLowLevel: array [0..7] of integer;
+  ExtraHighLevel: array [0..7] of integer;
+
+  ApprenticeMinLevel: word;
+  ApprenticeMaxLevel: word;
+  MasterOKLevel: word;
+  MasterCreditPointCount: byte;
+  ApprenticeLevel: array [0..99] of byte;
+  ApprenticeCreditPoint: array [0..99] of integer;
+  MasterCreditPoint: array [0..99] of integer;
+  //叼滚彪 沥焊
+  gErrorCount :integer;
+  g_TestTime : integer;
+
+  //胶琴眉农
+  g_SpeedHackCheck : integer;
+  g_SpeedHackCheckChar : string;
+
+  //寇摹扁 裹困
+  g_CryWide : integer;
+  //泅犁 积己吝牢 Merchant Index
+  CurrentMerchantIndex : integer;
+  ServerTickDifference: longword;
+
+  //酒捞袍 牢郸胶 瘤沥
+  INDEX_CHOCOLATE: integer;  //檬妮房
+  INDEX_CANDY: integer;      //荤帕
+  INDEX_LOLLIPOP: integer;   //阜措荤帕
+  INDEX_MIRBOOTS: integer;   //玫锋脚青焊
+
+  ShopItemList: TGList;
+
+implementation
+
+{$R *.DFM}
+
+uses
+   LocalDB, IdSrvClient, LogManage;
+
+
+function IntTo_Str (val: integer): string;
+begin
+   if val < 10 then Result := '0' + IntToStr(val)
+   else Result := IntToStr(val);
+end;
+
+function  CheckFileCheckSum (flname: string): integer;
+type
+   pinteger = ^NativeInt;
+var
+   pbuf: PAnsiChar;
+   i, n, handle, bsize, cval, csum: NativeInt;
+begin
+   Result := 0;
+   if FileExists (flname) then begin
+      handle := FileOpen (flname, fmOpenRead or fmShareDenyNone);
+      if handle > 0 then begin
+         bsize := FileSeek (handle, 0, 2);
+         GetMem (pbuf, (bsize+3) div 4 * 4);
+         FillChar (pbuf^, (bsize+3) div 4 * 4, 0);
+         FileSeek (handle, 0, 0);
+         FileRead (handle, pbuf^, bsize);
+         FileClose (handle);
+
+         csum := 0;
+         for i:=0 to (bsize+3) div 4 - 1 do begin
+            cval := pinteger (pbuf)^;
+            pbuf := PAnsiChar (NativeInt(pbuf) + 4);
+            csum := csum xor cval;
+         end;
+
+         Result := csum;
+      end;
+   end;
+end;
+
+
+procedure TFrmMain.RefreshForm;
+begin
+   Application.ProcessMessages;
+end;
+
+procedure TFrmMain.FormCreate(Sender: TObject);
+var
+   fname, str, sLoadString: string;
+   ini: TIniFile;
+   ayear, amon, aday, ahour, amin, asec, amsec: word;
+   fhandle: TextFile;
+   i, nLoadInteger : Integer;
+begin
+   gErrorCount := 0;
+   Randomize;
+   ServerIndex := 0;
+
+   RunSocket := TRunSocket.Create;
+   MainMsg := TStringList.Create;
+   UserLogs := TStringList.Create;
+   UserConAlarmLogs := TStringList.Create;
+   UserConLogs := TStringList.Create;
+   UserChatLog := TStringList.Create;
+   GrobalEnvir := TEnvirList.Create;
+   ItemMan := TItemUnit.Create;
+   MagicMan := TMagicManager.Create;
+   NoticeMan := TNoticeManager.Create;
+   GuildMan := TGuildManager.Create;
+   GuildAgitMan := TGuildAgitManager.Create; //巩颇厘盔(sonmg)
+   GuildAgitBoardMan := TGuildAgitBoardManager.Create;  //厘盔霸矫魄(sonmg)
+   EventMan := TEventManager.Create;
+   UserCastle := TUserCastle.Create;
+   boUserCastleInitialized := FALSE;
+   //侩带傈 矫胶袍
+   gFireDragon := TDragonSystem.Create;
+
+   FrontEngine  := TFrontEngine.Create;
+   UserEngine   := TUserEngine.Create;
+   // 模备 率瘤 矫胶袍
+   UserMgrEngine:= TUserMgrEngine.Create;
+
+   // DBSQL
+   g_DBSQL   := TDBSQL.Create;
+   SQLEngine := TSQLEngine.Create;
+
+
+   DecoItemList := TStringList.Create;
+   MakeItemList := TStringList.Create;
+   MakeItemIndexList := TStringList.Create;
+   StartPoints := TStringList.Create;
+   SafePoints := TStringList.Create;
+   MultiServerList := TList.Create;
+   ShutUpList := TQuickList.Create;
+   MiniMapList := TStringList.Create;
+   UnbindItemList := TStringList.Create;
+   LineNoticeList := TStringList.Create;
+   LineHelpList := TStringList.Create;
+   QuestDiaryList := TList.Create;
+   StartupQuestNpc := nil;
+   DefaultNpc := nil;
+   QFunctionNpc := nil;
+   g_UserCmdList := TGStringList.Create;
+
+   g_MonSayMsgList := TStringList.Create;
+
+
+   EventItemList := TStringList.Create;
+   EventItemGifeBaseNumber := 0;
+
+   csMsgLock    := TCriticalSection.Create;
+   csTimerLock  := TCriticalSection.Create;
+   csObjMsgLock := TCriticalSection.Create;
+   csSendMsgLock:= TCriticalSection.Create;
+   csShare      := TCriticalSection.Create;
+   csDelShare   := TCriticalSection.Create;
+   csSocLock    := TCriticalSection.Create;
+   usLock       := TCriticalSection.Create;
+   usIMLock     := TCriticalSection.Create;
+   ruLock       := TCriticalSection.Create;
+   ruSendLock   := TCriticalSection.Create;
+   ruCloseLock  := TCriticalSection.Create;
+   socstrLock   := TCriticalSection.Create;
+   fuLock       := TCriticalSection.Create;
+   fuOpenLock   := TCriticalSection.Create;
+   fuCloseLock  := TCriticalSection.Create;
+   HumanLock    := TCriticalSection.Create; // 困俊巴甸篮 恐 橇府 救且鳖...
+   umLock       := TCriticalSection.Create;
+   SQLock       := TCriticalSection.Create;
+
+   RDBSocData := '';
+   ReadyDBReceive := FALSE;
+   RunFailCount := 0;
+   MirUserLoadCount := 0;
+   MirUserSaveCount := 0;
+   BoGetGetNeedNotice := FALSE;
+
+   FCertify := 0;
+   FItemNumber := 0;
+   ServerReady := FALSE;
+   ServerClosing := FALSE;
+   BoEnableAbusiveFilter := TRUE;
+   LottoSuccess := 0;
+   LottoFail := 0;
+   Lotto1 := 0;
+   Lotto2 := 0;
+   Lotto3 := 0;
+   Lotto4 := 0;
+   Lotto5 := 0;
+   Lotto6 := 0;
+
+   CurrentMerchantIndex := 0;
+   ServerTickDifference := 0;
+
+   FillChar (GrobalQuestParams, sizeof(GrobalQuestParams), #0);
+   FillChar (GlobaDyMval, sizeof(GrobalQuestParams), #0);
+   FillChar (GlobaDyTval, sizeof(GrobalQuestParams), #0);
+   FillChar (HGlobalVal, sizeof(GrobalQuestParams), #0);
+
+
+   DecodeDate (Date, ayear, amon, aday);
+   DecodeTime (Time, ahour, amin, asec, amsec);
+   ErrorLogFile := '.\Log\' +
+                   IntToStr(ayear) + '-' + IntToStr(amon) + '-' + IntTo_Str(aday) +
+                   '.' +
+                   IntTo_Str(ahour) +
+                   '-' +
+                   IntTo_Str(amin) +
+                   '.log';
+   AssignFile (fhandle, ErrorLogFile);
+   Rewrite (fhandle);
+   CloseFile (fhandle);
+
+   minruncount := 99999;
+   maxsoctime := 0;
+   maxusrtime := 0;
+   maxhumtime := 0;
+   maxmontime := 0;
+   curhumrotatetime := 0;
+   maxhumrotatetime := 0;
+   humrotatecount := 0;
+
+
+   HumLimitTime := 30;
+   MonLimitTime := 30;
+   ZenLimitTime := 5;
+   NpcLimitTime := 5;
+   SocLimitTime := 10;
+   DecLimitTime := 20;
+
+   Memo1.Lines.Add ('准备加载配置信息..');
+   fname := '.\!setup.txt';
+   if FileExists (fname) then begin
+      ini := TIniFile.Create (fname);
+      if ini <> nil then begin
+         ServerIndex := ini.ReadInteger ('Server', 'ServerIndex', 0);
+         ServerName := ini.ReadString ('Server', 'ServerName', '');
+         ServerNumber := ini.ReadInteger ('Server', 'ServerNumber', 0);
+         str := ini.ReadString ('Server', 'VentureServer', 'FALSE');
+         BoVentureServer := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'TestServer', 'FALSE');
+         BoTestServer := (CompareText(str, 'TRUE') = 0);
+         //努扼捞攫飘 抛胶飘侩
+         str := ini.ReadString ('Server', 'ClientTest', 'FALSE');
+         BoClientTest := (CompareText(str, 'TRUE') = 0);
+
+         TestLevel := ini.ReadInteger ('Server', 'TestLevel', 1);
+         TestGold := ini.ReadInteger ('Server', 'TestGold', 0);
+         TestServerMaxUser := ini.ReadInteger ('Server', 'TestServerUserLimit', 500);
+
+         str := ini.ReadString ('Server', 'ServiceMode', 'FALSE');
+         BoServiceMode := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'NonPKServer', 'FALSE');
+         BoNonPKServer := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'ViewHackMessage', 'TRUE');
+         BoViewHackCode := (CompareText(str, 'TRUE') = 0);
+//-摆摊
+         str := ini.ReadString ('Server', 'sellall', 'TRUE');
+         Bo摆摊 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'sellallsafe', 'TRUE');
+
+         bosafe摆摊 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'SuperPoisonMagic', 'TRUE');
+
+         g_SuperPoisonMagic := (CompareText(str, 'TRUE') = 0);
+
+
+         str := ini.ReadString ('Server', 'MirShop', 'TRUE');
+
+         g_boMirShop := (CompareText(str, 'TRUE') = 0);
+
+
+         int摆摊等级 := ini.ReadInteger ('Server', 'sellalllevel', 0);
+//--摆摊
+         str := ini.ReadString ('Server', 'FuguHP', 'FALSE');
+         g_bofuguHP := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'zuduihp', 'FALSE');
+         g_bozuduihp := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'MirNg', 'FALSE');
+         boMirNg := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'ExpDouble', 'FALSE');
+         boExpDouble := (CompareText(str, 'TRUE') = 0);
+
+         g_nExpDouble := ini.ReadInteger ('Server', 'nExpDouble', 1);
+
+         str := ini.ReadString ('Server', 'MirDark', 'FALSE');
+         g_boMirDark := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'MirShowHp', 'FALSE');
+         g_boMirShowHp := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'chksigedu', 'FALSE');
+         g_bochksigedu := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'MirShowNumber', 'FALSE');
+         g_boMirShowNumber := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'mianzhupao', 'FALSE');
+         g_bo免助跑 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'wenrutaishan', 'FALSE');
+         g_bo稳如泰山 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'jueduitaishan', 'FALSE');
+         g_bo绝对泰山 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'daodaocisha', 'FALSE');
+         g_bo刀刀刺杀 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'shuangjichuandai', 'FALSE');
+         g_bosjcd := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'zidongfangyao', 'FALSE');
+         g_bozdfy := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'Deatheject', 'FALSE');
+         g_Deatheject := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'jinengbeizhu', 'FALSE');
+         g_bo技能备注 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'wupinchuangkou', 'FALSE');
+         g_bo物品窗口 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'zhujiemian', 'FALSE');
+         g_bo主界面 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'suodingrenwu', 'FALSE');
+         g_bo锁定人物 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'suodingguaiwu', 'FALSE');
+         g_bo锁定怪物 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'jipinlanzi', 'FALSE');
+         g_bo极品蓝字 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'siliaodengji', 'FALSE');
+         g_bo私聊等级 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'experienceremains', 'FALSE');
+         g_boHighLevelKillMonFixExp := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'zidongdufu', 'FALSE');
+         g_bo自动换符 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'zidonghuandu', 'FALSE');
+         g_bo自动换毒 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'dituleida', 'FALSE');
+         g_bo地图雷达 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'xuanfuxinxi', 'FALSE');
+         g_bo悬浮信息 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'jiemianqiehuan', 'FALSE');
+         g_bo人物四格 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'yunxudaditu', 'FALSE');
+         g_bo大地图开关 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'migongrukouxianshi', 'FALSE');
+         g_bo小地图迷宫入口显示 := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'HelpShow', 'FALSE');
+         g_boHelp := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'Hostpot', 'FALSE');
+         g_boHostpot := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'Questions', 'FALSE');
+         g_boQuestions := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'Chinese', 'FALSE');
+         g_boChinese := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'WhisperWin', 'FALSE');
+         g_boWhisperWin := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'RelationWin', 'FALSE');
+         g_boRelationWin := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'Taoistbabycontrol', 'FALSE');
+         g_Taoistbabycontrol := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'LIMITLESSQiswitch', 'FALSE');
+         g_LIMITLESSQiswitch := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'Allowablelevel', 'FALSE');
+         g_Allowablelevel := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'WemadeGoldEvent', 'FALSE');
+         g_WemadeGoldEvent := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'WemadeItemEvent', 'FALSE');
+         g_WemadeItemEvent := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'NoviceguildEXP', 'FALSE');
+         g_NoviceguildEXP := (CompareText(str, 'TRUE') = 0);
+
+         str := ini.ReadString ('Server', 'Magebabycontrol', 'FALSE');
+         g_Magebabycontrol := (CompareText(str, 'TRUE') = 0);
+
+         g_boHostpotWeb := ini.ReadString ('Server', 'HostpotWeb', 'www.qq.com');
+         g_boQuestionsWeb := ini.ReadString ('Server', 'QuestionsWeb', 'www.baidu.com');
+
+
+         g_nMsgFColor:=ini.ReadInteger('Server', 'MsgFColor', 0);
+         g_nMsgBColor:=ini.ReadInteger('Server', 'MsgBColor', 0);
+         g_nMsgDFColor:=ini.ReadInteger('Server', 'MsgDFColor', 0);
+         g_nMsgDBColor:=ini.ReadInteger('Server', 'MsgDBColor', 0);
+
+         BADMANHOMEMAP := ini.ReadString ('Server', 'BADMANHOMEMAP', '3');   //红名回城地图  3
+         BADMANSTARTX := ini.ReadInteger('Server', 'BADMANSTARTX', 845);    //红名回城X坐标  845
+         BADMANSTARTY := ini.ReadInteger('Server', 'BADMANSTARTY', 674);    //红名回城Y坐标  674
+
+         Bbpb := ini.ReadInteger('Server', 'Bbpb', 4);    //宝宝叛变  4小时
+         youhuojilv := ini.ReadInteger('Server', 'youhuojilv', 10);    //宝宝诱惑等级几率
+         youhuoxueliang := ini.ReadInteger('Server', 'youhuoxueliang', 100);    //宝宝诱惑血量几率
+         huoweili := ini.ReadInteger('Server', 'huoweili', 100);    //烈火
+         bingpaoxiao := ini.ReadInteger('Server', 'bingpaoxiao', 1);    //冰咆哮
+         cishaweili := ini.ReadInteger('Server', 'cishaweili', 100);  //刺杀
+         lvduweili := ini.ReadInteger('Server', 'lvduweili', 10);  //绿毒
+         hongduweili := ini.ReadInteger('Server', 'hongduweili', 10);  //红毒
+         zbchijiu := ini.ReadInteger('Server', 'zbchijiu', 100);  //装备持久
+         sdfanwei := ini.ReadInteger('Server', 'sdfanwei', 1);  //魔法锁定范围默认1
+         wqsjgj := ini.ReadInteger('Server', 'wqsjgj', 100);  //武器升级攻击成功率 默认100
+         wqsjmf := ini.ReadInteger('Server', 'wqsjmf', 100);  //武器升级魔法成功率 默认100
+         wqsjds := ini.ReadInteger('Server', 'wqsjds', 100);  //武器升级道术成功率 默认100
+         erjizhufu := ini.ReadInteger('Server', 'erjizhufu', 6);  //二级祝福油 默认6
+         erjidianshu := ini.ReadInteger('Server', 'erjidianshu', 3);  //二级点数 默认3
+         sanjizhufu := ini.ReadInteger('Server', 'sanjizhufu', 40);  //三级祝福油 默认40
+         sanjidianshu := ini.ReadInteger('Server', 'sanjidianshu', 7);  //三级点数 默认7
+         zhufuzuzhou := ini.ReadInteger('Server', 'zhufuzuzhou', 20);  //祝福油被诅咒  默认20
+         g_Powerfulblessingoil := ini.ReadInteger('Server', 'Powerfulblessingoil', 1);  //二级祝福油点数 默认1
+         g_PPowerfulblessingoil := ini.ReadInteger('Server', 'PPowerfulblessingoil', 1);  //二级祝福油几率 默认1
+         g_WPowerfulblessingoil := ini.ReadInteger('Server', 'WPowerfulblessingoil', 1);  //三级祝福油点数 默认1
+         g_EPowerfulblessingoil := ini.ReadInteger('Server', 'EPowerfulblessingoil', 1);  //三级祝福油几率 默认1
+         baishidengji := ini.ReadInteger('Server', 'baishidengji', 18);  //拜师等级
+         chushidengji := ini.ReadInteger('Server', 'chushidengji', 28);   //出师等级
+         chushi1 := ini.ReadInteger('Server', 'chushi1', 19);//出师奖励初
+         chushi2 := ini.ReadInteger('Server', 'chushi2', 27); //出师奖励终
+         shitucanshu := ini.ReadInteger('Server', 'shitucanshu', 19);  //出师参数
+         xingyunxl := ini.ReadInteger('Server', 'xingyunxl', 60);  //幸运项链
+         jipingailv := ini.ReadInteger('Server', 'jipingailv', 50);   //极品属性的概率
+         jipindianshu := ini.ReadInteger('Server', 'jipindianshu', 6);//极品点数最大值
+         jpzonggailv := ini.ReadInteger('Server', 'jpzonggailv', 20);  //极品属性的总概率
+         dianshugailv := ini.ReadInteger('Server', 'dianshugailv', 20); //极品点数概率
+         xingyunxlds := ini.ReadInteger('Server', 'xingyunxlds', 2);  //幸运项链点数
+         wakuang1 := ini.ReadInteger('Server', 'wakuang1', 4);  //挖矿1
+         wakuang2 := ini.ReadInteger('Server', 'wakuang2', 12);  //挖矿2
+         Pkzhi := ini.ReadInteger('Server', 'Pkzhi', 1);  //PK值每2分钟减少
+         siwangbaolv := ini.ReadInteger('Server', 'siwangbaolv', 30);  //死亡爆率
+         hongmingbaolv := ini.ReadInteger('Server', 'hongmingbaolv', 15);  //红名死亡爆率
+         beibaobaolv := ini.ReadInteger('Server', 'beibaobaolv', 8);  //背包死亡爆率
+         g_MONLEVELTIAOJIE := ini.ReadInteger('Server', 'MONLEVELTIAOJIE', 60); //怪物停顿等级
+         g_seMONJISHU := ini.ReadInteger('Server', 'seMONJISHU', 800); //怪物停顿时间
+         g_seMONSUIJIZHI := ini.ReadInteger('Server', 'seMONSUIJIZHI', 1000); //怪物停顿随机时间
+         HFJL := ini.ReadInteger('Server', 'seHFJL', 1200); //火符打人几率
+         g_YinYangDharmaring := ini.ReadInteger('Server', 'YinYangDharmaring', 7); //阴阳法环回血几率
+         g_YinYangDharmaring1 := ini.ReadInteger('Server', 'YinYangDharmaring1', 3); //阴阳法环回血点数
+         g_YinYangDharmaring2 := ini.ReadInteger('Server', 'YinYangDharmaring2', 100); //阴阳法环回抵消伤害
+         g_bopaobusudu := ini.ReadInteger('Server', 'SpinEditpaobusudu', 110);  //跑步速度
+         g_MAGICSPEED := ini.ReadInteger('Server', 'MAGICSPEED', 500);  //魔法间隔速度
+         g_ATTACKSPEED := ini.ReadInteger('Server', 'ATTACKSPEED', 1400);  //魔法间隔速度
+         g_Taoistbabyattackpower := ini.ReadInteger('Server', 'Taoistbabyattackpower', 10); //道士宝宝道术控制默认点数
+         g_Magebabyattack := ini.ReadInteger('Server', 'Magebabyattack', 10); //法师宝宝魔法控制默认点数
+         g_MagebabyFoundation := ini.ReadInteger('Server', 'MagebabyFoundation', 2); //法师宝宝基础点数
+
+         g_seCurse := ini.ReadInteger('Server', 'seCurse', 93); //
+         g_seCurse1 := ini.ReadInteger('Server', 'seCurse1', 88); //
+         g_seCurse2 := ini.ReadInteger('Server', 'seCurse2', 82); //
+         g_seCurse3 := ini.ReadInteger('Server', 'seCurse3', 75); //
+         g_seTIEBUSHAN := ini.ReadInteger('Server', 'seTIEBUSHAN', 20);
+         g_Bloodbreakingcrazykilling := ini.ReadInteger('Server', 'Bloodbreakingcrazykilling', 12);
+         g_seGALECHOP := ini.ReadInteger('Server', 'seGALECHOP', 1);
+
+         g_AllMsgType := ini.ReadInteger('Server', 'ALLMSGTYPE', 0);
+         g_AllMsgmomey := ini.ReadInteger('Server', 'ALLMSGMONEY', 1);
+
+         g_ExtraLowLevel1 := ini.ReadInteger('Server', 'ExtraLowLevel1', 40); //等级差默认等级机制
+         g_ExtraHighquantity := ini.ReadInteger('Server', 'ExtraHighquantity', 1); //等级差默认等级人数机制
+
+         g_ExtraMoneyPer := ini.ReadInteger('Server', 'ExtraMoneyPer', 0); //服务器活动金币爆率
+         g_ExtraItemPer := ini.ReadInteger('Server', 'ExtraItemPer', 0); //服务器活动物品爆率
+
+         g_NoviceguildEXPSZ := ini.ReadInteger('Server', 'NoviceguildEXPSZ', 100); //服务器活动新手行会
+
+         g_TopAllMsgType := ini.ReadInteger('Server', 'TOPALLMSGTYPE', 0);
+         g_TopAllMsgmomey := ini.ReadInteger('Server', 'TOPALLMSGMONEY', 1);
+
+         g_seWeapongoldcoin := ini.ReadInteger('Server', 'seWeapongoldcoin', 10000);       //升武器所需金币
+         g_Weapontime := ini.ReadInteger('Server', 'Weapontime', 60);                      //生武器所需时间
+
+         g_AllMsgStr := ini.ReadString ('Server', 'ALLMSGCMD', '千里传音');
+         g_TopAllMsgStr := ini.ReadString ('Server', 'TOPALLMSGCMD', '传音筒');
+
+         str := ini.ReadString ('Server', 'ViewAdmissionFailure', 'FALSE');
+         BoViewAdmissionfail := (CompareText(str, 'TRUE') = 0);
+
+
+         boSecondCardSystem := ini.ReadBool('Server', 'SecondCardSystem', boSecondCardSystem);
+
+         g_sRechargingMap := ini.ReadString ('Server', 'RechargingMap', '');
+         g_nExpErienceLevel := ini.ReadInteger('Server', 'ExpErienceLevel', 0);
+         boBbpbsiwang := ini.ReadBool('Server', 'Bbpbsiwang', boBbpbsiwang);
+
+         g_WeightSet:=ini.ReadInteger('Server', 'WeightSet', 0);
+
+         DefHomeMap := ini.ReadString ('Server', 'HomeMap', '0');
+         DefHomeX := ini.ReadInteger ('Server', 'HomeX', 289);
+         DefHomeY := ini.ReadInteger ('Server', 'HomeY', 618);
+
+         with DBSocket do begin
+            Address := ini.ReadString ('Server', 'DBAddr', '210.121.143.205');
+            Port := ini.ReadInteger ('Server', 'DBPort', 6000);
+            Active := TRUE;
+         end;
+         FItemNumber := ini.ReadInteger ('Setup', 'ItemNumber', 0);
+
+         HumLimitTime := ini.ReadInteger ('Server', 'HumLimit', HumLimitTime);
+         MonLimitTime := ini.ReadInteger ('Server', 'MonLimit', MonLimitTime);
+         ZenLimitTime := ini.ReadInteger ('Server', 'ZenLimit', ZenLimitTime);
+         NpcLimitTime := ini.ReadInteger ('Server', 'NpcLimit', NpcLimitTime);
+         SocLimitTime := ini.ReadInteger ('Server', 'SocLimit', SocLimitTime);
+         DecLimitTime := ini.ReadInteger ('Server', 'DecLimit', DecLimitTime);
+
+         SENDBLOCK := ini.ReadInteger ('Server', 'SendBlock', SENDBLOCK);
+         SENDCHECKBLOCK := ini.ReadInteger ('Server', 'CheckBlock', SENDCHECKBLOCK);
+         SENDAVAILABLEBLOCK := ini.ReadInteger ('Server', 'AvailableBlock', SENDAVAILABLEBLOCK);
+         GATELOAD := ini.ReadInteger ('Server', 'GateLoad', GATELOAD);
+
+         UserFullCount := ini.ReadInteger ('Server', 'UserFull', 500);
+         ZenFastStep := ini.ReadInteger ('Server', 'ZenFastStep', 300);
+
+         MsgServerAddress := ini.ReadString ('Server', 'MsgSrvAddr', '210.121.143.205');
+         MsgServerPort := ini.ReadInteger ('Server', 'MsgSrvPort', 4900);
+
+//         LogServerAddress := ini.ReadString ('Server', 'LogServerAddr', '192.168.0.152');
+//         LogServerPort := ini.ReadInteger ('Server', 'LogServerPort', 10000);
+
+         DiscountForNightTime := ini.ReadBool ('Server', 'DiscountForNightTime', FALSE);
+         HalfFeeStart := ini.ReadInteger ('Server', 'HalfFeeStart', 2);  //2矫
+         HalfFeeEnd := ini.ReadInteger ('Server', 'HalfFeeEnd', 10);  //10矫
+
+         ShareBaseDir := ini.ReadString ('Share', 'BaseDir', 'D:\');
+         ShareFileNameNum := 1;
+         GuildDir := ini.ReadString ('Share', 'GuildDir', 'D:\');
+         GuildFile := ini.ReadString ('Share', 'GuildFile', 'D:\');
+         // 厘盔 格废 颇老.
+         GuildBaseDir := ExtractFileDir(GuildFile) + '\';  //弃歹绰 GuildFile苞 鞍捞 荤侩(sonmg)
+         GuildAgitFile := GuildBaseDir + 'GuildAgitList.txt';   //颇老捞抚 窍靛内爹(sonmg)
+
+         ShareVentureDir := ini.ReadString ('Share', 'VentureDir', 'D:\');
+         ConLogBaseDir := ini.ReadString ('Share', 'ConLogDir', 'D:\');
+         ChatLogBaseDir := ini.ReadString ('Share', 'ChatLogDir', 'D:\');
+         CastleDir := ini.ReadString ('Share', 'CastleDir', 'D:\');
+         EnvirDir := ini.ReadString ('Share', 'EnvirDir', '.\Envir\');
+         MapDir := ini.ReadString ('Share', 'MapDir', '.\Map\');
+
+         ClientFileName1 := ini.ReadString ('Setup', 'ClientFile1', '');
+         ClientFileName2 := ini.ReadString ('Setup', 'ClientFile2', '');
+         ClientFileName3 := ini.ReadString ('Setup', 'ClientFile3', '');
+
+         __ClothsForMan := ini.ReadString ('Names', 'ClothsMan', '');
+         __ClothsForWoman := ini.ReadString ('Names', 'ClothsWoman', '');
+         __WoodenSword := ini.ReadString ('Names', 'WoodenSword', '');
+         __Candle := ini.ReadString ('Names', 'Candle', '');
+         __BasicDrug := ini.ReadString ('Names', 'BasicDrug', '');
+
+         __GoldStone := ini.ReadString ('Names', 'GoldStone', '');
+         __SilverStone := ini.ReadString ('Names', 'SilverStone', '');
+         __SteelStone := ini.ReadString ('Names', 'SteelStone', '');
+         __CopperStone := ini.ReadString ('Names', 'CopperStone', '');
+         __BlackStone := ini.ReadString ('Names', 'BlackStone', '');
+         __Gem1Stone := ini.ReadString ('Names', 'Gem1Stone', '');
+         __Gem2Stone := ini.ReadString ('Names', 'Gem2Stone', '');
+         __Gem3Stone := ini.ReadString ('Names', 'Gem3Stone', '');
+         __Gem4Stone := ini.ReadString ('Names', 'Gem4Stone', '');
+
+         __ZumaMonster1 := ini.ReadString ('Names', 'Zuma1', '');
+         __ZumaMonster2 := ini.ReadString ('Names', 'Zuma2', '');
+         __ZumaMonster3 := ini.ReadString ('Names', 'Zuma3', '');
+         __ZumaMonster4 := ini.ReadString ('Names', 'Zuma4', '');
+
+         __Bee      := ini.ReadString ('Names', 'Bee', '');
+         __Spider   := ini.ReadString ('Names', 'Spider', '');
+         __WhiteSkeleton := ini.ReadString ('Names', 'Skeleton', '');
+         __ShinSu   := ini.ReadString ('Names', 'Dragon', '');
+         __ShinSu1  := ini.ReadString ('Names', 'Dragon1', '');
+         __AngelMob := ini.ReadString ('Names', 'Angel', '');
+         __CloneMob := ini.ReadString ('Names', 'Clone', '');
+
+         __WomaHorn := ini.ReadString ('Names', 'WomaHorn', '');
+         BUILDGUILDFEE := ini.ReadInteger ('Names', 'BuildGuildFee', BUILDGUILDFEE);
+         __ZumaPiece := ini.ReadString ('Names', 'ZumaPiece', '');
+
+         __GoldenImugi := ini.ReadString ('Names', 'GoldenImugi', '');
+         __WhiteSnake  := ini.ReadString ('Names', 'WhiteSnake', '');
+
+         __VomaAncestor := ini.ReadString ('Names', 'VomaAncestor', '');
+         __WermaBrothers := ini.ReadString ('Names', 'WermaBrothers', '');
+         __WermaBrothers1 := ini.ReadString ('Names', 'WermaBrothers1', '');
+
+         ini.Free;
+      end;
+      Memo1.Lines.Add ('正在加载配置文件!setup.txt..');
+   end else
+      ShowMessage ('重大错误！缺少档案!setup.txt...');
+
+   if (__ClothsForMan = '') or
+      (__ClothsForWoman = '') or
+      (__WoodenSword = '') or
+      (__Candle = '') or
+      (__BasicDrug = '') or
+      (__GoldStone = '') or
+      (__SilverStone = '') or
+      (__SteelStone = '') or
+      (__CopperStone = '') or
+      (__BlackStone = '') or
+      (__Gem1Stone = '') or
+      (__Gem2Stone = '') or
+      (__Gem3Stone = '') or
+      (__Gem4Stone = '') or
+      (__ZumaMonster1 = '') or
+      (__ZumaMonster2 = '') or
+      (__ZumaMonster3 = '') or
+      (__ZumaMonster4 = '') or
+      (__Bee = '') or
+      (__Spider = '') or
+      (__WhiteSkeleton = '') or
+      (__ShinSu = '') or
+      (__ShinSu1 = '') or
+      (__AngelMob = '') or
+      (__CloneMob = '') or
+      (__WomaHorn = '') or
+      (__ZumaPiece = '') or
+      (__GoldenImugi = '') or
+      (__WhiteSnake = '')  or
+      (__VomaAncestor = '') or
+      (__WermaBrothers = '')   then
+      ShowMessage ('Check your !setup.txt file. [Names] -> ClothsForMan ...');
+
+   Memo1.Lines.Add ('准备加载变量信息..');
+   fname := '.\Setup\Global.ini';
+   if FileExists (fname) then begin
+      ini := TIniFile.Create (fname);
+      if ini <> nil then begin
+
+          for i := Low(GlobaDyTval) to High(GlobaDyTval) do begin
+            sLoadString := ini.ReadString('Setup', 'GlobaStrVal' + IntToStr(i), '');
+            if sLoadString = '' then
+              ini.WriteString('Setup', 'GlobaStrVal' + IntToStr(i), GlobaDyTval[i])
+            else
+              GlobaDyTval[i] := sLoadString;
+          end;
+
+          for i := Low(GrobalQuestParams) to High(GrobalQuestParams) do begin
+            nLoadInteger := ini.ReadInteger('Setup', 'GlobalVal' + IntToStr(i), -1);
+            if nLoadInteger < 0 then
+              ini.WriteInteger('Setup', 'GlobalVal' + IntToStr(i), GrobalQuestParams[i])
+            else
+              GrobalQuestParams[i] := nLoadInteger;
+          end;
+
+         ini.Free;
+      end;
+   end;
+
+   //滚傈喊 酒捞袍 牢郸胶 瘤沥
+   if KOREANVERSION then begin
+      INDEX_CHOCOLATE := 661; //檬妮房
+      INDEX_CANDY     := 666; //荤帕
+      INDEX_LOLLIPOP  := 667; //阜措荤帕
+      INDEX_MIRBOOTS  := 642; //玫锋脚青焊
+   end else if ENGLISHVERSION then begin
+      INDEX_CHOCOLATE := 1; //檬妮房
+      INDEX_CANDY     := 594; //荤帕
+      INDEX_LOLLIPOP  := 595; //阜措荤帕
+      INDEX_MIRBOOTS  := 477; //玫锋脚青焊
+   end else if PHILIPPINEVERSION then begin
+      INDEX_CHOCOLATE := 611; //檬妮房
+      INDEX_CANDY     := 556; //荤帕
+      INDEX_LOLLIPOP  := 557; //阜措荤帕
+      INDEX_MIRBOOTS  := 1; //玫锋脚青焊
+   end;
+
+{$IFDEF MIR2EI}
+   Caption := '[ei] ' + ServerName + ' ' + DateToStr(Date) + ' ' + TimeToStr(Time);
+   Panel1.Color := clLime;
+{$ELSE}
+   // 2003/04/01 滚怜 锅龋 钎扁
+   Caption := ServerName + ' ' + DateToStr(Date) + ' ' + TimeToStr(Time) + 'V' + '20210501'{+ IntToStr(VERSION_NUMBER)}; //版本提示
+{$ENDIF}
+   LoadSetupIniInfo;
+
+   LoadMultiServerTables;
+
+//   LogUDP.Host := LogServerAddress;
+//   LogUDP.Port := LogServerPort;
+
+   ConnectTimer.Enabled := TRUE;
+   Application.OnException := OnProgramException;
+
+   CurrentDBloadingTime := GetTickCount;
+   serverruntime := GetTickCount;
+
+   StartTimer.Enabled := TRUE;
+   Timer1.Enabled := TRUE;
+
+   g_TestTime := 0;
+   g_CryWide := 150;  //黄字范围 150
+
+   //胶琴眉农
+   g_SpeedHackCheck := 300;
+   g_SpeedHackCheckChar := '';
+   ShopItemList := TGList.Create;
+end;
+
+procedure TFrmMain.OnProgramException (Sender: TObject; E: Exception);
+begin
+   if gErrorCount > 20000 then
+   begin
+     gErrorCount := 0;
+//   if Sender <> nil then
+//       MainOutMessage (Sender.ClassName +':'+E.Message + formatdatetime('hh:nn:ss',now))
+//   else
+       MainOutMessage (E.Message + formatdatetime('hh:nn:ss',now));
+   end;
+   gErrorCount := gErrorCount + 1;
+end;
+
+procedure TFrmMain.FormDestroy(Sender: TObject);
+var
+  i: Integer;
+begin
+   SaveItemNumber;
+   //辑滚 坷幅车阑锭 荤合己 颇老捞 檬扁拳登绰 巴阑 阜扁困茄 内靛(sonmg 2004/08/13)
+   if boUserCastleInitialized then
+      UserCastle.SaveAll;
+
+   FrontEngine.Terminate;
+   FrontEngine.Free;
+
+   UserEngine.Free;
+   //模备 率瘤 矫胶袍
+   UserMgrEngine.Terminate;
+   UserMgrEngine.Free;
+
+   //DBSQL
+   SQLEngine.Terminate;
+   g_DBSQL.Free;
+   SQLEngine.Free;
+
+   RunSocket.Free;
+   MainMsg.Free;
+   UserLogs.Free;
+   UserConAlarmLogs.Free;
+   UserConLogs.Free;
+   UserChatLog.Free;
+   GrobalEnvir.Free;
+   ItemMan.Free;
+   MagicMan.Free;
+   NoticeMan.Free;
+   GuildMan.Free;
+   GuildAgitMan.Free;   //巩颇厘盔(sonmg)
+   GuildAgitBoardMan.Free; //厘盔霸矫魄(sonmg)
+   EventMan.Free;
+   UserCastle.Free;
+   gFireDragon.Free;
+
+   DecoItemList.Free;
+   MakeItemList.Free;
+   MakeItemIndexList.Free;
+   StartPoints.Free;
+   SafePoints.Free;
+   MultiServerList.Free;
+   EventItemList.Free;
+
+   g_MonSayMsgList.Free;
+
+   if g_RobotManage <> nil then g_RobotManage.Free;
+
+   csMsgLock.Free;
+   csTimerLock.Free;
+   csObjMsgLock.Free;
+   csSendMsgLock.Free;
+   csShare.Free;
+   csDelShare.Free;
+   csSocLock.Free;
+
+   for i := 0 to ShopItemList.Count - 1 do
+     Dispose(pTShopItem(ShopItemList.Items[i]));
+   FreeAndNil(ShopItemList);
+
+end;
+
+procedure TFrmMain.SaveItemNumber;
+var
+   fname: string;
+   ini: TIniFile;
+   i: Integer;
+begin
+   fname := '.\!setup.txt';
+   ini := TIniFile.Create (fname);
+   if ini <> nil then begin
+      ini.WriteInteger ('Setup', 'ItemNumber', FItemNumber);
+      ini.Free;
+   end;
+
+   fname := '.\setup\Global.ini';
+   ini := TIniFile.Create (fname);
+   if ini <> nil then begin
+      for i := Low(GrobalQuestParams) to High(GrobalQuestParams) do
+        ini.WriteInteger('Setup', 'GlobalVal' + IntToStr(i), GrobalQuestParams[i]);
+      for i := Low(GlobaDyTval) to High(GlobaDyTval) do
+        ini.WriteString('Setup', 'GlobaStrVal' + IntToStr(i), Trim(GlobaDyTval[i]));
+      ini.Free;
+   end;
+end;
+
+function GetCertifyNumber: integer;
+begin
+   Inc (FCertify);
+   if FCertify > $7FFE then FCertify := 1;
+   Result := FCertify;
+end;
+
+function GetItemServerIndex: integer;
+begin
+   Inc (FItemNumber);
+   if FItemNumber > $7FFFFFFE then FItemNumber := 1;
+   Result := FItemNumber;
+end;
+
+procedure LoadMultiServerTables;
+var
+   i, k: integer;
+   str, snum, saddr, sport: string;
+   strlist, slist: TStringList;
+begin
+   for i:=0 to MultiServerList.Count-1 do
+      TStringList(MultiServerList[i]).Free;
+   MultiServerList.Clear;
+
+   if FileExists ('!servertable.txt') then begin
+      strlist := TStringList.Create;
+      strlist.LoadFromFile ('!servertable.txt');
+      for i:=0 to strlist.Count-1 do begin
+         str := Trim(strlist[i]);
+         if str <> '' then begin
+            if str[1] = ';' then continue;
+            str := GetValidStr3 (str, snum, [' ', #9]);
+            if str <> '' then begin
+               slist := TStringList.Create;
+               for k:=0 to 30 do begin
+                  if str = '' then break;
+                  str := GetValidStr3 (str, saddr, [' ', #9]);
+                  str := GetValidStr3 (str, sport, [' ', #9]);
+                  if (saddr <> '') and (sport <> '') then begin
+                     slist.AddObject (saddr, TObject(Str_ToInt(sport, 0)));
+                  end;
+               end;
+               MultiServerList.Add (slist);
+            end;
+         end;
+      end;
+   end else
+      ShowMessage ('File not found... <!servertable.txt>');
+end;
+
+function  GetMultiServerAddrPort (servernum: byte; var addr: string; var port: integer): Boolean;
+var
+   n: integer;
+   slist: TStringList;
+begin
+   Result := FALSE;
+   if servernum < MultiServerList.Count then begin
+      slist := TStringList(MultiServerList[servernum]);
+      n := Random (slist.Count);
+      addr := slist[n];
+      port := Integer(slist.Objects[n]);
+      Result := TRUE;
+   end else
+      MainOutMessage ('GetMultiServerAddrPort Fail..:'+ IntToStr(servernum));
+end;
+
+function  GetUnbindItemName (shape: integer): string;
+var
+   i: integer;
+begin
+   Result := '';
+   for i:=0 to UnbindItemList.Count-1 do begin
+      if Integer(UnbindItemList.Objects[i]) = shape then begin
+         Result := UnbindItemList[i];
+         break;
+      end;
+   end;
+end;
+
+function  LoadLineNotice (flname: string): Boolean;
+begin
+   Result := FALSE;
+   if FileExists (flname) then begin
+      LineNoticeList.LoadFromFile (flname);
+      CheckListValid (LineNoticeList);
+      Result := TRUE;
+   end;
+end;
+
+function  LoadLineHelp (flname: string): Boolean;
+begin
+   Result := FALSE;
+   if FileExists (flname) then begin
+      LineHelpList.LoadFromFile (flname);
+      CheckListValid (LineHelpList);
+      Result := TRUE;
+   end;
+end;
+
+//秦寸 index狼 StartPoint 甘 捞抚阑 掘绢坷绰 窃荐(sonmg 2005/12/28)
+function  GetStartPointMapName (index: integer): string;
+var
+   str, mapstr, rangestr: string;
+begin
+   str := '';
+   Result := '';
+   if index < 0 then exit;
+   if StartPoints.Count <= 0 then exit;
+
+   if (index < StartPoints.Count) then begin
+      str := StartPoints[index];
+      str := GetValidStr3(str, mapstr, ['/']);
+      Result := mapstr; //返回安全区的编号
+   end;
+end;
+
+//巩磊凯阑 牢内爹 肚绰 叼内爹窍绰 窃荐
+//巩磊凯 菊俊 'ENCODE_'啊 嘿绢乐栏搁 牢内爹, 酒聪搁 叼内爹 累诀阑 荐青
+//@Param var src : 牢内爹 肚绰 叼内爹瞪 盔夯 巩磊凯, 府畔瞪 锭俊绰
+//@Param key : 牢内爹 棺 叼内爹俊 荤侩瞪 Key
+//@Result : 牢内爹等 巩磊凯阑 馆券窃. 叼内爹牢 版快绰 ''甫 馆券窃.
+function  DecodeStringPassword( var src: string; key: integer ): string;
+var
+   i, temp: integer;
+   tempstr, EncodedPwd: string;
+   EncodeString: string;
+begin
+   Result := '';
+   EncodeString := 'M2';
+
+   tempstr := Copy( UPPERCASE(src), 1, _MIN(Length(EncodeString), Length(src)) );
+   if tempstr = EncodeString then begin
+      src := Copy( src, Length(EncodeString) +1, Length(src) );
+      EncodedPwd := src;
+      //Encode Password
+      for i:=1 to Length(src) do begin
+         temp := Integer(src[i]) xor ( key + i );
+         if not ((temp >= 33) and (temp <= 126)) then begin
+            temp := Integer(src[i]);
+         end;
+         EncodedPwd[i] := Char(temp);
+      end;
+      Result := EncodedPwd;
+   end else begin
+      //Decode Password
+      for i:=1 to Length(src) do begin
+         temp := Integer(src[i]) xor ( key + i );
+         if not ((temp >= 33) and (temp <= 126)) then begin
+            temp := Integer(src[i]);
+         end;
+         src[i] := Char(temp);
+      end;
+   end;
+end;
+
+procedure LoadSetupIniInfo;
+var
+  i: Integer;
+  ini: TIniFile;
+  fname: string;
+begin
+  fname := '.\Setup\Global.ini';
+  if FileExists(fname) then begin
+    ini := TIniFile.Create(fname);
+    if ini <> nil then begin
+      UserSendAllMsgType := ini.ReadInteger('Server', 'UserSendAllMsgType', 0);
+      UserSendAllMsgGold := ini.ReadInteger('Server', 'UserSendAllMsgGold', 10000);
+      UserSendAllMsgPotCash := ini.ReadInteger('Server', 'UserSendAllMsgPotCash', 10);
+
+      for i := Low(ExtraHighLevel) to High(ExtraHighLevel) do begin
+        ExtraExp[i] := ini.ReadInteger('Exp', 'ExtraExp' + IntToStr(i + 1), 0);
+        ExtraLowLevel[i] := ini.ReadInteger('Exp', 'ExtraLowLevel' + IntToStr(i + 1), 0);
+        ExtraHighLevel[i] := ini.ReadInteger('Exp', 'ExtraHighLevel' + IntToStr(i + 1), 0);
+      end;
+      ExtraMsgInfo := ini.ReadString('Exp', 'ExtraMsgInfo', '');
+
+      ApprenticeMinLevel := ini.ReadInteger('Master', 'ApprenticeMinLevel', 7);
+      ApprenticeMaxLevel := ini.ReadInteger('Master', 'ApprenticeMaxLevel', 18);
+      MasterOKLevel := ini.ReadInteger('Master', 'MasterOKLevel', 35);
+      MasterCreditPointCount := ini.ReadInteger('Master', 'MasterCreditPointCount', 0);
+
+      if MasterCreditPointCount > 0 then begin
+        for i := 0 to MasterCreditPointCount - 1 do begin
+          ApprenticeLevel[i] := ini.ReadInteger('Master', 'ApprenticeLevel' + IntToStr(i + 1), 0);
+          ApprenticeCreditPoint[i] := ini.ReadInteger('Master', 'ApprenticeCreditPoint' + IntToStr(i + 1), 0);
+          MasterCreditPoint[i] := ini.ReadInteger('Master', 'MasterCreditPoint' + IntToStr(i + 1), 0);
+        end;
+      end;
+    end;
+    ini.Free;
+  end else
+    ShowMessage('File not found... <' + fname + '>');
+end;
+
+//---------------------------------------------------------------//
+
+procedure MainOutMessage (str: string);
+begin
+   try
+      csMsgLock.Enter;
+      MainMsg.Add (str);
+   finally
+      csMsgLock.Leave;
+   end;
+end;
+
+procedure AddUserLog (str: string);
+begin
+   try
+      csMsgLock.Enter;
+      UserLogs.Add (str);
+   finally
+      csMsgLock.Leave;
+   end;
+end;
+
+procedure AddUserConAlarmLog (str: string);
+begin
+   try
+      csMsgLock.Enter;
+      UserConAlarmLogs.Add (str);
+   finally
+      csMsgLock.Leave;
+   end;
+end;
+
+procedure AddConLog (str: string);
+begin
+   try
+      csMsgLock.Enter;
+      UserConLogs.Add (str);
+   finally
+      csMsgLock.Leave;
+   end;
+end;
+
+procedure AddChatLog (str: string);
+begin
+   try
+      csMsgLock.Enter;
+      UserChatLog.Add (str);
+   finally
+      csMsgLock.Leave;
+   end;
+end;
+
+procedure WriteConLogs (slist: TStringList);
+var
+   ayear, amon, aday, ahour, amin, asec, amsec: word;
+   dirname, flname: string;
+   dir256: array[0..255] of char;
+   f: TextFile;
+   i: integer;
+begin
+   if slist.Count = 0 then exit;
+
+   DecodeDate (Date, ayear, amon, aday);
+   DecodeTime (Time, ahour, amin, asec, amsec);
+   dirname := ConLogBaseDir + IntToStr(ayear) + '-' + IntTo_Str(amon) + '-' + IntTo_Str(aday);
+   if not FileExists (dirname) then begin
+      StrPCopy (dir256, dirname);
+      CreateDirectory (@dir256, nil);
+   end;
+   flname := dirname + '\C-' + IntToStr(ServerIndex) + '-' + IntTo_Str(ahour) + 'H' + IntTo_Str(amin div 10 * 10) + 'M.txt';
+
+   AssignFile (f, flname);
+   if not FileExists (flname) then
+      Rewrite (f)
+   else Append (f);
+
+   for i:=0 to slist.Count-1 do begin
+      WriteLn (f, '1'#9 + slist[i] + ''#9 + '0');
+   end;
+
+   CloseFile (f);
+end;
+
+procedure WriteChatLogs (slist: TStringList);
+var
+   ayear, amon, aday, ahour, amin, asec, amsec: word;
+   dirname, flname: string;
+   dir256: array[0..255] of char;
+   f: TextFile;
+   i: integer;
+begin
+   if slist.Count = 0 then exit;
+
+   DecodeDate (Date, ayear, amon, aday);
+   DecodeTime (Time, ahour, amin, asec, amsec);
+   dirname := ChatLogBaseDir + IntToStr(ayear) + '-' + IntTo_Str(amon) + '-' + IntTo_Str(aday);
+   if not FileExists (dirname) then begin
+      StrPCopy (dir256, dirname);
+      CreateDirectory (@dir256, nil);
+   end;
+   flname := dirname + '\C-' + {IntToStr(ServerIndex) + '-' +} IntTo_Str(ahour) + 'H' + {IntTo_Str(amin div 10 * 10) +} 'M.txt';
+
+   AssignFile (f, flname);
+   if not FileExists (flname) then
+      Rewrite (f)
+   else Append (f);
+
+   for i:=0 to slist.Count-1 do begin
+      WriteLn (f, IntToStr(ServerIndex) + ''#9 + slist[i] + ''#9 + '0');
+   end;
+
+   CloseFile (f);
+end;
+
+function TFrmMain.LoadClientFileCheckSum: Boolean;
+begin
+   Memo1.Lines.Add ('加载客户端版本信息..');
+   if ClientFileName1 <> '' then
+      ClientCheckSumValue1 := CheckFileCheckSum (ClientFileName1);
+   if ClientFileName2 <> '' then
+      ClientCheckSumValue2 := CheckFileCheckSum (ClientFileName2);
+   if ClientFileName3 <> '' then
+      ClientCheckSumValue3 := CheckFileCheckSum (ClientFileName3);
+   if (clientchecksumvalue1 = 0) and (clientchecksumvalue2 = 0) and (clientchecksumvalue3 = 0) then begin
+      Memo1.Lines.Add ('Loading client version information failed. check !setup.txt -> [setup] -> clientfile1,..');
+      Result := FALSE;
+   end else begin
+      Memo1.Lines.Add ('客户端版本信息加载成功.' + ClientFileName1 + '(' + IntToStr(ClientCheckSumValue1) + ') ' + ClientFileName2 + '(' + IntToStr(ClientCheckSumValue2) + ') ' + ClientFileName3 + '(' + IntToStr(ClientCheckSumValue3) + ')');
+      Result := TRUE;
+   end;
+end;
+
+// ----------------------------------------------------------------
+
+
+procedure TFrmMain.StartTimerTimer(Sender: TObject);
+var
+   i,error, checkvalue: integer;
+   IsSuccess : Boolean;
+   handle, FileDate : integer;
+   DateTime : TDateTime;
+   sPass: string;
+begin
+   StartTimer.Enabled := FALSE;
+
+   try
+      //单捞磐 八荤
+{$ifdef MIR2EI}
+      checkvalue := SIZEOFEIFDB;
+{$else}
+      checkvalue := SIZEOFFDB;
+{$endif}
+
+      if sizeof(FDBRecord) <> checkvalue then begin
+         ShowMessage('SizeOf(THuman) ' + IntToStr(sizeof(FDBRecord)) + ' <> SIZEOFTHUMAN ' + IntToStr(SIZEOFFDB));
+         Close;
+         exit;
+      end;
+{$ifdef Release}
+      {sPass := InputBox('提示','请输入启动密码',sPass);
+      if sPass <> (sRunPassword) then begin
+         Close;
+         exit;
+      end;}
+{$endif}
+
+
+
+      if not LoadClientFileCheckSum then begin
+         close;
+         exit;
+      end;
+
+      Memo1.Lines.Add ('正在加载物品数据库 StdItem.DB...');
+
+      //扁夯 单捞鸥甫 肺爹 茄促.
+      error := FrmDB.LoadStdItems;
+      if error < 0 then begin
+         ShowMessage ('StdItems.DB' + '：读取失败code= ' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('物品数据库加载成功.');
+
+      Memo1.Lines.Add ('正在加载小地图信息 MiniMap.txt...');
+      error := FrmDB.LoadMiniMapInfos;
+      if error < 0 then begin
+         ShowMessage ('MiniMap.txt' + '：读取失败code= ' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('小地图信息加载成功.');
+
+      // 侩带怜 矫胶袍 肺爹
+      Memo1.Lines.Add('正在加载 DragonSystem...');
+      Memo1.Lines.Add( gFireDragon.Initialize( EnvirDir + DRAGONITEMFILE , IsSuccess ) );
+      if ( not IsSuccess ) then
+      Memo1.Lines.Add( DRAGONITEMFILE +'读取龙配置时出错');
+
+      Memo1.Lines.Add ('正在加载技能数据库 Magic.DB...');
+      error := FrmDB.LoadMagic;
+      if error <= 0 then begin
+         ShowMessage ('Magic.DB' + '：读取失败code= ' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add  ('技能数据库加载成功.');
+
+      Memo1.Lines.Add ('正在加载地图文件 MapInfo.txt...');
+      error := FrmDB.LoadMapFiles;
+      if error < 0 then begin
+         ShowMessage ('MapInfo.txt读取失败code= ' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add  ('地图文件加载成功.');
+
+      Memo1.Lines.Add ('正在加载怪物数据库 Monster.DB...');
+      error := FrmDB.LoadMonsters;
+      if error <= 0 then begin
+         ShowMessage ('Monster.DB' + '：读取失败code= ' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add  ('怪物数据库加载成功.');
+
+      Memo1.Lines.Add ('正在加载怪物刷新信息 MonGen.txt...');
+      error := FrmDB.LoadZenLists;
+      if error <= 0 then begin
+         ShowMessage ('MonGen.txt' + '：读取失败code= ' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add  ('怪物刷新信息加载成功.');
+
+      // 2003/06/20 捞亥飘各 哩 皋技瘤 殿废
+      Memo1.Lines.Add ('正在加载怪物说话文件 GenMsg.txt...');
+      error := FrmDB.LoadGenMsgLists;
+      if error <= 0 then begin
+         ShowMessage ('GenMsg.txt' + '读取失败code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add  ('怪物说话文件加载成功.');
+
+      Memo1.Lines.Add ('loading MonSayMsg.txt...');
+      error := FrmDB.LoadMonSayMsg;
+      if error <= 0 then begin
+         ShowMessage ('MonSayMsg.txt' + '：读取失败code= ' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add  ('MonSayMsg.txt loaded.');
+
+
+      Memo1.Lines.Add ('正在加载捆绑物品信息 UnbindList.txt...');
+      error := FrmDB.LoadUnbindItemLists;
+      if error < 0 then begin
+         ShowMessage ('UnbindList.txt' + '读取失败 code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('捆绑物品信息加载成功..');
+
+      FrmDB.LoadShopItemList();
+      Memo1.Lines.Add('正在加载商铺信息 ShopItemList.txt...');
+
+      Memo1.Lines.Add ('正在加载地图任务信息 MapQuest.txt...');
+      error := FrmDB.LoadMapQuestInfos;
+      if error < 0 then begin
+         ShowMessage ('MapQuest.txt' + '读取失败 code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('地图任务信息加载成功.');
+
+      Memo1.Lines.Add ('正在加载默认登录脚本QManage.txt...');
+      error := FrmDB.LoadDefaultNpc;
+      if error < 0 then begin
+         ShowMessage ('QManage.txt' + '读取失败 code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('登录脚本QManage加载成功..');
+
+      Memo1.Lines.Add ('正在加载脚本QFunction.txt...');
+      error := FrmDB.LoadQFunctionNpc;
+      if error < 0 then begin
+         ShowMessage ('QFunction.txt' + '读取失败 code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('QFunction脚本加载成功..');
+
+      FrmDB.RobotNPC();
+
+      LoadUserCmdList();
+      Memo1.Lines.Add('加载自定义命令配置列表完成...');
+
+      Memo1.Lines.Add ('正在加载任务日记信息 QuestDiary\*.txt...');
+      error := FrmDB.LoadQuestDiary;
+      if error < 0 then begin
+         ShowMessage ('QuestDiary\*.txt' + '读取失败 code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('任务日记信息加载成功..');
+
+      if LoadAbusiveList ('!Abuse.txt') then
+         Memo1.Lines.Add  ('!Abuse.txt' + ' 加载成功..');
+
+      if LoadLineNotice (LINENOTICEFILE) then
+         Memo1.Lines.Add  (LINENOTICEFILE + ' 公告文件加载成功..')
+      else
+         Memo1.Lines.Add  (LINENOTICEFILE + ' 公告文件加载失败!!');
+
+//      if LoadLineHelp (LINEHELPFILE) then
+//         Memo1.Lines.Add  (LINEHELPFILE + ' loaded..')
+//      else
+//         Memo1.Lines.Add  (LINEHELPFILE + ' loading failure !!!!!!!!!');
+
+      if FrmDB.LoadAdminFiles > 0 then
+         Memo1.Lines.Add  ('管理员列表加载成功..')
+      else
+         Memo1.Lines.Add  ('管理员列表加载失败!!');
+
+      //升级经验列表
+      Memo1.Lines.Add ('加载升级经验列表...');
+      error := FrmDB.LoadCharExp;
+      if error < 0 then begin
+         ShowMessage ('CharExp' + ' : Failure was occurred while reading this file. code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('升级经验列表成功. 数量 = ' + IntToStr(UserEngine.CharExpList.Count));
+
+      // LoadPublicKey
+//      if LoadPublicKey( EnvirDir + 'enckey.txt' ) then
+//         Memo1.Lines.Add  ('PublicKey loaded..');
+
+      // 2003/08/28
+      FrmDB.LoadChatLogFiles;
+      Memo1.Lines.Add  ('聊天日志列表加载成功..');
+
+      GuildMan.LoadGuildList;
+      Memo1.Lines.Add  ('行会列表加载成功..');
+
+      GuildAgitMan.LoadGuildAgitList;
+      Memo1.Lines.Add  ('行会庄园列表加载成功..');
+
+      //厘盔霸矫魄
+      GuildAgitBoardMan.LoadAllGaBoardList('');
+      Memo1.Lines.Add  ('行会庄园公告列表加载成功..');
+
+      UserCastle.Initialize;  //巩颇沥焊啊 捞固 佬绢柳 饶俊 阂妨廉具窃
+      boUserCastleInitialized := TRUE;
+      Memo1.Lines.Add  ('城堡初始化..');
+
+      if ServerIndex = 0 then begin //0锅 辑滚啊 付胶磐啊 等促.
+         FrmSrvMsg.Initialize;
+      end else begin
+         FrmMsgClient.Initialize;
+      end;
+
+      // DBSQL 楷搬 ------------------------------------------------------------
+      if g_DBSQL.Connect( ServerName , '.\!DBSQL.TXT' ) then
+      Memo1.Lines.Add ('DBSQL 连接成功..')
+      else
+      Memo1.Lines.Add ('DBSQL 连接失败!! ' );
+      //------------------------------------------------------------------------
+      //滚傈 钎矫..
+      DateTime := 0;
+      if FileExists ('M2Server.exe') then begin
+         handle := FileOpen ('M2Server.exe', fmOpenRead or fmShareDenyNone);
+         if handle > 0 then begin
+            FileDate := FileGetDate( handle );
+            DateTime := FileDateToDateTime(FileDate);
+            MainOutMessage('文件最新版本 : ' + DateTimeToStr(DateTime));
+            FileClose (handle);
+         end;
+      end;
+      //------------------------------------------------------------------------
+
+      StartServer;
+
+      ServerReady := TRUE;
+
+      Sleep(1);
+      ConnectTimer.Enabled := TRUE;
+
+      runstart := GetTickCount;
+      rcount := 0;
+      humrotatetime := GetTickCount;
+      RunTimer.Enabled := TRUE;
+
+
+   except
+      MainOutMessage ('starttimer exception...');
+   end;
+end;
+
+procedure TFrmMain.Timer1Timer(Sender: TObject);
+var
+   i, runsec: integer;
+   fhandle: TextFile;
+   fail: Boolean;
+   r: Real;
+   ayear, amon, aday: word;
+   ahour, amin, asec, amsec: word;
+   checkstr, str, sendb: string;
+   pgate: PTRunGateInfo;
+   MyStream: TMemoryStream;
+   down : integer;
+  Year, Month, Day, Hour, Min, Sec, MSec: Word;
+  Data, tmp: string;
+  sAction,
+  sMapName,
+  sXX,
+  sYY,
+  sUserName,
+  sItemName,
+  sMakeIndex,
+  sOpt1,
+  sOpt2,
+  sTime : string;
+begin
+   down := 1;
+   try
+      csTimerLock.Enter;
+      if Memo1.Lines.Count > 500 then Memo1.Lines.Clear;
+      fail := TRUE;
+      if MainMsg.Count > 0 then begin
+         try
+            if not FileExists (ErrorLogFile) then begin
+               AssignFile (fhandle, ErrorLogFile);
+               Rewrite (fhandle);
+               fail := FALSE;
+            end else begin
+               AssignFile (fhandle, ErrorLogFile);
+               Append (fhandle);
+               fail := FALSE;
+            end;
+         except
+            Memo1.Lines.Add ('Error on writing ErrorLog.');
+         end;
+      end;
+      for i:=0 to MainMsg.Count-1 do begin
+         Memo1.Lines.Add (MainMsg[i]);
+         if not fail then WriteLn (fhandle, MainMsg[i]);
+      end;
+      MainMsg.Clear;
+      if not fail then CloseFile (fhandle);
+
+      //敲贰捞绢狼 立加 肺弊甫 UDP家南阑 烹秦辑 肺弊荐笼辑滚俊 傈崔
+      for I := 0 to UserLogs.Count-1 do begin
+         try
+            str := '1'#9 +
+                   IntToStr(ServerNumber) + #9 +
+                   IntToStr(ServerIndex) + #9 +
+                   UserLogs[I];
+
+
+              Data := str;
+              sTime := FormatDateTime('yyyy-mm-dd hh:mm:ss', Now);
+
+              Data := GetValidStr3 (Data, tmp, [#9]);
+              Data := GetValidStr3 (Data, tmp, [#9]);
+              Data := GetValidStr3 (Data, tmp, [#9]);
+
+              Data := GetValidStr3 (Data, sAction, [#9]);
+              Data := GetValidStr3 (Data, sMapName, [#9]);
+              Data := GetValidStr3 (Data, sXX, [#9]);
+              Data := GetValidStr3 (Data, sYY, [#9]);
+              Data := GetValidStr3 (Data, sUserName, [#9]);
+              Data := GetValidStr3 (Data, sItemName, [#9]);
+              Data := GetValidStr3 (Data, sMakeIndex, [#9]);
+              Data := GetValidStr3 (Data, sOpt1, [#9]);
+              Data := GetValidStr3 (Data, sOpt2, [#9]);
+
+
+              g_DBSQL.FADOQuery.Close;
+              g_DBSQL.FADOQuery.SQL.Clear;
+              g_DBSQL.FADOQuery.SQL.Add('insert into tbl_userlog(FLD_ACTION, FLD_MAPNAME, FLD_CX, FLD_CY, FLD_USERNAME, FLD_ITEMNAME, FLD_ITEMMAKEINDEX, FLD_OPT1, FLD_OPT2, FLD_TIME) values(' +
+                QuotedStr(sAction) + ',' +
+                QuotedStr(sMapName) + ',' +
+                QuotedStr(sXX) + ',' +
+                QuotedStr(sYY) + ',' +
+                QuotedStr(AnsiString(sUserName)) + ',' +
+                QuotedStr(AnsiString(sItemName)) + ',' +
+                QuotedStr(sMakeIndex) + ',' +
+                QuotedStr(AnsiString(sOpt1)) + ',' +
+                QuotedStr(AnsiString(sOpt2)) + ',' +
+                QuotedStr(sTime) +  ')');
+                g_DBSQL.FADOQuery.Prepared;
+                g_DBSQL.FADOQuery.ExecSQL;
+
+
+
+
+
+
+//            LogUDP.Send(AnsiString(str));
+//            MainOutMessage ('测试日志='+str);
+         except
+            Continue;
+         end;
+      end;
+      UserLogs.Clear;
+
+      //敲贰捞绢狼 立加 肺弊甫 历厘茄促.
+      if UserConLogs.Count > 0 then begin
+         try
+           WriteConLogs (UserConLogs);
+         except
+           MainOutMessage ('ERROR_CONLOG_FAIL');
+         end;
+         UserConLogs.Clear;
+      end;
+
+      //敲贰捞绢狼 盲泼 肺弊甫 历厘茄促.
+      if UserChatLog.Count > 0 then begin
+         try
+           WriteChatLogs (UserChatLog);
+         except
+           MainOutMessage ('ERROR_CHATLOG_FAIL');
+         end;
+         UserChatLog.Clear;
+      end;
+
+   finally
+      csTimerLock.Leave;
+   end;
+
+   try
+   down := 2;
+
+   if ServerIndex = 0 then checkstr := '[M]'
+   else if FrmMsgClient.MsgClient.Socket.Connected then checkstr := '[S]'
+   else checkstr := '[ ]';
+
+   checkStr := checkStr+IntToStr(gErrorCount);
+{$IFDEF DEBUG} //sonmg
+   checkstr := checkstr + ' DEBUG';
+{$ENDIF}
+
+   down := 3;
+
+   runsec := (GetTickCount - serverruntime) div 1000;
+   ahour := runsec div 3600;
+   amin := (runsec mod 3600) div 60;
+   asec := runsec mod 60;
+   LbRunTime.Caption := '[' + IntToStr(ahour) + ':' + IntToStr(amin) + ':' + IntToStr(asec)
+                        + ']' + checkstr;
+   down := 4;
+   // 2003/03/18 抛胶飘 辑滚 牢盔 力茄
+   LbUserCount.Caption :=
+                           '(' + //IntToStr(UserEngine.MonRunCount) + '/' +
+                           IntToStr(UserEngine.MonCount) + ')   ' +
+                           IntToStr(UserEngine.GetRealUserCount) +
+                           '/' + IntToStr(UserEngine.GetUserCount) +
+                           '/' + IntToStr(UserEngine.FreeUserCount);
+   Label1.Caption := 'Run' + IntToStr(curruncount) + '/' + IntToStr(minruncount) + ' ' +
+                     'Soc' + IntToStr(cursoctime) + '/' + IntToStr(maxsoctime) + ' ' +
+                     'Usr' + IntToStr(curusrcount) + '/' + IntToStr(maxusrtime) + '.';
+   Label2.Caption := 'Hum' + IntToStr(curhumtime) + '/' + IntToStr(maxhumtime) + ' ' +
+                     'Mon' + IntToStr(curmontime) + '/' + IntToStr(maxmontime) + ' ' +
+                     'UsrRot' + IntToStr(curhumrotatetime) + '/' + IntToStr(maxhumrotatetime) +
+                                '(' + IntToStr(humrotatecount) + ')';
+
+   Label5.Caption := LatestGenStr + ' - ' + LatestMonStr + '    ';
+
+   down := 5;
+   r := GetTickCount / (1000 * 60 * 60 * 24);
+   if r >= 36 then LbTimeCount.Font.Color := clRed;
+   LbTimeCount.Caption := FloatToString (r) + ' 天';
+
+   down := 6;
+   str := '';
+   with RunSocket do begin  //钢萍 胶贰飘肺 函版沁阑 版快 悼扁拳 林狼
+      for i:=0 to MAXGATE-1 do begin
+         pgate := PTRunGateInfo (@GateArr[i]);
+         if pgate <> nil then begin
+            if pgate.Socket <> nil then begin
+               if pgate.sendbytes < 1024 then sendb := IntToStr(pgate.sendbytes) + 'b '
+               else sendb := IntToStr(pgate.sendbytes div 1024) + 'kb ';
+               str := str +
+                      '[G' + IntToStr(i+1) + ': ' +
+                      IntToStr(pgate.curbuffercount) + '/' + IntToStr(pgate.remainbuffercount) + ' ' +
+                      sendb +
+                      IntToStr(pgate.sendsoccount) +
+                      '] ';
+            end;
+         end;
+      end;
+   end;
+   Label3.Caption := str;
+
+   down := 7;
+   Inc (minruncount);
+   Dec (maxsoctime);
+   Dec (maxusrtime);
+   Dec (maxhumtime);
+   Dec (maxmontime);
+   Dec (maxhumrotatetime);
+
+   except
+      MainOutMessage('Exception Timer1Timer :'+IntTostr(down));
+   end;
+end;
+
+procedure TFrmMain.SaveVariableTimerTimer(Sender: TObject);
+begin
+   SaveItemNumber;
+end;
+
+procedure TFrmMain.MakeStoneMines;
+var
+   i, k, x, y: integer;
+   ev: TStoneMineEvent;
+   env: TEnvirnoment;
+begin
+   for i:=0 to GrobalEnvir.Count-1 do begin
+      env := TEnvirnoment(GrobalEnvir[i]);
+      if (env.MineMap > 0) then begin
+         for x:=0 to env.MapWidth-1 do
+            for y:=0 to env.MapHeight-1 do begin
+               if env.minemap = 1 then
+                  ev := TStoneMineEvent.Create (env, x, y, ET_MINE)   //积己栏肺 场
+               else if env.minemap = 2 then
+                  ev := TStoneMineEvent.Create (env, x, y, ET_MINE2)  //积己栏肺 场
+               else
+                  ev := TStoneMineEvent.Create (env, x, y, ET_MINE3);  //积己栏肺 场
+               //EventMan.AddEvent (ev); 眠啊且 鞘夸绰 绝促.
+               // 付牢捞 救 持绢脸促搁 绝俊滚府瘤..
+               if ( ev <> nil ) and ev.IsAddToMap = false then
+               begin
+                    ev.Free;
+                    ev := nil;
+                    // MainOutMessage('STONMIME FREE');
+               end;
+
+            end;
+      end;
+   end;
+end;
+
+procedure TFrmMain.Memo1DblClick(Sender: TObject);
+begin
+  if Memo1.Lines.Count = 0 then
+    Exit;
+  if Application.MessageBox('是否确认清除显示的日志信息？', '确认信息', MB_OKCANCEL + MB_ICONQUESTION) <> IDOK then
+    Exit;
+  Memo1.Clear;
+end;
+
+procedure TFrmMain.StartServer;
+var
+   error: integer;
+   TotalDecoMonCount: integer;
+begin
+   try
+
+      FrmIDSoc.Initialize;
+      Memo1.Lines.Add ('IDSoc 初始化..');
+
+      GrobalEnvir.InitEnvirnoments;
+      Memo1.Lines.Add ('GrobalEnvir 加载成功..');
+
+      MakeStoneMines; //堡籍阑 盲款促.
+      Memo1.Lines.Add ('MakeStoneMines 加载成功..');
+
+      error := FrmDB.LoadMerchants;
+      if error < 0 then begin
+         ShowMessage ('merchant.txt' + '读取失败 code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('商人文件加载成功...');
+
+      //---------------------------------------------
+      //厘盔操固扁 酒捞袍 府胶飘 肺靛(sonmg)
+      //LoadAgitDecoMon焊促 刚历 角青登绢具 窃.
+      error := FrmDB.LoadDecoItemList;
+      if error < 0 then begin
+         ShowMessage ('DecoItem.txt' + '读取失败 code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('庄园系统装饰物品列表加载成功..');
+
+      //0锅 辑滚俊辑父 佬绢甸烙.
+      if ServerIndex = 0 then begin
+         //厘盔操固扁 坷宏璃飘 肺靛(sonmg)
+         //LoadDecoItemList焊促 唱吝俊 角青登绢具 窃.
+         error := GuildAgitMan.LoadAgitDecoMon;
+         if error < 0 then begin
+            ShowMessage (GuildBaseDir + AGITDECOMONFILE + '读取失败 code=' + IntToStr(error));
+            close;
+            exit;
+         end else begin
+            //厘盔俊 操固扁 坷宏璃飘甫 积己矫挪促.
+            TotalDecoMonCount := GuildAgitMan.MakeAgitDecoMon;
+            //厘盔喊 操固扁 坷宏璃飘 俺荐甫 辆钦茄促.
+            GuildAgitMan.ArrangeEachAgitDecoMonCount;
+            Memo1.Lines.Add ('庄园装饰物 ' + IntToStr(TotalDecoMonCount) + ' 加载...');
+         end;
+      end;
+      //---------------------------------------------
+
+      if not BoVentureServer then begin  //葛氰辑滚俊辑绰 版厚捍捞 绝促.
+         error := FrmDB.LoadGuards;
+         if error < 0 then begin
+            ShowMessage ('Guardlist.txt' + '读取失败 code=' + IntToStr(error));
+            close;
+            exit;
+         end;
+      end;
+
+      error := FrmDB.LoadNpcs;
+      if error < 0 then begin
+         ShowMessage ('Npc.txt' + '读取失败 code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('交易NPC列表加载成功..');
+
+      error := FrmDB.LoadMakeItemList;
+      if error < 0 then begin
+         ShowMessage ('MakeItem.txt' + '读取失败 code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('炼制物品信息加载成功..');
+
+      error := FrmDB.LoadDropItemShowList;
+      if error < 0 then begin
+         ShowMessage ('DropItemShowList.txt' + '：读取失败code= ' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('怪物掉落提示文件加载成功..');
+
+      error := FrmDB.LoadStartPoints;
+      if error < 0 then begin
+         ShowMessage ('StartPoint.txt' + '读取失败 code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('复活点配置加载成功..');
+
+      error := FrmDB.LoadSafePoints;
+      if error < 0 then begin
+         ShowMessage ('SafePoint.txt' + '读取失败 code=' + IntToStr(error));
+         close;
+         exit;
+      end else
+         Memo1.Lines.Add ('回城点配置加载成功..');
+
+//      error := FrmDB.LoadCityInfo;
+//      if error < 0 then begin
+//         ShowMessage ('CityInfo.txt' + '读取失败 code=' + IntToStr(error));
+//         close;
+//         exit;
+//      end else
+//         Memo1.Lines.Add ('城镇信息加载成功...');
+
+      g_RobotManage := TRobotManage.Create;
+
+      FrontEngine.Resume;
+      Memo1.Lines.Add ('F-Engine 准备就绪..');
+
+      UserEngine.Initialize;
+      Memo1.Lines.Add ('U-Engine 初始化..');
+
+      UserMgrEngine.Resume;
+      Memo1.Lines.Add ('UserMgr-Engine 准备就绪..');
+
+      SQlEngine.Resume;
+      Memo1.Lines.Add ('SQL-Engine 准备就绪..');
+
+      MainOutMessage('欢迎使用BOBO系列软件:');
+      MainOutMessage('引擎版本: 2.30 Build 20230204');
+      MainOutMessage('程序制作: BOBO');
+      MainOutMessage('联系QQ: 350001574');
+      MainOutMessage('联系邮箱: 350001574@qq.com');
+      MainOutMessage('疯子传奇官方网站: http://www.mir2c.com');
+      MainOutMessage('疯子传奇官方网站: http://www.mir2t.com');
+      MainOutMessage('本程序只适用于中华人民共和国法律允许范围内的个人娱乐，不得用于商业盈利性经营，如因此造成的后果自负与本软件无关。');
+   except
+      MainOutMessage ('服务启动时出现异常错误..');
+   end;
+end;
+
+procedure TFrmMain.ConnectTimerTimer(Sender: TObject);
+begin
+   if not DBSocket.Active then begin
+      DBSocket.Active := TRUE;
+   end;
+end;
+
+
+{--------------- Gate狼 单捞鸥甫 贸府窃 --------------}
+
+procedure TFrmMain.RunTimerTimer(Sender: TObject);
+begin
+   if ServerReady then begin
+      RunSocket.Run;
+
+      FrmIDSoc.DecodeSocStr;
+
+      UserEngine.ExecuteRun;
+
+      //困殴惑痢
+      SqlEngine.ExecuteRun;
+
+      EventMan.Run;
+
+      if g_RobotManage <> nil then g_RobotManage.Run;
+
+      if ServerIndex = 0 then begin //0锅 辑滚啊 付胶磐啊 等促.
+         FrmSrvMsg.Run;
+      end else begin
+         FrmMsgClient.Run;
+      end;
+   end;
+
+   Inc (rcount);
+   if GetTickCount - runstart > 250 then begin
+      runstart := GetTickCount;
+      curruncount := rcount;
+      if minruncount > curruncount then minruncount := curruncount;
+      rcount := 0;
+   end;
+end;
+
+{------------- Gate Socket 包访 窃荐 ----------------}
+
+procedure TFrmMain.GateSocketClientConnect(Sender: TObject;
+  Socket: TCustomWinSocket);
+begin
+   RunSocket.Connect (Socket);
+end;
+
+procedure TFrmMain.GateSocketClientDisconnect(Sender: TObject;
+  Socket: TCustomWinSocket);
+begin
+   RunSocket.Disconnect (Socket);
+end;
+
+procedure TFrmMain.GateSocketClientError(Sender: TObject;
+  Socket: TCustomWinSocket; ErrorEvent: TErrorEvent;
+  var ErrorCode: Integer);
+begin
+   RunSocket.SocketError (Socket, ErrorCode);
+end;
+
+procedure TFrmMain.GateSocketClientRead(Sender: TObject;
+  Socket: TCustomWinSocket);
+begin
+   RunSocket.SocketRead (Socket);
+end;
+
+procedure TFrmMain.GM1Click(Sender: TObject);
+begin
+  FrmDB.LoadAdminFiles;
+  UserEngine.SendInterMsg(ISM_RELOADADMIN, ServerIndex, '');
+  Memo1.Lines.Add('【数据重载提示】管理员名单已重新加载.');
+end;
+
+procedure TFrmMain.MAGICDBClick(Sender: TObject);
+begin
+  FrmDB.LoadMagic();
+  MainOutMessage('【技能数据库提示】重新加载技能数据库完成...');
+end;
+
+procedure TFrmMain.MONSTERDBClick(Sender: TObject);
+begin
+  FrmDB.LoadMonsters();
+  MainOutMessage('【怪物数据库提示】重新加载怪物数据库完成...');
+end;
+
+procedure TFrmMain.ITEMDBClick(Sender: TObject);
+begin
+  FrmDB.LoadStdItems();
+  MainOutMessage('【物品数据库库提示】重新加载物品数据库完成...');
+end;
+
+{------------- DB Socket 包访 窃荐 ----------------}
+
+function  DBConnected: Boolean;
+begin
+   if FrmMain.DBSocket.Active then
+      Result := FrmMain.DBSocket.Socket.Connected
+   else Result := FALSE;      
+end;
+
+procedure TFrmMain.DBSocketConnect(Sender: TObject;
+  Socket: TCustomWinSocket);
+begin
+   ;
+end;
+
+procedure TFrmMain.DBSocketDisconnect(Sender: TObject;
+  Socket: TCustomWinSocket);
+begin
+   ;
+end;
+
+procedure TFrmMain.DBSocketError(Sender: TObject; Socket: TCustomWinSocket;
+  ErrorEvent: TErrorEvent; var ErrorCode: Integer);
+begin
+   ErrorCode := 0;
+   Socket.Close;
+end;
+
+procedure TFrmMain.DBSocketRead(Sender: TObject; Socket: TCustomWinSocket);
+var
+   data: string;
+begin
+   try
+      csSocLock.Enter;
+      data := Socket.ReceiveText;
+      RDBSocData := RDBSocData + data;
+      if not ReadyDBReceive then
+         RDBSocData := '';
+
+   finally
+      csSocLock.Leave;
+   end;
+
+   // DB 俊辑佬篮 单捞磐甫 持绰促. PDS...
+   UserMgrEngine.OnDBRead( data );
+
+
+//   if ReadyDBReceive then MainOutMessage ('DB-> ' + IntToStr(Length(data)) + ' OK')
+//   else MainOutMessage ('DB-> ' + IntToStr(Length(data)) + ' Miss');
+end;
+
+procedure TFrmMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+   if not ServerClosing then begin
+      CanClose := FALSE;
+      if MessageDlg ('要离开此服器吗？', mtConfirmation, [mbYes, mbNo, mbCancel], 0) = mrYes then begin
+         ServerClosing := TRUE;
+         TCloseTimer.Enabled := TRUE;
+         RunSocket.CloseAllGate;
+      end;
+   end;      
+end;
+
+procedure TFrmMain.N10Click(Sender: TObject);
+begin
+  FrmDB.LoadShopItemList();
+  Memo1.Lines.Add('【数据重载提示】ShopItemList已重新加载.');
+end;
+
+procedure TFrmMain.N11Click(Sender: TObject);
+begin
+  FrmLogManage.Show;
+end;
+
+procedure TFrmMain.N13Click(Sender: TObject);
+begin
+  Memo1.Lines.Add('程序名称: 火炬游戏引擎');
+  Memo1.Lines.Add('程序版本: 2022/04/12');
+  Memo1.Lines.Add('程序网站: www.mir2c.com ');
+  Memo1.Lines.Add('QQ联系: 350001574 ');
+end;
+
+procedure TFrmMain.N2Click(Sender: TObject);
+begin
+Panel1DblClick(Sender);
+end;
+
+procedure TFrmMain.N3Click(Sender: TObject);
+begin
+  TNormNpc(DefaultNpc).ClearNpcInfos;
+  TNormNpc(DefaultNpc).LoadNpcInfos;
+  Memo1.Lines.Add('【数据重载提示】QManage已重新加载.');
+end;
+
+procedure TFrmMain.N4Click(Sender: TObject);
+begin
+  UserEngine.ReloadAllMonsterItems;
+  Memo1.Lines.Add('【数据重载提示】爆率文件已重新加载.');
+end;
+
+procedure TFrmMain.N5Click(Sender: TObject);
+begin
+  if FrmDB.LoadZenLists > 0 then begin
+    Memo1.Lines.Add('【数据重载提示】怪物刷新文件已重新加载.');
+  end;
+end;
+
+procedure TFrmMain.N6Click(Sender: TObject);
+begin
+  FrmDB.LoadCityInfo;
+end;
+
+procedure TFrmMain.N7Click(Sender: TObject);
+begin
+  if FrmDB.LoadDropItemShowList > 0 then begin
+    Memo1.Lines.Add('【数据重载提示】怪物极品掉落提示信息文件已重新加载.');
+  end;
+end;
+
+procedure TFrmMain.N8Click(Sender: TObject);
+begin
+  if g_RobotManage <> nil then begin
+    g_RobotManage.RELOADROBOT();
+    Memo1.Lines.Add('重新加载机器人配置完成...');
+  end;
+end;
+
+procedure TFrmMain.N9Click(Sender: TObject);
+begin
+  if g_RobotNPC <> nil then begin
+    g_RobotNPC.ClearNpcInfos();
+    g_RobotNPC.LoadNpcInfos();
+    Memo1.Lines.Add('重新加载机器人专用脚本完成...');
+  end
+  else begin
+    Memo1.Lines.Add('重新加载机器人专用脚本失败...');
+  end;
+end;
+
+procedure TFrmMain.NPC1Click(Sender: TObject);
+var
+  i, n: integer;
+begin
+  FrmDB.ReloadNpcs;  //眠啊等 npc, 昏力等 npc 利侩
+  FrmDB.ReloadMerchants;
+
+  n := 0;
+  for i:=0 to UserEngine.NpcList.Count-1 do begin
+     TNormNpc(UserEngine.NpcList[i]).ClearNpcInfos;
+     TNormNpc(UserEngine.NpcList[i]).LoadNpcInfos;
+     Inc (n);
+  end;
+  for i:=0 to UserEngine.MerchantList.Count-1 do begin
+     TMerchant(UserEngine.MerchantList[i]).ClearMerchantInfos;
+     TMerchant(UserEngine.MerchantList[i]).LoadMerchantInfos;
+     Inc (n);
+  end;
+  Memo1.Lines.Add('【数据重载提示】重读所有NPC信息成功 数量 : ' + IntToStr(n));
+end;
+
+procedure TFrmMain.TCloseTimerTimer(Sender: TObject);
+begin
+   if (UserEngine.GetRealUserCount = 0) and (FrontEngine.IsFinished) then begin
+      Close;
+   end;
+end;
+
+procedure TFrmMain.Panel1DblClick(Sender: TObject);
+var
+   ini: TIniFile;
+   fname, bostr: string;
+   AoldWeight:Byte;
+begin
+   AoldWeight:=g_WeightSet;
+   if FrmServerValue.Execute then
+   begin
+      fname := '.\!setup.txt';
+      ini := TIniFile.Create (fname);
+      if ini <> nil then
+      begin
+         ini.WriteInteger ('Server', 'HumLimit', HumLimitTime);
+         ini.WriteInteger ('Server', 'MonLimit', MonLimitTime);
+         ini.WriteInteger ('Server', 'ZenLimit', ZenLimitTime);
+         ini.WriteInteger ('Server', 'SocLimit', SocLimitTime);
+         ini.WriteInteger ('Server', 'DecLimit', DecLimitTime);
+         ini.WriteInteger ('Server', 'NpcLimit', NpcLimitTime);
+
+         ini.WriteInteger ('Server', 'SendBlock', SENDBLOCK);
+         ini.WriteInteger ('Server', 'CheckBlock', SENDCHECKBLOCK);
+         ini.WriteInteger ('Server', 'GateLoad', GATELOAD);
+
+         ini.WriteInteger ('Server', 'MsgFColor', g_nMsgFColor);
+         ini.WriteInteger ('Server', 'MsgBColor', g_nMsgBColor);
+         ini.WriteInteger ('Server', 'MsgDFColor', g_nMsgDFColor);
+         ini.WriteInteger ('Server', 'MsgDBColor', g_nMsgDBColor);
+
+         ini.WriteString ('Server', 'BADMANHOMEMAP', BADMANHOMEMAP);
+         ini.WriteInteger ('Server', 'BADMANSTARTX', BADMANSTARTX);
+         ini.WriteInteger ('Server', 'BADMANSTARTY', BADMANSTARTY);
+
+         ini.WriteInteger ('Server', 'Bbpb', Bbpb);
+         ini.WriteInteger ('Server', 'youhuojilv', youhuojilv);
+         ini.WriteInteger ('Server', 'youhuoxueliang', youhuoxueliang);
+         ini.WriteInteger ('Server', 'huoweili', huoweili);
+         ini.WriteInteger ('Server', 'bingpaoxiao', bingpaoxiao);
+         ini.WriteInteger ('Server', 'cishaweili', cishaweili);
+         ini.WriteInteger ('Server', 'lvduweili', lvduweili);
+         ini.WriteInteger ('Server', 'hongduweili', hongduweili);
+         ini.WriteInteger ('Server', 'zbchijiu', zbchijiu);
+         ini.WriteInteger ('Server', 'sdfanwei', sdfanwei);
+         ini.WriteInteger ('Server', 'wqsjgj', wqsjgj);
+         ini.WriteInteger ('Server', 'wqsjmf', wqsjmf);
+         ini.WriteInteger ('Server', 'wqsjds', wqsjds);
+         ini.WriteInteger ('Server', 'erjizhufu', erjizhufu);
+         ini.WriteInteger ('Server', 'erjidianshu', erjidianshu);
+         ini.WriteInteger ('Server', 'sanjizhufu', sanjizhufu);
+         ini.WriteInteger ('Server', 'sanjidianshu', sanjidianshu);
+         ini.WriteInteger ('Server', 'zhufuzuzhou', zhufuzuzhou);
+         ini.WriteInteger ('Server', 'Powerfulblessingoil', g_Powerfulblessingoil);
+         ini.WriteInteger ('Server', 'PPowerfulblessingoil', g_PPowerfulblessingoil);
+         ini.WriteInteger ('Server', 'WPowerfulblessingoil', g_WPowerfulblessingoil);
+         ini.WriteInteger ('Server', 'EPowerfulblessingoil', g_EPowerfulblessingoil);
+         ini.WriteInteger ('Server', 'baishidengji', baishidengji);   //拜师等级
+         ini.WriteInteger ('Server', 'chushidengji', chushidengji);   //出师等级
+         ini.WriteInteger ('Server', 'chushi1', chushi1);   //出师奖励初
+         ini.WriteInteger ('Server', 'chushi2', chushi2);   //出师奖励终
+         ini.WriteInteger ('Server', 'shitucanshu', shitucanshu);   //出师参数
+         ini.WriteInteger ('Server', 'xingyunxl', xingyunxl);   //幸运项链
+         ini.WriteInteger ('Server', 'jipingailv', jipingailv);   //极品属性的概率
+         ini.WriteInteger ('Server', 'jipindianshu', jipindianshu);   //极品点数最大值
+         ini.WriteInteger ('Server', 'jpzonggailv', jpzonggailv);   //极品属性的总概率
+         ini.WriteInteger ('Server', 'dianshugailv', dianshugailv);   //极品点数概率
+         ini.WriteInteger ('Server', 'xingyunxlds', xingyunxlds);   //幸运项链点数
+         ini.WriteInteger ('Server', 'wakuang1', wakuang1);   //挖矿1
+         ini.WriteInteger ('Server', 'wakuang2', wakuang2);   //挖矿2
+         ini.WriteInteger ('Server', 'Pkzhi', Pkzhi);   //PK值
+         ini.WriteInteger ('Server', 'siwangbaolv', siwangbaolv);   //死亡爆率
+         ini.WriteInteger ('Server', 'hongmingbaolv', hongmingbaolv);   //红名死亡爆率
+         ini.WriteInteger ('Server', 'beibaobaolv', beibaobaolv);   //背包死亡爆率
+         ini.WriteInteger ('Server', 'MONLEVELTIAOJIE', g_MONLEVELTIAOJIE); //怪物停顿等级
+         ini.WriteInteger ('Server', 'seMONJISHU', g_seMONJISHU); //怪物停顿时间
+         ini.WriteInteger ('Server', 'seMONSUIJIZHI', g_seMONSUIJIZHI); //怪物停顿时间
+         ini.WriteInteger ('Server', 'seHFJL', HFJL);
+         ini.WriteInteger ('Server', 'YinYangDharmaring', g_YinYangDharmaring); //阴阳法环回血几率
+         ini.WriteInteger ('Server', 'YinYangDharmaring1', g_YinYangDharmaring1); //阴阳法环回血点数
+         ini.WriteInteger ('Server', 'YinYangDharmaring2', g_YinYangDharmaring2); //阴阳法环回抵消伤害
+         ini.WriteInteger ('Server', 'seCurse', g_seCurse);
+         ini.WriteInteger ('Server', 'seCurse1', g_seCurse1);
+         ini.WriteInteger ('Server', 'seCurse2', g_seCurse2);
+         ini.WriteInteger ('Server', 'seCurse3', g_seCurse3);
+         ini.WriteInteger ('Server', 'seTIEBUSHAN', g_seTIEBUSHAN);
+         ini.WriteInteger ('Server', 'Bloodbreakingcrazykilling', g_Bloodbreakingcrazykilling);
+         ini.WriteInteger ('Server', 'seGALECHOP', g_seGALECHOP);
+         ini.WriteInteger ('Server', 'SpinEditpaobusudu', g_bopaobusudu);
+         ini.WriteInteger ('Server', 'MAGICSPEED', g_MAGICSPEED);
+         ini.WriteInteger ('Server', 'ATTACKSPEED', g_ATTACKSPEED);
+         ini.WriteInteger ('Server', 'Taoistbabyattackpower', g_Taoistbabyattackpower); //怪物攻击力点数
+         ini.WriteInteger ('Server', 'Magebabyattack', g_Magebabyattack); //怪物攻击力点数
+         ini.WriteInteger ('Server', 'MagebabyFoundation', g_MagebabyFoundation); //法师宝宝怪物攻击力基础点数
+
+         ini.WriteInteger ('Server', 'ALLMSGTYPE', g_AllMsgType);
+         ini.WriteInteger ('Server', 'ALLMSGMONEY', g_AllMsgmomey);
+
+         ini.WriteInteger ('Server', 'ExtraLowLevel1', g_ExtraLowLevel1);
+         ini.WriteInteger ('Server', 'ExtraHighquantity', g_ExtraHighquantity);
+
+         ini.WriteInteger ('Server', 'ExtraMoneyPer', g_ExtraMoneyPer);
+         ini.WriteInteger ('Server', 'ExtraItemPer', g_ExtraItemPer);
+
+         ini.WriteInteger ('Server', 'NoviceguildEXPSZ', g_NoviceguildEXPSZ);
+
+         ini.WriteInteger ('Server', 'TOPALLMSGTYPE', g_TopAllMsgType);
+         ini.WriteInteger ('Server', 'TOPALLMSGMONEY', g_TopAllMsgmomey);
+
+         ini.WriteInteger ('Server', 'seWeapongoldcoin', g_seWeapongoldcoin);
+         ini.WriteInteger ('Server', 'Weapontime', g_Weapontime);
+
+         ini.WriteString ('Server', 'ALLMSGCMD', g_AllMsgStr);
+         ini.WriteString ('Server', 'TOPALLMSGCMD', g_TopAllMsgStr);
+
+         ini.WriteBool('Server', 'SecondCardSystem', boSecondCardSystem);
+         ini.WriteString ('Server', 'RechargingMap', g_sRechargingMap);
+         ini.WriteInteger ('Server', 'ExpErienceLevel', g_nExpErienceLevel);
+
+         ini.WriteBool('Server', 'Bbpbsiwang', boBbpbsiwang);
+
+
+         if BoViewHackCode then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'ViewHackMessage', bostr);
+
+         if g_SuperPoisonMagic then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'SuperPoisonMagic', bostr);
+
+
+         if g_boMirShop then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'MirShop', bostr);
+
+ //-摆摊
+
+         if bosafe摆摊 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'sellallsafe', bostr);
+         if Bo摆摊 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'sellall', bostr);
+         ini.WriteInteger ('Server', 'sellalllevel', int摆摊等级);
+
+ //-摆摊
+         if g_bofuguHP then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'fuguHP', bostr);
+
+         if g_bozuduihp then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'zuduihp', bostr);
+
+         if boMirNg then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'MirNg', bostr);
+
+         if boExpDouble then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'ExpDouble', bostr);
+
+         ini.WriteInteger ('Server', 'nExpDouble', g_nExpDouble);
+
+         if g_boMirDark then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'MirDark', bostr);
+
+         if g_boMirShowHp then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'MirShowHp', bostr);
+
+         if g_bochksigedu then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'chksigedu', bostr);
+
+         if g_boMirShowNumber then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'MirShowNumber', bostr);
+
+         if g_bo免助跑 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'mianzhupao', bostr);
+
+         if g_bo稳如泰山 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'wenrutaishan', bostr);
+
+         if g_bo绝对泰山 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'jueduitaishan', bostr);
+
+         if g_bo刀刀刺杀 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'daodaocisha', bostr);
+
+         if g_bosjcd then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'shuangjichuandai', bostr);
+
+         if g_bozdfy then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'zidongfangyao', bostr);
+
+         if g_Deatheject then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'Deatheject', bostr);
+
+         if g_bo技能备注 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'jinengbeizhu', bostr);
+
+         if g_bo物品窗口 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'wupinchuangkou', bostr);
+
+         if g_bo主界面 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'zhujiemian', bostr);
+
+         if g_bo锁定人物 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'suodingrenwu', bostr);
+
+         if g_bo锁定怪物 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'suodingguaiwu', bostr);
+
+         if g_bo极品蓝字 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'jipinlanzi', bostr);
+
+         if g_bo私聊等级 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'siliaodengji', bostr);
+
+         if g_boHighLevelKillMonFixExp then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'experienceremains', bostr);
+
+         if g_bo自动换符 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'zidongdufu', bostr);
+
+         if g_bo自动换毒 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'zidonghuandu', bostr);
+
+         if g_bo地图雷达 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'dituleida', bostr);
+
+         if g_bo悬浮信息 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'xuanfuxinxi', bostr);
+
+         if g_bo人物四格 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'jiemianqiehuan', bostr);
+
+         if g_bo大地图开关 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'yunxudaditu', bostr);
+
+         if g_bo小地图迷宫入口显示 then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'migongrukouxianshi', bostr);
+
+         if g_boHelp then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'HelpShow', bostr);
+
+         if g_boHostpot then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'Hostpot', bostr);
+
+         if g_boQuestions then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'Questions', bostr);
+
+         if g_boChinese then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'Chinese', bostr);
+         
+         if g_boWhisperWin then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'WhisperWin', bostr);
+
+         if g_boRelationWin then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'RelationWin', bostr);
+
+
+         if g_Taoistbabycontrol then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'Taoistbabycontrol', bostr);
+
+         if g_LIMITLESSQiswitch then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'LIMITLESSQiswitch', bostr);
+
+         if g_Allowablelevel then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'Allowablelevel', bostr);
+
+         if g_WemadeGoldEvent then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'WemadeGoldEvent', bostr);
+
+         if g_WemadeItemEvent then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'WemadeItemEvent', bostr);
+
+         if g_NoviceguildEXP then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'NoviceguildEXP', bostr);
+
+         if g_Magebabycontrol then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'Magebabycontrol', bostr);
+
+         ini.WriteString ('Server', 'HostpotWeb', g_boHostpotWeb);
+         ini.WriteString('Server', 'QuestionsWeb', g_boQuestionsWeb);
+
+         if BoViewAdmissionFail then bostr := 'TRUE'
+         else bostr := 'FALSE';
+         ini.WriteString ('Server', 'ViewAdmissionFailure', bostr);
+         ini.WriteInteger('Server', 'WeightSet', g_WeightSet);
+         if AoldWeight<>g_WeightSet then
+            UserEngine.SendWeightConfig;
+      end;
+   end;
+end;
+
+procedure TFrmMain.QFunction1Click(Sender: TObject);
+begin
+  TNormNpc(QFunctionNpc).ClearNpcInfos;
+  TNormNpc(QFunctionNpc).LoadNpcInfos;
+  Memo1.Lines.Add('【数据重载提示】QFunction已重新加载.');
+end;
+
+procedure TFrmMain.SpeedButton1Click(Sender: TObject);
+var
+   ini: TIniFile;
+   fname: string;
+begin
+   FrmIDSoc.Timer1Timer(self);
+
+   with FrmMsgClient do begin
+      if ServerIndex <> 0 then
+         if not MsgClient.Socket.Connected then begin
+            MsgClient.Active := TRUE;
+         end;
+   end;
+
+   fname := '.\!setup.txt';
+   if FileExists (fname) then begin
+      ini := TIniFile.Create (fname);
+      if ini <> nil then begin
+//         LogServerAddress := ini.ReadString ('Server', 'LogServerAddr', '192.168.0.152');
+//         LogServerPort := ini.ReadInteger ('Server', 'LogServerPort', 10000);
+
+         ClientFileName1 := ini.ReadString ('Setup', 'ClientFile1', '');
+         ClientFileName2 := ini.ReadString ('Setup', 'ClientFile2', '');
+         ClientFileName3 := ini.ReadString ('Setup', 'ClientFile3', '');
+      end;
+      ini.Free;
+   end;
+//   LogUDP.Host := LogServerAddress;
+//   LogUDP.Port := LogServerPort;
+
+   LoadMultiServerTables;
+
+   FrmIDSoc.LoadShareIPList;
+
+   LoadClientFileCheckSum;
+
+end;
+
+end.
+

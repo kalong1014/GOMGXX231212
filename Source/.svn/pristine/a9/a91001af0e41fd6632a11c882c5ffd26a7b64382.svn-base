@@ -1,0 +1,185 @@
+unit wmM2Kr;
+
+interface
+uses
+  Windows, Classes, Graphics, SysUtils, HGETextures, HUtil32, WIL, DirectXGraphics, ZLibEx, Forms, Dialogs;
+
+type
+  TWMImageHeader = packed record
+      Title: string[40]; 
+      ImageCount: integer;
+      ColorCount: integer;
+      PaletteSize: integer;
+      VersionInfo: longword;
+  end;
+
+  TWMIndexHeader = packed record
+    Title: string[40];
+    IndexCount: integer;
+    VerFlag: integer;
+  end;
+  PTWMIndexHeader = ^TWMIndexHeader;
+
+  TWMImageInfo = packed record
+    DXInfo: TDXTextureInfo;
+    ImageVersion: longword;
+    nSize: Integer;
+  end;
+  PTWMImageInfo = ^TWMImageInfo;
+
+
+  TWMM2KrImages = class(TWMBaseImages)
+  private
+    FHeader: TWMImageHeader;
+    FIdxHeader: TWMIndexHeader;
+    FIdxFile: string;
+    procedure LoadIndex(idxfile: string);
+    function CopyImageDataToTexture(Buffer: PChar; Texture: TDXImageTexture; Width, Height: Word): Boolean;
+  protected
+    procedure LoadDxImage(index: Integer; position: integer; pDXTexture: pTDXTextureSurface); override;
+  public
+    constructor Create(); override;
+    function Initialize(): Boolean; override;
+    procedure Finalize; override;
+  end;
+
+
+implementation
+
+{ TWMM2KrImages }
+
+function TWMM2KrImages.CopyImageDataToTexture(Buffer: PChar; Texture: TDXImageTexture; Width, Height: Word): Boolean;
+var
+  Y: Integer;
+  Access: TDXAccessInfo;
+  WriteBuffer, ReadBuffer: PChar;
+begin
+  Result := False;
+  if Texture.Lock(lfWriteOnly, Access) then begin
+    try
+        FillChar(Access.Bits^, Access.Pitch * Texture.Size.Y, #0);
+        for Y := 0 to Height - 1 do begin
+          WriteBuffer := Pointer(Integer(Access.Bits) + (Access.Pitch * Y));
+          ReadBuffer := @Buffer[(Height - 1 - Y) * Width];
+          LineR5G6B5_A1R5G5B5(ReadBuffer, WriteBuffer, Texture.Width);
+        end;
+      Result := True;
+    finally
+      Texture.Unlock;
+    end;
+  end;
+end;
+
+constructor TWMM2KrImages.Create;
+begin
+  inherited;
+  FReadOnly := True;
+end;
+
+procedure TWMM2KrImages.Finalize;
+begin
+  inherited;
+end;
+
+function TWMM2KrImages.Initialize: Boolean;
+begin
+  Result := inherited Initialize;
+  if Result then begin
+    FFileStream.Read(FHeader, SizeOf(TWMImageHeader));
+    FImageCount := FHeader.ImageCount;
+    FIdxFile := ExtractFilePath(FFileName) + ExtractFileNameOnly(FFileName) + '.WIX';
+    LoadIndex(FIdxFile);
+    InitializeTexture;
+  end;
+end;
+
+function KorZIPDecompress(const InBuf: Pointer; InBytes: Integer; OutEstimate: Integer; out OutBuf: PChar): Integer;
+var
+  outlen: integer;
+begin
+  ZDecompress2(Pointer(inbuf), inbytes, Pointer(outbuf), outlen, -15, outEstimate);
+  Result := outlen;
+end;
+
+
+procedure TWMM2KrImages.LoadDxImage(index: Integer; position: integer; pDXTexture: pTDXTextureSurface);
+var
+  imginfo: TWMImageInfo;
+  inBuffer, outBuffer: PChar;
+  nLen: Integer;
+  SrcP:PByte;
+  S: Pointer;
+begin
+  pDXTexture.boNotRead := True;
+  if FFileStream.Seek(position, 0) = position then begin;
+    FFileStream.Read(imginfo, SizeOf(TWMImageInfo));
+    if (imginfo.DXInfo.nWidth > MAXIMAGESIZE) or (imgInfo.DXInfo.nHeight > MAXIMAGESIZE) then
+      Exit;
+    if (imginfo.DXInfo.nWidth < MINIMAGESIZE) or (imgInfo.DXInfo.nHeight < MINIMAGESIZE) then
+      Exit;
+
+    nLen := WidthBytes(16, imginfo.DXInfo.nWidth);
+
+    if (imginfo.nSize <= 0) then exit;
+    GetMem(inBuffer, imginfo.nSize);
+    FFileStream.Read(inBuffer^, 6);
+    outBuffer := nil;
+        ///KorZIPDecompress(inBuffer, imginfo.nSize - 6, 0, outBuffer);
+
+
+
+    try
+      if FFileStream.Read(inBuffer^, imginfo.nSize - 6) = imginfo.nSize - 6 then begin
+       // ZDecompress2(Pointer(inBuffer), imginfo.nSize - 6, Pointer(outBuffer), nLen, -15, 0);
+        KorZIPDecompress(inBuffer, imginfo.nSize - 6, 0, outBuffer);
+        pDXTexture.Surface := MakeDXImageTexture(imginfo.DXInfo.nWidth, imginfo.DXInfo.nHeight, WILFMT_A1R5G5B5);
+
+        if pDXTexture.Surface <> nil then begin
+          if not CopyImageDataToTexture(outBuffer, pDXTexture.Surface, nLen, imginfo.DXInfo.nHeight) then
+          begin
+            pDXTexture.Surface.Free;
+            pDXTexture.Surface := nil;
+          end
+          else begin
+            pDXTexture.boNotRead := False;
+            pDXTexture.nPx := imginfo.DXInfo.px;
+            pDXTexture.nPy := imginfo.DXInfo.py;
+          end;
+        end;
+      end;
+      FreeMem(outBuffer);
+    finally
+      FreeMem(inBuffer);
+    end;
+  end;
+end;
+
+procedure TWMM2KrImages.LoadIndex(idxfile: string);
+var
+  fhandle, i, value: integer;
+  pvalue: PInteger;
+begin
+  FIndexList.Clear;
+  FImageCount := 0;
+  if FileExists(idxfile) then begin
+    fhandle := FileOpen(idxfile, fmOpenRead or fmShareDenyNone);
+    if fhandle > 0 then begin
+      FileSeek(fHandle, 0, 0);
+      FileRead(fhandle, FIdxHeader, sizeof(TWMIndexHeader));
+      if FIdxHeader.IndexCount > MAXIMAGECOUNT then exit;
+      GetMem(pvalue, 4 * FIdxHeader.IndexCount);
+      if FileRead(fhandle, pvalue^, 4 * FIdxHeader.IndexCount) = (4 * FIdxHeader.IndexCount) then begin
+        for i := 0 to FIdxHeader.IndexCount - 1 do begin
+          value := PInteger(integer(pvalue) + 4 * i)^;
+          FIndexList.Add(pointer(value));
+        end;
+      end;
+      FreeMem(pvalue);
+      FileClose(fhandle);
+    end;
+    FImageCount := FIndexList.Count;
+  end;
+end;
+
+end.
+

@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="StallSystem" platform="Win32">
+  <const name="MAX_STALL_ITEM_COUNT" type="Integer" file="StallSystem.pas" line="9">
+    <value>
+      $A
+    </value>
+  </const>
+  <struct name="TClientStall" size="9" packed="true" file="StallSystem.pas" line="13">
+    <field name="MakeIndex" type="Cardinal" visibility="public" size="4" offset="0" file="StallSystem.pas" line="14" />
+    <field name="Price" type="Integer" visibility="public" size="4" offset="4" file="StallSystem.pas" line="15" />
+    <field name="GoldType" type="Byte" visibility="public" size="1" offset="8" file="StallSystem.pas" line="16" />
+  </struct>
+  <struct name="TClientStallItems" size="119" packed="true" file="StallSystem.pas" line="18">
+    <field name="Name" visibility="public" size="29" offset="0" file="StallSystem.pas" line="19">
+      <type name="Name" type="ShortString" />
+    </field>
+    <field name="Items" visibility="public" size="90" offset="29" file="StallSystem.pas" line="20">
+      <array name="Items" visibility="public" low="0" high="9">
+        <element type="TClientStall" />
+      </array>
+    </field>
+  </struct>
+  <struct name="TClientStallInfo" size="1153" packed="true" file="StallSystem.pas" line="25">
+    <field name="ItemCount" type="Integer" visibility="public" size="4" offset="0" file="StallSystem.pas" line="26" />
+    <field name="StallName" visibility="public" size="29" offset="4" file="StallSystem.pas" line="27">
+      <type name="StallName" type="ShortString" />
+    </field>
+    <field name="Items" visibility="public" size="1120" offset="33" file="StallSystem.pas" line="28">
+      <array name="Items" visibility="public" low="0" high="9">
+        <element type="TClientItem" />
+      </array>
+    </field>
+  </struct>
+  <struct name="TStallInfo" size="32" packed="true" file="StallSystem.pas" line="32">
+    <field name="Open" type="Boolean" visibility="public" size="1" offset="0" file="StallSystem.pas" line="33" />
+    <field name="Looks" type="Word" visibility="public" size="2" offset="1" file="StallSystem.pas" line="34" />
+    <field name="Name" visibility="public" size="29" offset="3" file="StallSystem.pas" line="35">
+      <type name="Name" type="ShortString" />
+    </field>
+  </struct>
+  <class name="TStallMgr" file="StallSystem.pas" line="38">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="StallType" type="Word" visibility="public" size="2" offset="4" file="StallSystem.pas" line="39" />
+      <field name="OnSale" type="Boolean" visibility="public" size="1" offset="6" file="StallSystem.pas" line="40" />
+      <field name="mBlock" type="TClientStallInfo" visibility="public" size="1153" offset="7" file="StallSystem.pas" line="41" />
+      <field name="DoShop" type="Boolean" visibility="public" size="1" offset="1160" file="StallSystem.pas" line="43" />
+      <field name="uSelIdx" type="Integer" visibility="public" size="4" offset="1164" file="StallSystem.pas" line="44" />
+      <field name="uBlock" type="TClientStallInfo" visibility="public" size="1153" offset="1168" file="StallSystem.pas" line="45" />
+      <field name="CurActor" type="Integer" visibility="public" size="4" offset="2324" file="StallSystem.pas" line="47" />
+      <constructor name="Create" visibility="public" file="StallSystem.pas" line="51">
+        <parameters>
+        </parameters>
+      </constructor>
+    </members>
+  </class>
+</namespace>

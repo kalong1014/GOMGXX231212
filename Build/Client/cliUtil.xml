@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="cliUtil" platform="Win32">
+  <const name="ALPHAVALUE" type="Integer" file="cliUtil.pas" line="11">
+    <value>
+      $96
+    </value>
+  </const>
+  <const name="ceNone" type="TColorEffect" file="cliUtil.pas" line="14">
+    <value>
+      ceNone
+    </value>
+  </const>
+  <const name="ceGrayScale" type="TColorEffect" file="cliUtil.pas" line="14">
+    <value>
+      ceGrayScale
+    </value>
+  </const>
+  <const name="ceBright" type="TColorEffect" file="cliUtil.pas" line="14">
+    <value>
+      ceBright
+    </value>
+  </const>
+  <const name="ceBlack" type="TColorEffect" file="cliUtil.pas" line="14">
+    <value>
+      ceBlack
+    </value>
+  </const>
+  <const name="ceWhite" type="TColorEffect" file="cliUtil.pas" line="14">
+    <value>
+      ceWhite
+    </value>
+  </const>
+  <const name="ceRed" type="TColorEffect" file="cliUtil.pas" line="14">
+    <value>
+      ceRed
+    </value>
+  </const>
+  <const name="ceGreen" type="TColorEffect" file="cliUtil.pas" line="14">
+    <value>
+      ceGreen
+    </value>
+  </const>
+  <const name="ceBlue" type="TColorEffect" file="cliUtil.pas" line="14">
+    <value>
+      ceBlue
+    </value>
+  </const>
+  <const name="ceYellow" type="TColorEffect" file="cliUtil.pas" line="14">
+    <value>
+      ceYellow
+    </value>
+  </const>
+  <const name="ceFuchsia" type="TColorEffect" file="cliUtil.pas" line="14">
+    <value>
+      ceFuchsia
+    </value>
+  </const>
+  <const name="ceSky" type="TColorEffect" file="cliUtil.pas" line="14">
+    <value>
+      ceSky
+    </value>
+  </const>
+  <enum name="TColorEffect" file="cliUtil.pas" line="14">
+    <element value="0" name="ceNone" file="cliUtil.pas" line="14" />
+    <element value="1" name="ceGrayScale" file="cliUtil.pas" line="14" />
+    <element value="2" name="ceBright" file="cliUtil.pas" line="14" />
+    <element value="3" name="ceBlack" file="cliUtil.pas" line="14" />
+    <element value="4" name="ceWhite" file="cliUtil.pas" line="14" />
+    <element value="5" name="ceRed" file="cliUtil.pas" line="14" />
+    <element value="6" name="ceGreen" file="cliUtil.pas" line="14" />
+    <element value="7" name="ceBlue" file="cliUtil.pas" line="14" />
+    <element value="8" name="ceYellow" file="cliUtil.pas" line="14" />
+    <element value="9" name="ceFuchsia" file="cliUtil.pas" line="14" />
+    <element value="10" name="ceSky" file="cliUtil.pas" line="14" />
+  </enum>
+  <variable name="DarkLevel" type="Integer" file="cliUtil.pas" line="20" />
+  <procedure name="MakeDark" visibility="public" procflags="inline" file="cliUtil.pas" line="24">
+    <parameters>
+      <parameter name="ssuf" type="TAsphyreCanvas" />
+      <parameter name="darklevel" type="Integer" />
+    </parameters>
+  </procedure>
+  <procedure name="DrawEffect" visibility="public" procflags="inline" file="cliUtil.pas" line="30">
+    <parameters>
+      <parameter name="X" type="Integer" />
+      <parameter name="Y" type="Integer" />
+      <parameter name="ACanavas" type="TAsphyreCanvas" />
+      <parameter name="ATexture" type="TAsphyreLockableTexture" />
+      <parameter name="AColorEff" type="TColorEffect" />
+      <parameter name="ATransparent" type="Boolean" />
+    </parameters>
+  </procedure>
+</namespace>

@@ -1,0 +1,319 @@
+unit clEvent;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  AbstractCanvas, AbstractTextures, uGameEngine, Grobal2, D7ScktComp, ExtCtrls,
+  HUtil32, EdCode, CliUtil, MShare;
+
+const
+   ZOMBIDIGUPDUSTBASE = 420;
+   STONEFRAGMENTBASE = 64;
+   HOLYCURTAINBASE = 1390;
+   FIREBURNBASE = 1630;
+   METEORBASE = 1600;
+   SCULPTUREFRAGMENT = 1349;
+   HEARTPALPMARK = 420;
+   YINYANGFIVEBASE = 630;
+   POISONCLOUDBASE = 1650;
+
+type
+   TClEvent = class
+      X, Y, Dir: integer;
+      px, py: integer;
+      EventType: integer;
+      EventParam: integer;
+      ServerId: integer;
+      dsurface: TAsphyreLockableTexture;
+      BoBlend: Boolean;
+      calcframetime: longword;
+      curframe: longword;
+      light: integer;
+      calcframetime2: longword;
+      curframe2: longword;
+
+   private
+   public
+      constructor Create (svid, ax, ay, evtype: integer);
+      destructor Destroy; override;
+      procedure DrawEvent (backsurface: TAsphyreCanvas; ax, ay: integer); dynamic;
+      procedure Run; dynamic;
+   end;
+
+   TClEventManager = class
+   private
+   public
+      EventList: TList;
+      constructor Create;
+      destructor Destroy; override;
+      procedure ClearEvents;
+      function  AddEvent (evn: TClEvent): TClEvent;
+      procedure DelEvent (evn: TClEvent);
+      procedure DelEventById (svid: integer);
+      function  GetEvent (ax, ay, etype: integer): TClEvent;
+      procedure Execute;
+   end;
+
+
+implementation
+
+uses
+   ClMain;
+
+constructor TClEvent.Create (svid, ax, ay, evtype: integer);
+begin
+   ServerId := svid;
+   X := ax;
+   Y := ay;
+   EventType := evtype;
+   EventParam := 0;
+   BoBlend := FALSE;
+   calcframetime := GetTickCount;
+   curframe := 0;
+   light := 0;
+end;
+
+destructor TClEvent.Destroy;
+begin
+   inherited Destroy;
+end;
+
+procedure TClEvent.DrawEvent (backsurface: TAsphyreCanvas; ax, ay: integer);
+begin
+   if dsurface <> nil then
+      if BoBlend then backsurface.DrawBlend (ax+px, ay+py, dsurface, 1)
+      else backsurface.Draw(ax+px, ay+py, dsurface.ClientRect, dsurface, TRUE);
+end;
+
+procedure TClEvent.Run;
+begin
+   dsurface := nil;
+      if EventType = ET_METEOR then begin
+     if GetTickCount - calcframetime > 80 then begin
+       calcframetime := GetTickCount;
+       Inc(curframe);
+     end;
+   end else begin
+   if GetTickCount - calcframetime > 20 then begin
+      calcframetime := GetTickCount;
+      Inc (curframe);
+   end;
+   end;
+   //烟花
+   if EventType in [ET_FIREFLOWER_1..ET_FIREFLOWER_9] then begin
+     if GetTickCount - calcframetime2 > 180 then begin
+       calcframetime2 := GetTickCount;
+       Inc (curframe2);
+     end;
+     if curframe2 >= 20 then Exit;
+   end;
+
+   case EventType of
+      ET_DIGOUTZOMBI:
+         begin
+            dsurface := WMon6Img.GetCachedImage (ZOMBIDIGUPDUSTBASE+Dir, px, py);
+         end;
+      ET_PILESTONES:
+         begin
+            if EventParam <= 0 then EventParam := 1;
+            if EventParam > 5 then EventParam := 5;
+            dsurface := WEffectImg.GetCachedImage (STONEFRAGMENTBASE+(EventParam-1), px, py);
+         end;
+      ET_HOLYCURTAIN:
+         begin
+            dsurface := WMagic.GetCachedImage (HOLYCURTAINBASE+(curframe mod 10), px, py);
+            BoBlend := TRUE;
+            light := 1;
+         end;
+      ET_FIRE:
+         begin
+            if BoViewEffect then begin
+               dsurface := WMagic.GetCachedImage (FIREBURNBASE+((curframe div 2) mod 6), px, py);
+               BoBlend := TRUE;
+               light := 1;
+            end;
+         end;
+       ET_BLIZZARD:
+         begin
+            BoBlend  := True;
+            light    := 1;
+         end;
+
+      ET_SCULPEICE:
+         begin
+            dsurface := WMon7Img.GetCachedImage (SCULPTUREFRAGMENT, px, py);
+         end;
+      ET_HEARTPALP:  //利岿付狼 盟荐 傍拜
+         begin
+            dsurface := WMon14Img.GetCachedImage (HEARTPALPMARK, px, py);
+         end;
+       ET_YINYANGFIVE:
+         begin
+            dsurface := WMagic3.GetCachedImage(YINYANGFIVEBASE+((curframe div 3) mod 11), px, py);
+            BoBlend  := True;
+            light    := 3;
+         end;
+    ET_POISONCLOUD:
+      begin
+        dsurface := WMagic2.GetCachedImage(POISONCLOUDBASE + ((curframe div 2) mod 20), px, py);
+        BoBlend := True;
+        light := 2;
+      end;
+            //BOBO add 烟花
+      ET_FIREFLOWER_1:
+        begin //一心一意
+          Dsurface := WMagic4.GetCachedImage(60 + Curframe2, Px, Py);
+          boBlend := TRUE;
+          Light := 1;
+        end;
+      ET_FIREFLOWER_2:
+        begin //心心相印
+          Dsurface := WMagic4.GetCachedImage(80 + Curframe2, Px, Py);
+          boBlend := TRUE;
+          Light := 1;
+        end;
+      ET_FIREFLOWER_3:
+        begin
+          Dsurface := WMagic4.GetCachedImage(100 + Curframe2, Px, Py); ;
+          boBlend := TRUE;
+          Light := 1;
+        end;
+      ET_FIREFLOWER_4:
+        begin
+          Dsurface := WMagic4.GetCachedImage(120 + Curframe2, Px, Py);
+          boBlend := TRUE;
+          Light := 1;
+        end;
+      ET_FIREFLOWER_5:
+        begin
+          Dsurface := WMagic4.GetCachedImage(140 + Curframe2, Px, Py);
+          boBlend := TRUE;
+          Light := 1;
+        end;
+      ET_FIREFLOWER_6:
+        begin
+          Dsurface := WMagic4.GetCachedImage(160 + Curframe2, Px, Py);
+          boBlend := TRUE;
+          Light := 1;
+        end;
+      ET_FIREFLOWER_7:
+        begin
+          Dsurface := WMagic4.GetCachedImage(180 + Curframe2, Px, Py);
+          boBlend := TRUE;
+          Light := 1;
+        end;
+      ET_FIREFLOWER_8:
+        begin
+          Dsurface := WMagic4.GetCachedImage(200 + Curframe2, Px, Py);
+          boBlend := TRUE;
+          Light := 1;
+        end;
+      ET_FIREFLOWER_9:
+        begin
+          Dsurface := WMagic4.GetCachedImage(220 + Curframe2, Px, Py);
+          boBlend := TRUE;
+          Light := 1;
+        end;
+       ET_METEOR:
+         begin
+            dsurface := WMagic2.GetCachedImage(METEORBASE+((curframe) mod 9), px, py);
+            BoBlend  := True;
+            light    := 1;
+         end;
+
+   end;
+end;
+
+
+{-----------------------------------------------------------------------------}
+
+
+
+{-----------------------------------------------------------------------------}
+
+constructor TClEventManager.Create;
+begin
+   EventList := TList.Create;
+end;
+
+destructor TClEventManager.Destroy;
+var
+   i: integer;
+begin
+   for i:=0 to EventList.Count-1 do
+      TClEvent(EventList[i]).Free;
+   EventList.Free;
+   inherited Destroy;
+end;
+
+procedure TClEventManager.ClearEvents;
+var
+   i: integer;
+begin
+   for i:=0 to EventList.Count-1 do
+      TClEvent(EventList[i]).Free;
+   EventList.Clear;
+end;
+
+function  TClEventManager.AddEvent (evn: TClEvent): TClEvent;
+var
+   i: integer;
+   event: TClEvent;
+begin
+   for i:=0 to EventList.Count-1 do
+      if (EventList[i] = evn) or (TClEvent(EventList[i]).ServerId = evn.ServerId) then begin
+         evn.Free;
+         Result := nil;
+         exit;
+      end;
+   EventList.Add (evn);
+   Result := evn;
+end;
+
+procedure TClEventManager.DelEvent (evn: TClEvent);
+var
+   i: integer;
+begin
+   for i:=0 to EventList.Count-1 do
+      if EventList[i] = evn then begin
+         TClEvent(EventList[i]).Free;
+         EventList.Delete (i);
+         break;
+      end;
+end;
+
+procedure TClEventManager.DelEventById (svid: integer);
+var
+   i: integer;
+begin
+   for i:=0 to EventList.Count-1 do
+      if TClEvent(EventList[i]).ServerId = svid then begin
+         TClEvent(EventList[i]).Free;
+         EventList.Delete (i);
+         break;
+      end;
+end;
+
+function  TClEventManager.GetEvent (ax, ay, etype: integer): TClEvent;
+var
+   i: integer;
+begin
+   Result := nil;
+   for i:=0 to EventList.Count-1 do
+      if (TClEvent(EventList[i]).X = ax) and (TClEvent(EventList[i]).Y = ay) and
+         (TClEvent(EventList[i]).EventType = etype) then begin
+         Result := TClEvent(EventList[i]);
+         break;
+      end;
+end;
+
+procedure TClEventManager.Execute;
+var
+   i: integer;
+begin
+   for i:=0 to EventList.Count-1 do
+      TClEvent(EventList[i]).Run;
+end;
+
+end.

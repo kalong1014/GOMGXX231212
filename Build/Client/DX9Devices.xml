@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="DX9Devices" platform="Win32">
+  <class name="TDX9Device" file="DX9Devices.pas" line="54">
+    <ancestor name="TAsphyreDevice" namespace="AbstractDevices">
+      <methodref name="InitDevice" visibility="protected" procflags="abstract virtual" />
+      <methodref name="DoneDevice" visibility="protected" procflags="abstract virtual" />
+      <methodref name="ResetDevice" visibility="protected" procflags="virtual" />
+      <methodref name="MayRender" visibility="protected" procflags="virtual" />
+      <methodref name="RenderWith" visibility="protected" procflags="abstract virtual" />
+      <methodref name="RenderToTarget" visibility="protected" procflags="abstract virtual" />
+      <methodref name="ResizeSwapChain" visibility="protected" procflags="virtual" />
+      <methodref name="ClearDevStates" visibility="protected" procflags="virtual" />
+      <propertyref name="SwapChains" visibility="public" />
+      <propertyref name="State" visibility="public" />
+      <propertyref name="Technology" visibility="public" />
+      <propertyref name="TechVersion" visibility="public" />
+      <propertyref name="TechFeatureVersion" visibility="public" />
+      <propertyref name="FillDepthValue" visibility="public" />
+      <propertyref name="FillStencilValue" visibility="public" />
+      <methodref name="Initialize" visibility="public" />
+      <methodref name="Finalize" visibility="public" />
+      <methodref name="Connect" visibility="public" />
+      <methodref name="Disconnect" visibility="public" />
+      <methodref name="Render" visibility="public" procflags="overload" />
+      <methodref name="Render" visibility="public" procflags="overload" />
+      <methodref name="RenderTo" visibility="public" />
+      <methodref name="Resize" visibility="public" />
+      <methodref name="IsAtFault" visibility="public" />
+      <methodref name="ClearStates" visibility="public" />
+      <methodref name="ResetInitFailed" visibility="public" />
+      <methodref name="Create" visibility="public" procflags="constructor virtual" />
+      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FDXSwapChains" type="TDX9SwapChains" visibility="private" size="4" offset="32" file="DX9Devices.pas" line="56" />
+      <field name="ManagedDirect3D" type="Boolean" visibility="private" size="1" offset="36" file="DX9Devices.pas" line="58" />
+      <field name="ManagedDevice" type="Boolean" visibility="private" size="1" offset="37" file="DX9Devices.pas" line="59" />
+      <field name="UsingDepthBuf" type="Boolean" visibility="private" size="1" offset="38" file="DX9Devices.pas" line="61" />
+      <field name="UsingStencil" type="Boolean" visibility="private" size="1" offset="39" file="DX9Devices.pas" line="62" />
+      <field name="IsLostState" type="Boolean" visibility="private" size="1" offset="40" file="DX9Devices.pas" line="63" />
+      <function name="CreateDirect3D" visibility="private" file="DX9Devices.pas" line="65">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DestroyDirect3D" visibility="private" file="DX9Devices.pas" line="66">
+      </procedure>
+      <function name="GetDisplayMode" visibility="private" file="DX9Devices.pas" line="68">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="MakePresentParams" visibility="private" file="DX9Devices.pas" line="69">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="CreateDevice" visibility="private" file="DX9Devices.pas" line="70">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DestroyDevice" visibility="private" file="DX9Devices.pas" line="71">
+      </procedure>
+      <procedure name="MoveIntoLostState" visibility="private" file="DX9Devices.pas" line="73">
+      </procedure>
+      <function name="AttemptRecoverState" visibility="private" file="DX9Devices.pas" line="74">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="CheckDeviceCondition" visibility="private" file="DX9Devices.pas" line="75">
+        <parameters>
+          <parameter name="SwapChainIndex" type="Integer" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="SetDefaultViewport" visibility="private" file="DX9Devices.pas" line="77">
+        <parameters>
+          <parameter name="UserDesc" type="PSwapChainDesc" />
+        </parameters>
+      </procedure>
+      <procedure name="Clear" visibility="private" file="DX9Devices.pas" line="78">
+        <parameters>
+          <parameter name="Color" type="Cardinal" />
+        </parameters>
+      </procedure>
+      <function name="InitDevice" visibility="protected" procflags="override" file="DX9Devices.pas" line="80">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="DoneDevice" visibility="protected" procflags="override" file="DX9Devices.pas" line="81">
+      </procedure>
+      <procedure name="ResetDevice" visibility="protected" procflags="override" file="DX9Devices.pas" line="82">
+      </procedure>
+      <function name="MayRender" visibility="protected" procflags="override" file="DX9Devices.pas" line="84">
+        <parameters>
+          <parameter name="SwapChainIndex" type="Integer" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="RenderWith" visibility="protected" procflags="override" file="DX9Devices.pas" line="86">
+        <parameters>
+          <parameter name="SwapChainIndex" type="Integer" />
+          <parameter name="Handler" type="TNotifyEvent" />
+          <parameter name="Background" type="Cardinal" />
+        </parameters>
+      </procedure>
+      <procedure name="RenderToTarget" visibility="protected" procflags="override" file="DX9Devices.pas" line="89">
+        <parameters>
+          <parameter name="Handler" type="TNotifyEvent" />
+          <parameter name="Background" type="Cardinal" />
+          <parameter name="FillBk" type="Boolean" />
+        </parameters>
+      </procedure>
+      <function name="ResizeSwapChain" visibility="protected" procflags="override" file="DX9Devices.pas" line="92">
+        <parameters>
+          <parameter name="SwapChainIndex" type="Integer" />
+          <parameter name="NewUserDesc" type="PSwapChainDesc" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <property name="DXSwapChains" visibility="public" read="FDXSwapChains" type="TDX9SwapChains" file="DX9Devices.pas" line="95" />
+      <constructor name="Create" visibility="public" file="DX9Devices.pas" line="97">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="DX9Devices.pas" line="98">
+        <parameters>
+        </parameters>
+      </destructor>
+    </members>
+  </class>
+</namespace>

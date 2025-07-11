@@ -1,0 +1,423 @@
+unit ActnListXe;
+
+
+interface
+
+uses
+  System.Classes, System.SysUtils, System.Actions, Winapi.Messages, Vcl.ImgList,ActnList;
+
+type
+
+   TCustomActionListXE = class;
+
+  TContainedAction = class(TBasicAction)
+  private
+    FCategory: string;
+    FActionList: TCustomActionListXE;
+    function GetIndex: Integer;
+    function IsCategoryStored: Boolean;
+    procedure SetCategory(const Value: string);
+    procedure SetIndex(Value: Integer);
+    procedure SetActionList(AActionList: TCustomActionListXE);
+{$IF DEFINED(CLR)}
+    class constructor Create;
+{$IFEND}
+  protected
+    procedure ReadState(Reader: TReader); override;
+{$IF DEFINED(CLR)}
+    procedure Change; override;
+{$IFEND}
+  public
+    destructor Destroy; override;
+    function Execute: Boolean; override;
+    function GetParentComponent: TComponent; override;
+    function HasParent: Boolean; override;
+    procedure SetParentComponent(AParent: TComponent); override;
+    function Update: Boolean; override;
+    property ActionList: TCustomActionListXE read FActionList write SetActionList;
+    property Index: Integer read GetIndex write SetIndex stored False;
+  published
+    property Category: string read FCategory write SetCategory stored IsCategoryStored;
+  end;
+
+  TContainedActionClass = class of TContainedAction;
+
+  TCustomActionListXE = class(TComponent)
+  private
+    FActions: TList;
+    FImageChangeLink: TChangeLink;
+    FImages: TCustomImageList;
+    FOnChange: TNotifyEvent;
+    FOnExecute: TActionEvent;
+    FOnUpdate: TActionEvent;
+    FState: TActionListState;
+    FOnStateChange: TNotifyEvent;
+    function GetAction(Index: Integer): TContainedAction;
+    function GetActionCount: Integer;
+    procedure SetAction(Index: Integer; Value: TContainedAction);
+    procedure ImageListChange(Sender: TObject);
+{$IF DEFINED(CLR)}
+    class constructor Create;
+{$IFEND}
+  protected
+    procedure AddAction(Action: TContainedAction);
+    procedure RemoveAction(Action: TContainedAction);
+    procedure Change; virtual;
+    procedure Notification(AComponent: TComponent;
+      Operation: TOperation); override;
+    procedure SetChildOrder(Component: TComponent; Order: Integer); override;
+    procedure SetImages(Value: TCustomImageList); virtual;
+    procedure SetState(const Value: TActionListState); virtual;
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property OnExecute: TActionEvent read FOnExecute write FOnExecute;
+    property OnUpdate: TActionEvent read FOnUpdate write FOnUpdate;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    function ExecuteAction(Action: TBasicAction): Boolean; override;
+    procedure GetChildren(Proc: TGetChildProc; Root: TComponent); override;
+    function GetEnumerator: TActionListEnumerator;
+    function IsShortCut(var Message: TWMKey): Boolean;
+    function UpdateAction(Action: TBasicAction): Boolean; override;
+    property Actions[Index: Integer]: TContainedAction read GetAction write SetAction; default;
+    property ActionCount: Integer read GetActionCount;
+    property Images: TCustomImageList read FImages write SetImages;
+    property State: TActionListState read FState write SetState default asNormal;
+    property OnStateChange: TNotifyEvent read FOnStateChange write FOnStateChange;
+  end;
+
+implementation
+
+{ TContainedAction }
+
+{$IF DEFINED(CLR)}
+class constructor TContainedAction.Create;
+begin
+  GroupDescendentsWith(TContainedAction, TControl);
+end;
+{$IFEND}
+
+destructor TContainedAction.Destroy;
+begin
+  if ActionList <> nil then ActionList.RemoveAction(Self);
+  inherited Destroy;
+end;
+
+function TContainedAction.GetIndex: Integer;
+begin
+  if ActionList <> nil then
+    Result := ActionList.FActions.IndexOf(Self) else
+    Result := -1;
+end;
+
+function TContainedAction.IsCategoryStored: Boolean;
+begin
+  Result := True;//GetParentComponent <> ActionList;
+end;
+
+[UIPermission(SecurityAction.LinkDemand, Window=UIPermissionWindow.AllWindows)]
+function TContainedAction.GetParentComponent: TComponent;
+begin
+  if ActionList <> nil then
+    Result := ActionList else
+    Result := inherited GetParentComponent;
+end;
+
+function TContainedAction.HasParent: Boolean;
+begin
+  if ActionList <> nil then
+    Result := True else
+    Result := inherited HasParent;
+end;
+
+{$IF DEFINED(CLR)}
+procedure TContainedAction.Change;
+begin
+  inherited Change;
+end;
+{$IFEND}
+
+procedure TContainedAction.ReadState(Reader: TReader);
+begin
+  inherited ReadState(Reader);
+  if Reader.Parent is TCustomActionList then
+    ActionList := TCustomActionListXE(Reader.Parent);
+end;
+
+procedure TContainedAction.SetIndex(Value: Integer);
+var
+  CurIndex, Count: Integer;
+begin
+  CurIndex := GetIndex;
+  if CurIndex >= 0 then
+  begin
+    Count := ActionList.FActions.Count;
+    if Value < 0 then Value := 0;
+    if Value >= Count then Value := Count - 1;
+    if Value <> CurIndex then
+    begin
+      ActionList.FActions.Delete(CurIndex);
+      ActionList.FActions.Insert(Value, Self);
+    end;
+  end;
+end;
+
+procedure TContainedAction.SetCategory(const Value: string);
+begin
+  if Value <> Category then
+  begin
+    FCategory := Value;
+    if ActionList <> nil then
+      ActionList.Change;
+  end;
+end;
+
+procedure TContainedAction.SetActionList(AActionList: TCustomActionListXE);
+begin
+  if AActionList <> ActionList then
+  begin
+    if ActionList <> nil then ActionList.RemoveAction(Self);
+    if AActionList <> nil then AActionList.AddAction(Self);
+  end;
+end;
+
+procedure TContainedAction.SetParentComponent(AParent: TComponent);
+begin
+  if not (csLoading in ComponentState) and (AParent is TCustomActionList) then
+    ActionList := TCustomActionListXE(AParent);
+end;
+
+function TContainedAction.Execute: Boolean;
+begin
+{$IF DEFINED(CLR)}
+  Result := (ActionList <> nil) and ActionList.ExecuteAction(Self) or
+    Application.ExecuteAction(Self) or inherited Execute;
+  if not Result then
+    if Assigned(Application) then
+      Result := Application.DispatchAction(True, self, False);
+{$ELSE}
+  Result := (ActionList <> nil) and ActionList.ExecuteAction(Self) or
+    Application.ExecuteAction(Self) or inherited Execute or
+    (SendAppMessage(CM_ACTIONEXECUTE, 0, Longint(Self)) = 1);
+{$IFEND}
+end;
+
+function TContainedAction.Update: Boolean;
+begin
+{$IF DEFINED(CLR)}
+  Result := (ActionList <> nil) and ActionList.UpdateAction(Self) or
+    Application.UpdateAction(Self) or inherited Update;
+   if not Result then
+     if Assigned(Application) then
+       Result := Application.DispatchAction(False, self, False);
+{$ELSE}
+  Result := (ActionList <> nil) and ActionList.UpdateAction(Self) or
+    Application.UpdateAction(Self) or inherited Update or
+    (SendAppMessage(CM_ACTIONUPDATE, 0, Longint(Self)) = 1);
+{$IFEND}
+end;
+
+
+{ TCustomActionList }
+
+{$IF DEFINED(CLR)}
+class constructor TCustomActionListXE.Create;
+begin
+  GroupDescendentsWith(TCustomActionList, TControl);
+end;
+{$IFEND}
+
+constructor TCustomActionListXE.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FActions := TList.Create;
+  FImageChangeLink := TChangeLink.Create;
+  FImageChangeLink.OnChange := ImageListChange;
+  FState := asNormal;
+end;
+
+destructor TCustomActionListXE.Destroy;
+begin
+  FImageChangeLink.Free;
+  while FActions.Count > 0 do TContainedAction(FActions.Last).Free;
+  FreeAndNil(FActions);
+  inherited Destroy;
+end;
+
+procedure TCustomActionListXE.GetChildren(Proc: TGetChildProc; Root: TComponent);
+var
+  I: Integer;
+  Action: TCustomAction;
+begin
+  for I := 0 to FActions.Count - 1 do
+  begin
+    Action := TCustomAction(FActions.List[I]);
+    if Action.Owner = Root then Proc(Action);
+  end;
+end;
+
+procedure TCustomActionListXE.SetChildOrder(Component: TComponent; Order: Integer);
+begin
+  if FActions.IndexOf(Component) >= 0 then
+    (Component as TContainedAction).Index := Order;
+end;
+
+function TCustomActionListXE.GetAction(Index: Integer): TContainedAction;
+begin
+  Result := TContainedAction(FActions[Index]);
+end;
+
+function TCustomActionListXE.GetActionCount: Integer;
+begin
+  Result := FActions.Count;
+end;
+
+function TCustomActionListXE.GetEnumerator: TActionListEnumerator;
+begin
+  Result := TActionListEnumerator.Create(Self);
+end;
+
+procedure TCustomActionList.SetAction(Index: Integer; Value: TContainedAction);
+begin
+  TContainedAction(FActions[Index]).Assign(Value);
+end;
+
+procedure TCustomActionListXE.SetImages(Value: TCustomImageList);
+begin
+  if Images <> nil then Images.UnRegisterChanges(FImageChangeLink);
+  FImages := Value;
+  if Images <> nil then
+  begin
+    Images.RegisterChanges(FImageChangeLink);
+    Images.FreeNotification(Self);
+  end;
+end;
+
+procedure TCustomActionList.ImageListChange(Sender: TObject);
+begin
+  if Sender = Images then Change;
+end;
+
+procedure TCustomActionList.Notification(AComponent: TComponent;
+  Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if Operation = opRemove then
+    if AComponent = Images then
+      Images := nil
+    else if (FActions <> nil) and (AComponent is TContainedAction) then
+      RemoveAction(TContainedAction(AComponent));
+end;
+
+procedure TCustomActionList.AddAction(Action: TContainedAction);
+begin
+  FActions.Add(Action);
+  Action.FActionList := Self;
+  Action.FreeNotification(Self);
+end;
+
+procedure TCustomActionListXE.RemoveAction(Action: TContainedAction);
+begin
+  if FActions.Remove(Action) >= 0 then
+  begin
+    Action.RemoveFreeNotification(Self);
+    Action.FActionList := nil;
+  end;
+end;
+
+procedure TCustomActionListXE.Change;
+var
+  I: Integer;
+begin
+  if Assigned(FOnChange) then FOnChange(Self);
+  for I := 0 to FActions.Count - 1 do
+    TContainedAction(FActions.List[I]).Change;
+  if csDesigning in ComponentState then
+  begin
+    if (Owner is TForm) and (TForm(Owner).Designer <> nil) then
+      TForm(Owner).Designer.Modified;
+  end;
+end;
+
+[UIPermission(SecurityAction.LinkDemand, Window=UIPermissionWindow.AllWindows)]
+function TCustomActionListXE.IsShortCut(var Message: TWMKey): Boolean;
+var
+  I: Integer;
+  ShortCut: TShortCut;
+  ShiftState: TShiftState;
+  Action: TCustomAction;
+begin
+{$IF NOT DEFINED(CLR)}
+  Result := False;
+  if Menus.IsAltGRPressed then Exit;
+{$IFEND}
+  ShiftState := KeyDataToShiftState(Message.KeyData);
+  ShortCut := Menus.ShortCut(Message.CharCode, ShiftState);
+  if ShortCut <> scNone then
+    for I := 0 to FActions.Count - 1 do
+    begin
+      Action := TCustomAction(FActions.List[I]);
+      if (TObject(Action) is TCustomAction) then
+        if (Action.ShortCut = ShortCut) or (Assigned(Action.FSecondaryShortCuts) and
+           (Action.SecondaryShortCuts.IndexOfShortCut(ShortCut) <> -1)) then
+        begin
+          Result := Action.HandleShortCut;
+          Exit;
+        end;
+    end;
+{$IF DEFINED(CLR)}
+  Result := False;
+{$IFEND}
+end;
+
+function TCustomActionListXE.ExecuteAction(Action: TBasicAction): Boolean;
+begin
+  Result := False;
+  if Assigned(FOnExecute) then FOnExecute(Action, Result);
+end;
+
+function TCustomActionListXE.UpdateAction(Action: TBasicAction): Boolean;
+begin
+  Result := False;
+  if Assigned(FOnUpdate) then FOnUpdate(Action, Result);
+end;
+
+procedure TCustomActionListXE.SetState(const Value: TActionListState);
+var
+  I: Integer;
+  Action: TCustomAction;
+  OldState: TActionListState;
+begin
+  if FState <> Value then
+  begin
+    OldState := FState;
+    FState := Value;
+    if State = asSuspended then exit;
+    for I := 0 to FActions.Count - 1 do
+    begin
+      Action := TCustomAction(FActions.List[I]);
+      case Value of
+        asNormal:
+          begin
+            if Action is TCustomAction then
+              if OldState = asSuspendedEnabled then
+                with Action as TCustomAction do
+                  Enabled := SavedEnabledState;
+            Action.Update;
+          end;
+        asSuspendedEnabled:
+          if Action is TCustomAction then
+            if Value = asSuspendedEnabled then
+              with Action as TCustomAction do
+              begin
+                SavedEnabledState := Enabled;
+                Enabled := True;
+              end;
+      end;
+    end;
+    if Assigned(FOnStateChange) then
+      FOnStateChange(Self);
+  end;
+end;
+
+end.

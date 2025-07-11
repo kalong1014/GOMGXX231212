@@ -1,0 +1,274 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsMD5" platform="Win32">
+  <const name="MD5Version" type="Integer" file="OverbyteIcsMD5.pas" line="97">
+    <value>
+      $2BF
+    </value>
+  </const>
+  <variable name="CopyRight" type="string" visibility="public" file="OverbyteIcsMD5.pas" line="98" />
+  <const name="DefaultMode" type="Integer" file="OverbyteIcsMD5.pas" line="99">
+    <value>
+      $20
+    </value>
+  </const>
+  <array name="TMD5State" low="0" high="3">
+    <element type="Integer" />
+  </array>
+  <struct name="TMD5Context" size="88" file="OverbyteIcsMD5.pas" line="108">
+    <field name="State" type="TMD5State" visibility="public" size="16" offset="0" file="OverbyteIcsMD5.pas" line="109" />
+    <field name="Count" visibility="public" size="8" offset="16" file="OverbyteIcsMD5.pas" line="110">
+      <array name="Count" visibility="public" low="0" high="1">
+        <element type="Integer" />
+      </array>
+    </field>
+    <field name="BufChar" visibility="public" variant="true" size="64" offset="24" file="OverbyteIcsMD5.pas" line="115">
+      <array name="BufChar" visibility="public" low="0" high="63">
+        <element type="Byte" />
+      </array>
+    </field>
+    <field name="BufLong" visibility="public" variant="true" size="64" offset="24" file="OverbyteIcsMD5.pas" line="116">
+      <array name="BufLong" visibility="public" low="0" high="15">
+        <element type="Integer" />
+      </array>
+    </field>
+  </struct>
+  <array name="TMD5Digest" low="0" high="15">
+    <element type="Byte" />
+  </array>
+  <procedure name="MD5Init" visibility="public" file="OverbyteIcsMD5.pas" line="234">
+    <parameters>
+      <parameter name="MD5Context" type="TMD5Context" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="MD5Update" visibility="public" file="OverbyteIcsMD5.pas" line="257">
+    <parameters>
+      <parameter name="MD5Context" type="TMD5Context" paramflags="var" />
+      <parameter name="Data" paramflags="const" />
+      <parameter name="Len" type="Integer" />
+    </parameters>
+  </procedure>
+  <procedure name="MD5Final" visibility="public" file="OverbyteIcsMD5.pas" line="314">
+    <parameters>
+      <parameter name="Digest" type="TMD5Digest" paramflags="var" />
+      <parameter name="MD5Context" type="TMD5Context" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="MD5Transform" visibility="public" file="OverbyteIcsMD5.pas" line="365">
+    <parameters>
+      <parameter name="Buf" paramflags="var">
+        <array name="Buf">
+          <element type="Integer" />
+        </array>
+      </parameter>
+      <parameter name="Data" paramflags="const">
+        <array name="Data">
+          <element type="Integer" />
+        </array>
+      </parameter>
+    </parameters>
+  </procedure>
+  <procedure name="MD5UpdateBuffer" visibility="public" procflags="overload" file="OverbyteIcsMD5.pas" line="526">
+    <parameters>
+      <parameter name="MD5Context" type="TMD5Context" paramflags="var" />
+      <parameter name="Buffer" type="Pointer" />
+      <parameter name="BufSize" type="Integer" />
+    </parameters>
+  </procedure>
+  <procedure name="MD5UpdateBuffer" visibility="public" procflags="overload" file="OverbyteIcsMD5.pas" line="553">
+    <parameters>
+      <parameter name="MD5Context" type="TMD5Context" paramflags="var" />
+      <parameter name="Buffer" type="AnsiString" paramflags="const" />
+    </parameters>
+  </procedure>
+  <procedure name="MD5UpdateBuffer" visibility="public" procflags="overload" file="OverbyteIcsMD5.pas" line="563">
+    <parameters>
+      <parameter name="MD5Context" type="TMD5Context" paramflags="var" />
+      <parameter name="Buffer" type="TMD5Digest" paramflags="const" />
+    </parameters>
+  </procedure>
+  <function name="MD5DigestToHex" visibility="public" file="OverbyteIcsMD5.pas" line="582">
+    <parameters>
+      <parameter name="MD5Digest" type="TMD5Digest" paramflags="const" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="MD5DigestToLowerHexA" visibility="public" file="OverbyteIcsMD5.pas" line="600">
+    <parameters>
+      <parameter name="MD5Digest" type="TMD5Digest" paramflags="const" />
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="MD5DigestToLowerHex" visibility="public" file="OverbyteIcsMD5.pas" line="618">
+    <parameters>
+      <parameter name="MD5Digest" type="TMD5Digest" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <procedure name="HMAC_MD5" visibility="public" file="OverbyteIcsMD5.pas" line="637">
+    <parameters>
+      <parameter name="Buffer" paramflags="const" />
+      <parameter name="BufferSize" type="Integer" />
+      <parameter name="Key" paramflags="const" />
+      <parameter name="KeySize" type="Integer" />
+      <parameter name="Digest" type="TMD5Digest" paramflags="out" />
+    </parameters>
+  </procedure>
+  <procedure name="MD5DigestInit" visibility="public" file="OverbyteIcsMD5.pas" line="680">
+    <parameters>
+      <parameter name="MD5Digest" type="TMD5Digest" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="GetMD5" visibility="public" procflags="overload" file="OverbyteIcsMD5.pas" line="695">
+    <parameters>
+      <parameter name="Buffer" type="Pointer" />
+      <parameter name="BufSize" type="Integer" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="StrMD5" visibility="public" procflags="overload" file="OverbyteIcsMD5.pas" line="709">
+    <parameters>
+      <parameter name="Buffer" type="string" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="StrMD5" visibility="public" procflags="overload" file="OverbyteIcsMD5.pas" line="718">
+    <parameters>
+      <parameter name="Buffer" type="AnsiString" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <procedure name="StreamMD5Context" visibility="public" file="OverbyteIcsMD5.pas" line="743">
+    <parameters>
+      <parameter name="Stream" type="TStream" />
+      <parameter name="Obj" type="TObject" />
+      <parameter name="ProgressCallback" type="TMD5Progress" />
+      <parameter name="StartPos" type="Int64" />
+      <parameter name="EndPos" type="Int64" />
+      <parameter name="MD5Context" type="TMD5Context" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="StreamMD5" visibility="public" file="OverbyteIcsMD5.pas" line="792">
+    <parameters>
+      <parameter name="Stream" type="TStream" />
+      <parameter name="Obj" type="TObject" />
+      <parameter name="ProgressCallback" type="TMD5Progress" />
+      <parameter name="StartPos" type="Int64" />
+      <parameter name="EndPos" type="Int64" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="FileMD5" visibility="public" procflags="overload" file="OverbyteIcsMD5.pas" line="811">
+    <parameters>
+      <parameter name="Filename" type="string" paramflags="const" />
+      <parameter name="Obj" type="TObject" />
+      <parameter name="ProgressCallback" type="TMD5Progress" />
+      <parameter name="StartPos" type="Int64" />
+      <parameter name="EndPos" type="Int64" />
+      <parameter name="Mode" type="Word">
+        <value>
+          $20
+        </value>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="FileMD5" visibility="public" procflags="overload" file="OverbyteIcsMD5.pas" line="827">
+    <parameters>
+      <parameter name="Filename" type="string" paramflags="const" />
+      <parameter name="Mode" type="Word">
+        <value>
+          $20
+        </value>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="FileMD5" visibility="public" procflags="overload" file="OverbyteIcsMD5.pas" line="834">
+    <parameters>
+      <parameter name="Filename" type="string" paramflags="const" />
+      <parameter name="StartPos" type="Int64" />
+      <parameter name="EndPos" type="Int64" />
+      <parameter name="Mode" type="Word">
+        <value>
+          $20
+        </value>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="FileMD5" visibility="public" procflags="overload" file="OverbyteIcsMD5.pas" line="841">
+    <parameters>
+      <parameter name="Filename" type="string" paramflags="const" />
+      <parameter name="Obj" type="TObject" />
+      <parameter name="ProgressCallback" type="TMD5Progress" />
+      <parameter name="Mode" type="Word">
+        <value>
+          $20
+        </value>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="FileListMD5" visibility="public" file="OverbyteIcsMD5.pas" line="848">
+    <parameters>
+      <parameter name="FileList" type="TStringList" />
+      <parameter name="Obj" type="TObject" />
+      <parameter name="ProgressCallback" type="TMD5Progress" />
+      <parameter name="Mode" type="Word">
+        <value>
+          $20
+        </value>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="MD5GetBufChar" visibility="public" file="OverbyteIcsMD5.pas" line="891">
+    <parameters>
+      <parameter name="MD5Context" type="TMD5Context" paramflags="const" />
+      <parameter name="Index" type="Integer" />
+      <retval type="Byte" />
+    </parameters>
+  </function>
+  <procedure name="MD5SetBufChar" visibility="public" file="OverbyteIcsMD5.pas" line="911">
+    <parameters>
+      <parameter name="MD5Context" type="TMD5Context" paramflags="var" />
+      <parameter name="Index" type="Integer" />
+      <parameter name="Value" type="Byte" />
+    </parameters>
+  </procedure>
+  <procedure name="MD5MoveToBufChar" visibility="public" file="OverbyteIcsMD5.pas" line="934">
+    <parameters>
+      <parameter name="MD5Context" type="TMD5Context" paramflags="var" />
+      <parameter name="Data" paramflags="const" />
+      <parameter name="Offset" type="Integer" />
+      <parameter name="Index" type="Integer" />
+      <parameter name="Len" type="Integer" />
+    </parameters>
+  </procedure>
+  <procedure name="MD5FillBufChar" visibility="public" file="OverbyteIcsMD5.pas" line="954">
+    <parameters>
+      <parameter name="MD5Context" type="TMD5Context" paramflags="var" />
+      <parameter name="Index" type="Integer" />
+      <parameter name="Count" type="Integer" />
+      <parameter name="Value" type="Byte" />
+    </parameters>
+  </procedure>
+  <procedure name="MD5ContextClear" visibility="public" file="OverbyteIcsMD5.pas" line="970">
+    <parameters>
+      <parameter name="MD5Context" type="TMD5Context" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="MD5MoveStateToDigest" visibility="public" file="OverbyteIcsMD5.pas" line="994">
+    <parameters>
+      <parameter name="State" type="TMD5State" paramflags="const" />
+      <parameter name="Digest" type="TMD5Digest" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="MD5SameDigest" visibility="public" file="OverbyteIcsMD5.pas" line="1018">
+    <parameters>
+      <parameter name="D1" type="TMD5Digest" paramflags="const" />
+      <parameter name="D2" type="TMD5Digest" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+</namespace>

@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="uDiskSN" platform="Win32">
+  <const name="IDENTIFY_BUFFER_SIZE" type="Integer" file="uDiskSN.pas" line="10">
+    <value>
+      $200
+    </value>
+  </const>
+  <struct name="TIDERegs" size="8" packed="true" file="uDiskSN.pas" line="13">
+    <field name="bFeaturesReg" type="Byte" visibility="public" size="1" offset="0" file="uDiskSN.pas" line="14" />
+    <field name="bSectorCountReg" type="Byte" visibility="public" size="1" offset="1" file="uDiskSN.pas" line="15" />
+    <field name="bSectorNumberReg" type="Byte" visibility="public" size="1" offset="2" file="uDiskSN.pas" line="16" />
+    <field name="bCylLowReg" type="Byte" visibility="public" size="1" offset="3" file="uDiskSN.pas" line="17" />
+    <field name="bCylHighReg" type="Byte" visibility="public" size="1" offset="4" file="uDiskSN.pas" line="18" />
+    <field name="bDriveHeadReg" type="Byte" visibility="public" size="1" offset="5" file="uDiskSN.pas" line="19" />
+    <field name="bCommandReg" type="Byte" visibility="public" size="1" offset="6" file="uDiskSN.pas" line="20" />
+    <field name="bReserved" type="Byte" visibility="public" size="1" offset="7" file="uDiskSN.pas" line="21" />
+  </struct>
+  <struct name="TSendCmdInParams" size="33" packed="true" file="uDiskSN.pas" line="24">
+    <field name="cBufferSize" type="Cardinal" visibility="public" size="4" offset="0" file="uDiskSN.pas" line="25" />
+    <field name="irDriveRegs" type="TIDERegs" visibility="public" size="8" offset="4" file="uDiskSN.pas" line="26" />
+    <field name="bDriveNumber" type="Byte" visibility="public" size="1" offset="12" file="uDiskSN.pas" line="27" />
+    <field name="bReserved" visibility="public" size="3" offset="13" file="uDiskSN.pas" line="28">
+      <array name="bReserved" visibility="public" low="0" high="2">
+        <element type="Byte" />
+      </array>
+    </field>
+    <field name="dwReserved" visibility="public" size="16" offset="16" file="uDiskSN.pas" line="29">
+      <array name="dwReserved" visibility="public" low="0" high="3">
+        <element type="Cardinal" />
+      </array>
+    </field>
+    <field name="bBuffer" visibility="public" size="1" offset="32" file="uDiskSN.pas" line="30">
+      <array name="bBuffer" visibility="public" low="0" high="0">
+        <element type="Byte" />
+      </array>
+    </field>
+  </struct>
+  <struct name="TIdSector" size="324" packed="true" file="uDiskSN.pas" line="33">
+    <field name="wGenConfig" type="Word" visibility="public" size="2" offset="0" file="uDiskSN.pas" line="34" />
+    <field name="wNumCyls" type="Word" visibility="public" size="2" offset="2" file="uDiskSN.pas" line="35" />
+    <field name="wReserved" type="Word" visibility="public" size="2" offset="4" file="uDiskSN.pas" line="36" />
+    <field name="wNumHeads" type="Word" visibility="public" size="2" offset="6" file="uDiskSN.pas" line="37" />
+    <field name="wBytesPerTrack" type="Word" visibility="public" size="2" offset="8" file="uDiskSN.pas" line="38" />
+    <field name="wBytesPerSector" type="Word" visibility="public" size="2" offset="10" file="uDiskSN.pas" line="39" />
+    <field name="wSectorsPerTrack" type="Word" visibility="public" size="2" offset="12" file="uDiskSN.pas" line="40" />
+    <field name="wVendorUnique" visibility="public" size="6" offset="14" file="uDiskSN.pas" line="41">
+      <array name="wVendorUnique" visibility="public" low="0" high="2">
+        <element type="Word" />
+      </array>
+    </field>
+    <field name="sSerialNumber" visibility="public" size="40" offset="20" file="uDiskSN.pas" line="42">
+      <array name="sSerialNumber" visibility="public" low="0" high="19">
+        <element type="Char" />
+      </array>
+    </field>
+    <field name="wBufferType" type="Word" visibility="public" size="2" offset="60" file="uDiskSN.pas" line="43" />
+    <field name="wBufferSize" type="Word" visibility="public" size="2" offset="62" file="uDiskSN.pas" line="44" />
+    <field name="wECCSize" type="Word" visibility="public" size="2" offset="64" file="uDiskSN.pas" line="45" />
+    <field name="sFirmwareRev" visibility="public" size="16" offset="66" file="uDiskSN.pas" line="46">
+      <array name="sFirmwareRev" visibility="public" low="0" high="7">
+        <element type="Char" />
+      </array>
+    </field>
+    <field name="sModelNumber" visibility="public" size="80" offset="82" file="uDiskSN.pas" line="47">
+      <array name="sModelNumber" visibility="public" low="0" high="39">
+        <element type="Char" />
+      </array>
+    </field>
+    <field name="wMoreVendorUnique" type="Word" visibility="public" size="2" offset="162" file="uDiskSN.pas" line="48" />
+    <field name="wDoubleWordIO" type="Word" visibility="public" size="2" offset="164" file="uDiskSN.pas" line="49" />
+    <field name="wCapabilities" type="Word" visibility="public" size="2" offset="166" file="uDiskSN.pas" line="50" />
+    <field name="wReserved1" type="Word" visibility="public" size="2" offset="168" file="uDiskSN.pas" line="51" />
+    <field name="wPIOTiming" type="Word" visibility="public" size="2" offset="170" file="uDiskSN.pas" line="52" />
+    <field name="wDMATiming" type="Word" visibility="public" size="2" offset="172" file="uDiskSN.pas" line="53" />
+    <field name="wBS" type="Word" visibility="public" size="2" offset="174" file="uDiskSN.pas" line="54" />
+    <field name="wNumCurrentCyls" type="Word" visibility="public" size="2" offset="176" file="uDiskSN.pas" line="55" />
+    <field name="wNumCurrentHeads" type="Word" visibility="public" size="2" offset="178" file="uDiskSN.pas" line="56" />
+    <field name="wNumCurrentSectorsPerTrack" type="Word" visibility="public" size="2" offset="180" file="uDiskSN.pas" line="57" />
+    <field name="ulCurrentSectorCapacity" type="Cardinal" visibility="public" size="4" offset="182" file="uDiskSN.pas" line="58" />
+    <field name="wMultSectorStuff" type="Word" visibility="public" size="2" offset="186" file="uDiskSN.pas" line="59" />
+    <field name="ulTotalAddressableSectors" type="Cardinal" visibility="public" size="4" offset="188" file="uDiskSN.pas" line="60" />
+    <field name="wSingleWordDMA" type="Word" visibility="public" size="2" offset="192" file="uDiskSN.pas" line="61" />
+    <field name="wMultiWordDMA" type="Word" visibility="public" size="2" offset="194" file="uDiskSN.pas" line="62" />
+    <field name="bReserved" visibility="public" size="128" offset="196" file="uDiskSN.pas" line="63">
+      <array name="bReserved" visibility="public" low="0" high="127">
+        <element type="Byte" />
+      </array>
+    </field>
+  </struct>
+  <pointer name="PIdSector" type="TIdSector" indircnt="1" file="uDiskSN.pas" line="65" />
+  <struct name="TDriverStatus" size="12" packed="true" file="uDiskSN.pas" line="67">
+    <field name="bDriverError" type="Byte" visibility="public" size="1" offset="0" file="uDiskSN.pas" line="68" />
+    <field name="bIDEStatus" type="Byte" visibility="public" size="1" offset="1" file="uDiskSN.pas" line="69" />
+    <field name="bReserved" visibility="public" size="2" offset="2" file="uDiskSN.pas" line="70">
+      <array name="bReserved" visibility="public" low="0" high="1">
+        <element type="Byte" />
+      </array>
+    </field>
+    <field name="dwReserved" visibility="public" size="8" offset="4" file="uDiskSN.pas" line="71">
+      <array name="dwReserved" visibility="public" low="0" high="1">
+        <element type="Cardinal" />
+      </array>
+    </field>
+  </struct>
+  <struct name="TSendCmdOutParams" size="17" packed="true" file="uDiskSN.pas" line="74">
+    <field name="cBufferSize" type="Cardinal" visibility="public" size="4" offset="0" file="uDiskSN.pas" line="75" />
+    <field name="DriverStatus" type="TDriverStatus" visibility="public" size="12" offset="4" file="uDiskSN.pas" line="76" />
+    <field name="bBuffer" visibility="public" size="1" offset="16" file="uDiskSN.pas" line="77">
+      <array name="bBuffer" visibility="public" low="0" high="0">
+        <element type="Byte" />
+      </array>
+    </field>
+  </struct>
+  <pointer name="PMemoryBuffer" type="TMemoryBuffer" indircnt="1" file="uDiskSN.pas" line="81" />
+  <array name="TMemoryBuffer" low="0" high="65535">
+    <element type="AnsiChar" />
+  </array>
+  <array name="TArrayBuffer" low="0" high="254">
+    <element type="AnsiChar" />
+  </array>
+  <function name="GetIdeSerialNumber" visibility="public" file="uDiskSN.pas" line="104">
+    <parameters>
+      <parameter name="DeviceNumber" type="Byte" />
+      <retval type="PWideChar" />
+    </parameters>
+  </function>
+</namespace>

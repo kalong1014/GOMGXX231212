@@ -1,0 +1,1033 @@
+unit NetSelChrGate;
+
+interface
+
+uses
+  Windows, SysUtils, Classes, Controls, Forms, syncobjs, Grobal2, HUtil32,
+  EdCode, mudutil, MfdbDef, ExtCtrls, Inifiles, ScktComp, FDBSQL, ADODB, DBShare;
+
+type
+  TCSelChrGate = class
+    procedure OutTimerTimer(Sender: TObject);
+    procedure SocketConnect(Sender: TObject; Socket: TCustomWinSocket);
+    procedure SocketDisconnect(Sender: TObject; Socket: TCustomWinSocket);
+    procedure SocketError(Sender: TObject; Socket: TCustomWinSocket; ErrorEvent: TErrorEvent; var ErrorCode: Integer);
+    procedure SocketRead(Sender: TObject; Socket: TCustomWinSocket);
+    procedure LogTimerTimer(Sender: TObject);
+  private
+    procedure SendGateSocket(asocket: TCustomWinSocket; shandle, socstr: string);
+    procedure ReceiveCheckCode(asocket: TCustomWinSocket);
+    procedure ReceiveOpenUser(uhandle, usraddr: string; pg: PTGateInfo);
+    procedure ReceiveCloseUser(uhandle: string; pg: PTGateInfo);
+    procedure ProcessUserData(pu: PTUserInfo);
+    procedure DecodeSocData(pg: PTGateInfo);
+    function DecodeMessages(data: string; pu: PTUserInfo): Boolean;
+    function GetQueryChr(body: string; pu: PTUserInfo): Boolean;
+    procedure GetNewChr(body: string; pu: PTUserInfo);
+    procedure GetDelChr(body: string; pu: PTUserInfo);
+    function GetSelChr(body: string; pu: PTUserInfo): Boolean;
+    procedure SendOutofConnection(pu: PTUserInfo);
+    function GetServerFromMap(map: string): integer;
+    function GetRunServerAddr(remote: string): string;
+    function GetRunServerPort(remote: string): integer;
+    procedure SendResponse(pu: PTUserInfo; msg, Recog, param, tag, series: integer; body: string = '');
+  public
+    OutTimer: TTimer;
+    UserSocket: TServerSocket;
+    LogTimer: TTimer;
+    constructor Create;
+    destructor Destroy; override;
+    function UserCount: integer;
+    function LoadAddrTables: Boolean;
+    procedure ClearList;
+  end;
+
+var
+  CSelChrGate: TCSelChrGate;
+
+implementation
+
+uses
+   DBSMain, NetLoginServer;
+
+constructor TCSelChrGate.Create;
+begin
+  UserSocket:= TServerSocket.Create(nil);
+  UserSocket.OnClientConnect := SocketConnect;
+  UserSocket.OnClientDisconnect := SocketDisconnect;
+  UserSocket.OnClientError := SocketError;
+  UserSocket.OnClientRead := SocketRead;
+  LogTimer := TTimer.Create(nil);
+  LogTimer.Interval := 1000;
+  LogTimer.OnTimer := LogTimerTimer;
+
+  OutTimer := TTimer.Create(nil);
+  OutTimer.Interval := 1000;
+  OutTimer.OnTimer := OutTimerTimer;
+
+  ErrorSum := -1;
+  sLock := TCriticalSection.Create;
+  m_listRunGate := TList.Create;
+  m_listMapServerInfo := TStringList.Create;
+  LoadAbusiveList('Badid.txt');
+
+  HackCountQueryChr := 0;
+  HackCountNewChr := 0;
+  HackCountDelChr := 0;
+  HackCountSelChr := 0;
+
+  HackCountErrorPacket1 := 0;
+  HackCountErrorPacket2 := 0;
+  HackCountErrorPacket3 := 0;
+  HackCountErrorPacket4 := 0;
+  HackCountErrorPacket5 := 0;
+end;
+
+destructor TCSelChrGate.Destroy;
+begin
+  ClearList;
+  m_listRunGate.Free;
+  m_listMapServerInfo.Free;
+  sLock.Free;
+  inherited;
+end;
+
+function TCSelChrGate.LoadAddrTables: Boolean;
+var
+  i, j, svindex: integer;
+  strlist: TStringList;
+  str, raddr, laddr, data, sport, map, maptitle, servernum: string;
+begin
+  Result := FALSE;
+  strlist := TStringList.Create;
+  FillChar(m_ServerConnInfo, sizeof(TServerConnInfo) * MAXPLAYSERVER, #0);
+  strlist.LoadFromFile('!serverinfo.txt');
+  for i := 0 to MAXPLAYSERVER - 1 do begin
+    if i >= strlist.Count then break;
+    str := strlist[i];
+    if str <> '' then begin
+      data := GetValidStr3(str, raddr, [' ', #9, ',']);
+      data := GetValidStr3(data, laddr, [' ', #9, ':']);
+      data := GetValidStr3(data, sport, [' ', #9, ',']);
+      m_ServerConnInfo[i].Remote := Trim(raddr);
+      m_ServerConnInfo[i].Addr[0] := Trim(laddr);
+      m_ServerConnInfo[i].Port[0] := Str_ToInt(sport, 0);
+      for j := 1 to 7 do begin  //連넣8역 by rainee
+        if data = '' then
+          Break;
+        data := GetValidStr3(data, laddr, [' ', #9, ':']);
+        data := GetValidStr3(data, sport, [' ', #9, ',']);
+        m_ServerConnInfo[i].Addr[j] := Trim(laddr);
+        m_ServerConnInfo[i].Port[j] := Str_ToInt(sport, 0);
+      end;
+    end;
+  end;
+
+  MapFile := g_Config.MF_FILEPATH + '\mapinfo.txt';
+  m_listMapServerInfo.Clear;
+
+  if FileExists(MapFile) then begin
+    strlist.Clear;
+    strlist.LoadFromFile(MapFile);
+    for i := 0 to strlist.Count - 1 do begin
+      str := strlist[i];
+      if str <> '' then begin
+        if str[1] = '[' then begin
+          str := ArrestStringEx(str, '[', ']', map);
+          maptitle := GetValidStr3(map, map, [' ', ',', #9]);
+          servernum := Trim(GetValidStr3(maptitle, maptitle, [' ', ',', #9]));
+          svindex := Str_ToInt(servernum, 0);
+          m_listMapServerInfo.AddObject(map, TObject(svindex));
+        end;
+      end;
+    end;
+    Result := TRUE;
+  end else
+    MainOutMessage(CERR, 'Unable to find map file.');
+  strlist.Free;
+end;
+
+function TCSelChrGate.GetServerFromMap(map: string): integer;
+var
+  i: integer;
+begin
+  Result := 0;
+  for i := 0 to m_listMapServerInfo.Count - 1 do begin
+    if map = m_listMapServerInfo[i] then begin
+      Result := integer(m_listMapServerInfo.Objects[i]);
+      break;
+    end;
+  end;
+end;
+
+function TCSelChrGate.GetRunServerAddr(remote: string): string;
+var
+  i, j: integer;
+begin
+  Result := '';
+  for i := 0 to MAXPLAYSERVER - 1 do begin
+    if m_ServerConnInfo[i].remote = remote then begin
+      for j := 0 to 7 do begin
+        if m_ServerConnInfo[i].Addr[j] = '' then Break;
+      end;
+      Result := m_ServerConnInfo[i].Addr[Random(j)];
+      break;
+    end;
+  end;
+end;
+
+function TCSelChrGate.GetRunServerPort(remote: string): integer;
+var
+  i, j: integer;
+begin
+  Result := 0;
+  for i := 0 to MAXPLAYSERVER - 1 do begin
+    if m_ServerConnInfo[i].remote = remote then begin
+      for j := 0 to 7 do begin
+        if m_ServerConnInfo[i].Addr[j] = '' then Break;
+      end;
+      Result := m_ServerConnInfo[i].Port[Random(j)];
+      break;
+    end;
+  end;
+end;
+
+procedure TCSelChrGate.SendResponse(pu: PTUserInfo; msg, Recog, param, tag, series: integer; body: string);
+var
+  dmsg: TDefaultMessage;
+begin
+  dmsg := MakeDefaultMsg(msg, Recog, param, tag, series);
+  SendGateSocket(pu.CSocket, pu.UserHandle, EncodeMessage(dmsg) + EncodeString(body));
+end;
+
+procedure TCSelChrGate.ClearList;
+var
+  i, j: integer;
+  ginfo: PTGateInfo;
+begin
+  for i := m_listRunGate.Count - 1 downto 0 do begin
+    ginfo := PTGateInfo(m_listRunGate[i]);
+    for j := ginfo.listUser.Count - 1 downto 0 do
+      Dispose(PTUserInfo(ginfo.listUser[j]));
+    Dispose(ginfo);
+  end;
+  m_listRunGate.Clear;
+  m_listMapServerInfo.Clear;
+  FillChar(m_ServerConnInfo, sizeof(TServerConnInfo) * MAXPLAYSERVER, #0);
+end;
+
+procedure TCSelChrGate.OutTimerTimer(Sender: TObject);
+var
+  i: integer;
+  puid: PTUserIdInfo;
+begin
+  i := 0;
+  while TRUE do begin
+    if i >= UserIdList.Count then break;
+    puid := PTUserIdInfo(UserIdList[i]);
+      {if puid.DoDeath then begin
+         if GetCurrentTime - puid.DeathStart > 5 * 1000 then begin
+            Dispose (PTUserIdInfo (UserIdList[i]));
+            UserIdList.Delete (i);
+            continue;
+         end;
+      end;}
+    if not puid.RunConnect then begin
+      if puid.Connecting then begin  //서버 접속 지연/실패
+        if GetCurrentTime - puid.OpenTime > 20 * 1000 then begin
+          Dispose(PTUserIdInfo(UserIdList[i]));
+          UserIdList.Delete(i);
+          continue;
+        end;
+      end
+      else begin  //비정상적 종료
+        if GetCurrentTime - puid.OpenTime > 2 * 60 * 1000 then begin
+          Dispose(PTUserIdInfo(UserIdList[i]));
+          UserIdList.Delete(i);
+          continue;
+        end;
+      end;
+    end
+    else if GetCurrentTime - puid.OpenTime > 60 * 40 * 1000 then begin
+      Dispose(PTUserIdInfo(UserIdList[i]));
+      UserIdList.Delete(i);
+      continue;
+    end;
+    Inc(i);
+  end;
+end;
+
+procedure TCSelChrGate.SocketConnect(Sender: TObject; Socket: TCustomWinSocket);
+var
+  ginfo: PTGateInfo;
+  szLogMsg: string;
+begin
+  new(ginfo);
+  with ginfo^ do begin
+    GateSocket := Socket;
+    RemoteAddr := Socket.RemoteAddress;
+    SocData := '';
+    listUser := TList.Create;
+    ConnCheckTime := GetCurrentTime;
+  end;
+  try
+    sLock.Enter;
+    m_listRunGate.Add(ginfo);
+  finally
+    sLock.Leave;
+  end;
+  szLogMsg := Format('[%s:%d] SelGate connected.', [Socket.RemoteAddress, Socket.RemotePort]);
+  MainOutMessage(0, szLogMsg);
+  AddLog(szLogMsg);
+end;
+
+procedure TCSelChrGate.SocketDisconnect(Sender: TObject; Socket: TCustomWinSocket);
+var
+  i, j: integer;
+  ginfo: PTGateInfo;
+  szLogMsg: string;
+begin
+  try
+    sLock.Enter;
+    for i := 0 to m_listRunGate.Count - 1 do begin
+      if PTGateInfo(m_listRunGate[i]).GateSocket = Socket then begin
+        szLogMsg := Format('[%s:%d] SelGate disconnected.', [Socket.RemoteAddress, Socket.RemotePort]);
+        MainOutMessage(CERR, szLogMsg);
+        AddLog(szLogMsg);
+        ginfo := PTGateInfo(m_listRunGate[i]);
+        for j := 0 to ginfo.listUser.Count - 1 do begin
+          Dispose(PTUserInfo(ginfo.listUser[j]));
+        end;
+        Dispose(ginfo);
+        m_listRunGate.Delete(i);
+        break;
+      end;
+    end;
+  finally
+    sLock.Leave;
+  end;
+end;
+
+procedure TCSelChrGate.SocketError(Sender: TObject; Socket:
+  TCustomWinSocket; ErrorEvent: TErrorEvent; var ErrorCode: Integer);
+begin
+  ErrorCode := 0;
+  Socket.Close;
+end;
+
+procedure TCSelChrGate.SocketRead(Sender: TObject; Socket: TCustomWinSocket);
+var
+  i: integer;
+  pg: PTGateInfo;
+begin
+  try
+    sLock.Enter;
+    for i := 0 to m_listRunGate.Count - 1 do begin
+      if PTGateInfo(m_listRunGate[i]).GateSocket = Socket then begin
+        pg := PTGateInfo(m_listRunGate[i]);
+        WorkGate := pg;
+        pg.SocData := pg.SocData + Socket.ReceiveText;
+        if Length(pg.SocData) < 8192 then begin
+          if pos('$', pg.SocData) >= 1 then begin  //%....$
+            DecodeSocData(pg);
+          end;
+        end
+        else begin
+          pg.SocData := '';
+        end;
+        break;
+      end;
+    end;
+  finally
+    sLock.Leave;
+  end;
+end;
+
+function TCSelChrGate.UserCount: integer;
+var
+  i, count: integer;
+begin
+  count := 0;
+  try
+    sLock.Enter;
+    for i := 0 to m_listRunGate.Count - 1 do begin
+      count := count + PTGateInfo(m_listRunGate[i]).listUser.Count;
+    end;
+  finally
+    sLock.Leave;
+  end;
+  Result := count;
+end;
+
+procedure TCSelChrGate.SendGateSocket(asocket: TCustomWinSocket; shandle, socstr: string);
+begin
+  asocket.SendText('%' + shandle + '/#' + socstr + '!$');
+end;
+
+//KeepAlive  Syntax> %--$
+procedure TCSelChrGate.ReceiveCheckCode(asocket: TCustomWinSocket);
+begin
+  if asocket.Connected then begin
+    asocket.SendText('%++$');
+  end;
+end;
+
+//User Connection  Syntax> %O[handle]/[addr]$
+procedure TCSelChrGate.ReceiveOpenUser(uhandle, usraddr: string; pg: PTGateInfo);
+var
+  i: integer;
+  puinfo: PTUserInfo;
+begin
+  for i := 0 to pg.listUser.Count - 1 do begin
+    puinfo := PTUserInfo(pg.listUser[i]);
+    if puinfo.UserHandle = uhandle then begin
+      puinfo.UserAddr := usraddr;
+      puinfo.UserId := '';
+      puinfo.Certification := 0;
+      puinfo.UserSocData := '';
+      puinfo.ConnectTime := GetTickCount;
+      puinfo.LatestCmdTime := GetTickCount;
+      puinfo.SelChrFinished := FALSE;
+      puinfo.QueryChrFinished := FALSE;
+      exit;
+    end;
+  end;
+  new(puinfo);
+  with puinfo^ do begin
+    UserId := '';
+    UserAddr := usraddr;
+    UserHandle := uhandle;
+    Certification := 0;    // not certificated..
+    CSocket := pg.GateSocket;
+    UserSocData := '';
+    ConnectTime := GetTickCount;
+    LatestCmdTime := GetTickCount;
+    SelChrFinished := FALSE;
+    QueryChrFinished := FALSE;
+  end;
+  pg.listUser.Add(puinfo);
+end;
+
+//User Disconnection  Syntax> %X[handle]$
+procedure TCSelChrGate.ReceiveCloseUser(uhandle: string; pg: PTGateInfo);
+var
+  i: integer;
+  pu: PTUserInfo;
+begin
+  for i := 0 to pg.listUser.Count - 1 do begin
+    if PTUserInfo(pg.listUser[i]).UserHandle = uhandle then begin
+      pu := PTUserInfo(pg.listUser[i]);
+         //강제 종료이면 Certification 승인 해제
+      if not CLoginServer.IsSelectedAdmision(pu.Certification) then begin
+            //Select되지 않은 강제 종료
+        CLoginServer.SendIDSMsg(ISM_USERCLOSED, pu.UserId + '/' + IntToStr(pu.Certification));
+        CLoginServer.RemoveAdmission(pu.Userid, pu.Certification);
+      end;
+      Dispose(PTUserInfo(pg.listUser[i]));
+      pg.listUser.Delete(i);
+      break;
+    end;
+  end;
+end;
+
+//Data Packet  Syntax> %A[handle]/#?[DEFBLOCK][BODY]!$
+procedure TCSelChrGate.ProcessUserData(pu: PTUserInfo);
+var
+  errcount: integer;
+  msg: string;
+begin
+  errcount := 0;
+  while pu.UserSocData <> '' do begin  // #FDSAFDJSAFDSA!
+    if CharCount(pu.UserSocData, '!') <= 0 then break;
+    pu.UserSocData := ArrestStringEx(pu.UserSocData, '#', '!', msg);
+    if msg <> '' then begin
+      msg := Copy(msg, 2, Length(msg) - 1);
+      if Length(msg) >= DEFBLOCKSIZE then begin
+        if Length(msg) > DEFBLOCKSIZE + 50 then begin
+          Inc(HackCountErrorPacket5);
+        end
+        else begin
+          DecodeMessages(msg, pu);
+        end;
+      end else
+        Inc(HackCountErrorPacket2);
+    end
+    else begin
+      Inc(HackCountErrorPacket1);
+      if errcount >= 1 then begin
+        pu.UserSocData := '';
+      end;
+      Inc(errcount);
+      //break;
+    end;
+  end;
+end;
+
+procedure TCSelChrGate.DecodeSocData(pg: PTGateInfo);
+var
+  str, data, shandle, addr: string;
+  tag: char;
+  i, errcount: integer;
+  pu: PTUserInfo;
+begin
+{$IFDEF DEBUG}
+//   MainOutMessage( CRECV, Format('[CM/%d] %s', [Length(pg.SocData), pg.SocData]) );
+{$ENDIF}
+  try
+    errcount := 0;
+    while TRUE do begin
+      if pos('$', pg.SocData) <= 0 then break;
+      pg.SocData := ArrestStringEx(pg.SocData, '%', '$', data);
+      if data <> '' then begin
+        tag := data[1];
+        data := Copy(data, 2, Length(data) - 1);
+        case word(tag) of
+          word('-'):
+            begin
+              ReceiveCheckCode(pg.GateSocket);
+              pg.ConnCheckTime := GetCurrentTime;
+            end;
+          word('O'):
+            begin
+              data := GetValidStr3(data, str, ['/']);
+              //str : user handle
+              //data : user remote address
+              shandle := str;
+              addr := data;
+              ReceiveOpenUser(shandle, addr, pg);
+            end;
+          word('X'):
+            begin
+              shandle := data;
+              ReceiveCloseUser(shandle, pg);
+            end;
+          word('A'):
+            begin
+              data := GetValidStr3(data, shandle, ['/']);
+              for i := 0 to pg.listUser.Count - 1 do begin
+                if PTUserInfo(pg.listUser[i]).UserHandle = shandle then begin
+                  pu := PTUserInfo(pg.listUser[i]);
+                  pu.UserSocData := pu.UserSocData + data;
+                  if pos('!', pu.UserSocData) >= 1 then begin
+                    ProcessUserData(pu);
+                  end;
+                  if Length(pu.UserSocData) > 512 then
+                    pu.UserSocData := '';
+                  break;
+                end;
+              end;
+            end;
+        else
+          begin
+            if errcount >= 1 then
+              pg.SocData := '';
+            Inc(HackCountErrorPacket4);
+            Inc(errcount);
+          end;
+        end;
+      end
+      else begin
+        if errcount >= 1 then
+          pg.SocData := '';
+        Inc(HackCountErrorPacket4);
+        Inc(errcount);
+      end;
+    end;
+  except
+  end;
+end;
+
+// CM_QUERYCHR [BODY] -> uid/certstr
+function TCSelChrGate.GetQueryChr(body: string; pu: PTUserInfo): Boolean;
+var
+  nCnt, nCert: integer;
+  sqlfail: Boolean;
+  szID, szCert, szQuery: string;
+  sdata, uname, sjob, sface, slevel: string;
+  sex: byte;
+  pRec: TADOQuery;
+begin
+  Result := FALSE;
+
+  nCnt := 0;
+  sqlfail := false;
+
+  if (pu.QueryChrFinished) //and (GetTickCount - pu.LatestCmdTime <= 200)
+    then begin
+    Inc(HackCountQueryChr);
+    Exit;
+  end;
+
+  szCert := GetValidStr3(DecodeString(body), szID, ['/']);
+  nCert := Str_ToInt(szCert, -2);  // default value
+  if CLoginServer.GetAdmission(szID, pu.UserAddr, nCert) then begin
+    CLoginServer.ClearSelectedAdmission(nCert); //재접속인경우 <캐릭선태했음> 초기화
+
+    pu.UserId := szID;
+    pu.Certification := nCert;
+    pu.QueryChrFinished := FALSE;
+
+    if g_FDBSQL.Connected then begin
+      szQuery := Format('SELECT TOP 2 FLD_CHARACTER, FLD_JOB, FLD_HAIR, ' +
+                        'FLD_LEVEL, FLD_SEX FROM TBL_CHARACTER ' +
+                        'WHERE FLD_USERID=N''%s'' AND FLD_DELETED=0 ORDER BY FLD_UPDATEDATETIME DESC',
+                        [szID]);
+      //SetLog(0, szQuery);
+      sqlfail := FALSE;
+
+      g_FDBSQL.UseDB(tGame);
+      pRec := g_FDBSQL.OpenQuery(szQuery);
+      if (pRec <> nil) and (pRec.RecordCount > 0) then begin
+        pRec.First;
+        while not pRec.EOF do begin
+          uname := Trim(pRec.FieldByName('FLD_CHARACTER').AsString);
+          sjob := Trim(pRec.FieldByName('FLD_JOB').AsString);
+          sface := Trim(pRec.FieldByName('FLD_HAIR').AsString);
+          slevel := Trim(pRec.FieldByName('FLD_LEVEL').AsString);
+          sex := pRec.FieldByName('FLD_SEX').AsInteger;
+          sdata := sdata + uname + '/' + sjob + '/' + sface + '/' + slevel + '/'
+            + IntToStr(sex) + '/';
+          Inc(nCnt);
+          pRec.Next;
+        end;
+        pRec.Close;
+      end else
+        sqlfail := TRUE;
+
+      if sqlfail then g_FDBSQL.ReConnect;
+      //else g_FDBSQL.DisConnect;
+
+      SendResponse(pu, SM_QUERYCHR, nCnt, 0, 0, 1, sdata);  {OK}
+      pu.QueryChrFinished := TRUE;
+      Result := TRUE;
+    end;
+  end
+  else begin
+    SendResponse(pu, SM_QUERYCHR, 0, 0, 0, 1);  {FAIL}
+    ReceiveCloseUser(pu.UserHandle, WorkGate);
+  end;
+end;
+
+// CM_NEWCHR [BODY] -> uid/uname/hair/job/sex/
+procedure TCSelChrGate.GetNewChr(body: string; pu: PTUserInfo);
+var
+  str, szID, szName, szHair, szJob, szSex: String;
+  i, error, hair_, sex_, job_: integer;
+  szQuery, szNewChrQuery: string;
+  pRec: TADOQuery;
+  tCharVal: TCHARACTERFIELDS;
+  tAbilVal: TABILITYFIELDS;
+  tQuestVal: TQUESTFIELDS;
+  CharInfo: TCHARINFO;
+begin
+//   if GetTickCount - pu.LatestCmdTime <= 200 then begin
+//      Inc (HackCountNewChr);
+//		  Exit;
+//   end;
+
+  if not CLoginServer.GetAdmission(pu.UserId, pu.UserAddr, pu.Certification) then begin
+    SendOutofConnection(pu);
+    Exit;
+  end;
+
+  str := DecodeString(AnsiString(body));
+  str := GetValidStr3(str, szID, ['/']);
+  str := GetValidStr3(str, szName, ['/']);
+  str := GetValidStr3(str, szHair, ['/']);
+  str := GetValidStr3(str, szJob, ['/']);
+  str := GetValidStr3(str, szSex, ['/']);
+
+  if Length(szID) > 20 then begin
+    MainOutMessage(CERR, Format('[LONG-QUERY MESSAGE!!!20] ID : %s', [szID]));
+    AddLog(szID);
+  end;
+
+  if Length(szName) > 20 then begin
+    MainOutMessage(CERR, Format('[LONG-QUERY MESSAGE!!!20] NAME : %s', [szName]));
+    AddLog(szName);
+  end;
+
+  if Length(szHair) > 3 then begin
+    MainOutMessage(CERR, Format('[LONG-QUERY MESSAGE!!!20] HAIR : %s', [szHair]));
+    AddLog(szHair);
+  end;
+
+  if Length(szJob) > 3 then begin
+    MainOutMessage(CERR, Format('[LONG-QUERY MESSAGE!!!20] JOB : %s', [szJob]));
+    AddLog(szJob);
+  end;
+
+  if Length(szSex) > 3 then begin
+    MainOutMessage(CERR, Format('[LONG-QUERY MESSAGE!!!20] GENDER : %s', [szSex]));
+  end;
+
+  error := -1;
+
+  szName := Trim(szName);
+  if Length(AnsiString(szName)) < 3 then error := 0;
+
+
+//  if BoKoreaVersion then begin
+//    if not CheckValidUserName(szName) then error := 0;
+//  end;
+
+//  if (Length(szID) < 3) or (Length(szID) >= 20) then error := 0;
+
+  hair_ := Str_ToInt(szHair, -1);
+  sex_ := Str_ToInt(szSex, -1);
+  job_ := Str_ToInt(szJob, -1);
+
+  if not ((sex_ = 0) or (sex_ = 1)) then error := 0;
+  if not ((job_ = 0) or (job_ = 1) or (job_ = 2)) then error := 0;
+  if not ((hair_ > 0) and (hair_ <= 5)) then error := 0;
+
+  ChangeAbusiveText(szName); //쇱꿴훙膠츰角뤠벵唐팁귁俚륜
+
+  for i := 1 to Length(szName) do begin
+    if (szName[i] = ' ') or
+      (szName[i] = '/') or (szName[i] = '@') or (szName[i] = '?') or
+      (szName[i] = '''') or (szName[i] = '"') or (szName[i] = '\') or
+      (szName[i] = '.') or (szName[i] = ',') or (szName[i] = ':') or
+      (szName[i] = ';') or (szName[i] = '`') or (szName[i] = '~') or
+      (szName[i] = '!') or (szName[i] = '#') or (szName[i] = '$') or
+      (szName[i] = '%') or (szName[i] = '^') or (szName[i] = '&') or
+      (szName[i] = '*') or (szName[i] = '(') or (szName[i] = ')') or
+      (szName[i] = '-') or (szName[i] = '_') or (szName[i] = '+') or
+      (szName[i] = '=') or (szName[i] = '|') or (szName[i] = '[') or
+      (szName[i] = '{') or (szName[i] = ']') or (szName[i] = '}')
+    then
+      error := 5; //invalid name
+  end;
+
+  if (error = -1) then begin
+		(* TO PDS:
+		// Update TBL_CHAR_INFO in Account Database
+
+		if g_FDBSQL.Connected then begin
+			// 케릭터 이름 변경등록이 되어있는 케릭이지 본다.
+			szQuery := Format('SELECT New_Chr FROM TBL_CHANGECHR WHERE New_Chr=''%s''', [szName] );
+      g_FDBSQL.UseDB (tAccount);
+			pRec := g_FDBSQL.OpenQuery (szQuery);
+
+			if ( pRec <> nil ) and ( pRec.RecordCount > 0 ) then begin
+				error := 2;
+				pRec.Close;
+			end;
+			pRec := nil;
+		end;
+		*)
+		if ( error = -1 ) then begin
+
+			if g_FDBSQL.Connected then begin
+				// 케릭터가 있는지 검사해보자
+				szQuery := Format('SELECT FLD_CHARACTER FROM TBL_CHARACTER WHERE FLD_CHARACTER=N''%s''', [szName] );
+        //SetLog(0, szQuery);
+        g_FDBSQL.UseDB (tGame);
+				pRec := g_FDBSQL.OpenQuery (szQuery);
+
+        if ( pRec <> nil ) then begin
+          if ( pRec.RecordCount > 0 ) then begin
+            pRec.Close;
+            error := 2;
+          end
+          else // 케릭터가 없으니까 새로 만든다.
+          begin
+            pRec.Close;
+
+            ZeroMemory(@tCharVal, sizeof(tCharVal));
+            ZeroMemory(@tAbilVal, sizeof(tAbilVal));
+            ZeroMemory(@tQuestVal, sizeof(tQuestVal));
+
+            StrPCopy(tCharVal.fld_userid,	szID);
+            StrPCopy(tCharVal.fld_character, szName);
+            tCharVal.fld_hair	:= Str_ToInt(szHair, 0);
+            tCharVal.fld_sex	:= Str_ToInt(szSex, 0);
+            tCharVal.fld_job	:= Str_ToInt(szJob, 0);
+
+            szNewChrQuery := Format('INSERT TBL_CHARACTER ( FLD_CHARACTER, FLD_USERID, FLD_DELETED,' +
+                                    'FLD_UPDATEDATETIME, FLD_DBVERSION, FLD_MAPNAME,' +
+                                    'FLD_CX, FLD_CY, FLD_DIR, FLD_HAIR,' +
+                                    'FLD_HAIRCOLORR, FLD_HAIRCOLORG, FLD_HAIRCOLORB,' +
+                                    'FLD_SEX, FLD_JOB, FLD_LEVEL, FLD_GOLD, FLD_POTCASH, FLD_GAMEPOINT, ' +
+                                    'FLD_HOMEMAP, FLD_HOMEX, FLD_HOMEY, FLD_PKPOINT,' +
+                                    'FLD_ALLOWPARTY, FLD_FREEGULITYCOUNT, FLD_ATTACKMODE,' +
+                                    'FLD_FIGHTZONEDIE, FLD_BODYLUCK, FLD_INCHEALTH,' +
+                                    'FLD_INCSPELL, FLD_INCHEALING, FLD_BONUSAPPLY,' +
+                                    'FLD_BONUSPOINT, FLD_HUNGRYSTATE, FLD_TESTSERVERRESETCOUNT,' +
+                                    'FLD_CGHUSETIME, FLD_ENABLEGRECALL, FLD_BYTES_1, FLD_HORSERACE, FLD_SECONDS, FLD_MAKEDATE) VALUES' +
+                                    '(N''%s'', N''%s'', 0, GETDATE(), 0, '''', 0, 0, 0, %d,' +
+                                    '0, 0, 0, %d, %d, 0, 0, 0, 0,' +
+                                    ''''', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,' +
+                                    '0, 0, 0, 0, 0, 0, 0, 0, GETDATE())',
+                        [tCharVal.fld_character, tCharVal.fld_userid, tCharVal.fld_hair, tCharVal.fld_sex, tCharVal.fld_job]);
+            //SetLog(0, szNewChrQuery);
+
+            if ( g_FDBSQL.ExecuteSQL(szNewChrQuery) > 0 ) then begin
+              error := 1;
+            end;
+
+            // TO PDS: REMOVE ABILITYTABLE
+            (*
+            StrPCopy(tAbilVal.fld_character, szName);
+
+            if (g_FDBSQL.UpdateRecord(@__ABILITYTABLE, @tAbilVal, true)) then
+              error = 1;
+            *)
+
+            StrPCopy (tQuestVal.fld_character, szName);
+
+            if (g_FDBSQL.UpdateRecord(@__QUESTTABLE, @tQuestVal, true)) then
+              error := 1;
+          end;
+        end
+        else
+        begin
+          pRec.Close;
+          error := 2;
+        end;
+
+        pRec := nil;
+			end;
+
+		 	(* To PDS: 필요없음
+			if ( error = 1 ) then begin
+				// Update TBL_CHAR_INFO in Account Database
+
+				if ( g_FDBSQL.Connected ) then begin
+					StrPCopy(CharInfo.fld_userid, szID);
+					StrPCopy(CharInfo.fld_character,	szName);
+					StrPCopy(CharInfo.fld_servername, ServerName);
+
+					CharInfo.fld_job := StrToInt(szJob);
+					CharInfo.fld_sex := StrToInt(szSex);
+
+          g_FDBSQL.UseDB (tAccount);
+					if (g_FDBSQL.UpdateRecord(@__CHAR_INFOTABLE, @CharInfo, true)) then
+						error := 1;
+				end;
+			end;
+		 	*)
+		end;
+	end;
+
+	if (error = 1) then
+		SendResponse( pu, SM_NEWCHR_SUCCESS, error, 0, 0, 0 )
+	else
+		SendResponse( pu, SM_NEWCHR_FAIL, error, 0, 0, 0 );
+
+	pu.QueryChrFinished := FALSE;
+end;
+
+procedure TCSelChrGate.GetDelChr(body: string; pu: PTUserInfo);
+var
+  szName, szQuery: string;
+begin
+//   if GetTickCount - pu.LatestCmdTime <= 200 then begin
+//      Inc (HackCountDelChr);
+//		  Exit;
+//   end;
+
+  if not CLoginServer.GetAdmission(pu.UserId, pu.UserAddr, pu.Certification) then begin
+    SendOutofConnection(pu);
+    Exit;
+  end;
+
+  szName := DecodeString(body);
+
+  if g_FDBSQL.Connected then begin
+    szQuery := Format('UPDATE TBL_CHARACTER SET FLD_DELETED=1 WHERE FLD_CHARACTER=N''%s''', [szName]);
+    //SetLog(0, szQuery);
+    g_FDBSQL.UseDB(tGame);
+    if g_FDBSQL.ExeCuteSQL(szQuery) > 0 then begin
+         // Update TBL_CHAR_INFO in Account Database
+         (*
+         if g_FDBSQL.Connected then begin
+            g_FDBSQL.UseDB (tAccount);
+            szQuery := Format('UPDATE TBL_CHAR_INFO SET FLD_DELETED=1 WHERE FLD_CHARACTER=''%s''', [szName]);  SetLog(0, szQuery);
+            g_FDBSQL.ExeCuteSQL(szQuery);
+         end;
+         *)
+      SendResponse(pu, SM_DELCHR_SUCCESS, 1, 0, 0, 0);
+      pu.QueryChrFinished := FALSE;
+      Exit;
+    end;
+  end;
+
+  SendResponse(pu, SM_DELCHR_FAIL, 0, 0, 0, 0);
+  pu.QueryChrFinished := FALSE;
+end;
+
+// CM_SELCHR [BODY] -> uid/uname
+function TCSelChrGate.GetSelChr(body: string; pu: PTUserInfo): Boolean;
+var
+  szID, szName, szQuery, smap, szData: string;
+  nServerIndex: integer;
+  fOK: Boolean;
+  pRec: TADOQuery;
+begin
+  Result := FALSE;
+  if (pu.SelChrFinished) then begin
+    Inc(HackCountSelChr);
+    Exit;
+  end;
+
+  if not CLoginServer.GetAdmission(pu.UserId, pu.UserAddr, pu.Certification) then begin
+    SendOutofConnection(pu);
+    Exit;
+  end;
+
+  szName := GetValidStr3(DecodeString(body), szID, ['/']);
+
+  if Length(szID) > 20 then begin
+    MainOutMessage(CERR, Format('[LONG-QUERY MESSAGE!!!22] ID : %s"', [szID]));
+    AddLog(szID);
+  end;
+
+  fOK := FALSE;
+
+  if g_FDBSQL.Connected then begin
+    szQuery := Format('SELECT FLD_MAPNAME FROM TBL_CHARACTER WHERE FLD_CHARACTER=N''%s''', [szName]);
+      //SetLog(0, szQuery);
+    g_FDBSQL.UseDB(tGame);
+    pRec := g_FDBSQL.OpenQuery(szQuery);
+    if (pRec <> nil) and (pRec.RecordCount > 0) then begin
+      smap := Trim(pRec.FieldByName('FLD_MAPNAME').AsString);
+      fOK := TRUE;
+      pRec.Close;
+    end;
+  end;
+
+  if fOK then begin
+    nServerIndex := GetServerFromMap(smap);  //멀티서버인경우 접속포트+1씩 된다.
+    //Admission정보에 선택되었음을 표시, 그래야 socket.close되었을때 강제종료로 간주하지 않음
+    CLoginServer.CheckSelectedAdmission(pu.Certification); // (*) for save selected character.
+    szData := Format('%s/%d', [GetRunServerAddr(WorkGate.RemoteAddr), GetRunServerPort(WorkGate.RemoteAddr) + nServerIndex]);
+{$IFDEF DEBUG}
+    MainOutMessage(0, szData);
+{$ENDIF}
+    SendResponse(pu, SM_STARTPLAY, 0, 0, 0, 0, szData);
+  end else
+    SendResponse(pu, SM_STARTFAIL, 0, 0, 0, 0);
+
+   pu.SelChrFinished := TRUE;
+   Result := TRUE;
+end;
+
+procedure TCSelChrGate.SendOutofConnection(pu: PTUserInfo);
+begin
+  Def := MakeDefaultMsg(SM_OUTOFCONNECTION, 0, 0, 0, 0);  {Fail}
+  SendGateSocket(pu.CSocket, pu.UserHandle, EncodeMessage(Def));
+end;
+
+function TCSelChrGate.DecodeMessages(data: string; pu: PTUserInfo): Boolean;
+var
+  msg: TDefaultMessage;
+  head, body: string;
+begin
+  Result := FALSE;
+  head := Copy(data, 1, DEFBLOCKSIZE);
+  body := Copy(data, DEFBLOCKSIZE + 1, Length(data) - DEFBLOCKSIZE);
+  msg := DecodeMessage(head);
+
+  case msg.Ident of
+    CM_QUERYCHR:   //ok
+      begin
+        if (not pu.QueryChrFinished) or (GetTickCount - pu.LatestCmdTime > 200) then begin
+          pu.LatestCmdTime := GetTickCount;
+          if GetQueryChr(body, pu) then
+            pu.QueryChrFinished := TRUE;
+        end
+        else begin
+          Inc(HackCountQueryChr);
+          if ViewHackMsg then
+            AddLog('[Hacker Attack] _QUERYCHR ' + pu.UserId + '/' + pu.UserAddr);
+        end;
+      end;
+    CM_NEWCHR:
+      begin
+        if GetTickCount - pu.LatestCmdTime > 1000 then begin
+          pu.LatestCmdTime := GetTickCount;
+          if (pu.UserId <> '') and CLoginServer.GetAdmission(pu.UserId, pu.UserAddr,
+            pu.Certification) then begin
+            GetNewChr(body, pu);
+            pu.QueryChrFinished := FALSE;
+          end
+          else
+            SendOutofConnection(pu);
+        end
+        else begin
+          Inc(HackCountNewChr);
+          if ViewHackMsg then
+            AddLog('[Hacker Attack] _NEWCHR ' + pu.UserId + '/' + pu.UserAddr);
+        end;
+      end;
+    CM_DELCHR:
+      begin
+        if GetTickCount - pu.LatestCmdTime > 1000 then begin
+          pu.LatestCmdTime := GetTickCount;
+          if (pu.UserId <> '') and CLoginServer.GetAdmission(pu.UserId, pu.UserAddr, pu.Certification) then begin
+            GetDelChr(body, pu);
+            pu.QueryChrFinished := FALSE;
+          end
+          else
+            SendOutofConnection(pu);
+        end
+        else begin
+          Inc(HackCountDelChr);
+          if ViewHackMsg then
+            AddLog('[Hacker Attack] _DELCHR ' + pu.UserId + '/' + pu.UserAddr);
+        end;
+      end;
+    CM_SELCHR:
+      begin
+        if not pu.SelChrFinished then begin
+          if (pu.UserId <> '') and CLoginServer.GetAdmission(pu.UserId, pu.UserAddr, pu.Certification) then begin
+            if GetSelChr(body, pu) then
+              pu.SelChrFinished := TRUE;
+          end else
+            SendOutofConnection(pu);
+        end
+        else begin
+          Inc(HackCountSelChr);
+          if ViewHackMsg then
+            AddLog('Double send _SELCHR ' + pu.UserId + '/' + pu.UserAddr);
+        end;
+      end;
+  else
+    begin
+      //pu.CSocket.Close;
+      Inc(HackCountErrorPacket3);
+    end;
+  end;
+end;
+
+procedure TCSelChrGate.LogTimerTimer(Sender: TObject);
+var
+  sum: integer;
+begin
+  sum := HackCountQueryChr +
+         HackCountNewChr +
+         HackCountDelChr +
+         HackCountSelChr +
+         HackCountErrorPacket1 +
+         HackCountErrorPacket2 +
+         HackCountErrorPacket3 +
+         HackCountErrorPacket4 +
+         HackCountErrorPacket5;
+
+  if ErrorSum <> sum then begin
+    ErrorSum := sum;
+    AddLog ('H-QyChr=' + IntToStr(HackCountQueryChr) + ' ' +
+            'H-NwChr=' + IntToStr(HackCountNewChr) + ' ' +
+            'H-DlChr=' + IntToStr(HackCountDelChr) + ' ' +
+            'Dubl-Sl=' + IntToStr(HackCountSelChr) + ' ' +
+            'P1=' + IntToStr(HackCountErrorPacket1) + ' ' +
+            'P2=' + IntToStr(HackCountErrorPacket2) + ' ' +
+            'P3=' + IntToStr(HackCountErrorPacket3) + ' ' +
+            'P4=' + IntToStr(HackCountErrorPacket4) + ' ' +
+            'P5=' + IntToStr(HackCountErrorPacket5)
+            );
+  end;
+end;
+
+end.

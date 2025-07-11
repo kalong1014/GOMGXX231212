@@ -1,0 +1,4052 @@
+unit PlayScn;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  AsphyreFactory, AbstractDevices, AbstractCanvas, AbstractTextures,
+  AsphyreTypes, AsphyreTextureFonts, AsphyreUtils, uGameEngine, uCommon,
+  IntroScn, Grobal2, CliUtil, HUtil32, DWinCtl, Actor, HerbActor, AxeMon,
+  SoundUtil, ClEvent, Wil, StdCtrls, clFunc, magiceff, extctrls;
+
+const
+  LONGHEIGHT_IMAGE = 35;
+  FLASHBASE = 410;
+//  AAX = 16;
+  SOFFX = 0;
+  SOFFY = 0;
+  LMX = 30;
+  LMY = 26;
+  MAXLIGHT = 5;
+  HEALTHBAR_BLACK = 0;
+  HEALTHBAR_RED = 1;
+  HEALTHBAR_BLUE = 10;
+  LightFiles: array[0..MAXLIGHT] of string = (
+    'Data\lig0a.dat',
+    'Data\lig0b.dat',
+    'Data\lig0c.dat',
+    'Data\lig0d.dat',
+    'Data\lig0e.dat',
+    'Data\lig0f.dat'
+  );
+  LightSizes: array[0..MAXLIGHT] of integer = (
+    34496,
+    161280,
+    327360,
+    405920,
+    542976,
+    713632
+  );
+  LightMask0: array[0..2, 0..2] of shortint = (
+    (0, 1, 0),
+    (1, 3, 1),
+    (0, 1, 0)
+  );
+  LightMask1: array[0..4, 0..4] of shortint = (
+    (0, 1, 1, 1, 0),
+    (1, 1, 3, 1, 1),
+    (1, 3, 4, 3, 1),
+    (1, 1, 3, 1, 1),
+    (0, 1, 2, 1, 0)
+  );
+  LightMask2: array[0..8, 0..8] of shortint = (
+    (0, 0, 0, 1, 1, 1, 0, 0, 0),
+    (0, 0, 1, 2, 3, 2, 1, 0, 0),
+    (0, 1, 2, 3, 4, 3, 2, 1, 0),
+    (1, 2, 3, 4, 4, 4, 3, 2, 1),
+    (1, 3, 4, 4, 4, 4, 4, 3, 1),
+    (1, 2, 3, 4, 4, 4, 3, 2, 1),
+    (0, 1, 2, 3, 4, 3, 2, 1, 0),
+    (0, 0, 1, 2, 3, 2, 1, 0, 0),
+    (0, 0, 0, 1, 1, 1, 0, 0, 0)
+  );
+  LightMask3: array[0..10, 0..10] of shortint = (
+    (0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0),
+    (0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0),
+    (0, 0, 1, 2, 3, 3, 3, 2, 1, 0, 0),
+    (0, 1, 2, 3, 4, 4, 4, 3, 2, 1, 0),
+    (1, 2, 3, 4, 4, 4, 4, 4, 3, 2, 1),
+    (2, 3, 4, 4, 4, 4, 4, 4, 4, 3, 2),
+    (1, 2, 3, 4, 4, 4, 4, 4, 3, 2, 1),
+    (0, 1, 2, 3, 4, 4, 4, 3, 2, 1, 0),
+    (0, 0, 1, 2, 3, 3, 3, 2, 1, 0, 0),
+    (0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0),
+    (0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0)
+  );
+  LightMask4: array[0..14, 0..14] of shortint = (
+    (0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0),
+    (0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0),
+    (0, 0, 0, 0, 1, 1, 2, 2, 2, 1, 1, 0, 0, 0, 0),
+    (0, 0, 0, 1, 1, 2, 3, 3, 3, 2, 1, 1, 0, 0, 0),
+    (0, 0, 1, 1, 2, 3, 4, 4, 4, 3, 2, 1, 1, 0, 0),
+    (0, 1, 1, 2, 3, 4, 4, 4, 4, 4, 3, 2, 1, 1, 0),
+    (1, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1, 1),
+    (1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1),
+    (1, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 3, 2, 1, 1),
+    (0, 1, 1, 2, 3, 4, 4, 4, 4, 4, 3, 2, 1, 1, 0),
+    (0, 0, 1, 1, 2, 3, 4, 4, 4, 3, 2, 1, 1, 0, 0),
+    (0, 0, 0, 1, 1, 2, 3, 3, 3, 2, 1, 1, 0, 0, 0),
+    (0, 0, 0, 0, 1, 1, 2, 2, 2, 1, 1, 0, 0, 0, 0),
+    (0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0)
+  );
+  LightMask5: array[0..16, 0..16] of shortint = (
+    (0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0),
+    (0, 0, 0, 0, 0, 1, 2, 4, 4, 4, 2, 1, 0, 0, 0, 0, 0),
+    (0, 0, 0, 0, 1, 2, 4, 4, 4, 4, 4, 2, 1, 0, 0, 0, 0),
+    (0, 0, 0, 1, 2, 4, 4, 4, 4, 4, 4, 4, 2, 1, 0, 0, 0),
+    (0, 0, 1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 1, 0, 0),
+    (0, 1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 1, 0),
+    (1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 1),
+    (1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 1),
+    (1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 1),
+    (0, 1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 1, 0),
+    (0, 0, 1, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 1, 0, 0),
+    (0, 0, 0, 1, 2, 4, 4, 4, 4, 4, 4, 4, 2, 1, 0, 0, 0),
+    (0, 0, 0, 0, 1, 2, 4, 4, 4, 4, 4, 2, 1, 0, 0, 0, 0),
+    (0, 0, 0, 0, 0, 1, 2, 4, 4, 4, 2, 1, 0, 0, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0),
+    (0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0)
+  );
+
+type
+  PShoftInt = ^ShortInt;
+
+  TLightEffect = record
+    Width: integer;
+    Height: integer;
+    PFog: Pbyte;
+  end;
+
+  TLightMapInfo = record
+    ShiftX: integer;
+    ShiftY: integer;
+    light: integer;
+    bright: integer;
+  end;
+
+  TPlayScene = class(TScene)
+    MapSurface: TAsphyreRenderTargetTexture;
+    ObjSurface: TAsphyreRenderTargetTexture;
+    LigSurface: TAsphyreRenderTargetTexture;
+  private
+//    FogScreen: array[0..g_FScreenHeight, 0..g_FScreenWidth] of byte;
+//    PFogScreen: PByte;
+//    FogWidth, FogHeight: integer;
+    Lights: array[0..MAXLIGHT] of TLightEffect;
+    MoveTime: longword;
+    MoveStepCount: integer;
+    AniTime: longword;
+    DefXX, DefYY: integer;
+    MainSoundTimer: TTimer;
+    MsgList: TList;
+    LightMap: array[0..LMX, 0..LMY] of TLightMapInfo;
+    procedure LoadFog;
+    procedure ClearLightMap;
+    procedure AddLight(x, y, shiftx, shifty, light: integer; nocheck: Boolean);
+    procedure UpdateBright(x, y, light: integer);
+    function CheckOverLight(x, y, light: integer): Boolean;
+    procedure ApplyLightMap;
+    procedure DrawLightEffect(lx, ly, bright: integer);
+    procedure SoundOnTimer(Sender: TObject);
+  public
+//    EdChat: TEdit;
+    ActorList, TempList: TList;
+    GroundEffectList: TList;
+    EffectList: TList;
+    FlyList: TList;
+    BlinkTime: Longword;
+    ViewBlink: Boolean;
+    constructor Create;
+    destructor Destroy; override;
+    procedure Initialize; override;
+    procedure Finalize; override;
+    procedure OpenScene; override;
+    procedure CloseScene; override;
+    procedure OpeningScene; override;
+    procedure DrawTileMap(Sender: TObject);
+    procedure DrawMiniMap(surface: TAsphyreCanvas; transparent: Boolean);
+    procedure RenderMiniMap(surface: TAsphyreCanvas);
+    procedure DrawGeneralMap(surface: TAsphyreCanvas; transparent: Boolean);
+    procedure PlayScene(MSurface: TAsphyreCanvas); override;
+    procedure BeginScene(Device: TAsphyreDevice; MSurface: TAsphyreCanvas); override;
+    procedure LightSurface(MSurface: TAsphyreCanvas);
+    function ButchAnimal(x, y: integer): TActor;
+    function FindActor(id: integer): TActor;
+    function FindActorXY(x, y: integer): TActor;
+    function IsValidActor(actor: TActor): Boolean;
+    function NewActor(chrid: integer; cx, cy, cdir: word; cfeature, cstate:
+      integer): TActor;
+    procedure ActorDied(actor: TObject);
+    procedure SetActorDrawLevel(actor: TObject; level: integer);
+    procedure ClearActors;
+    function DeleteActor(id: integer): TActor;
+    procedure DelActor(actor: TObject);
+    procedure SendMsg(ident, chrid, x, y, cdir, feature, state, param: integer;
+      str: string);
+    procedure NewMagic(aowner: TActor; magid, magnumb, cx, cy, tx, ty,
+      targetcode: integer; mtype: TMagicType; Recusion: Boolean; anitime:
+      integer; var bofly: Boolean);
+    procedure DelMagic(magid: integer);
+    function NewFlyObject(aowner: TActor; cx, cy, tx, ty, targetcode: integer;
+      mtype: TMagicType): TMagicEff;
+      //function  NewStaticMagic (aowner: TActor; tx, ty, targetcode, effnum: integer);
+    procedure EdChatKeyPress(Sender: TObject; var Key: Char);
+    procedure EdChatKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure ScreenXYfromMCXY(cx, cy: integer; var sx, sy: integer);
+    procedure CXYfromMouseXY(mx, my: integer; var ccx, ccy: integer);
+    procedure CXYfromMouseXYMid(mx, my: integer; var ccx, ccy: integer);
+    function GetCharacter(x, y, wantsel: integer; var nowsel: integer; liveonly:
+      Boolean): TActor;
+    function GetAttackFocusCharacter(x, y, wantsel: integer; var nowsel: integer;
+      liveonly: Boolean): TActor;
+    function IsSelectMyself(x, y: integer): Boolean;
+    function GetDropItems(x, y: integer; var inames: string): PTDropItem;
+    procedure GetDropItemsList(x, y: integer; var ItemList: TList);
+    procedure DropItemsShow(dsurface: TAsphyreCanvas);
+    function CanRun(sx, sy, ex, ey: integer): Boolean;
+    function CanRunEx(sx, sy, ex, ey: Integer): Boolean;
+    function CanWalk(mx, my: integer): Boolean;
+    function CanWalkEx(mx, my: Integer): Boolean;
+    function CanWalkEx2(mx, my: Integer): Boolean;
+    function CrashMan(mx, my: integer): Boolean; //»ç¶÷³¢¸® °ãÄ¡´Â°¡?
+    function CrashManEx(mx, my: Integer): Boolean;
+    function CrashManEx2(mx, my: Integer): Boolean;
+    function CanFly(mx, my: integer): Boolean;
+    procedure DrawGroupHealthBar(surface: TAsphyreCanvas);
+    procedure RefreshScene;
+    procedure CleanObjects;
+    procedure ProcessObecjts;
+  end;
+
+implementation
+
+uses
+  ClMain, FState, Relationship, MShare, Imm, NgShare;
+
+constructor TPlayScene.Create;
+begin
+  MapSurface := nil;
+  ObjSurface := nil;
+  LigSurface := nil;
+
+  MsgList := TList.Create;
+  ActorList := TList.Create;
+  TempList := TList.Create;
+  GroundEffectList := TList.Create;
+  EffectList := TList.Create;
+  FlyList := TList.Create;
+  BlinkTime := GetTickCount;
+  ViewBlink := FALSE;
+
+//  EdChat := TEdit.Create(FrmMain.Owner);
+//  with EdChat do
+//  begin
+//    Parent := FrmMain;
+//    BorderStyle := bsNone;
+//    OnKeyPress := EdChatKeyPress;
+//  //  OnKeyDown := EdChatKeyDown;
+//    Visible := FALSE;
+//    MaxLength := 70;
+//    Ctl3D := FALSE;
+//    Left := 208;
+//    Top := g_FScreenHeight - 19;
+//    Height := 12;
+//    if g_FScreenWidth = 1024 then Width := 387 + 224
+//    else Width := 387;
+//    Color := clSilver;
+//  end;
+  MoveTime := GetTickCount;
+  AniTime := GetTickCount;
+  MainAniCount := 0;
+  MoveStepCount := 0;
+  MainSoundTimer := TTimer.Create(FrmMain.Owner);
+  with MainSoundTimer do begin
+    OnTimer := SoundOnTimer;
+    Interval := 1;
+    Enabled := FALSE;
+  end;
+end;
+
+destructor TPlayScene.Destroy;
+begin
+  MsgList.Free;
+  ActorList.Free;
+  TempList.Free;
+  GroundEffectList.Free;
+  EffectList.Free;
+  FlyList.Free;
+  inherited Destroy;
+end;
+
+procedure TPlayScene.SoundOnTimer(Sender: TObject);
+begin
+  PlaySound(s_main_theme);
+  MainSoundTimer.Interval := 46 * 1000;
+end;
+
+procedure TPlayScene.EdChatKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then begin
+    FrmMain.SendSay(FrmDlg.DEdChat.Text);
+    if (frmDlg.DEdChat.Text <> '') and (g_SendSayList.indexof(frmDlg.DEdChat.Text) < 0) then
+      g_SendSayList.Add(frmDlg.DEdChat.Text);
+    FrmDlg.DEdChat.Text := '';
+    FrmDlg.DEdChat.Visible := FALSE;
+    Key := #0;
+//    g_HIMC := ImmGetContext(FrmDlg.DEdChat.Handle);
+//    ImmAssociateContext(FrmMain.Handle,0);
+//    SetImeMode(frmDlg.DEdChat.Handle, imSAlpha);
+  end;
+  if Key = #27 then begin
+    FrmDlg.DEdChat.Text := '';
+    FrmDlg.DEdChat.Visible := FALSE;
+    Key := #0;
+//    g_HIMC := ImmGetContext(FrmDlg.DEdChat.Handle);
+//    ImmAssociateContext(FrmMain.Handle,0);
+//    SetImeMode(FrmDlg.DEdChat.Handle, imSAlpha);
+  end;
+end;
+
+procedure TPlayScene.EdChatKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if Key = 13 then begin
+    FrmMain.SendSay(FrmDlg.DEdChat.Text);
+    if (frmDlg.DEdChat.Text <> '') and (g_SendSayList.indexof(frmDlg.DEdChat.Text) < 0) then
+      g_SendSayList.Add(frmDlg.DEdChat.Text);
+    FrmDlg.DEdChat.Text := '';
+    g_HIMC := ImmGetContext(FrmDlg.DEdChat.Handle);
+    ImmAssociateContext(FrmMain.Handle, 0);    // ÆÁ±ÎÊäÈë·¨,±ÜÃâÖ÷½çÃæ¿ì½Ý¼ü²»¿ÉÓÃ
+    FrmDlg.DEdChat.Visible := FALSE;
+  end;
+  if Key = 27 then begin
+    FrmMain.SendSay(FrmDlg.DEdChat.Text);
+    FrmDlg.DEdChat.Text := '';
+    g_HIMC := ImmGetContext(FrmDlg.DEdChat.Handle);
+    ImmAssociateContext(FrmMain.Handle, 0);    // ÆÁ±ÎÊäÈë·¨,±ÜÃâÖ÷½çÃæ¿ì½Ý¼ü²»¿ÉÓÃ
+    FrmDlg.DEdChat.Visible := FALSE;
+  end;
+end;
+
+procedure TPlayScene.Initialize;
+var
+  i: integer;
+begin
+  MapSurface := Factory.CreateRenderTargetTexture;
+  MapSurface.Format := apf_A8R8G8B8;
+//  MapSurface.SetSize(g_FScreenWidth + UNITX * 10 + 30, g_FScreenHeight + UNITY * 10, True);
+  MapSurface.SetSize(g_FScreenWidth + UNITX * 10 + 30, g_FScreenHeight + UNITY *
+    10 + 30, True);
+
+  ObjSurface := Factory.CreateRenderTargetTexture;
+  ObjSurface.Format := apf_A8R8G8B8;
+//  ObjSurface.SetSize(g_FScreenWidth - SOFFX * 2, g_FScreenHeight, True);
+  ObjSurface.SetSize(g_FScreenWidth + UNITX * 10 + 30, g_FScreenHeight + UNITY *
+    10 + 30, True);
+
+  LigSurface := Factory.CreateRenderTargetTexture;
+  LigSurface.Format := apf_A8R8G8B8;
+  LigSurface.SetSize(g_FScreenWidth - SOFFX * 2, g_FScreenHeight, True);
+end;
+
+procedure TPlayScene.Finalize;
+begin
+  if MapSurface <> nil then
+    MapSurface.Free;
+  if ObjSurface <> nil then
+    ObjSurface.Free;
+  if LigSurface <> nil then
+    LigSurface.Free;
+
+  MapSurface := nil;
+  ObjSurface := nil;
+  LigSurface := nil;
+end;
+
+procedure TPlayScene.OpenScene;
+begin
+  WProgUse.ClearCache;  //·Î±×ÀÎ ÀÌ¹ÌÁö Ä³½Ã¸¦ Áö¿î´Ù.
+//   FrmDlg.ViewBottomBox (TRUE);
+//   //EdChat.Visible := TRUE;
+//   //EdChat.SetFocus;
+//   SetImeMode (FrmMain.Handle, LocalLanguage);
+//   //MainSoundTimer.Interval := 1000;
+//   //MainSoundTimer.Enabled := TRUE;
+  FrmDlg.ViewBottomBox(TRUE);
+  SetImeMode(FrmMain.Handle, LocalLanguage);
+end;
+
+procedure TPlayScene.CloseScene;
+begin
+   //MainSoundTimer.Enabled := FALSE;
+  SilenceSound;
+
+  FrmDlg.DEdChat.Visible := FALSE;
+  FrmDlg.ViewBottomBox(FALSE);
+end;
+
+procedure TPlayScene.OpeningScene;
+begin
+end;
+
+procedure TPlayScene.RefreshScene;
+var
+  i: integer;
+begin
+  Map.OldClientRect.Left := -1;
+  for i := 0 to ActorList.Count - 1 do
+    TActor(ActorList[i]).LoadSurface;
+end;
+
+procedure TPlayScene.RenderMiniMap(surface: TAsphyreCanvas);
+begin
+  if (MiniMapIndex = -1) or (Myself = nil) then
+    Exit;
+  if BoDrawMiniMap then begin
+    if ViewMiniMapStyle > 0 then begin
+      if ViewMiniMapStyle = 1 then begin
+        DrawMiniMap(surface, ViewMiniMapTran);
+//        FrmDlg.DGeneralMap.Visible := FALSE;
+      end
+      else if ViewMiniMapStyle = 2 then begin
+        DrawMiniMap(surface, ViewMiniMapTran);
+//        FrmDlg.DGeneralMap.Visible := FALSE;
+      end
+      else if ViewMiniMapStyle = 3 then begin
+        DrawMiniMap(surface, ViewMiniMapTran);
+//        FrmDlg.DGeneralMap.Visible := True;
+      end;
+    end;
+
+    if ViewGeneralMapStyle > 0 then begin
+      if ViewGeneralMapStyle = 1 then begin
+        if MiniMapIndex in [100, 101, 102, 104, 105, 120, 160, 190] then
+          DrawGeneralMap(surface, TRUE)
+        else begin
+          ViewGeneralMapStyle := 0;
+          DScreen.AddChatBoardString('µ±Ç°µØÍ¼Ã»ÓÐÉèÖÃ´óµØÍ¼', clGreen, clWhite);
+//         else if MiniMapIndex in [134,101,102,104,105,160,190] then DrawGeneralMap2 (MSurface, FALSE)
+        end;
+      end
+      else begin
+        if MiniMapIndex in [100, 101, 102, 104, 105, 120, 160, 190] then
+          DrawGeneralMap(surface, FALSE)
+        else begin
+          ViewGeneralMapStyle := 0;
+          DScreen.AddChatBoardString('Only field map will be displayed.',
+            clGreen, clWhite);
+//            DScreen.AddChatBoardString ('×Ö¶ÎÓ³Éä¾Í¿ÉÒÔ.', clGreen, clWhite);
+        end;
+      end;
+    end;
+  end;
+end;
+
+procedure TPlayScene.CleanObjects;
+var
+  i: integer;
+begin
+  for i := ActorList.Count - 1 downto 0 do begin
+    if TActor(ActorList[i]) <> Myself then begin
+      TActor(ActorList[i]).Free;
+      ActorList.Delete(i);
+    end;
+  end;
+  MsgList.Clear;
+  TargetCret := nil;
+  FocusCret := nil;
+  MagicTarget := nil;
+  for i := 0 to GroundEffectList.Count - 1 do
+    TMagicEff(GroundEffectList[i]).Free;
+  GroundEffectList.Clear;
+  for i := 0 to EffectList.Count - 1 do
+    TMagicEff(EffectList[i]).Free;
+  EffectList.Clear;
+end;
+
+
+{---------------------- Draw Map -----------------------}
+
+procedure TPlayScene.DrawTileMap(Sender: TObject);
+var
+  i, j, m, n, imgnum, imgnum2: integer;
+  DSurface: TAsphyreLockableTexture;
+begin
+  if (Myself = nil) then Exit;
+  Map.OldClientRect := Map.ClientRect;
+
+  with Map.ClientRect do begin
+    m := -UNITY * 2;
+    for j := (Top - Map.BlockTop - 1) to (Bottom - Map.BlockTop + 1) do begin
+      n := AAX - UNITX;
+      for i := (Left - Map.BlockLeft - 2) to (Right - Map.BlockLeft + 1) do begin
+        if (i >= 0) and (i < LOGICALMAPUNIT * 3) and (j >= 0) and (j <
+          LOGICALMAPUNIT * 3) then begin
+          imgnum := (Map.MArr[i, j].BkImg and $7FFF);
+          if imgnum > 0 then begin
+            if (i mod 2 = 0) and (j mod 2 = 0) then begin
+              imgnum := imgnum - 1;
+              DSurface := WTiles.Images[imgnum];
+              if DSurface <> nil then
+                g_GameCanvas.Draw(n, m, DSurface.ClientRect, DSurface, FALSE);
+            end;
+          end;
+        end;
+        Inc(n, UNITX);
+      end;
+      Inc(m, UNITY);
+    end;
+  end;
+
+  with Map.ClientRect do begin
+    m := -UNITY * 2;
+    for j := (Top - Map.BlockTop - 1) to (Bottom - Map.BlockTop + 1) do begin
+      n := AAX - UNITX;
+      for i := (Left - Map.BlockLeft - 2) to (Right - Map.BlockLeft + 1) do begin
+        if (i >= 0) and (i < LOGICALMAPUNIT * 3) and (j >= 0) and (j <
+          LOGICALMAPUNIT * 3) then begin
+
+          imgnum := Map.MArr[i, j].MidImg;
+          if imgnum > 0 then begin
+            imgnum := imgnum - 1;
+            DSurface := WSmTiles.Images[imgnum];
+            if DSurface <> nil then
+              g_GameCanvas.Draw(n, m, DSurface.ClientRect, DSurface, TRUE);
+          end;
+        end;
+        Inc(n, UNITX);
+      end;
+      Inc(m, UNITY);
+    end;
+  end;
+
+end;
+
+{----------------------- Æ÷±×, ¶óÀÌÆ® Ã³¸® -----------------------}
+
+procedure TPlayScene.LoadFog;  //¶óÀÌÆ® µ¥ÀÌÅ¸ ÀÐ±â
+var
+  i, fhandle, w, h, prevsize: integer;
+  cheat: Boolean;
+begin
+  prevsize := 0; //Á¶ÀÛ Ã¼Å©
+  cheat := FALSE;
+  for i := 0 to MAXLIGHT do begin
+    if FileExists(LightFiles[i]) then begin
+      fhandle := FileOpen(LightFiles[i], fmOpenRead or fmShareDenyNone);
+      FileRead(fhandle, w, sizeof(integer));
+      FileRead(fhandle, h, sizeof(integer));
+      Lights[i].Width := w;
+      Lights[i].Height := h;
+      Lights[i].PFog := AllocMem(w * h + 8);
+      if prevsize < w * h then begin
+        FileRead(fhandle, Lights[i].PFog^, w * h);
+      end
+      else
+        cheat := TRUE;
+      prevsize := w * h;
+      if LightSizes[i] <> prevsize then
+        cheat := TRUE;
+      FileClose(fhandle);
+    end;
+  end;
+  if cheat then
+    for i := 0 to MAXLIGHT do begin
+      if Lights[i].PFog <> nil then
+        FillChar(Lights[i].PFog^, Lights[i].Width * Lights[i].Height + 8, #0);
+    end;
+end;
+
+procedure TPlayScene.ClearLightMap;
+var
+  i, j: integer;
+begin
+  FillChar(LightMap, (LMX + 1) * (LMY + 1) * sizeof(TLightMapInfo), 0);
+  for i := 0 to LMX do
+    for j := 0 to LMY do
+      LightMap[i, j].Light := -1;
+end;
+
+procedure TPlayScene.UpdateBright(x, y, light: integer);
+var
+  i, j, r, lx, ly: integer;
+  pmask: ^ShortInt;
+begin
+  r := -1;
+  case light of
+    0:
+      begin
+        r := 2;
+        pmask := @LightMask0;
+      end;
+    1:
+      begin
+        r := 4;
+        pmask := @LightMask1;
+      end;
+    2:
+      begin
+        r := 8;
+        pmask := @LightMask2;
+      end;
+    3:
+      begin
+        r := 10;
+        pmask := @LightMask3;
+      end;
+    4:
+      begin
+        r := 14;
+        pmask := @LightMask4;
+      end;
+    5:
+      begin
+        r := 16;
+        pmask := @LightMask5;
+      end;
+  end;
+  for i := 0 to r do
+    for j := 0 to r do begin
+      lx := x - (r div 2) + i;
+      ly := y - (r div 2) + j;
+      if (lx in [0..LMX]) and (ly in [0..LMY]) then
+        LightMap[lx, ly].bright := LightMap[lx, ly].bright + PShoftInt(integer(pmask)
+          + (i * (r + 1) + j) * sizeof(shortint))^;
+    end;
+end;
+
+function TPlayScene.CheckOverLight(x, y, light: integer): Boolean;
+var
+  i, j, r, mlight, lx, ly, count, check: integer;
+  pmask: ^ShortInt;
+begin
+  r := -1;
+  case light of
+    0:
+      begin
+        r := 2;
+        pmask := @LightMask0;
+        check := 0;
+      end;
+    1:
+      begin
+        r := 4;
+        pmask := @LightMask1;
+        check := 4;
+      end;
+    2:
+      begin
+        r := 8;
+        pmask := @LightMask2;
+        check := 8;
+      end;
+    3:
+      begin
+        r := 10;
+        pmask := @LightMask3;
+        check := 18;
+      end;
+    4:
+      begin
+        r := 14;
+        pmask := @LightMask4;
+        check := 30;
+      end;
+    5:
+      begin
+        r := 16;
+        pmask := @LightMask5;
+        check := 40;
+      end;
+  end;
+  count := 0;
+  for i := 0 to r do
+    for j := 0 to r do begin
+      lx := x - (r div 2) + i;
+      ly := y - (r div 2) + j;
+      if (lx in [0..LMX]) and (ly in [0..LMY]) then begin
+        mlight := PShoftInt(integer(pmask) + (i * (r + 1) + j) * sizeof(shortint))^;
+        if LightMap[lx, ly].bright < mlight then begin
+          inc(count, mlight - LightMap[lx, ly].bright);
+          if count >= check then begin
+            Result := FALSE;
+            exit;
+          end;
+        end;
+      end;
+    end;
+  Result := TRUE;
+end;
+
+procedure TPlayScene.AddLight(x, y, shiftx, shifty, light: integer; nocheck: Boolean);
+var
+  lx, ly: integer;
+begin
+  lx := x - Myself.Rx + LMX div 2;
+  ly := y - Myself.Ry + LMY div 2;
+  if (lx >= 1) and (lx < LMX) and (ly >= 1) and (ly < LMY) then begin
+    if LightMap[lx, ly].light < light then begin
+      if not CheckOverLight(lx, ly, light) or nocheck then begin // > LightMap[lx, ly].light then begin
+        UpdateBright(lx, ly, light);
+        LightMap[lx, ly].light := light;
+        LightMap[lx, ly].shiftx := shiftx;
+        LightMap[lx, ly].shifty := shifty;
+      end;
+    end;
+  end;
+end;
+
+procedure TPlayScene.ApplyLightMap;
+var
+  i, j, light, defx, defy, lx, ly, lxx, lyy, lcount: integer;
+begin
+//   defx := -UNITX*2 + AAX + 14 - Myself.ShiftX;
+//   defy := -UNITY*3 - Myself.ShiftY;
+//   lcount := 0;
+//   for i:=1 to LMX-1 do
+//      for j:=1 to LMY-1 do begin
+//         light := LightMap[i, j].light;
+//         if light >= 0 then begin
+//            lx := (i + Myself.Rx - LMX div 2);
+//            ly := (j + Myself.Ry - LMY div 2);
+//            lxx := (lx-Map.ClientRect.Left)*UNITX + defx + LightMap[i, j].ShiftX;
+//            lyy := (ly-Map.ClientRect.Top)*UNITY + defy + LightMap[i, j].ShiftY;
+//
+//            FogCopy (Lights[light].PFog,
+//                     0,
+//                     0,
+//                     Lights[light].Width,
+//                     Lights[light].Height,
+//                     PFogScreen,
+//                     lxx - (Lights[light].Width-UNITX) div 2,
+//                     lyy - (Lights[light].Height-UNITY) div 2 - 5,
+//                     FogWidth,
+//                     FogHeight,
+//                     20);
+//            inc (lcount);
+//         end;
+//      end;
+end;
+
+procedure TPlayScene.DrawLightEffect(lx, ly, bright: integer);
+begin
+//   if (bright > 0) and (bright <= MAXLIGHT) then
+//      FogCopy (Lights[bright].PFog,
+//               0,
+//               0,
+//               Lights[bright].Width,
+//               Lights[bright].Height,
+//               PFogScreen,
+//               lx - (Lights[bright].Width-UNITX) div 2,
+//               ly - (Lights[bright].Height-UNITY) div 2,
+//               FogWidth,
+//               FogHeight,
+//               15);
+end;
+
+{-----------------------------------------------------------------------}
+(*
+procedure TPlayScene.DrawMiniMap(surface: TDirectDrawSurface; transparent: Boolean);
+var
+  d: TDirectDrawSurface;
+  v: Boolean;
+  i, k, cl, ix, mx, my, NearLoverCount: integer;
+  rc: TRect;
+  actor: TActor;
+  MINIMAPTRect: TRect;
+begin
+   // µ±Ç°Íæ¼ÒÔÚÐ¡µØÍ¼ÉÏµÄÎ»ÖÃ£¬Ã¿300ºÁÃëÉÁÒ»´Î
+//   if GetTickCount > BlinkTime + 300 then begin
+//      BlinkTime := GetTickCount;
+//      ViewBlink := not ViewBlink;
+//   end;
+
+  d := WMMap.Images[MiniMapIndex];
+  if d <> nil then
+  begin
+    mx := (Myself.XX * 48) div 32;
+    my := (Myself.YY * 32) div 32;
+    rc.Left := _MAX(0, mx - 60);
+    rc.Top := _MAX(0, my - 60);
+    rc.Right := _MIN(d.ClientRect.Right, rc.Left + 120);
+    rc.Bottom := _MIN(d.ClientRect.Bottom, rc.Top + 120);
+
+    MINIMAPTRect.Left := rc.Left;
+    MINIMAPTRect.Top := rc.Top;
+    MINIMAPTRect.Right := _MIN(rc.Left + 120, d.Width);
+    MINIMAPTRect.Bottom := _MIN(rc.Top + 120, d.Height);
+
+    if transparent then
+      DrawBlendR(surface, (g_FScreenWidth - 120), 0, MINIMAPTRect, d, 0)
+    else
+      surface.Draw((g_FScreenWidth - 120), 0, rc, d, True);
+
+//    if ViewBlink then begin
+    ix := (g_FScreenWidth - 120) - rc.Left;
+
+    NearLoverCount := 0;
+         // 2003/02/11 ¹Ì´Ï¸Ê»ó¿¡ ´Ù¸¥ ¿ÀºêÀèÆ®µé Ãâ·Â
+
+
+    if ActorList.Count > 0 then
+    begin
+      for i := 0 to ActorList.Count - 1 do
+      begin
+        mx := ix + (TActor(ActorList[i]).XX * 48) div 32;
+        my := (TActor(ActorList[i]).YY * 32) div 32 - rc.Top;
+        cl := 0;
+        case TActor(ActorList[i]).Race of
+          RC_USERHUMAN:
+            if (TActor(ActorList[i]) = Myself) then
+              cl := $FFFFFFFF//255
+            else if (nil <> fLover) and (Length(Trim(TActor(ActorList[i]).UserName)) > 0) and (TActor(ActorList[i]).UserName = Copy(fLover.GetDisplay(0), length(STR_LOVER) + 1, 20)) and (not TActor(ActorList[i]).BoOpenHealth) then
+            begin
+//      DScreen.AddChatBoardString ('TActor(ActorList[i]).UserName=> '+TActor(ActorList[i]).UserName, clYellow, clRed);
+//      DScreen.AddChatBoardString ('fLover.GetDisplay(0)=> '+fLover.GetDisplay(0), clYellow, clRed);
+              cl := $FFFF0000; //253;
+              if (mx > 680) and (my < 119) then
+                Inc(NearLoverCount);
+            end
+            else
+              cl := 0;  // »ç¶÷ Ãâ·ÂÇÏÁö ¾ÊÀ½...±×·ì¿øÀº ViewList¿¡¼­ Ãâ·Â
+
+          RCC_GUARD, RCC_GUARD2, RCC_MERCHANT:
+            cl := $FF00FF00; //251;
+          54, 55:
+            cl := 0;  // ½Å¼ö Ãâ·ÂÇÏÁö ¾ÊÀ½...ViewList¿¡¼­ Ãâ·Â...250
+          98, 99:
+            cl := 0;
+        else
+          if ((TActor(ActorList[i]).Visible) and (not TActor(ActorList[i]).Death) and (pos('(', TActor(ActorList[i]).UserName) = 0)) then
+            cl := $FF0000FF; //249;
+        end;
+        if (mx > 680) and (my < 119) then
+        begin //@@@@old
+          if cl <> 0 then
+          begin
+            g_DXCanvas.FillRect(mx - 2, my - 2, 3, 3, cl);
+
+//                         surface.Pixels[mx-1, my-1] := cl;
+//                         surface.Pixels[mx,   my-1] := cl;
+//                         surface.Pixels[mx+1, my-1] := cl;
+//                         surface.Pixels[mx-1, my]   := cl;
+//                         surface.Pixels[mx,   my]   := cl;
+//                         surface.Pixels[mx+1, my]   := cl;
+//                         surface.Pixels[mx-1, my+1] := cl;
+//                         surface.Pixels[mx,   my+1] := cl;
+//                         surface.Pixels[mx+1, my+1] := cl;
+          end;
+        end;
+      end;
+    end;
+  end;
+
+  if NearLoverCount > 0 then
+    CouplePower := True
+  else
+    CouplePower := False;
+
+  if ViewListCount > 0 then
+  begin
+    for i := 1 to ViewListCount do
+    begin
+      if ((abs(ViewList[i].x - Myself.XX) < 40) and (abs(ViewList[i].y - Myself.YY) < 40)) then
+      begin
+        mx := ix + (ViewList[i].x * 48) div 32;
+        my := (ViewList[i].y * 32) div 32 - rc.Top;
+        if (mx > 680) and (my < 119) then
+        begin //@@@@old
+          cl := $FFFF0000; //252;
+          g_DXCanvas.FillRect(mx - 2, my - 2, 3, 3, cl);
+//                      surface.Pixels[mx-1, my-1] := cl;
+//                      surface.Pixels[mx,   my-1] := cl;
+//                      surface.Pixels[mx+1, my-1] := cl;
+//                      surface.Pixels[mx-1, my]   := cl;
+//                      surface.Pixels[mx,   my]   := cl;
+//                      surface.Pixels[mx+1, my]   := cl;
+//                      surface.Pixels[mx-1, my+1] := cl;
+//                      surface.Pixels[mx,   my+1] := cl;
+//                      surface.Pixels[mx+1, my+1] := cl;
+        end;
+      end;
+                // ¿À·¡µÆÀ¸´Ï Áö¿ìÀÚ...
+      if (((GetTickCount - ViewList[i].LastTick) > 5000) and (ViewList[i].Index > 0)) then
+      begin
+                   // 2003/03/04 ±×·ì¿ø Å½±âÆÄ¿¬ ¼³Á¤
+        actor := FindActor(ViewList[i].Index);
+        if actor <> nil then
+        begin
+          actor.BoOpenHealth := FALSE;
+          if GroupIdList.Count > 0 then
+            for k := 0 to GroupIdList.Count - 1 do
+            begin  // MonOpenHp
+              if integer(GroupIdList[k]) = actor.RecogId then
+              begin
+                GroupIdList.Delete(k);
+                Break;
+              end;
+            end;
+        end;
+                   // ¾ÆÁ÷ ³²Àº°Ô ÀÖ´Ù¸é ÀÌµ¿
+        if (ViewListCount > 0) then
+        begin
+          ViewList[i].Index := ViewList[ViewListCount].Index;
+          ViewList[i].x := ViewList[ViewListCount].x;
+          ViewList[i].y := ViewList[ViewListCount].y;
+          ViewList[i].LastTick := ViewList[ViewListCount].LastTick;
+          ViewList[ViewListCount].Index := 0;
+          ViewList[ViewListCount].x := 0;
+          ViewList[ViewListCount].y := 0;
+          ViewList[ViewListCount].LastTick := 0;
+        end;
+        Dec(ViewListCount);
+      end;
+    end;
+  end;
+
+end; *)
+
+procedure TPlayScene.DrawGroupHealthBar(surface: TAsphyreCanvas);
+var
+  d: TAsphyreLockableTexture;
+  i, n, lx, ly, ncolor: integer;
+  rc: TRect;
+  Actor: TActor;
+begin
+  lx := 12; // 12×é¶ÓÆÁÄ»ÓÒ±ß12µÄ¾àÀëÏÔÊ¾
+  d := MShare.WProgUse2.Images[15];
+  for n := 0 to GroupMembers.Count - 1 do
+  begin
+    ly := 25 + (n * 25); // 25´ú±í×é¶Ó¼ä¸ô¿Õ¼ä
+    ncolor := clSilver;
+    for i := 0 to GroupIdList.Count - 1 do
+    begin
+      Actor := FindActor(integer(GroupIdList[i]));
+      if (Actor <> nil) and (not Actor.Death) then
+      begin
+        if Actor.UserName = GroupMembers[n] then
+        begin
+          ncolor := clWhite;
+          if d <> nil then
+          begin
+            rc := d.ClientRect;
+            if Actor.Abil.MaxHP > 0 then
+              rc.Right := Round((rc.Right - rc.Left) / Actor.Abil.MaxHP *
+                Actor.Abil.HP);
+            surface.Draw(lx, ly + 80, rc, d, True); // 80´ú±íÍ¼Æ¬¸ß¶ÈÎ»ÖÃ
+          end;
+          Break;
+        end;
+      end;
+    end;
+    with surface do
+    begin
+      BoldTextOut(lx, ly + 65, ncolor, FontBorderColor, GroupMembers[n]);
+      // 65´ú±íÃû×Ö¸ß¶ÈÎ»ÖÃ
+    end;
+  end;
+end;
+
+
+procedure TPlayScene.DrawMiniMap(surface: TAsphyreCanvas; transparent: Boolean);
+var
+  d, ATexture: TAsphyreLockableTexture;
+  v: Boolean;
+  i, k, cl, ix, mx, my, NearLoverCount, nrcx, nrcy: integer;
+  rc: TRect;
+  actor: TActor;
+  nSize, nlen: Integer;
+  Rx, Ry: Integer;
+  S: string;
+  ATem: Single;
+  MapDesc: pTMapDesc;
+  nShowWidthSize, nShowHeightSize, NewViewMiniMapStyle: integer;
+  nNewSize: Boolean;
+  AMapRec: TRect;
+begin
+   // 2003/02/11 ±ô¹Ú°Å¸®Áö ¾Ê°Ô ÇÔ...
+  if GetTickCount > BlinkTime + 300 then begin
+    BlinkTime := GetTickCount;
+    ViewBlink := not ViewBlink;
+  end;
+  if g_boµØÍ¼À×´ï then begin
+    ViewBlink := True;  //µØÍ¼ÉÏ×Ô¼ºµÄ°×µã²»ÉÁË¸
+  end;
+  if g_boÐ¡µØÍ¼ÃÔ¹¬Èë¿ÚÏÔÊ¾ then
+    d := WMMapNew.Images[MiniMapIndex]
+  else
+    d := WMMap.Images[MiniMapIndex];
+  if d <> nil then begin
+    mx := (Myself.XX * 48) div 32;
+    my := (Myself.YY * 32) div 32;
+    nNewSize := False;
+    if ViewMiniMapStyle = 1 then begin
+      if (d.Width < 120) or (d.Height < 120) then begin
+        NewViewMiniMapStyle := 2;
+        nNewSize := True;
+      end
+      else
+        NewViewMiniMapStyle := 1;
+    end
+    else begin
+      NewViewMiniMapStyle := 2;
+    end;
+
+    if NewViewMiniMapStyle = 2 then begin
+      if nNewSize then
+        nSize := 120
+      else
+        nSize := 200;
+      g_MinMapWidth := nSize;
+      rc.Left := _MAX(0, mx - nSize div 2);
+      rc.Top := _MAX(0, my - nSize div 2);
+      rc.Right := _MIN(d.ClientRect.Right, rc.Left + nSize);
+      rc.Bottom := _MIN(d.ClientRect.Bottom, rc.Top + nSize);
+
+      nShowWidthSize := nSize;
+      nShowHeightSize := nSize;
+
+      if transparent then
+         surface.StretchDraw(Rect((g_FScreenWidth - nSize), 0, g_FScreenWidth,nSize), d.ClientRect, d, cAlpha4(65), True)  //´óµØÍ¼µÄÍ¸Ã÷¶È
+      else
+        surface.StretchDraw(Rect((g_FScreenWidth - nSize), 0, g_FScreenWidth,
+          nSize), d.ClientRect, d, clWhite4, False);
+
+      ix := 0;
+    end
+    else begin
+      nSize := 120;
+      g_MinMapWidth := nSize;
+      rc.Left := _MAX(0, mx - g_MinMapWidth div 2);
+      rc.Top := _MAX(0, my - g_MinMapWidth div 2);
+      rc.Right := _MIN(d.ClientRect.Right, rc.Left + nSize);
+      rc.Bottom := _MIN(d.ClientRect.Bottom, rc.Top + nSize);
+      nrcx := 0;
+      nrcy := 0;
+      if (d.Width > nSize) and ((rc.Right - rc.Left) < nSize) then begin
+        nrcx := nSize - (rc.Right - rc.Left);
+        rc.Left := rc.Right - nSize;
+      end;
+      if (d.Height > nSize) and ((rc.Bottom - rc.Top) < nSize) then begin
+        nrcy := nSize - (rc.Bottom - rc.Top);
+        rc.Top := rc.Bottom - nSize;
+      end;
+
+      AMapRec := Bounds((g_FScreenWidth - nSize), 0, g_MinMapWidth, g_MinMapWidth);
+
+      nShowWidthSize := nSize;
+      nShowHeightSize := nSize;
+
+      if (d.Width < nSize) or (d.Height < nSize) then begin
+        if (d.Width < nSize) then begin
+          rc.Left := 0;
+          rc.Right := rc.Left + d.Width;
+          nShowWidthSize := d.Width;
+        end;
+        if (d.Height < nSize) then begin
+          rc.Top := 0;
+          rc.Bottom := rc.Top + d.Height;
+          nShowHeightSize := d.Height;
+        end;
+//        DrawZoom := True;
+      end;
+      begin
+        if transparent then
+          surface.DrawAlpha((g_FScreenWidth - nShowWidthSize), 0, rc, d, 65) //Ð¡µØÍ¼µÄÍ¸Ã÷¶È
+        else
+          surface.Draw((g_FScreenWidth - nShowWidthSize), 0, rc, d, True);
+        ix := (g_FScreenWidth - nShowWidthSize) - rc.Left;
+      end;
+    end;
+
+    NearLoverCount := 0;
+    if g_boµØÍ¼À×´ï then begin
+      if ActorList.Count > 0 then begin
+        for i := 0 to ActorList.Count - 1 do begin
+          if (abs(TActor(ActorList[i]).XX - MySelf.XX) <= 10) and (abs(TActor(ActorList
+            [i]).YY - MySelf.YY) <= 10) then begin
+            if NewViewMiniMapStyle = 2 then begin
+              mx := ix + (TActor(ActorList[i]).XX * 48) div 32;
+              my := (TActor(ActorList[i]).YY * 32) div 32;
+              mx := UpInt((mx / d.Width) * nShowWidthSize + g_FScreenWidth -
+                nShowWidthSize);
+              my := UpInt((my / d.Height) * nShowHeightSize);
+            end
+            else begin
+              mx := ix + (TActor(ActorList[i]).XX * 48) div 32;
+              my := (TActor(ActorList[i]).YY * 32) div 32 - rc.Top;
+            end;
+
+            cl := 0;
+            if NewViewMiniMapStyle = 2 then begin
+              case TActor(ActorList[i]).Race of
+                RC_USERHUMAN:
+                  if (TActor(ActorList[i]) = Myself) then begin
+                    if ViewBlink then
+                      cl := $FFFFFFFF
+                    else
+                      cl := 0;
+                  end
+                  else if (nil <> fLover) and (Length(Trim(TActor(ActorList[i]).UserName))
+                    > 0) and (TActor(ActorList[i]).UserName = Copy(fLover.GetDisplay
+                    (0), length(STR_LOVER) + 1, 20)) and (not TActor(ActorList[i]).BoOpenHealth)
+                    then begin
+                    cl := 0;
+                    if (mx > (g_FScreenWidth - nShowWidthSize)) and (my < (nShowWidthSize
+                      - 1)) then
+                      Inc(NearLoverCount);
+                  end
+                  else
+                    cl := 0;
+
+                RCC_GUARD, RCC_GUARD2, RCC_MERCHANT:
+                  cl := 0;
+                54, 55:
+                  cl := 0;
+                98, 99:
+                  cl := 0;
+              else
+                if ((TActor(ActorList[i]).Visible) and (not TActor(ActorList[i]).Death)
+                  and (pos('(', TActor(ActorList[i]).UserName) = 0)) then
+                  cl := 249;
+              end;
+            end
+            else begin
+              case TActor(ActorList[i]).Race of
+                RC_USERHUMAN:
+                  if (TActor(ActorList[i]) = Myself) then begin
+                    if ViewBlink then
+                      cl := 255
+                    else
+                      cl := 0;
+                  end
+                  else if (nil <> fLover) and (Length(Trim(TActor(ActorList[i]).UserName))
+                    > 0) and (TActor(ActorList[i]).UserName = Copy(fLover.GetDisplay
+                    (0), length(STR_LOVER) + 1, 20)) and (not TActor(ActorList[i]).BoOpenHealth)
+                    then begin
+                    cl := 253;
+                    if (mx > (g_FScreenWidth - nShowWidthSize)) and (my < (nShowWidthSize
+                      - 1)) then
+                      Inc(NearLoverCount);
+                  end
+                  else
+                    cl := 251;
+
+                RCC_GUARD, RCC_GUARD2,    //Ð¡µØÍ¼ÉÏ´óµ¶ÑÕÉ«
+                RCC_MERCHANT:
+                  cl := 250; //Ð¡µØÍ¼ÉÏNPCÑÕÉ«
+              23, 54, 55:begin    //ÆÁ±ÎÕâ¶Î¾ÍÊÇ²¿·ÖµØÍ¼Ã»ÓÐÀ×´ïÁË
+                 if ((TActor(ActorList[i]).Visible) and (not TActor(ActorList[i]).Death)) then cl := $FF0000FF;      //Ð¡µØÍ¼ÉÏµÀÊ¿±¦±¦ÑÕÉ«
+               end;
+                98, 99:
+                  cl := 0;
+              else
+                if ((TActor(ActorList[i]).Visible) and (not TActor(ActorList[i]).Death)
+                  { and (pos('(', TActor(ActorList[i]).UserName) = 0)}) then
+                  cl := 249;
+              end;
+            end;
+
+            if (mx > (g_FScreenWidth - nShowWidthSize)) and (my < (nShowWidthSize
+              - 1)) then begin
+              if cl <> 0 then begin
+                surface.FillRect(Rect(mx - 1, my - 1, mx + 2, my + 2), GetRGB(cl));
+              end;
+            end;
+          end;
+        end;
+      end;
+    end
+    else begin
+      if NewViewMiniMapStyle = 2  then begin
+        mx := ix + (Myself.XX * 48) div 32;
+        my := (Myself.YY * 32) div 32;
+        mx := UpInt((mx / d.Width) * nShowWidthSize + g_FScreenWidth - nShowWidthSize);
+        my := UpInt((my / d.Height) * nShowHeightSize);
+      end
+      else begin
+        mx := ix + (Myself.XX * 48) div 32;
+        my := (Myself.YY * 32) div 32 - rc.Top;
+      end;
+      if ViewBlink then
+        cl := 255
+      else
+        cl := 0;
+      if (mx > (g_FScreenWidth - nShowWidthSize)) and (my < (nShowWidthSize - 1))
+        then begin
+        if cl <> 0 then begin
+          surface.FillRect(Rect(mx - 1, my - 1, mx + 2, my + 2), GetRGB(cl));
+        end;
+      end;
+    end;
+
+    if NearLoverCount > 0 then
+      CouplePower := True
+    else
+      CouplePower := False;
+
+    if ViewListCount > 0 then begin
+      for i := 1 to ViewListCount do begin
+        if ((abs(ViewList[i].x - Myself.XX) < 40) and (abs(ViewList[i].y -
+          Myself.YY) < 40)) then begin
+          if NewViewMiniMapStyle = 2 then begin
+            mx := (ViewList[i].x * 48) div 32;
+            my := (ViewList[i].y * 32) div 32;
+
+
+
+            mx := UpInt((mx / d.Width) * nShowWidthSize + g_FScreenWidth -
+              nShowWidthSize);
+            my := UpInt((my / d.Height) * nShowHeightSize);
+          end
+          else begin
+            mx := ix + (ViewList[i].x * 48) div 32;
+            my := (ViewList[i].y * 32) div 32 - rc.Top;
+          end;
+
+          if (mx > (g_FScreenWidth-nShowWidthSize)) and (my < (nShowWidthSize-1)) and (g_boµØÍ¼À×´ï= false) then begin
+            cl := $FF0000FF; //$FF0000FF
+            if ViewMiniMapStyle <> 3 then
+//            surface.FillRect(mx - 2, my - 2, 3, 3, cl);
+         surface.FillRect(mx - 2, my - 2, 3, 3, cl);
+          end; //Ð¡µØÍ¼ÉÏµÄ×é¶ÓÀ¶µã  }
+        end;
+
+        if (((GetTickCount - ViewList[i].LastTick) > 5000) and (ViewList[i].Index
+          > 0)) then begin
+          actor := FindActor(ViewList[i].Index);
+          if actor <> nil then begin
+            actor.BoOpenHealth := FALSE;
+            if GroupIdList.Count > 0 then
+              for k := 0 to GroupIdList.Count - 1 do begin  // MonOpenHp
+                if integer(GroupIdList[k]) = actor.RecogId then begin
+                  GroupIdList.Delete(k);
+                  Break;
+                end;
+              end;
+          end;
+
+          if (ViewListCount > 0) then begin
+            ViewList[i].Index := ViewList[ViewListCount].Index;
+            ViewList[i].x := ViewList[ViewListCount].x;
+            ViewList[i].y := ViewList[ViewListCount].y;
+            ViewList[i].LastTick := ViewList[ViewListCount].LastTick;
+            ViewList[ViewListCount].Index := 0;
+            ViewList[ViewListCount].x := 0;
+            ViewList[ViewListCount].y := 0;
+            ViewList[ViewListCount].LastTick := 0;
+          end;
+          Dec(ViewListCount);
+        end;
+      end;
+    end;
+    if g_NgConfigInfo.boShowMap then begin
+      if g_MapDesc <> nil then begin
+        case NewViewMiniMapStyle of
+          1:
+            begin
+              for i := 0 to g_MapDesc.MinList.Count - 1 do begin
+                MapDesc := g_MapDesc.MinList[i];
+                if MapDesc.nColor > 0 then begin
+                  ATexture := FontManager.Default.TextOut(MapDesc.sName);
+                  if ATexture <> nil then begin
+                    mx := (MapDesc.nX * 48) div 32;
+                    my := (MapDesc.nY * 32) div 32;
+                    if (mx + ATexture.WIDTH div 2 >= rc.Left) and (mx - ATexture.WIDTH
+                      div 2 <= rc.Right) and (my + ATexture.Height div 2 >= rc.Top)
+                      and (my - ATexture.Height div 2 <= rc.Bottom) then begin
+                      surface.DrawBoldTextInRect((g_FScreenWidth -
+                        nShowWidthSize) + mx - rc.Left - ATexture.WIDTH div 2,
+                        my - rc.Top - ATexture.Height div 2, AMapRec, ATexture,
+                        MapDesc.nColor, FontBorderColor);
+                    end;
+                  end;
+                end;
+              end;
+            end;
+          2:
+            begin
+              for i := 0 to g_MapDesc.MaxList.Count - 1 do begin
+                MapDesc := g_MapDesc.MaxList[i];
+                if MapDesc.nColor > 0 then begin
+                  mx := (g_FScreenWidth - nShowWidthSize) + Trunc((MapDesc.nX *
+                    48) * (g_MinMapWidth / (d.ClientRect.Right))) div 32;
+                  my := Trunc(MapDesc.nY * (g_MinMapWidth / (d.ClientRect.Bottom)));
+                  nlen := FontManager.Default.TextWidth(MapDesc.sName) div 2;
+                  mx := mx - nlen;
+                  surface.BoldTextOut(mx, my, MapDesc.nColor, FontBorderColor,
+                    MapDesc.sName)
+                end;
+              end;
+            end;
+        end;
+      end;
+    end;
+  end;
+
+  if g_ShowMiniMapXY and (d <> nil) then begin
+    if (nShowWidthSize = 200) or nNewSize then begin
+      Rx := g_MouseX - (g_FScreenWidth - nShowWidthSize);
+      ATem := Rx * (d.Width / nShowWidthSize);
+      Rx := Round(Rx * (d.Width / nShowWidthSize) * map.MapWidth / d.Width);
+      Ry := Round(g_MouseY * (d.Height / nShowHeightSize) * map.MapHeight / d.Height);
+    end
+    else begin
+      Rx := Round(MySelf.xx + (g_MouseX - nrcx - (g_FScreenWidth - (rc.Right -
+        rc.Left)) - ((rc.Right - rc.Left) div 2)) * 2 / 3);
+      Ry := Round(MySelf.yy + (g_MouseY - nrcy - (rc.Bottom - rc.Top) div 2));
+
+//      if (g_MouseX - (g_FScreenWidth - nShowWidthSize)) < 60 then rx := -(60 - (g_MouseX - (g_FScreenWidth - nShowWidthSize)))
+//      else rx := (g_MouseX - (g_FScreenWidth - nShowWidthSize)) - 60;
+//      rx := (MySelf.xx * 32) div 32 - rc.Left + rx - (g_FScreenWidth - nShowWidthSize);
+//
+//      if (g_MouseY - (g_FScreenHeight - nShowHeightSize)) < 60 then ry := -(60 - (g_MouseY - (g_FScreenHeight - nShowHeightSize)))
+//      else ry := (g_MouseY - (g_FScreenHeight - nShowHeightSize)) - 60;
+//      ry := (MySelf.xx * 32) div 32 - rc.Top + ry;
+      Rx := ((rc.Left + (g_MouseX - nrcx - (g_FScreenWidth - nShowWidthSize))) *
+        32) div 48;
+//      ry := ((rc.Top + (g_MouseY - (g_FScreenHeight - nShowHeightSize))) * 32) div 32;
+    end;
+    if (Rx >= 0) and (Ry >= 0) then begin
+      S := Format('%s:%s', [IntToStr(Round(Rx)), IntToStr(Round(Ry))]);
+      if (nShowWidthSize = 200) or nNewSize then
+        surface.BoldTextOut(g_FScreenWidth - FontManager.Default.TextWidth(S) -
+          2, nShowHeightSize - 14, clWhite, clBlack, S)
+      else
+        surface.BoldTextOut(g_FScreenWidth - FontManager.Default.TextWidth(S) -
+          2, rc.Bottom - rc.Top - 14, clWhite, clBlack, S);
+    end;
+  end;
+end;
+
+procedure TPlayScene.DrawGeneralMap(surface: TAsphyreCanvas; transparent: Boolean);
+var
+  d: TAsphyreLockableTexture;
+  v: Boolean;
+  i, k, cl, mx, my, WPos, HPos: integer;
+//   i, k, cl, ix, mx, my, WPos, HPos: integer;
+  rc: TRect;
+  actor: TActor;
+begin
+
+  if MiniMapIndex = 100 then
+    d := WMMap.Images[134]
+  else if MiniMapIndex = 101 then
+    d := WMMap.Images[135]
+  else if MiniMapIndex = 102 then
+    d := WMMap.Images[136]
+  else if MiniMapIndex = 104 then
+    d := WMMap.Images[137]
+  else if MiniMapIndex = 105 then
+    d := WMMap.Images[138]
+  else if MiniMapIndex = 120 then
+    d := WMMap.Images[144]
+  else if MiniMapIndex = 160 then
+    d := WMMap.Images[145]
+  else if MiniMapIndex = 190 then
+    d := WMMap.Images[146]
+  else
+    d := WMMap.Images[MiniMapIndex];
+
+  if d <> nil then begin
+    mx := (Myself.XX * 48) div 64;
+    my := (Myself.YY * 32) div 64;
+//      rc.Left := _MAX(0, mx-60);
+//      rc.Top := _MAX(0, my-60);
+//      rc.Right := _MIN(d.ClientRect.Right, rc.Left + 120);
+//      rc.Bottom := _MIN(d.ClientRect.Bottom, rc.Top + 120);
+//      rc.Left := _MAX(0, mx-400);
+//      rc.Top  := _MAX(0, my-222);
+//      rc.Right  := _MIN(d.ClientRect.Right, rc.Left + MAPSURFACEWIDTH);
+//      rc.Bottom := _MIN(d.ClientRect.Bottom, rc.Top + MAPSURFACEHEIGHT);
+
+    rc.Left := 0;
+    rc.Top := 0;
+    rc.Right := d.Width;
+    rc.Bottom := d.Height;
+
+    WPos := (g_FScreenWidth - d.Width) div 2;
+    HPos := (g_FScreenHeight - 18 - d.Height) div 2;
+//      if WPos < 0 then WPos := 0;
+//      if HPos < 0 then HPos := 0;
+    if transparent then
+      surface.DrawAlpha(WPos, HPos, rc, d, 120)//         DrawBlendEx (surface, 0, 0, d, rc.Left, rc.Top, SCREENWIDTH, MAPSURFACEHEIGHT, 0)
+    else
+      surface.Draw(WPos, HPos, rc, d, True);
+//         surface.Draw ((SCREENWIDTH-120), 0, rc, d, FALSE);
+//    if ViewBlink then begin
+//         ix := (WPos) - rc.Left;
+//         ix := WPos;
+         // 2003/02/11 ¹Ì´Ï¸Ê»ó¿¡ ´Ù¸¥ ¿ÀºêÀèÆ®µé Ãâ·Â
+    if ActorList.Count > 0 then begin
+      for i := 0 to ActorList.Count - 1 do begin
+//                mx := ix + (TActor(ActorList[i]).XX*48) div 32;
+        mx := ((TActor(ActorList[i]).XX * 48) div 64) + WPos;
+        my := ((TActor(ActorList[i]).YY * 32) div 64) + HPos;
+//                my := (TActor(ActorList[i]).YY*32) div 32 - rc.Top;
+        cl := 0;
+        case TActor(ActorList[i]).Race of
+          RC_USERHUMAN:
+            if (TActor(ActorList[i]) = Myself) then
+              cl := 255
+            else if (nil <> fLover) and (Length(Trim(TActor(ActorList[i]).UserName))
+              > 0) and (TActor(ActorList[i]).UserName = Copy(fLover.GetDisplay(0),
+              length(STR_LOVER) + 1, 20)) and (not TActor(ActorList[i]).BoOpenHealth)
+              then begin
+//      DScreen.AddChatBoardString ('TActor(ActorList[i]).UserName=> '+TActor(ActorList[i]).UserName, clYellow, clRed);
+//      DScreen.AddChatBoardString ('fLover.GetDisplay(0)=> '+fLover.GetDisplay(0), clYellow, clRed);
+              cl := 253
+            end//                                 else           cl := 0;  // »ç¶÷ Ãâ·ÂÇÏÁö ¾ÊÀ½...±×·ì¿øÀº ViewList¿¡¼­ Ãâ·Â
+            else
+              cl := 146;  // ´Ù¸¥ ÇÃ·¹ÀÌ¾î ÇÏ´Ã»öÀ¸·Î Ç¥½Ã 2006/02/17
+
+          RCC_GUARD, RCC_GUARD2, RCC_MERCHANT:
+            cl := 251;
+          54, 55:
+            cl := 0;  // ½Å¼ö Ãâ·ÂÇÏÁö ¾ÊÀ½...ViewList¿¡¼­ Ãâ·Â...250
+          98, 99:
+            cl := 0;
+        else
+          if ((TActor(ActorList[i]).Visible) and (not TActor(ActorList[i]).Death)
+            and (pos('(', TActor(ActorList[i]).UserName) = 0)) then
+            cl := 249;
+        end;
+
+//                if (mx > 680) and (my < 119) then begin //@@@@old
+        if cl > 0 then begin
+//          surface.Pixels[mx - 1, my - 1] := cl;
+//          surface.Pixels[mx, my - 1] := cl;
+//          surface.Pixels[mx + 1, my - 1] := cl;
+//          surface.Pixels[mx - 1, my] := cl;
+//          surface.Pixels[mx, my] := cl;
+//          surface.Pixels[mx + 1, my] := cl;
+//          surface.Pixels[mx - 1, my + 1] := cl;
+//          surface.Pixels[mx, my + 1] := cl;
+//          surface.Pixels[mx + 1, my + 1] := cl;
+        end;
+//                end;
+      end;
+    end;
+    if ViewListCount > 0 then begin
+      for i := 1 to ViewListCount do begin
+        if ((abs(ViewList[i].x - Myself.XX) < 40) and (abs(ViewList[i].y -
+          Myself.YY) < 40)) then begin
+//                   mx := ix + (ViewList[i].x*48) div 32;
+          mx := ((ViewList[i].x * 48) div 64) + WPos;
+          my := ((ViewList[i].y * 32) div 64) + HPos;
+//                   my := (ViewList[i].y*32) div 32 - rc.Top;
+//                   if (mx > 680) and (my < 119) then begin //@@@@old
+          cl := 252;
+//          surface.Pixels[mx - 1, my - 1] := cl;
+//          surface.Pixels[mx, my - 1] := cl;
+//          surface.Pixels[mx + 1, my - 1] := cl;
+//          surface.Pixels[mx - 1, my] := cl;
+//          surface.Pixels[mx, my] := cl;
+//          surface.Pixels[mx + 1, my] := cl;
+//          surface.Pixels[mx - 1, my + 1] := cl;
+//          surface.Pixels[mx, my + 1] := cl;
+//          surface.Pixels[mx + 1, my + 1] := cl;
+//                   end;
+        end;
+                // ¿À·¡µÆÀ¸´Ï Áö¿ìÀÚ...
+        if (((GetTickCount - ViewList[i].LastTick) > 5000) and (ViewList[i].Index
+          > 0)) then begin
+                   // 2003/03/04 ±×·ì¿ø Å½±âÆÄ¿¬ ¼³Á¤
+          actor := FindActor(ViewList[i].Index);
+          if actor <> nil then begin
+            actor.BoOpenHealth := FALSE;
+            if GroupIdList.Count > 0 then
+              for k := 0 to GroupIdList.Count - 1 do begin  // MonOpenHp
+                if integer(GroupIdList[k]) = actor.RecogId then begin
+                  GroupIdList.Delete(k);
+                  Break;
+                end;
+              end;
+          end;
+                   // ¾ÆÁ÷ ³²Àº°Ô ÀÖ´Ù¸é ÀÌµ¿
+          if (ViewListCount > 0) then begin
+            ViewList[i].Index := ViewList[ViewListCount].Index;
+            ViewList[i].x := ViewList[ViewListCount].x;
+            ViewList[i].y := ViewList[ViewListCount].y;
+            ViewList[i].LastTick := ViewList[ViewListCount].LastTick;
+            ViewList[ViewListCount].Index := 0;
+            ViewList[ViewListCount].x := 0;
+            ViewList[ViewListCount].y := 0;
+            ViewList[ViewListCount].LastTick := 0;
+          end;
+          Dec(ViewListCount);
+        end;
+      end;
+    end;
+//    end;
+  end;
+end;
+
+procedure TPlayScene.ProcessObecjts;
+var
+  i, k: Integer;
+  movetick: Boolean;
+  actor: TActor;
+  meff: TMagicEff;
+  pd: PTDropItem;
+  evn: TClEvent;
+  boChange: Boolean;
+begin
+  DoFastFadeOut := FALSE;
+  if (MySelf = nil) then
+    exit;
+
+  movetick := FALSE;
+  if GetTickCount - MoveTime >= g_bopaobusudu then //ÈËÎïÅÜ²½ËÙ¶ÈÉèÖÃ  ÊýÖµÔ½´óÈËÎïÔ½Âý
+  begin
+    MoveTime := GetTickCount;   //ÒÆ¶¯¿ªÊ¼Ê±¼ä
+    movetick := TRUE;          //ÔÊÐíÒÆ¶¯
+    Inc(MoveStepCount);
+    if MoveStepCount > 1 then
+      MoveStepCount := 0;
+  end;
+
+
+  //Õâ²¿·ÖÊÇÈ«²¿´¦Àí¹ÖÎïÊÇ²»ÊÇ¶¯µÄ »¹ÊÇËÀµÄ »¹ÊÇÏÔÊ¾ °üÀ¨ÈËÎï
+  try
+    i := 0;                          //´¦Àí½ÇÉ«Ò»Ð©Ïà¹Ø¶«Î÷
+    while TRUE do begin              //Frame Ã³¸®´Â ¿©±â¼­ ¾ÈÇÔ.
+      if i >= ActorList.Count then
+        break;
+      actor := ActorList[i];
+      if movetick then
+        actor.LockEndFrame := FALSE; //¿ÉÒÔÒÆ¶¯
+      if not actor.LockEndFrame then begin //Ã»ÓÐËø¶¨¶¯×÷
+        actor.ProcMsg;   //´¦Àí½ÇÉ«µÄÏûÏ¢
+        if movetick then
+          if actor.Move(MoveStepCount) then begin  //½ÇÉ«ÒÆ¶¯
+            Inc(i);
+            continue;
+          end;
+        actor.Run;    //Ä³¸¯ÅÍµéÀ» ¿òÁ÷ÀÌ°Ô ÇÔ.
+        if actor <> Myself then
+          actor.ProcHurryMsg;
+      end;
+      if actor = Myself then
+        actor.ProcHurryMsg;
+      //º¯½ÅÀÎ °æ¿ì
+      if actor.WaitForRecogId <> 0 then begin
+        if actor.IsIdle then begin
+          DelChangeFace(actor.WaitForRecogId);
+          NewActor(actor.WaitForRecogId, actor.XX, actor.YY, actor.Dir, actor.WaitForFeature,
+            actor.WaitForStatus);
+          actor.WaitForRecogId := 0;
+          actor.BoDelActor := TRUE;
+        end;
+      end;
+      if actor.BoDelActor then begin
+         //actor.Free;
+        FreeActorList.Add(actor);
+        ActorList.Delete(i);
+        if TargetCret = actor then
+          TargetCret := nil;
+        if FocusCret = actor then
+          FocusCret := nil;
+        if MagicTarget = actor then
+          MagicTarget := nil;
+      end
+      else
+        Inc(i);
+    end;
+  except
+    DebugOutStr('101');
+  end;
+
+  //Õâ²¿·ÖÊÇ´¦ÀíÈ«²¿Ä§·¨Ð§¹û °üÀ¨¹ÖÎï´òÄãµÄÐ§¹û
+  try
+    i := 0;
+    while TRUE do begin
+      if i >= GroundEffectList.Count then
+        break;
+      meff := GroundEffectList[i];
+      if meff.Active then begin
+        if not meff.Run then begin //¸¶¹ýÈ¿°ú
+          meff.Free;
+          GroundEffectList.Delete(i);
+          continue;
+        end;
+      end;
+      Inc(i);
+    end;
+    i := 0;
+    while TRUE do begin
+      if i >= EffectList.Count then
+        break;
+      meff := EffectList[i];
+      if meff.Active then begin
+        if not meff.Run then begin //¸¶¹ýÈ¿°ú
+          meff.Free;
+          EffectList.Delete(i);
+          continue;
+        end;
+      end;
+      Inc(i);
+    end;
+    i := 0;
+    while TRUE do begin
+      if i >= FlyList.Count then
+        break;
+      meff := FlyList[i];
+      if meff.Active then begin
+        if not meff.Run then begin //µµ³¢,È­»ìµî ³¯¾Æ°¡´Â°Í
+          meff.Free;
+          FlyList.Delete(i);
+          continue;
+        end;
+      end;
+      Inc(i);
+    end;
+
+    EventMan.Execute;
+  except
+    DebugOutStr('102');
+  end;
+  //Õâ²¿·ÖÊÇ´¦ÀíµØÃæÉÏµÄËùÓÐÎïÆ· ÒÔ¼°µØÃæÐ§¹û °üÀ¨ÎïÆ· »ðÇ½ À§Ä§ÕâÐ©
+  try
+   //»ç¶óÁø ¾ÆÀÌÅÛ Ã¼Å©
+    for k := 0 to DropedItemList.Count - 1 do begin
+      pd := PTDropItem(DropedItemList[k]);
+      if pd <> nil then begin
+        if (Abs(pd.x - Myself.XX) > 20) and (Abs(pd.y - Myself.YY) > 20) then begin
+          Dispose(PTDropItem(DropedItemList[k]));
+          DropedItemList.Delete(k);
+          break;  //ÇÑ¹ø¿¡ ÇÑ°³¾¿..
+        end;
+      end;
+    end;
+   //»ç¶óÁø ´ÙÀÌ³ª¹Í¿ÀºêÁ§Æ® °Ë»ç
+    for k := 0 to EventMan.EventList.Count - 1 do begin
+      evn := TClEvent(EventMan.EventList[k]);
+      if (Abs(evn.X - Myself.XX) > 20) and (Abs(evn.Y - Myself.YY) > 20) then begin
+        evn.Free;
+        EventMan.EventList.Delete(k);
+        break;  //ÇÑ¹ø¿¡ ÇÑ°³¾¿
+      end;
+    end;
+  except
+    DebugOutStr('103');
+  end;
+end;
+
+{-----------------------------------------------------------------------}
+procedure TPlayScene.BeginScene(Device: TAsphyreDevice; MSurface: TAsphyreCanvas);
+begin
+  if MySelf = nil then
+    Exit;
+  try
+    with Map.ClientRect do begin
+      Left := MySelf.Rx - g_TileMapOffSetX;
+      Top := MySelf.Ry - g_TileMapOffSetY;
+      Right := MySelf.Rx + g_TileMapOffSetX;
+      Bottom := MySelf.Ry + g_TileMapOffSetY + 1;
+    end;
+    Map.UpdateMapPos (Myself.Rx, Myself.Ry);
+    if g_boForceMapDraw then
+    begin
+      if g_boForceMapFileLoad then
+        Map.LoadMap(Map.CurrentMap, MySelf.XX, MySelf.YY);
+      g_boForceMapDraw := False;
+      g_boForceMapFileLoad := False;
+    end
+    else
+    begin
+      with Map do
+        if (ClientRect.Left = OldClientRect.Left) and (ClientRect.Top = OldClientRect.Top) then
+          Exit;
+    end;
+    Device.RenderTo(DrawTileMap, 0, True, MapSurface);
+  except
+  end;
+end;
+
+procedure TPlayScene.LightSurface(MSurface: TAsphyreCanvas);
+var
+  d: TAsphyreLockableTexture;
+  i, j, defy, defx, lx, ly, lcount, light, lxx, lyy: Integer;
+  Actor: TActor;
+  DarkColor: Integer;
+begin
+  if (MySelf = nil) then
+    exit;
+  if DarkLevel = 1 then
+    DarkColor := $0F0F0F
+  else
+    DarkColor := $555555;
+
+  defx := -UNITX * 2 + AAX + 14 - Myself.ShiftX;
+  defy := -UNITY * 3 - Myself.ShiftY;
+
+  if ViewFog and (not MySelf.Death) then begin
+    if DarkLevel = 1 then
+      MSurface.FillRect(Rect(0, 0, g_FScreenWidth, g_FScreenHeight), clBlack)
+    else
+      MSurface.FillRectAlpha(Rect(0, 0, g_FScreenWidth, g_FScreenHeight), DarkColor, 255);
+    lcount := 0;
+    for i := 1 to LMX - 1 do begin
+      for j := 1 to LMY - 1 do begin
+        light := LightMap[i, j].light;
+        if light >= 0 then begin
+          lx := (i + Myself.Rx - LMX div 2);
+          ly := (j + Myself.Ry - LMY div 2);
+          lxx := (lx - Map.ClientRect.Left) * UNITX + defx + LightMap[i, j].shiftx;
+          lyy := (ly - Map.ClientRect.Top) * UNITY + defy + LightMap[i, j].shifty;
+
+          d := LightImages[light];
+          if d <> nil then
+            MSurface.Draw(lxx - (d.Width - UNITX) div 2, lyy - (d.Height -
+              UNITY) div 2, d.ClientRect, d, clWhite4, beSrcColorAdd);
+
+          inc(lcount);
+        end;
+      end;
+    end;
+  end;
+end;
+
+
+//»­ÓÎÏ·ÕýÊ½³¡¾°
+procedure TPlayScene.PlayScene(MSurface: TAsphyreCanvas);
+  procedure NameTextOut(surface: TAsphyreCanvas; x, y, fcolor, bcolor: integer; namestr: string);   //2022
+  var
+    i, row: integer;
+    nstr: string;
+  begin
+    row := 0;
+    for i := 0 to 10 do
+    begin
+      if namestr = '' then
+        break;
+      namestr := GetValidStr3(namestr, nstr, ['\']);
+//         BoldTextOut (surface,
+//                      x - surface.Canvas.TextWidth(nstr) div 2,
+//                      y + row * 12,
+//                      fcolor, bcolor, nstr);
+
+      surface.BoldTextOut(x - FontManager.Default.TextWidth(nstr) div 2, y + row * 12, fcolor, bcolor, nstr);
+      Inc(row);
+    end;
+  end;
+  function CheckOverlappedObject(myrc, obrc: TRect): Boolean;
+  begin
+    if (obrc.Right > myrc.Left) and (obrc.Left < myrc.Right) and (obrc.Bottom >
+      myrc.Top) and (obrc.Top < myrc.Bottom) then
+      Result := TRUE
+    else
+      Result := FALSE;
+  end;
+
+var
+  i, j, k, n, m, mmm, ix, iy, mx, my, line, defx, defy, wunit, fridx, ani,
+    anitick, ax, ay, idx, drawingbottomline,TempNameColor: integer;
+  DSurface, d: TAsphyreLockableTexture;
+  blend, movetick: Boolean;
+   //myrc, obrc: TRect;
+  pd: PTDropItem;
+  pCItemRule: pTCItemRule;
+  evn: TClEvent;
+  actor: TActor;
+  meff: TMagicEff;
+  msgstr, uname: string;
+  px, py, ImgPosX, ImgPosY: integer;
+  nFColor, nBColor: Integer;
+  p: TPoint;
+  ATexture: TAsphyreLockableTexture;
+  rc: TRect;
+  infoMsg: string;
+  HpColor, Right: Integer;
+
+begin
+  if (Myself = nil) then begin
+    MSurface.FillRect(Rect(0, 0, g_FScreenWidth, g_FScreenHeight), Clblack);
+    msgstr := 'ÇëÉÔºò...';
+    ATexture := FontManager.Default.TextOut(msgstr);
+    if ATexture <> nil then
+      MSurface.DrawBoldText((g_FScreenWidth - ATexture.Width) div 2, (g_FScreenHeight
+        - 280) div 2, ATexture, clWhite, FontBorderColor);
+    Exit;
+  end;
+
+  if GetTickCount - AniTime >= 50 then begin
+    AniTime := GetTickCount;
+    Inc(MainAniCount);
+    if MainAniCount > 1000000 then
+      MainAniCount := 0;
+  end;
+  try
+
+   ///////////////////////
+   //ViewFog := FALSE;
+   ///////////////////////
+
+    if NoDarkness or (Myself.Death) then begin
+      ViewFog := FALSE;
+    end;
+
+    if ViewFog then begin //Æ÷±×
+//        ZeroMemory (PFogScreen, MAPSURFACEHEIGHT * MAPSURFACEWIDTH);
+      ClearLightMap;
+    end;
+
+    drawingbottomline := g_FScreenHeight;
+//   ObjSurface.Fill(0);
+//   DrawTileMap;
+//    ObjSurface.Draw(0, 0, Rect(UNITX * 4 + Myself.ShiftX, UNITY * 5 + Myself.ShiftY, UNITX * 4 + Myself.ShiftX + g_FScreenWidth, UNITY * 5 + Myself.ShiftY + g_FScreenHeight), MapSurface, FALSE);
+    MSurface.FillRect(Rect(0, 0, g_FScreenWidth, g_FScreenHeight), Clblack);
+    MSurface.Draw(0, 0, Rect(UNITX * 3 + Myself.ShiftX, UNITY * 2 + Myself.ShiftY,
+      UNITX * 3 + Myself.ShiftX + g_FScreenWidth, UNITY * 2 + Myself.ShiftY +
+      g_FScreenHeight), MapSurface, FALSE);
+  except
+    DebugOutStr('104');
+  end;
+
+  defx := -UNITX * 2 - MySelf.ShiftX + AAX;
+  defy := -UNITY * 2 - MySelf.ShiftY;
+  DefXX := defx;
+  DefYY := defy;
+
+  try
+    m := defy - UNITY;
+    for j := (Map.ClientRect.Top - Map.BlockTop) to (Map.ClientRect.Bottom - Map.BlockTop
+      + LONGHEIGHT_IMAGE) do begin
+      if j < 0 then begin
+        Inc(m, UNITY);
+        continue;
+      end;
+      n := defx - UNITX * 2;
+      //*** 48*32 Å¸ÀÏÇü ¿ÀºêÁ§Æ® ±×¸®±â
+      for i := (Map.ClientRect.Left - Map.BlockLeft - 2) to (Map.ClientRect.Right
+        - Map.BlockLeft + 2) do begin
+        if (i >= 0) and (i < LOGICALMAPUNIT * 3) and (j >= 0) and (j <
+          LOGICALMAPUNIT * 3) then begin
+          fridx := (Map.MArr[i, j].FrImg) and $7FFF;
+          if fridx > 0 then begin
+            ani := Map.MArr[i, j].AniFrame;
+            wunit := Map.MArr[i, j].Area;
+            if (ani and $80) > 0 then begin
+              blend := TRUE;
+              ani := ani and $7F;
+            end;
+            if ani > 0 then begin
+              anitick := Map.MArr[i, j].anitick;
+              fridx := fridx + (MainAniCount mod (ani + (ani * anitick))) div (1
+                + anitick);
+            end;
+            if (Map.MArr[i, j].DoorOffset and $80) > 0 then begin //¿­¸²
+              if (Map.MArr[i, j].DoorIndex and $7F) > 0 then  //¹®À¸·Î Ç¥½ÃµÈ °Í¸¸
+                fridx := fridx + (Map.MArr[i, j].DoorOffset and $7F); //¿­¸° ¹®
+            end;
+            fridx := fridx - 1;
+               // ¹°Ã¼ ±×¸²
+            DSurface := GetObjs(wunit, fridx);
+            if DSurface <> nil then begin
+              if (DSurface.Width = 48) and (DSurface.Height = 32) then begin
+                mmm := m + UNITY - DSurface.Height;
+                if (n + DSurface.Width > 0) and (n <= g_FScreenWidth) and (mmm +
+                  DSurface.Height > 0) and (mmm < drawingbottomline) then begin
+                  MSurface.Draw(n, mmm, DSurface.ClientRect, DSurface, TRUE)
+                end
+                else begin
+                  if mmm < drawingbottomline then begin //ºÒÇÊ¿äÇÏ°Ô ±×¸®´Â °ÍÀ» ÇÇÇÔ
+                    MSurface.Draw(n, mmm, DSurface.ClientRect, DSurface, TRUE)
+                  end;
+                end;
+              end;
+            end;
+          end;
+        end;
+        Inc(n, UNITX);
+      end;
+      Inc(m, UNITY);
+    end;
+
+   //¶¥¹Ù´Ú¿¡ ±×·ÁÁö´Â ¸¶¹ý
+    for k := 0 to GroundEffectList.Count - 1 do begin
+      meff := TMagicEff(GroundEffectList[k]);
+      //if j = (meff.Ry - Map.BlockTop) then begin
+      meff.DrawEff(MSurface);
+      if ViewFog then begin
+        AddLight(meff.Rx, meff.Ry, 0, 0, meff.light, FALSE);
+      end;
+    end;
+
+  except
+    DebugOutStr('105');
+  end;
+
+  try
+    m := defy - UNITY;
+    for j := (Map.ClientRect.Top - Map.BlockTop) to (Map.ClientRect.Bottom - Map.BlockTop
+      + LONGHEIGHT_IMAGE) do begin
+      if j < 0 then begin
+        Inc(m, UNITY);
+        continue;
+      end;
+      n := defx - UNITX * 2;
+      //*** ¹è°æ¿ÀºêÁ§Æ® ±×¸®±â
+      for i := (Map.ClientRect.Left - Map.BlockLeft - 2) to (Map.ClientRect.Right
+        - Map.BlockLeft + 2) do begin
+        if (i >= 0) and (i < LOGICALMAPUNIT * 3) and (j >= 0) and (j <
+          LOGICALMAPUNIT * 3) then begin
+          fridx := (Map.MArr[i, j].FrImg) and $7FFF;
+          if fridx > 0 then begin
+            blend := FALSE;
+            wunit := Map.MArr[i, j].Area;
+               //¿¡´Ï¸ÞÀÌ¼Ç
+            ani := Map.MArr[i, j].AniFrame;
+            if (ani and $80) > 0 then begin
+              blend := TRUE;
+              ani := ani and $7F;
+            end;
+            if ani > 0 then begin
+              anitick := Map.MArr[i, j].anitick;
+              fridx := fridx + (MainAniCount mod (ani + (ani * anitick))) div (1
+                + anitick);
+            end;
+            if (Map.MArr[i, j].DoorOffset and $80) > 0 then begin //¿­¸²
+              if (Map.MArr[i, j].DoorIndex and $7F) > 0 then  //¹®À¸·Î Ç¥½ÃµÈ °Í¸¸
+                fridx := fridx + (Map.MArr[i, j].DoorOffset and $7F); //¿­¸° ¹®
+            end;
+            fridx := fridx - 1;
+               // ¹°Ã¼ ±×¸²
+            if not blend then begin
+              DSurface := GetObjs(wunit, fridx);
+              if DSurface <> nil then begin
+                if (DSurface.Width <> 48) or (DSurface.Height <> 32) then begin
+                  mmm := m + UNITY - DSurface.Height;
+                  if (n + DSurface.Width > 0) and (n <= g_FScreenWidth) and (mmm
+                    + DSurface.Height > 0) and (mmm < drawingbottomline) then begin
+                    MSurface.Draw(n, mmm, DSurface.ClientRect, DSurface, TRUE)
+                  end
+                  else begin
+                    if mmm < drawingbottomline then begin //ºÒÇÊ¿äÇÏ°Ô ±×¸®´Â °ÍÀ» ÇÇÇÔ
+                      MSurface.Draw(n, mmm, DSurface.ClientRect, DSurface, TRUE)
+                    end;
+                  end;
+                end;
+              end;
+            end
+            else begin
+              DSurface := GetObjsEx(wunit, fridx, ax, ay);
+              if DSurface <> nil then begin
+                mmm := m + ay - 68; //UNITY - DSurface.Height;
+                if (n > 0) and (mmm + DSurface.Height > 0) and (n + DSurface.Width
+                  < g_FScreenWidth) and (mmm < drawingbottomline) then begin
+                  MSurface.DrawBlend(n + ax - 2, mmm, DSurface, 1);
+                end
+                else begin
+                  if mmm < drawingbottomline then begin //ºÒÇÊ¿äÇÏ°Ô ±×¸®´Â °ÍÀ» ÇÇÇÔ
+                    MSurface.DrawBlend(n + ax - 2, mmm, DSurface, 1);
+                  end;
+                end;
+              end;
+            end;
+          end;
+
+        end;
+        Inc(n, UNITX);
+      end;
+
+      if (j <= (Map.ClientRect.Bottom - Map.BlockTop)) and (not BoServerChanging)
+        then begin
+
+        //*** ¹Ù´Ú¿¡ º¯°æµÈ ÈëÀÇ ÈçÀû
+        for k := 0 to EventMan.EventList.Count - 1 do begin
+          evn := TClEvent(EventMan.EventList[k]);
+          if j = (evn.Y - Map.BlockTop) then begin
+            evn.DrawEvent(MSurface, (evn.X - Map.ClientRect.Left) * UNITX + defx, m);
+          end;
+        end;
+
+         //*** ¹Ù´Ú¿¡ ¶³¾îÁø ¾ÆÀÌÅÛ ±×¸®±â
+        for k := 0 to DropedItemList.Count - 1 do begin
+          pd := PTDropItem(DropedItemList[k]);
+          if pd <> nil then begin
+
+            if j = (pd.y - Map.BlockTop) then begin
+              if pd.BoDeco then
+                d := WDecoImg.Images[pd.Looks]
+              else
+                d := WDnItem.Images[pd.Looks];
+
+              if d <> nil then begin
+                ix := (pd.x - Map.ClientRect.Left) * UNITX + defx + SOFFX; // + actor.ShiftX;
+                iy := m; // + actor.ShiftY;
+                if pd.BoDeco then begin
+                  WDecoImg.GetCachedImage(pd.Looks, px, py);
+                  ImgPosX := ix + px;
+                  ImgPosY := iy + py;
+                end
+                else begin
+                  ImgPosX := ix + HALFX - (d.Width div 2);
+                  ImgPosY := iy + HALFY - (d.Height div 2);
+                end;
+                if pd = FocusItem then begin
+                  MSurface.Draw(ImgPosX, ImgPosY, d.ClientRect, d, TRUE);
+                  DrawEffect(ImgPosX, ImgPosY, MSurface, d, ceBright, False);
+                end
+                else begin
+                  MSurface.Draw(ImgPosX, ImgPosY, d.ClientRect, d, TRUE);
+                end;
+              end;
+            end;
+          end;
+        end;
+         //*** Ä³¸¯ÅÍ ±×¸®±â
+        for k := 0 to ActorList.Count - 1 do begin
+          actor := ActorList[k];
+          //if actor.UserName = '' then Continue;
+
+          if actor.Race = 81 then begin  // ¿ù·É(Ãµ³à)
+            if actor.State and $00800000 = 0 then begin//Åõ¸íÀÌ ¾Æ´Ï¸é
+              if not g_NgConfigInfo.boNotDeath then
+                actor.DrawChr(MSurface, (actor.Rx - Map.ClientRect.Left) *
+                  UNITX + defx, (actor.Ry - Map.ClientRect.Top - 1) * UNITY +
+                  defy, TRUE, FALSE);
+            end;
+          end;
+
+          if (j = actor.Ry - Map.BlockTop - actor.DownDrawLevel) then begin
+            actor.SayX := (actor.Rx - Map.ClientRect.Left) * UNITX + defx +
+              actor.ShiftX + 24;
+            if actor.Death then
+              actor.SayY := m + UNITY + actor.ShiftY + 16 - 60 + (actor.DownDrawLevel
+                * UNITY)
+            else
+              actor.SayY := m + UNITY + actor.ShiftY + 16 - 95 + (actor.DownDrawLevel
+                * UNITY);
+            if actor.Death then begin
+              if not g_NgConfigInfo.boNotDeath then
+                actor.DrawChr(MSurface, (actor.Rx - Map.ClientRect.Left) *
+                  UNITX + defx, m + (actor.DownDrawLevel * UNITY), FALSE, TRUE);
+            end
+            else
+              actor.DrawChr(MSurface, (actor.Rx - Map.ClientRect.Left) *
+                UNITX + defx, m + (actor.DownDrawLevel * UNITY), FALSE, TRUE);
+          end;
+        end;
+        for k := 0 to FlyList.Count - 1 do begin
+          meff := TMagicEff(FlyList[k]);
+          if j = (meff.Ry - Map.BlockTop) then
+            meff.DrawEff(MSurface);
+        end;
+
+      end;
+      Inc(m, UNITY);
+    end;
+  except
+    DebugOutStr('106');
+  end;
+
+  try
+    if ViewFog then begin
+      m := defy - UNITY * 4;
+      for j := (Map.ClientRect.Top - Map.BlockTop - 4) to (Map.ClientRect.Bottom
+        - Map.BlockTop + LONGHEIGHT_IMAGE) do begin
+        if j < 0 then begin
+          Inc(m, UNITY);
+          continue;
+        end;
+        n := defx - UNITX * 5;
+         //¹è°æ Æ÷±× ±×¸®±â
+        for i := (Map.ClientRect.Left - Map.BlockLeft - 5) to (Map.ClientRect.Right
+          - Map.BlockLeft + 5) do begin
+          if (i >= 0) and (i < LOGICALMAPUNIT * 3) and (j >= 0) and (j <
+            LOGICALMAPUNIT * 3) then begin
+            idx := Map.MArr[i, j].light;
+            if idx > 0 then begin
+              AddLight(i + Map.BlockLeft, j + Map.BlockTop, 0, 0, idx, FALSE);
+            end;
+          end;
+          Inc(n, UNITX);
+        end;
+        Inc(m, UNITY);
+      end;
+
+      //Ä³¸¯ÅÍ Æ÷±× ±×¸®±â
+      if ActorList.Count > 0 then begin
+        for k := 0 to ActorList.Count - 1 do begin
+          actor := ActorList[k];
+          if (actor = Myself) or (actor.Light > 0) then
+            AddLight(actor.Rx, actor.Ry, actor.ShiftX, actor.ShiftY, actor.Light,
+              actor = Myself);
+        end;
+      end
+      else begin
+        if Myself <> nil then
+          AddLight(Myself.Rx, Myself.Ry, Myself.ShiftX, Myself.ShiftY, Myself.Light,
+            TRUE);
+      end;
+    end;
+  except
+    DebugOutStr('107');
+  end;
+
+  if not BoServerChanging then begin
+    try
+      if (MagicTarget <> nil) then begin
+//         if IsValidActor (MagicTarget) and (MagicTarget <> Myself) then
+        if IsValidActor(MagicTarget) and (MagicTarget <> Myself) and (actor.Race
+          <> 81) then
+          if MagicTarget.State and $00800000 = 0 then //Åõ¸íÀÌ ¾Æ´Ï¸é
+            if MagicTarget.Death then begin
+              if not g_NgConfigInfo.boNotDeath then
+                MagicTarget.DrawChr(MSurface, (MagicTarget.Rx - Map.ClientRect.Left)
+                  * UNITX + defx, (MagicTarget.Ry - Map.ClientRect.Top - 1) *
+                  UNITY + defy, TRUE, FALSE);
+            end
+            else
+              MagicTarget.DrawChr(MSurface, (MagicTarget.Rx - Map.ClientRect.Left)
+                * UNITX + defx, (MagicTarget.Ry - Map.ClientRect.Top - 1) *
+                UNITY + defy, TRUE, FALSE);
+      end;
+
+      //**** ÁÖÀÎ°ø Ä³¸¯ÅÍ ±×¸®±â
+//      if not CheckBadMapMode then
+//         if ( Myself.State and $00800000 = 0 ) then //Åõ¸íÀÌ ¾Æ´Ï¸é 1¹ø¸ðµåÀÏ¶§¿¡´Â Ç®¾îÁÜ
+//         begin
+      Myself.DrawChr(MSurface, (Myself.Rx - Map.ClientRect.Left) * UNITX +
+        defx, (Myself.Ry - Map.ClientRect.Top - 1) * UNITY + defy, TRUE, FALSE);
+//         end;
+      //**** ¸¶¿ì½º¸¦ °®´Ù´ë°í ÀÖ´Â Ä³¸¯ÅÍ
+      if (FocusCret <> nil) then begin
+//         if IsValidActor (FocusCret) and (FocusCret <> Myself) then
+        if IsValidActor(FocusCret) and (FocusCret <> Myself) and (actor.Race <> 81) then
+          if FocusCret.State and $00800000 = 0 then //Åõ¸íÀÌ ¾Æ´Ï¸é
+            if FocusCret.Death then begin
+              if not g_NgConfigInfo.boNotDeath then
+                FocusCret.DrawChr(MSurface, (FocusCret.Rx - Map.ClientRect.Left)
+                  * UNITX + defx, (FocusCret.Ry - Map.ClientRect.Top - 1) *
+                  UNITY + defy, TRUE, FALSE);
+            end
+            else
+              FocusCret.DrawChr(MSurface, (FocusCret.Rx - Map.ClientRect.Left)
+                * UNITX + defx, (FocusCret.Ry - Map.ClientRect.Top - 1) * UNITY
+                + defy, TRUE, FALSE);
+      end;
+    except
+      DebugOutStr('108');
+    end;
+  end;
+  try
+   //**** ¸¶¹ý È¿°ú
+    for k := 0 to ActorList.Count - 1 do begin
+      actor := ActorList[k];
+      actor.DrawEff(MSurface, (actor.Rx - Map.ClientRect.Left) * UNITX +
+        defx, (actor.Ry - Map.ClientRect.Top - 1) * UNITY + defy);
+    end;
+    for k := 0 to EffectList.Count - 1 do begin
+      meff := TMagicEff(EffectList[k]);
+      //if j = (meff.Ry - Map.BlockTop) then begin
+      meff.DrawEff(MSurface);
+      if ViewFog then begin
+        AddLight(meff.Rx, meff.Ry, 0, 0, meff.Light, FALSE);
+      end;
+    end;
+    if ViewFog then begin //ÏÔÊ¾ºÚ°µÓÐ¹Ø
+      for k := 0 to EventMan.EventList.Count - 1 do begin
+        evn := TClEvent(EventMan.EventList[k]);
+        if evn.light > 0 then
+          AddLight(evn.X, evn.Y, 0, 0, evn.light, FALSE);
+      end;
+    end;
+  except
+    DebugOutStr('109');
+  end;
+
+   //µØÃæÎïÆ·ÉÁÁÁ
+  try
+    for k := 0 to DropedItemList.Count - 1 do begin
+      pd := PTDropItem(DropedItemList[k]);
+
+      if (pd <> nil) and (not pd.BoDeco) then begin
+        if GetTickCount - pd.FlashTime > 5 * 1000 then begin //ÉÁË¸
+          pd.FlashTime := GetTickCount;
+          pd.BoFlash := TRUE;
+          pd.FlashStepTime := GetTickCount;
+          pd.FlashStep := 0;
+        end;
+        ix := (pd.x - Map.ClientRect.Left) * UNITX + defx + SOFFX;
+        iy := (pd.y - Map.ClientRect.Top - 1) * UNITY + defy + SOFFY;
+
+        if pd.BoFlash then begin
+          if GetTickCount - pd.FlashStepTime >= 20 then begin
+            pd.FlashStepTime := GetTickCount;
+            Inc(pd.FlashStep);
+          end;
+
+          if (pd.FlashStep >= 0) and (pd.FlashStep < 10) then begin
+            DSurface := WProgUse.GetCachedImage(FLASHBASE + pd.FlashStep, ax, ay);
+            if DSurface <> nil then
+              MSurface.DrawBlend(ix + ax, iy + ay, DSurface, 1);
+          end
+          else
+            pd.BoFlash := FALSE;
+        end;
+      end;
+    end;
+  except
+    DebugOutStr('110');
+  end;
+
+        for k := 0 to ActorList.Count - 1 do
+        begin
+          actor := ActorList[k];
+
+          if g_boMirShowHp then begin
+
+             if not actor.Death then begin
+              if actor.BoInstanceOpenHealth then
+                if GetTickCount - actor.OpenHealthStart > actor.OpenHealthTime then
+                  actor.BoInstanceOpenHealth := FALSE;
+
+          //Êý×ÖÏÔÑª
+
+              if g_boMirShowNumber then begin
+                if ( actor = MySelf ) or (g_bo¾ø¶ÔÌ©É½) then begin
+                  if ((actor.Abil.MaxHP > 1)) and not actor.Death then begin
+                    infoMsg := IntToStr(actor.Abil.HP) + '/' + IntToStr(actor.Abil.MaxHP);
+                    MSurface.BoldTextOut(actor.SayX - {15}FontManager.Default.TextWidth(infoMsg)
+                      div 2, actor.SayY - 23, clWhite, clBlack, infoMsg);
+                  end;
+                end
+                else begin
+                  if (actor.BoOpenHealth or actor.BoInstanceOpenHealth) and not actor.Death then
+                    if ((actor.Abil.MaxHP > 1)) and not actor.Death then begin
+                      infoMsg := IntToStr(actor.Abil.HP) + '/' + IntToStr(actor.Abil.MaxHP);
+                      MSurface.BoldTextOut(actor.SayX - {15}FontManager.Default.TextWidth(infoMsg)
+                        div 2, actor.SayY - 23, clWhite, clBlack, infoMsg);
+                    end;
+                end;
+              end
+              else begin
+                if (actor.BoOpenHealth and (actor.Abil.MaxHP > 1)) and not actor.Death
+                  then begin
+                  infoMsg := IntToStr(actor.Abil.HP) + '/' + IntToStr(actor.Abil.MaxHP);
+                  MSurface.BoldTextOut(actor.SayX - {15}FontManager.Default.TextWidth(infoMsg)
+                    div 2, actor.SayY - 23, clWhite, clBlack, infoMsg);
+                end;
+              end;
+
+              if actor.Race = 0 then begin
+                d := WProgUse2.Images[HEALTHBAR_BLUE]; //×é¶ÓÀ¶Ìõ
+                HpColor := $FF0000;
+              end
+              else begin
+                d := WProgUse2.Images[HEALTHBAR_RED];
+                HpColor := $0000FF;
+              end;
+
+              if actor.Race in [12, 24, 50] then begin//´óµ¶£¬´øµ¶£¬NPC
+                d := WProgUse2.Images[10];      //NPCÍ·¶¥ÑªÌõÍ¼Æ¬
+                HpColor := $CE9C4A;
+              end else
+              begin
+                if actor <> MySelf then begin
+                  d := WProgUse2.Images[HEALTHBAR_RED];
+                  HpColor := $0000FF;
+                  DScreen.AddChatBoardString('²âÊÔÑªÌõ', clGreen, clWhite);
+                end else if g_NgConfigInfo.boBrightShowHp then begin
+                  d := WProgUse2.Images[12];
+                  HpColor := $00DE00;
+                end else begin
+                  d := WProgUse2.Images[HEALTHBAR_RED];
+                  HpColor := $0000FF;
+                end;
+              end;
+             // if Actor.BoMagicShield then begin
+              //   d := WProgUse2.Images[10];
+             //    HpColor := $CE9C4A;
+            //    DScreen.AddChatBoardString('²âÊÔ»¤Éí', clGreen, clWhite);
+            //  end;
+              if Actor.BoMagicShield  then begin        //  »¤ÉíÏÔÀ¶
+               // d := WProgUse2.Images[HEALTHBAR_BLUE];
+                d := WProgUse2.Images[10];
+               if actor.Abil.MaxMP > 0 then
+                  rc.Right := Round((rc.Right-rc.Left) / actor.Abil.MaxMP * actor.Abil.MP);
+                  rc.Right := _MIN(rc.Right,d.width);
+                  MSurface.Draw (actor.SayX - d.Width div 2, actor.SayY - 10, rc, d, TRUE);
+                  DScreen.AddChatBoardString('²âÊÔ»¤Éí', clGreen, clWhite);
+              end;
+
+
+              if d <> nil then begin
+                rc := d.ClientRect;
+                if actor.Abil.MaxHP > 0 then
+                  rc.Right := _MIN(Round((rc.Right - rc.Left) / actor.Abil.MaxHP * actor.Abil.HP), d.Width);
+//                MSurface.Draw(actor.SayX - d.Width div 2, actor.SayY - 10, rc, d, TRUE);
+
+                if actor.Abil.MaxHP > 0 then begin
+                  Right := _MIN(31, Round(31 / actor.Abil.MaxHP * actor.Abil.HP));
+                end
+                else begin
+                  Right := 31;
+                end;
+                MSurface.FillRect(Rect(actor.SayX - 31 div 2,Actor.SayY - 9,actor.SayX - 31 div 2 + Right - 1,actor.SayY - 10 + 3), HpColor);
+              end;
+              d := WProgUse2.Images[HEALTHBAR_BLACK];
+              if d <> nil then
+                MSurface.Draw(actor.SayX - d.Width div 2, actor.SayY - 10, d.ClientRect, d, TRUE);
+            end;
+          end
+          else begin
+            if (actor.BoOpenHealth or actor.BoInstanceOpenHealth) and not actor.Death then begin
+              if actor.BoInstanceOpenHealth then
+                if GetTickCount - actor.OpenHealthStart > actor.OpenHealthTime then
+
+                  actor.BoInstanceOpenHealth := FALSE;
+
+              d := WProgUse2.Images[HEALTHBAR_BLACK];
+              if d <> nil then
+                MSurface.Draw(actor.SayX - d.Width div 2, actor.SayY - 10, d.ClientRect,
+                  d, TRUE);
+              if actor.Race = 0 then
+                d := WProgUse2.Images[HEALTHBAR_BLUE] //×é¶ÓÀ¶Ìõ
+              else
+                d := WProgUse2.Images[HEALTHBAR_RED];
+
+              if actor.Race in [12, 24, 50] then //´óµ¶£¬´øµ¶£¬NPC
+                d := WProgUse2.Images[10]      //NPCÍ·¶¥ÑªÌõÍ¼Æ¬
+              else begin
+                if actor <> MySelf then
+                  d := WProgUse2.Images[HEALTHBAR_RED]
+                else if g_NgConfigInfo.boBrightShowHp then
+                  d := WProgUse2.Images[12]
+                else
+                  d := WProgUse2.Images[HEALTHBAR_RED];
+              end;
+
+              if d <> nil then begin
+                rc := d.ClientRect;
+                if actor.Abil.MaxHP > 0 then
+                  rc.Right := _MIN(Round((rc.Right - rc.Left) / actor.Abil.MaxHP * actor.Abil.HP), d.Width);
+                MSurface.Draw(actor.SayX - d.Width div 2, actor.SayY - 10, rc, d, TRUE);
+              end;
+            end;
+            if g_boMirShowNumber then begin
+              //Êý×ÖÏÔÑª
+              if (actor = MySelf ) or (g_bo¾ø¶ÔÌ©É½) then begin
+                if ((actor.Abil.MaxHP > 1)) and not actor.Death then begin
+                  infoMsg := IntToStr(actor.Abil.HP) + '/' + IntToStr(actor.Abil.MaxHP);
+                  MSurface.BoldTextOut(actor.SayX - {15}FontManager.Default.TextWidth(infoMsg)
+                    div 2, actor.SayY - 23, clWhite, clBlack, infoMsg);
+                end;
+              end
+              else begin
+                if (actor.BoOpenStruckHealth) and not actor.Death then begin
+                  if actor.BoOpenStruckHealth then
+                    if GetTickCount - actor.OpenStruckStart > actor.OpenStruckTime then
+                      actor.BoOpenStruckHealth := FALSE;
+
+                  if ((actor.Abil.MaxHP > 1)) and not actor.Death then begin
+                    infoMsg := IntToStr(actor.Abil.HP) + '/' + IntToStr(actor.Abil.MaxHP);
+                    MSurface.BoldTextOut(actor.SayX - {15}FontManager.Default.TextWidth(infoMsg)
+                      div 2, actor.SayY - 23, clWhite, clBlack, infoMsg);
+                  end;
+                end;
+              end;
+            end;
+          end;
+        end;
+
+      if g_NgConfigInfo.boShowName then begin
+
+//        with PlayScene do begin
+          for k := 0 to ActorList.Count - 1 do begin
+            Actor := ActorList[k];
+
+
+            if (Actor <> nil) and //
+              (not Actor.Death) and //
+              (Actor.SayX <> 0) and //
+              (Actor.SayY <> 0) and //
+              ((actor.Race = 0) or //
+              (actor.Race = 1) or //
+              (actor.Race = 12) or //
+              (actor.Race = 50)) then
+            begin
+              if (Actor <> FocusCret) then
+              begin
+                if (actor = MySelf) and boSelectMyself then
+                  Continue;
+                uname := Actor.UserName;
+                case actor.Race of
+                  12, 50:
+                    if g_boMirNg then
+                      TempNameColor := clLime
+                    else
+                      //TempNameColor := Actor.NameColor;
+                      TempNameColor := clLime;  //NPC²»¿ªÄÚ¹ÒÑÕÉ«
+                else
+                  TempNameColor := Actor.NameColor;
+                end;
+
+                NameTextOut(MSurface, Actor.SayX, // - Canvas.TextWidth(uname) div 2,
+                  Actor.SayY + 30, TempNameColor, ClBlack, uname);
+              end;
+            end;
+          end;
+
+//        end;
+      end;
+
+         //»­µ±Ç°Ñ¡ÔñµÄÎïÆ·/ÈËÎïµÄÃû×Ö
+      if (FocusCret <> nil) and {PlayScene.}IsValidActor(FocusCret) then
+      begin        if FocusCret.Race = 95 then
+        begin
+          if FocusCret.Death then
+            FocusCret.UserName := '¾Æ¹öÁö'
+          else
+            FocusCret.UserName := '½û±â³ª¹æ';
+        end
+        else if FocusCret.Race = 96 then
+          FocusCret.UserName := '';
+
+        uname := FocusCret.DescUserName + '\' + FocusCret.UserName;
+        if (FocusCret.Race = 50) and (FocusCret.Appearance = 57) then
+          uname := '';
+        case FocusCret.Race of
+          12, 50:
+            begin
+              if g_boMirNg then
+                TempNameColor := clLime
+              else
+                TempNameColor := clLime;   //NPC²»¿ªÄÚ¹ÒÑÕÉ«
+            end
+        else
+         TempNameColor := FocusCret.NameColor;
+        end;
+        if FocusCret.Death then
+        begin
+          if not g_NgConfigInfo.boNotDeath then
+            NameTextOut(MSurface, FocusCret.SayX, // - Canvas.TextWidth(uname) div 2,
+              FocusCret.SayY + 30, TempNameColor, clBlack, uname);
+        end
+        else
+        NameTextOut(MSurface, FocusCret.SayX, // - Canvas.TextWidth(uname) div 2,
+          FocusCret.SayY + 30, TempNameColor, clBlack, uname);
+      end;
+      if BoSelectMyself then
+      begin
+        uname := Myself.DescUserName + '\' + Myself.UserName;  //ÄãÔ­À´¶¼ÓÐµÄ  Äã¶¼¸ø¸ÄÃ»ÁË
+         NameTextOut(MSurface, Myself.SayX, // - Canvas.TextWidth(uname) div 2,
+          Myself.SayY + 30, Myself.NameColor, clBlack, uname);
+      end;
+         //ÏÔÊ¾½ÇÉ«Ëµ»°ÎÄ×Ö
+
+        for k := 0 to ActorList.Count - 1 do
+        begin
+          actor := ActorList[k];
+          if actor is THumActor then
+            if THumActor(actor).m_StallMgr.OnSale then begin
+              NameTextOut(MSurface, THumActor(actor).SayX, THumActor(actor).SayY
+                - 36, GetRGB(94), clBlack, THumActor(actor).m_StallMgr.mBlock.StallName);
+            end;
+          if actor.Saying[0] <> '' then
+          begin
+            if GetTickCount - actor.SayTime < 4 * 1000 then
+            begin
+              for i := 0 to actor.SayLineCount - 1 do
+                if actor.Death then
+                           //¿ØÖÆÍæ¼ÒËµ»°µÄÑÕÉ«£¨Í·¶¥ÉÏµÄ×ÖÌåÑÕÉ«£©
+                  MSurface.BoldTextOut(actor.SayX - (actor.SayWidths[i] div 2), actor.SayY - (actor.SayLineCount * 16) + i * 14, clGray, clBlack, actor.Saying[i])
+                else
+                           //¿ØÖÆÈËÎïËÀÍöºóËµ»°µÄÑÕÉ«£¨Í·¶¥ÉÏµÄ×ÖÌåÑÕÉ«
+                  MSurface.BoldTextOut(actor.SayX - (actor.SayWidths[i] div 2), actor.SayY - (actor.SayLineCount * 16) + i * 14, clWhite, clBlack, actor.Saying[i]);
+            end
+            else
+              actor.Saying[0] := ''; //ËµµÄ»°ÏÔÊ¾4Ãë
+          end;
+        end;
+              if g_boShowName then begin
+
+            for k := 0 to ActorList.Count - 1 do begin
+              Actor := ActorList[k];
+              if (Actor <> nil)  and (not Actor.Death) and
+              //                (Actor.SayX <> 0) and (Actor.SayY <> 0) and ((actor.Race = 0) or (actor.Race = 1) or (actor.Race = 50)) then begin
+//                (Actor.SayX <> 0) and (Actor.SayY <> 0) and (actor.Race = 50) then begin
+                (Actor.SayX <> 0) and (Actor.SayY <> 0) and ((actor.Race = 12) or (actor.Race = 50)) then begin
+                  if (Actor <> FocusCret) then begin
+
+                    if (actor = MySelf) and boSelectMyself then Continue;
+                        uname := Actor.UserName;
+
+                      NameTextOut(MSurface,
+                        Actor.SayX, // - Canvas.TextWidth(uname) div 2,
+                        Actor.SayY + 30,
+                        ClLime, ClBlack,   //Actor.NameColor, ClBlack,  //NPCÃû×ÖÑÕÉ«
+                        uname);
+
+
+                  end;
+
+
+
+                end;
+               // if (Actor <> nil) { and (not Actor.Death)}  and (Actor.SayX <> 0) and (Actor.SayY <> 0) and ((actor.Race = 0) or (actor.Race = 1)) then begin
+                if (Actor <> nil)  and (not Actor.Death) and
+                  (Actor.SayX <> 0) and (Actor.SayY <> 0) and ((actor.Race = 0) or (actor.Race = 1)) then begin
+                  if (Actor <> FocusCret) then begin
+
+                    if (actor = MySelf) and boSelectMyself then Continue;
+                        uname := Actor.UserName;
+
+                      NameTextOut(MSurface,
+                        Actor.SayX, // - Canvas.TextWidth(uname) div 2,
+                        Actor.SayY + 30,
+                        Actor.NameColor, ClBlack,   //ÈËÎïÃû×ÖÑÕÉ«
+                        uname);
+
+
+                  end;
+
+
+
+
+                end;
+
+
+
+            end;
+
+        end; //with
+
+
+
+
+  if g_boMirNg then begin
+    DropItemsShow(MSurface);
+  end
+  else begin
+    if DropItemView then
+      if TabClickTime + 3000 > GetTickCount then begin
+        DropItemsShow(MSurface);
+      end;
+  end;
+
+  if ViewFog and (not MySelf.Death) then
+    MSurface.Draw(0, 0, LigSurface, clWhite4, beMultiply);
+
+  try
+    if ViewFog then begin
+      MSurface.Draw(SOFFX, SOFFY, ObjSurface.ClientRect, ObjSurface);
+    end
+    else begin
+      if Myself.Death then
+        g_GameCanvas.Draw(SOFFX, SOFFY, ObjSurface, beGrayscale);
+
+      MSurface.Draw(SOFFX, SOFFY, ObjSurface.ClientRect, ObjSurface);
+    end;
+  except
+    DebugOutStr('111');
+  end;
+
+  if BoDrawMiniMap and (MiniMapIndex <> -1) and (Myself <> nil) then begin
+    if ViewMiniMapStyle > 0 then begin
+      if ViewMiniMapStyle = 1 then begin
+        DrawMiniMap(MSurface, ViewMiniMapTran);
+//        FrmDlg.DGeneralMap.Visible := FALSE;
+      end
+      else if ViewMiniMapStyle = 2 then begin
+        DrawMiniMap(MSurface, ViewMiniMapTran);
+//        FrmDlg.DGeneralMap.Visible := FALSE;
+      end
+      else if ViewMiniMapStyle = 3 then begin
+        DrawMiniMap(MSurface, ViewMiniMapTran);
+//        FrmDlg.DGeneralMap.Visible := True;
+      end;
+    end;
+
+    if ViewGeneralMapStyle > 0 then begin
+      if ViewGeneralMapStyle = 1 then begin
+        if MiniMapIndex in [100, 101, 102, 104, 105, 120, 160, 190] then
+          DrawGeneralMap(MSurface, TRUE)
+        else begin
+          ViewGeneralMapStyle := 0;
+          DScreen.AddChatBoardString('µ±Ç°µØÍ¼Ã»ÓÐÉèÖÃ´óµØÍ¼', clGreen, clWhite);
+//         else if MiniMapIndex in [134,101,102,104,105,160,190] then DrawGeneralMap2 (MSurface, FALSE)
+        end;
+      end
+      else begin
+        if MiniMapIndex in [100, 101, 102, 104, 105, 120, 160, 190] then
+          DrawGeneralMap(MSurface, FALSE)
+        else begin
+          ViewGeneralMapStyle := 0;
+          DScreen.AddChatBoardString('Only field map will be displayed.',
+            clGreen, clWhite);
+//            DScreen.AddChatBoardString ('×Ö¶ÎÓ³Éä¾Í¿ÉÒÔ.', clGreen, clWhite);
+        end;
+      end;
+    end;
+  end;
+end;
+
+{-------------------------------------------------------}
+
+//cx, cy, tx, ty : ¸ÊÀÇ ÁÂÇ¥
+
+procedure TPlayScene.NewMagic(aowner: TActor; magid, magnumb, cx, cy, tx, ty,
+  targetcode: integer; mtype: TMagicType; Recusion: Boolean; anitime: integer;
+  var bofly: Boolean);
+var
+  i, scx, scy, sctx, scty, effnum: integer;
+  meff: TMagicEff;
+  target: TActor;
+  wimg: TWMImages;
+begin
+  if (mtype = mtThunder) and ((magnumb = 8) or (magnumb = 9)) then
+
+  else if not BoViewEffect then begin
+    meff := nil;
+    Exit;
+  end;
+  bofly := FALSE;
+  if not (magid in [SM_DRAGON_LIGHTING, 70..74, 111, MAGIC_JW_EFFECT1,
+    MAGIC_SOULBALL_ATT3_1..MAGIC_SOULBALL_ATT3_5, MAGIC_KINGTURTLE_ATT2_1,
+    MAGIC_KINGTURTLE_ATT2_2]) then //¹ß»ç ¸¶¹ýÀº Áßº¹µÊ. // FireDragon
+    for i := 0 to EffectList.Count - 1 do
+      if TMagicEff(EffectList[i]).ServerMagicId = magid then
+        exit; //ÀÌ¹Ì ÀÖÀ½..
+          if magnumb in [52, 53] then begin
+  ScreenXYfromMCXY(cx, cy, scx, scy);
+  ScreenXYfromMCXY(tx, ty - 20, sctx, scty);
+  end else begin
+  ScreenXYfromMCXY(cx, cy, scx, scy);
+  ScreenXYfromMCXY(tx, ty, sctx, scty);
+  end;
+  if magnumb > 0 then
+    GetEffectBase(magnumb - 1, 0, wimg, effnum)
+  else
+    effnum := -magnumb;
+  target := FindActor(targetcode);
+
+  meff := nil;
+  case mtype of
+    mtReady, mtFly, mtFlyAxe:
+      begin
+        meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+          Recusion, anitime);
+        meff.TargetActor := target;
+        meff.ImgLib := wimg;
+        bofly := TRUE;
+      end;
+    mtFlyBug:
+      begin
+        meff := TFlyingBug.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+          Recusion, anitime);
+        meff.TargetActor := target;
+            //if effnum = 38 then
+            //   meff.ImgLib := WMagic2;
+        bofly := TRUE;
+      end;
+
+    mtExplosion,mtIceSickle:
+      case magnumb of
+        18:
+          begin //·ÚÈ¥°Ý
+            meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+              Recusion, anitime);
+            meff.MagExplosionBase := 1570;
+            meff.TargetActor := target;
+            meff.NextFrameTime := 80;
+          end;
+        21:
+          begin //Æø¿­ÆÄ
+            meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+              Recusion, anitime);
+            meff.MagExplosionBase := 1660;
+            meff.TargetActor := nil; //target;
+            meff.NextFrameTime := 80;
+            meff.ExplosionFrame := 20;
+            meff.Light := 3;
+          end;
+        26:
+          begin //Å½±âÆÄ¿¬
+            meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+              Recusion, anitime);
+            meff.MagExplosionBase := 3990;
+            meff.TargetActor := target;
+            meff.NextFrameTime := 80;
+            meff.ExplosionFrame := 10;
+            meff.Light := 2;
+          end;
+        27:
+          begin //´ëÈ¸º¹¼ú
+            meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+              Recusion, anitime);
+            meff.MagExplosionBase := 1800;
+            meff.TargetActor := nil; //target;
+            meff.NextFrameTime := 80;
+            meff.ExplosionFrame := 10;
+            meff.Light := 3;
+          end;
+        30:
+          begin //»çÀÚÀ±È¸
+            meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+              Recusion, anitime);
+            meff.MagExplosionBase := 3930;
+            meff.TargetActor := target;
+            meff.NextFrameTime := 80;
+            meff.ExplosionFrame := 16;
+            meff.Light := 3;
+          end;
+        31:
+          begin //ºù¼³Ç³
+            meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+              Recusion, anitime);
+            meff.MagExplosionBase := 3850;
+            meff.TargetActor := nil; //target;
+            meff.NextFrameTime := 80;
+            meff.ExplosionFrame := 20;
+            meff.Light := 3;
+          end;
+        40:
+          begin //Á¤È­¼ú
+            meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+              Recusion, anitime);
+            meff.MagExplosionBase := 620;
+            meff.TargetActor := target;
+            meff.NextFrameTime := 80;
+            meff.ExplosionFrame := 10;
+            meff.Light := 3;
+            meff.ImgLib := wimg;
+          end;
+        47:
+          begin //Æ÷½Â°Ë
+            meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+              Recusion, anitime);
+            meff.MagExplosionBase := 1010;
+            meff.TargetActor := target;
+            meff.NextFrameTime := 120;
+            meff.ExplosionFrame := 10;
+            meff.Light := 2;
+            meff.ImgLib := wimg;
+          end;
+        48:
+          begin //ÈíÇ÷¼ú
+            meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+              Recusion, anitime);
+            meff.MagExplosionBase := 1060;
+            meff.TargetActor := target;
+            meff.NextFrameTime := 80;
+            meff.ExplosionFrame := 20;
+            meff.Light := 2;
+            meff.ImgLib := wimg;
+          end;
+        52:
+          begin //Blizzard
+            meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype, Recusion, anitime);
+            meff.MagExplosionBase := 1550;
+            meff.TargetActor := target;
+            meff.NextFrameTime := 33;
+            meff.ExplosionFrame := 120;
+            meff.Blizzard := True;
+            meff.Light := 2;
+            wimg := WMagic2;
+            meff.ImgLib := wimg;
+            PlaySound(10523);
+            meff.SoundIndex := 10523;
+            meff.TargetActor := nil
+          end;
+        53: begin //MeteorStrike
+          meff := TMagicEff.Create(magid, effnum, scx, scy, sctx,
+            scty, mtype, Recusion, anitime);
+          meff.MagExplosionBase := 1610;
+          meff.TargetActor := target;
+          meff.NextFrameTime := 33;
+          meff.ExplosionFrame := 120;
+          meff.Blizzard := True;
+          meff.Light := 2;
+          wimg   := WMagic2;
+          meff.ImgLib := wimg;
+          PlaySound(10532);
+          PlaySound(10533);
+          meff.SoundIndex := 10533;
+          meff.TargetActor := nil;
+        end;
+        57: meff := nil; //ºù¿°¼ú
+        90:
+          begin // ¿ë¼®»ó Áö¿° FireDragon
+            wimg := WDragonImg;
+            meff.ImgLib := wimg;
+            effnum := 350;
+            meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+              Recusion, anitime);
+            meff.MagExplosionBase := 350;
+            meff.ExplosionFrame := 30;
+            meff.TargetActor := nil; //target;
+            meff.NextFrameTime := 100;
+            meff.Light := 3;
+          end;
+
+      else
+        begin  //µÈ»Ö¸´..
+          meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+            Recusion, anitime);
+          meff.TargetActor := target;
+          meff.NextFrameTime := 80;
+        end;
+      end;
+    mtFireWind:
+      meff := nil;  //ÎÞÐ§¹û
+    mtFireGun: //»ðÑæÅçÉä
+      meff := TFireGunEffect.Create(930, scx, scy, sctx, scty);
+    mtThunder:
+      begin
+        if magnumb = SM_DRAGON_LIGHTING then begin
+          meff := TThuderEffectEx.Create(230, sctx, scty, nil, magnumb); //target);
+          meff.ExplosionFrame := 5;
+//               meff.MagExplosionBase := 250;
+          meff.ImgLib := WDragonImg;
+          meff.NextFrameTime := 80;
+        end
+        else if magnumb = MAGIC_DUN_THUNDER then begin
+          meff := TThuderEffectEx.Create(400, sctx, scty, nil, magnumb); //target);
+          meff.ExplosionFrame := 5;
+          meff.ImgLib := WDragonImg;
+          meff.NextFrameTime := 100;
+        end
+        else if magnumb = MAGIC_DUN_FIRE1 then begin
+          meff := TThuderEffectEx.Create(440, sctx, scty, nil, magnumb); //target);
+          meff.ExplosionFrame := 20;
+          meff.ImgLib := WDragonImg;
+          meff.NextFrameTime := 90;
+        end
+        else if magnumb = MAGIC_DUN_FIRE2 then begin
+          meff := TThuderEffectEx.Create(470, sctx, scty, nil, magnumb); //target);
+          meff.ExplosionFrame := 10;
+          meff.ImgLib := WDragonImg;
+          meff.NextFrameTime := 90;
+        end
+        else if magnumb = MAGIC_DRAGONFIRE then begin
+          meff := TThuderEffectEx.Create(200, sctx, scty, nil, magnumb); //target);
+          meff.ExplosionFrame := 20;
+          meff.ImgLib := WDragonImg;
+          meff.NextFrameTime := 120;
+        end
+        else if magnumb = MAGIC_FIREBURN then begin
+          meff := TThuderEffectEx.Create(350, sctx, scty, nil, magnumb); //target);
+          meff.ExplosionFrame := 35;
+          meff.ImgLib := WDragonImg;
+          meff.NextFrameTime := 100;
+        end
+        else if magnumb = MAGIC_SERPENT_1 then begin
+          meff := TThuderEffectEx.Create(1250, sctx, scty, nil, magnumb); //target);
+          meff.ExplosionFrame := 15;
+          meff.ImgLib := WMagic2;
+          meff.NextFrameTime := 90;
+        end
+        else if magnumb = MAGIC_JW_EFFECT1 then begin
+          meff := TThuderEffectEx.Create(1160, sctx, scty, nil, magnumb);
+          meff.ExplosionFrame := 18;
+          meff.ImgLib := WMagic2;
+          meff.NextFrameTime := 120;
+        end
+        else if magnumb = MAGIC_FOX_THUNDER then begin
+          meff := TThuderEffectEx.Create(780, sctx, scty, nil, magnumb);
+          meff.ExplosionFrame := 9;
+          meff.ImgLib := WMon24Img;
+          meff.NextFrameTime := 100;
+        end
+        else if magnumb = MAGIC_FOX_FIRE1 then begin
+          meff := TThuderEffectEx.Create(790, sctx, scty, nil, magnumb);
+          meff.ExplosionFrame := 10;
+          meff.ImgLib := WMon24Img;
+          meff.NextFrameTime := 100;
+        end
+        else if magnumb = MAGIC_SOULBALL_ATT2 then begin
+          meff := TThuderEffectEx.Create(2120, sctx, scty, nil, magnumb);
+          meff.ExplosionFrame := 20;
+          meff.ImgLib := WMon24Img;
+          meff.NextFrameTime := 100;
+        end
+        else if magnumb = MAGIC_SOULBALL_ATT3_1 then begin
+          meff := TThuderEffectEx.Create(2160, sctx, scty, nil, magnumb);
+          meff.ExplosionFrame := 20;
+          meff.ImgLib := WMon24Img;
+          meff.NextFrameTime := 100;
+          meff.Light := 1;
+        end
+        else if magnumb = MAGIC_SOULBALL_ATT3_2 then begin
+          meff := TThuderEffectEx.Create(2180, sctx, scty, nil, magnumb);
+          meff.ExplosionFrame := 20;
+          meff.ImgLib := WMon24Img;
+          meff.NextFrameTime := 100;
+          meff.Light := 1;
+        end
+        else if magnumb = MAGIC_SOULBALL_ATT3_3 then begin
+          meff := TThuderEffectEx.Create(2200, sctx, scty, nil, magnumb);
+          meff.ExplosionFrame := 20;
+          meff.ImgLib := WMon24Img;
+          meff.NextFrameTime := 100;
+          meff.Light := 1;
+        end
+        else if magnumb = MAGIC_SOULBALL_ATT3_4 then begin
+          meff := TThuderEffectEx.Create(2220, sctx, scty, nil, magnumb);
+          meff.ExplosionFrame := 20;
+          meff.ImgLib := WMon24Img;
+          meff.NextFrameTime := 100;
+          meff.Light := 1;
+        end
+        else if magnumb = MAGIC_SOULBALL_ATT3_5 then begin
+          meff := TThuderEffectEx.Create(2240, sctx, scty, nil, magnumb);
+          meff.ExplosionFrame := 20;
+          meff.ImgLib := WMon24Img;
+          meff.NextFrameTime := 100;
+          meff.Light := 1;
+        end
+        else if magnumb = MAGIC_KINGTURTLE_ATT2_1 then begin
+          meff := TThuderEffectEx.Create(3010, sctx, scty, nil, magnumb);
+          meff.ExplosionFrame := 12;
+          meff.ImgLib := WMon25Img;
+          meff.NextFrameTime := 100;
+          meff.Light := 1;
+        end
+        else if magnumb = MAGIC_KINGTURTLE_ATT2_2 then begin
+          meff := TThuderEffectEx.Create(3030, sctx, scty, nil, magnumb);
+          meff.ExplosionFrame := 12;
+          meff.ImgLib := WMon25Img;
+          meff.NextFrameTime := 100;
+          meff.Light := 1;
+        end
+        else begin
+          meff := TThuderEffect.Create(10, sctx, scty, nil); //target);
+          meff.ExplosionFrame := 6;
+          meff.ImgLib := WMagic2;
+        end
+      end;
+      // 2003/03/15 ½Å±Ô¹«°ø Ãß°¡
+    mtFireThunder:
+      begin
+        meff := TThuderEffect.Create(140, sctx, scty, nil); //target);
+        meff.ExplosionFrame := 10;
+        meff.ImgLib := WMagic2;
+      end;
+
+    mtLightingThunder:
+      meff := TLightingThunder.Create(970, scx, scy, sctx, scty, target);
+    mtExploBujauk:
+      begin
+        case magnumb of
+          10:
+            begin  //Æø»ì°è
+              meff := TExploBujaukEffect.Create(1160, magnumb, scx, scy, sctx,
+                scty, target);
+              meff.MagExplosionBase := 1360;
+            end;
+          17:
+            begin  //´ëÀº½Å
+              meff := TExploBujaukEffect.Create(1160, magnumb, scx, scy, sctx,
+                scty, target);
+              meff.MagExplosionBase := 1540;
+            end;
+          49:
+            begin  //¹ÌÈ¥¼ú
+              meff := TExploBujaukEffect.Create(1160, magnumb, scx, scy, sctx,
+                scty, target);
+              meff.MagExplosionBase := 1110;
+              meff.ExplosionFrame := 10;
+//                  meff.ImgLib := WMagic2;
+            end;
+          MAGIC_FOX_FIRE2:
+            begin  //¼ú»çºñ¿ù¿©¿ì:Æø»ì°è
+              meff := TExploBujaukEffect.Create(1160, magnumb, scx, scy, sctx,
+                scty, target);
+              meff.MagExplosionBase := 1320;
+              meff.ExplosionFrame := 10;
+            end;
+          MAGIC_FOX_CURSE:
+            begin  //¼ú»çºñ¿ù¿©¿ì:ÀúÁÖ¼ú
+              meff := TExploBujaukEffect.Create(1160, magnumb, scx, scy, sctx,
+                scty, target);
+              meff.MagExplosionBase := 1330;
+              meff.ExplosionFrame := 20;
+            end;
+        end;
+        bofly := TRUE;
+      end;
+      // 2003/03/04
+    mtGroundEffect:
+      begin
+        meff := TMagicEff.Create(magid, effnum, scx, scy, sctx, scty, mtype,
+          Recusion, anitime);
+        if meff <> nil then begin
+          case magnumb of
+            32:
+              begin  //¸¶¹ýÁø1
+                meff.ImgLib := WMon21Img;
+                meff.MagExplosionBase := 3580;
+                meff.TargetActor := target;
+                meff.Light := 3;
+                meff.ExplosionFrame := 20;
+              end;
+            37:
+              begin
+                meff.ImgLib := WMon22Img;
+                meff.MagExplosionBase := 3520;
+                meff.TargetActor := target;
+                meff.Light := 5;
+                meff.ExplosionFrame := 20;
+              end;
+            MAGIC_SOULBALL_ATT1:
+              begin
+                meff.ImgLib := WMon24Img;
+                meff.MagExplosionBase := 2140;
+                meff.TargetActor := target;
+                meff.Light := 5;
+                meff.ExplosionFrame := 20;
+              end;
+            MAGIC_SIDESTONE_ATT1:
+              begin
+                meff.ImgLib := WMon24Img;
+                meff.MagExplosionBase := 1440;
+                meff.TargetActor := target;
+                meff.Light := 4;
+                meff.ExplosionFrame := 10;
+                meff.NextFrameTime := 150;
+              end;
+            MAGIC_KINGTURTLE_ATT1:
+              begin
+                meff.ImgLib := WMon25Img;
+                meff.MagExplosionBase := 2990;
+                meff.TargetActor := target;
+                meff.Light := 5;
+                meff.ExplosionFrame := 10;
+              end;
+            MAGIC_KINGTURTLE_ATT3:
+              begin
+                meff.ImgLib := WMon25Img;
+                meff.MagExplosionBase := 3060;
+                meff.TargetActor := target;
+                meff.Light := 5;
+                meff.ExplosionFrame := 10;
+              end;
+          end;
+        end;
+//          bofly := TRUE;
+      end;
+    mtBujaukGroundEffect:
+      begin
+        meff := TBujaukGroundEffect.Create(1160, magnumb, scx, scy, sctx, scty);
+        case magnumb of
+          11:
+            meff.ExplosionFrame := 16; //ÓÄÁé¶Ü
+          12:
+            meff.ExplosionFrame := 16; //ÉñÊ¥Õ½¼×Êõ
+          46:
+            meff.ExplosionFrame := 24; //×çÖäÊõ
+          83,87: meff.ExplosionFrame := 10; //ÒõÑôÎåÐÐÕó
+          55:
+            begin
+              meff.ExplosionFrame := 20; //PoisonCloud
+              PlaySound(10553);
+              meff.TargetActor := nil;
+            end;
+        end;
+        bofly := TRUE;
+      end;
+    mtKyulKai:
+      begin
+        meff := nil; //TKyulKai.Create (1380, scx, scy, sctx, scty);
+      end;
+  end;
+  if meff = nil then
+    exit;
+
+  meff.TargetRx := tx;
+  meff.TargetRy := ty;
+  if meff.TargetActor <> nil then begin
+    meff.TargetRx := TActor(meff.TargetActor).XX;
+    meff.TargetRy := TActor(meff.TargetActor).YY;
+  end;
+  meff.MagOwner := aowner;
+  EffectList.Add(meff);
+end;
+
+procedure TPlayScene.DelMagic(magid: integer);
+var
+  i: integer;
+begin
+  for i := 0 to EffectList.Count - 1 do begin
+    if TMagicEff(EffectList[i]).ServerMagicId = magid then begin
+      TMagicEff(EffectList[i]).Free;
+      EffectList.Delete(i);
+      break;
+    end;
+  end;
+end;
+
+//cx, cy, tx, ty : Ó³ÉäµÄ×ø±ê
+function TPlayScene.NewFlyObject(aowner: TActor; cx, cy, tx, ty, targetcode:
+  integer; mtype: TMagicType): TMagicEff;
+var
+  i, scx, scy, sctx, scty: integer;
+  meff: TMagicEff;
+begin
+  ScreenXYfromMCXY(cx, cy, scx, scy);
+  ScreenXYfromMCXY(tx, ty, sctx, scty);
+  case mtype of
+    mtFlyArrow:
+      meff := TFlyingArrow.Create(1, 1, scx, scy, sctx, scty, mtype, TRUE, 0);
+    mtFlyBug:
+      meff := TFlyingBug.Create(1, 1, scx, scy, sctx, scty, mtype, TRUE, 0);
+    mtFireBall:
+      meff := TFlyingFireBall.Create(1, 1, scx, scy, sctx, scty, mtype, TRUE, 0);
+  else
+    meff := TFlyingAxe.Create(1, 1, scx, scy, sctx, scty, mtype, TRUE, 0);
+  end;
+  meff.TargetRx := tx;
+  meff.TargetRy := ty;
+  meff.TargetActor := FindActor(targetcode);
+  meff.MagOwner := aowner;
+  FlyList.Add(meff);
+  Result := meff;
+end;
+
+//Àü±â½î´Â Á»ºñÀÇ ¸¶¹ýÃ³·³ ±æ°Ô ³ª°¡´Â ¸¶¹ý
+//effnum: °¢ ¹øÈ£¸¶´Ù Base°¡ ´Ù ´Ù¸£´Ù.
+{function  NewStaticMagic (aowner: TActor; tx, ty, targetcode, effnum: integer);
+var
+   i, scx, scy, sctx, scty, effbase: integer;
+   meff: TMagicEff;
+begin
+   ScreenXYfromMCXY (cx, cy, scx, scy);
+   ScreenXYfromMCXY (tx, ty, sctx, scty);
+   case effnum of
+      1: effbase := 340;   //Á»ºñÀÇ ¶óÀÌÆ®´×ÀÇ ½ÃÀÛ À§Ä¡
+      else exit;
+   end;
+
+   meff := TLightingEffect.Create (effbase, 1, 1, scx, scy, sctx, scty, mtype, TRUE, 0);
+   meff.TargetRx := tx;
+   meff.TargetRy := ty;
+   meff.TargetActor := FindActor (targetcode);
+   meff.MagOwner := aowner;
+   FlyList.Add (meff);
+   Result := meff;
+end;  }
+
+{-------------------------------------------------------}
+
+//×ø±êÓ³Éäµ½Ï¸°ûÖÐÑë
+{procedure TPlayScene.ScreenXYfromMCXY (cx, cy: integer; var sx, sy: integer);
+begin
+   if Myself = nil then exit;
+   sx := -UNITX*2 - Myself.ShiftX + AAX + 14 + (cx - Map.ClientRect.Left) * UNITX + UNITX div 2;
+   sy := -UNITY*3 - Myself.ShiftY + (cy - Map.ClientRect.Top) * UNITY + UNITY div 2;
+end; }
+
+procedure TPlayScene.ScreenXYfromMCXY(cx, cy: integer; var sx, sy: integer);
+begin
+  if Myself = nil then
+    exit;
+  sx := (cx - Myself.Rx) * UNITX - Myself.ShiftX + g_FScreenWidth div 2;
+  sy := (cy - Myself.Ry) * UNITY - Myself.ShiftY + ShiftYOffset;
+end;
+
+//ÆÁÄ»×ù±ê mx, my×ª»»³Éccx, ccyµØÍ¼×ù±ê
+procedure TPlayScene.CXYfromMouseXY(mx, my: integer; var ccx, ccy: integer);
+begin
+  if Myself = nil then
+    exit;
+  ccx := Round((mx - g_FScreenWidth div 2 + Myself.ShiftX) / UNITX) + Myself.Rx;
+  ccy := Round((my - ShiftYOffset + Myself.ShiftY) / UNITY) + Myself.Ry;
+
+end;
+
+procedure TPlayScene.CXYfromMouseXYMid(mx, my: integer; var ccx, ccy: integer); // Ä§·¨¸ü×¼È·..
+begin
+  if Myself = nil then
+    exit;
+  ccx := Round((mx - g_FScreenWidth div 2 + Myself.ShiftX) / UNITX) + Myself.Rx;
+  ccy := Round((my - ShiftYOffset + Myself.ShiftY - 20) / UNITY) + Myself.Ry;
+end;
+
+//ÆÁÄ»×ø±êµÄ½ÇÉ«, ÒÔÏñËØÎªµ¥Î»Ñ¡Ôñ..
+function TPlayScene.GetCharacter(x, y, wantsel: integer; var nowsel: integer;
+  liveonly: Boolean): TActor;
+var
+  k, i, ccx, ccy, dx, dy: integer;
+  a: TActor;
+begin
+  Result := nil;
+  nowsel := -1;
+  CXYfromMouseXY(x, y, ccx, ccy);
+  for k := ccy + 8 downto ccy - 1 do begin
+    for i := ActorList.Count - 1 downto 0 do
+      if TActor(ActorList[i]) <> Myself then begin
+        a := TActor(ActorList[i]);
+        if (not liveonly or not a.Death) and (a.BoHoldPlace) and (a.Visible) then begin
+          if a.YY = k then begin
+                  //¸ü´óµÄ·¶Î§Ñ¡Ôñ
+            dx := (a.Rx - Map.ClientRect.Left) * UNITX + DefXX + a.px + a.ShiftX;
+            dy := (a.Ry - Map.ClientRect.Top - 1) * UNITY + DefYY + a.py + a.ShiftY;
+            if a.CheckSelect(x - dx, y - dy) then begin
+              Result := a;
+              Inc(nowsel);
+              if nowsel >= wantsel then
+                exit;
+            end;
+          end;
+        end;
+      end;
+  end;
+end;
+
+//È¡µÃÊó±êËùÖ¸×ø±êµÄ½ÇÉ«....
+function TPlayScene.GetAttackFocusCharacter(x, y, wantsel: integer; var nowsel:
+  integer; liveonly: Boolean): TActor;
+var
+  k, i, ccx, ccy, dx, dy, centx, centy: integer;
+  a: TActor;
+begin
+  Result := GetCharacter(x, y, wantsel, nowsel, liveonly);
+  if Result = nil then begin
+    nowsel := -1;
+    CXYfromMouseXY(x, y, ccx, ccy);
+    for k := ccy + 8 downto ccy - 1 do begin
+      for i := ActorList.Count - 1 downto 0 do
+        if TActor(ActorList[i]) <> Myself then begin
+          a := TActor(ActorList[i]);
+          if (not liveonly or not a.Death) and (a.BoHoldPlace) and (a.Visible)
+            and (not g_NgConfigInfo.boNotDeath) then begin
+            if a.YY = k then begin
+              dx := (a.Rx - Map.ClientRect.Left) * UNITX + DefXX + a.px + a.ShiftX;
+              dy := (a.Ry - Map.ClientRect.Top - 1) * UNITY + DefYY + a.py + a.ShiftY;
+              if a.CharWidth > 40 then
+                centx := (a.CharWidth - 40) div 2
+              else
+                centx := 0;
+              if a.CharHeight > 70 then
+                centy := (a.CharHeight - 70) div 2
+              else
+                centy := 0;
+              if (x - dx >= centx) and (x - dx <= a.CharWidth - centx) and (y -
+                dy >= centy) and (y - dy <= a.CharHeight - centy) then begin
+                Result := a;
+                Inc(nowsel);
+                if nowsel >= wantsel then
+                  exit;
+              end;
+            end;
+          end;
+        end;
+    end;
+  end;
+end;
+
+function TPlayScene.IsSelectMyself(x, y: integer): Boolean;
+var
+  k, i, ccx, ccy, dx, dy: integer;
+begin
+  Result := FALSE;
+  CXYfromMouseXY(x, y, ccx, ccy);
+  for k := ccy + 2 downto ccy - 1 do begin
+    if Myself.YY = k then begin
+         //¸ü´óµÄ·¶Î§Ñ¡Ôñ
+      dx := (Myself.Rx - Map.ClientRect.Left) * UNITX + DefXX + Myself.px + Myself.ShiftX;
+      dy := (Myself.Ry - Map.ClientRect.Top - 1) * UNITY + DefYY + Myself.py +
+        Myself.ShiftY;
+      if Myself.CheckSelect(x - dx, y - dy) then begin
+        Result := TRUE;
+        exit;
+      end;
+    end;
+  end;
+end;
+
+function TPlayScene.GetDropItems(x, y: integer; var inames: string): PTDropItem; //ÆÁÄ»×ø±êµÀ¾ß
+var
+  k, i, ccx, ccy, ssx, ssy, dx, dy: integer;
+  d: PTDropItem;
+  s: TAsphyreLockableTexture;
+  c: byte;
+begin
+  Result := nil;
+  CXYfromMouseXY(x, y, ccx, ccy);
+  ScreenXYfromMCXY(ccx, ccy, ssx, ssy);
+  dx := x - ssx;
+  dy := y - ssy;
+  inames := '';
+  for i := 0 to DropedItemList.Count - 1 do begin
+    d := PTDropItem(DropedItemList[i]);
+    if (d.X = ccx) and (d.Y = ccy) then begin
+      if d.BoDeco then
+        s := WDecoImg.Images[d.Looks]
+      else
+        s := WDnItem.Images[d.Looks];
+      if s = nil then
+        continue;
+      dx := (x - ssx) + (s.Width div 2) - 3;
+      dy := (y - ssy) + (s.Height div 2);
+      c := s.Pixels[dx, dy];
+      if (c <> 0) or d.BoDeco then begin  //×¯Ô°×°ÊÎ DecoÏîÄ¿µÄÃû³Æ
+        if Result = nil then
+          Result := d;
+        inames := inames + d.Name + '\';
+            //break;
+      end;
+    end;
+  end;
+end;
+
+procedure TPlayScene.GetDropItemsList(x, y: integer; var ItemList: TList);
+var
+  i: Integer;
+  d: PTDropItem;
+  pCItemRule: pTCItemRule;
+begin
+  for i := 0 to DropedItemList.Count - 1 do begin
+    d := PTDropItem(DropedItemList[i]);
+    if (d.X = x) and (d.y = y) then begin
+      pCItemRule := GetFiltrateItem(d.Name);
+      if pCItemRule <> nil then begin
+        d.boItemHiht := pCItemRule.rare;
+        d.boPickUp := pCItemRule.pick;
+        d.boShowName := pCItemRule.Show;
+        ItemList.Add(d);
+      end;
+    end;
+  end;
+end;
+
+procedure TPlayScene.DropItemsShow(dsurface: TAsphyreCanvas);
+var
+  i, k, mx, my, HintX, HintY, HintWidth, HintHeight: integer;
+  pd: PTDropItem;
+  dds: TAsphyreLockableTexture;
+  HITNTTRect: TRect;
+  pCItemRule: pTCItemRule;
+begin    //ÑªÌõ ÑªÖµÏÔÊ¾
+  for k := 0 to DropedItemList.Count - 1 do begin
+    pd := PTDropItem(DropedItemList[k]);
+    if pd <> nil then begin
+      ScreenXYfromMCXY(pd.X, pd.Y, mx, my);
+      if g_boMirNg then begin
+        pCItemRule := GetFiltrateItem(pd.Name);
+        if pCItemRule <> nil then begin
+          pd.boItemHiht := pCItemRule.rare;
+          pd.boPickUp := pCItemRule.pick;
+          pd.boShowName := pCItemRule.Show;
+        end;
+        if (pd.boItemHiht or pd.boShowName) and g_boMirNg then begin
+          if FocusItem = nil then begin
+            if pd.boItemHiht then
+              dsurface.BoldTextOut(mx + 2 - FontManager.Default.TextWidth(pd.Name)
+                div 2, my - 26, RGB(244, 0, 0), clBlack, pd.Name)
+            else begin
+              dsurface.BoldTextOut(mx + 2 - FontManager.Default.TextWidth(pd.Name)
+                div 2, my - 26, RGB(164, 206, 247), clBlack, pd.Name);          //ÄÚ¹ÒÎïÆ·µØÉÏÑÕÉ«
+            end;
+          end
+          else if (FocusItem.X <> pd.X) or (FocusItem.Y <> pd.y) then begin
+            if pd.boItemHiht then
+              dsurface.BoldTextOut(mx + 2 - FontManager.Default.TextWidth(pd.Name)
+                div 2, my - 26, RGB(244, 0, 0), clBlack, pd.Name)
+            else
+              dsurface.BoldTextOut(mx + 2 - FontManager.Default.TextWidth(pd.Name)
+                div 2, my - 26, RGB(164, 206, 247), clBlack, pd.Name);          //ÄÚ¹ÒÎïÆ·µØÉÏÑÕÉ«
+          end;
+        end;
+      end
+      else
+        dsurface.BoldTextOut(mx + 2 - ((Length(pd.Name) div 2) * 6) + 4, my - 26,
+          RGB(247, 251, 115){clWhite}, clBlack, pd.Name);    //ÎÞÄÚ¹ÒµÄµØÃæÎïÆ·ÑÕÉ«
+    end;
+  end;
+end;
+
+function TPlayScene.CanRun(sx, sy, ex, ey: integer): Boolean;
+var
+  ndir, rx, ry: integer;
+begin
+  ndir := GetNextDirection(sx, sy, ex, ey);
+  rx := sx;
+  ry := sy;
+  GetNextPosXY(ndir, rx, ry);
+  if CanWalk(rx, ry) and CanWalk(ex, ey) then
+    Result := TRUE
+  else
+    Result := FALSE;
+  if CanWalkEx(rx, ry) and CanWalkEx(ex, ey) {and CanWalkEx(lx, ly)} then  //´©ÈË´©¹Ö´©NPC
+    Result := TRUE
+  else
+    Result := FALSE;
+end;
+
+function TPlayScene.CanRunEx(sx, sy, ex, ey: Integer): Boolean;
+var
+  ndir, rx, ry: Integer;
+begin
+  ndir := GetNextDirection(sx, sy, ex, ey);
+  rx := sx;
+  ry := sy;
+  GetNextPosXY(ndir, rx, ry);
+  if CanWalkEx2(rx, ry) and CanWalkEx2(ex, ey) then
+    Result := True
+  else
+    Result := FALSE;
+end;
+
+function TPlayScene.CanWalk(mx, my: integer): Boolean;
+begin
+  Result := FALSE;
+  if Map.CanMove(mx, my) then
+    Result := not CrashMan(mx, my);
+end;
+
+function TPlayScene.CanWalkEx(mx, my: Integer): Boolean;
+begin
+  Result := FALSE;
+  if Map.CanMove(mx, my) then
+    Result := not CrashManEx(mx, my);
+end;
+
+function TPlayScene.CanWalkEx2(mx, my: Integer): Boolean;
+begin
+  Result := FALSE;
+  if Map.CanMove(mx, my) then
+    Result := not CrashManEx2(mx, my);
+end;
+
+function TPlayScene.CrashMan(mx, my: integer): Boolean;
+var
+  i: integer;
+  a: TActor;
+begin
+  Result := FALSE;
+  for i := 0 to ActorList.Count - 1 do begin
+    a := TActor(ActorList[i]);
+    if (a.Visible) and (a.BoHoldPlace) and (not a.Death) and (a.XX = mx) and (a.YY
+      = my) then begin
+      Result := TRUE;
+      break;
+    end;
+  end;
+end;
+
+function TPlayScene.CrashManEx(mx, my: Integer): Boolean;
+var
+  i: Integer;
+  Actor: TActor;
+begin
+  Result := FALSE;
+  for i := 0 to ActorList.count - 1 do begin
+    Actor := TActor(ActorList[i]);
+    if (Actor.Visible) and (Actor.boHoldPlace) and (not Actor.Death) and (Actor.XX = mx) and (Actor.YY = my) then
+    begin
+      Result := True;
+      break;
+    end;
+  end;
+end;
+
+function TPlayScene.CrashManEx2(mx, my: Integer): Boolean;
+var
+  i: Integer;
+  Actor: TActor;
+begin
+  Result := FALSE;
+  for i := 0 to ActorList.count - 1 do begin
+    Actor := TActor(ActorList[i]);
+    if (Actor.Visible) and (Actor.boHoldPlace) and (not Actor.Death) and (Actor.XX
+      = mx) and (Actor.YY = my) then begin
+      Result := True;
+      break;
+    end;
+  end;
+end;
+
+function TPlayScene.CanFly(mx, my: integer): Boolean;
+begin
+  Result := Map.CanFly(mx, my);
+end;
+
+
+{------------------------ Actor ------------------------}
+
+function TPlayScene.FindActor(id: integer): TActor;
+var
+  i: integer;
+begin
+  Result := nil;
+  for i := 0 to ActorList.Count - 1 do begin
+    if TActor(ActorList[i]).RecogId = id then begin
+      Result := TActor(ActorList[i]);
+      break;
+    end;
+  end;
+end;
+
+function TPlayScene.FindActorXY(x, y: integer): TActor;  //¸Ê ÁÂÇ¥·Î actor ¾òÀ½
+var
+  i: integer;
+begin
+  Result := nil;
+  for i := 0 to ActorList.Count - 1 do begin
+    if (TActor(ActorList[i]).XX = x) and (TActor(ActorList[i]).YY = y) then begin
+      Result := TActor(ActorList[i]);
+      if not Result.Death and Result.Visible and Result.BoHoldPlace then
+        break;
+    end;
+  end;
+end;
+
+function TPlayScene.IsValidActor(actor: TActor): Boolean;
+var
+  i: integer;
+begin
+  Result := FALSE;
+  for i := 0 to ActorList.Count - 1 do begin
+    if TActor(ActorList[i]) = actor then begin
+      Result := TRUE;
+      break;
+    end;
+  end;
+end;
+
+function TPlayScene.NewActor(chrid: integer; cx: word; //x
+  cy: word; //y
+  cdir: word; cfeature: integer; //race, hair, dress, weapon
+  cstate: integer): TActor;
+var
+  i, nRace: integer;
+  actor: TActor;
+  pm: PTMonsterAction;
+begin
+  Result := nil;
+  for i := 0 to ActorList.Count - 1 do
+    if TActor(ActorList[i]).RecogId = chrid then begin
+      Result := TActor(ActorList[i]);
+      exit; //ÀÌ¹Ì ÀÖÀ½
+    end;
+  if IsChangingFace(chrid) then
+    exit;  //º¯½ÅÁß...
+  nRace := RACEfeature(cfeature);
+  if nRace in [0, 1] then
+  begin
+    nRace := 0;
+  end;
+  case nRace of
+    0:
+      actor := THumActor.Create;
+    9:
+      actor := TSoccerBall.Create;  //Ãà±¸°ø
+
+    13:
+      actor := TKillingHerb.Create;
+    14:
+      actor := TSkeletonOma.Create;
+    15:
+      actor := TDualAxeOma.Create;
+
+    16:
+      actor := TGasKuDeGi.Create;  //°¡½º½î´Â ±¸µ¥±â
+
+    17:
+      actor := TCatMon.Create;   //±ªÀÌ, ¿ì¸é±Í(¿ì¸é±Í,Ã¢µç¿ì¸é±Í,Ã¶Åð¿ì¸é±Í)
+    18:
+      actor := THuSuABi.Create;
+    19:
+      actor := TCatMon.Create;   //¿ì¸é±Í(¿ì¸é±Í,Ã¢µç¿ì¸é±Í,Ã¶Åðµç¿ì¸é±Í)
+
+    20:
+      actor := TFireCowFaceMon.Create;
+    21:
+      actor := TCowFaceKing.Create;
+    22:
+      actor := TDualAxeOma.Create;  //Ä§½î´Â ´ÙÅ©
+    23:
+      actor := TWhiteSkeleton.Create;  //¼ÒÈ¯¹é°ñ
+
+    24:
+      actor := TSuperiorGuard.Create;  //¸ÚÀÖ´Â °æºñº´
+
+    30:
+      actor := TCatMon.Create; //³¯°³Áþ
+    31:
+      actor := TCatMon.Create; //³¯°³Áþ
+    32:
+      actor := TScorpionMon.Create; //°ø°ÝÀÌ 2µ¿ÀÛ
+
+    33:
+      actor := TCentipedeKingMon.Create;  //Áö³×¿Õ, ÃË·æ½Å
+    34, 97:
+      actor := TBigHeartMon.Create;  //Àû¿ù¸¶, ½ÉÀå, ¹ã³ª¹«, º¸¹°ÇÔ
+    35:
+      actor := TSpiderHouseMon.Create;  //Æø¾È°Å¹Ì
+    36:
+      actor := TExplosionSpider.Create;  //ÆøÁÖ
+    37:
+      actor := TFlyingSpider.Create;  //ºñµ¶°Å¹Ì
+
+    40:
+      actor := TZombiLighting.Create;  //Á»ºñ 1 (Àü±â ¸¶¹ý Á»ºñ)
+    41:
+      actor := TZombiDigOut.Create;  //¶¥ÆÄ°í ³ª¿À´Â Á»ºñ
+    42:
+      actor := TZombiZilkin.Create;
+
+    43:
+      actor := TBeeQueen.Create;
+
+    45:
+      actor := TArcherMon.Create;
+    47:
+      actor := TSculptureMon.Create;  //¿°¼ÒÀå±º, ¿°¼Ò´ëÀå
+    48:
+      actor := TSculptureMon.Create;  //
+    49:
+      actor := TSculptureKingMon.Create;  //ÁÖ¸¶¿Õ
+
+    50:
+      actor := TNpcActor.Create;
+
+    52, 53:
+      actor := TGasKuDeGi.Create;  //°¡½º½î´Â ½û±â³ª¹æ, µÕ
+    54:
+      actor := TSmallElfMonster.Create;
+    55:
+      actor := TWarriorElfMonster.Create;
+
+    60:
+      actor := TElectronicScolpionMon.Create;   //·ÚÇ÷»ç
+    61:
+      actor := TBossPigMon.Create;              //¿Õµ·
+    62:
+      actor := TKingOfSculpureKingMon.Create;   //ÁÖ¸¶º»¿Õ(¿ÕÁß¿Õ)
+      // 2003/02/11 ½Å±Ô ¸÷ Ãß°¡ .. ÇØ°ñº»¿Õ, ºÎ½Ä±Í
+    63:
+      actor := TSkeletonKingMon.Create;
+    64:
+      actor := TGasKuDeGi.Create;
+    65:
+      actor := TSamuraiMon.Create;
+    66:
+      actor := TSkeletonSoldierMon.Create;
+    67:
+      actor := TSkeletonSoldierMon.Create;
+    68:
+      actor := TSkeletonSoldierMon.Create;
+    69:
+      actor := TSkeletonArcherMon.Create;
+    70:
+      actor := TBanyaGuardMon.Create;           //¹Ý¾ß¿ì»ç
+    71:
+      actor := TBanyaGuardMon.Create;           //¹Ý¾ßÁÂ»ç
+    72:
+      actor := TBanyaGuardMon.Create;           //»ç¿ìÃµ¿Õ
+      // 2003/07/15 °ú°ÅºñÃµ ¸÷ Ãß°¡
+    73:
+      actor := TPBOMA1Mon.Create;               //ºñÀÍ¿À¸¶
+    74:
+      actor := TCatMon.Create;                  //¿À¸¶°Ëº´/Âüº´/ÁßÀ§º´/Ä£À§º´
+    75:
+      actor := TStoneMonster.Create;            //¸¶°è¼®1
+    76:
+      actor := TSuperiorGuard.Create;           //°ú°ÅºñÃµ°æºñ
+    77:
+      actor := TStoneMonster.Create;            //¸¶°è¼®2
+    78:
+      actor := TBanyaGuardMon.Create;           //ÆÄÈ²¸¶½Å
+    79:
+      actor := TPBOMA6Mon.Create;               //¿À¸¶¼®±Ãº´
+    80, 96:
+      actor := TMineMon.Create;             //µµ±úºñºÒ
+
+    81:
+      actor := TAngel.Create;                   //¿ù·É(Ãµ³à)
+    83:
+      actor := TFireDragon.Create;              //ÆÄÃµ¸¶·æ
+    84, 85, 86, 87, 88, 89:
+      actor := TDragonStatue.Create; //¿ë¼®»ó
+    90:
+      actor := TDragonBody.Create;              //ÆÄÃµ¸¶·æ Åõ¸í¸ö
+    91:
+      actor := TBanyaGuardMon.Create;           //¼³ÀÎ´ëÃæ
+    92:
+      actor := TJumaThunderMon.Create;          //ÁÖ¸¶°Ý·ÚÀå  TSculptureMon »ó¼Ó¹ÞÀ½
+    93:
+      actor := TBanyaGuardMon.Create;           //È¯¿µÇÑÈ£
+    94:
+      actor := TBanyaGuardMon.Create;           //°Å¹Ì(½Å¼®µ¶¸¶ÁÖ)
+    95:
+      actor := TGasKuDeGi.Create;               //ÀÌº¥Æ®³ª¹æ 96:²É´« 97:º¸¹°ÇÔ
+
+    98:
+      actor := TWallStructure.Create;
+    99:
+      actor := TCastleDoor.Create;              //¼º¹®...
+
+    100:
+      actor := TBanyaGuardMon.Create;          //È²±ÝÀÌ¹«±â
+    101:
+      actor := TCatMon.Create;                 //¹é»ç(Ã»¿µ»ç)
+    102:
+      actor := TSkeletonArcherMon.Create;      //±Ã¼öÈ£À§º´  #####
+    103:
+      actor := TBanyaGuardMon.Create;          //Àü»çºñ¿ù¿©¿ì
+    104:
+      actor := TBanyaGuardMon.Create;          //¼ú»çºñ¿ù¿©¿ì
+    105:
+      actor := TBanyaGuardMon.Create;          //µµ»çºñ¿ù¿©¿ì
+    106:
+      actor := TCentipedeKingMon.Create;       //È£È¥¼®
+    107:
+      actor := TBanyaGuardMon.Create;          //È£È¥±â¼®
+    108:
+      actor := TBanyaGuardMon.Create;          //È£±â¿¬(¼Ò)
+    109:
+      actor := TBanyaGuardMon.Create;          //È£±â¿¬(´ë)
+    110:
+      actor := TFireDragon.Create;             //ºñ¿ùÃµÁÖ
+    111, 112:
+      actor := TDualAxeOma.Create;         //ºñ¿ù´ÙÅ©
+    113, 114:
+      actor := TCatMon.Create;             //Ä¡Ãæ
+      // 115 È£¹Ú±«¹°
+    116:
+      actor := TCatMon.Create;                 //°©¼®±Í¼ö
+    117:
+      actor := TBanyaGuardMon.Create;          //°©Ã¶±Í¼ö
+    118:
+      actor := TFireDragon.Create;             //Çö¹«Çö½Å
+    119:
+      actor := TKillingHerb.Create;            //¶±
+
+  else
+    actor := TActor.Create;
+  end;
+
+  with actor do begin
+    RecogId := chrid;
+    XX := cx;
+    YY := cy;
+    Rx := XX;
+    Ry := YY;
+    Dir := cdir;
+    Feature := cfeature;
+    Race := RACEfeature(cfeature);         //changefeature°¡ ÀÖÀ»¶§¸¸
+    hair := HAIRfeature(cfeature);         //º¯°æµÈ´Ù.
+    dress := DRESSfeature(cfeature);
+    weapon := WEAPONfeature(cfeature);
+    Appearance := APPRfeature(cfeature);
+
+    pm := RaceByPm(Race, Appearance);
+    if pm <> nil then
+      WalkFrameDelay := pm.ActWalk.ftime;
+
+    if Race in [0, 1] then begin
+      Sex := Race;//dress mod 2;
+      if Race = 1 then
+        Race := 0;
+//    if Race = 0 then begin
+//      Sex := dress mod 2;   //0:³²ÀÚ 1:¿©ÀÚ
+    end
+    else
+      Sex := 0;
+    state := cstate;
+    Saying[0] := '';
+  end;
+  ActorList.Add(actor);
+  Result := actor;
+end;
+
+procedure TPlayScene.ActorDied(actor: TObject);
+var
+  i: integer;
+  flag: Boolean;
+begin
+  for i := 0 to ActorList.Count - 1 do
+    if ActorList[i] = actor then begin
+      ActorList.Delete(i);
+      break;
+    end;
+  flag := FALSE;
+  for i := 0 to ActorList.Count - 1 do
+    if not TActor(ActorList[i]).Death then begin
+      ActorList.Insert(i, actor);
+      flag := TRUE;
+      break;
+    end;
+  if not flag then
+    ActorList.Add(actor);
+end;
+
+procedure TPlayScene.SetActorDrawLevel(actor: TObject; level: integer);
+var
+  i: integer;
+begin
+  if level = 0 then begin  //¸Ç Ã³À½¿¡ ±×¸®µµ·Ï ÇÔ
+    for i := 0 to ActorList.Count - 1 do
+      if ActorList[i] = actor then begin
+        ActorList.Delete(i);
+        ActorList.Insert(0, actor);
+        break;
+      end;
+  end;
+end;
+
+procedure TPlayScene.ClearActors;  //·Î±×¾Æ¿ô¸¸ »ç¿ë
+var
+  i: integer;
+begin
+  for i := 0 to ActorList.Count - 1 do
+    TActor(ActorList[i]).Free;
+  ActorList.Clear;
+  Myself := nil;
+  TargetCret := nil;
+  FocusCret := nil;
+  MagicTarget := nil;
+
+   //¸¶¹ýµµ ÃÊ±âÈ­ ÇØ¾ßÇÔ.
+  for i := 0 to EffectList.Count - 1 do
+    TMagicEff(EffectList[i]).Free;
+  EffectList.Clear;
+end;
+
+function TPlayScene.DeleteActor(id: integer): TActor;
+var
+  i: integer;
+begin
+  Result := nil;
+  i := 0;
+  while TRUE do begin
+    if i >= ActorList.Count then
+      break;
+    if TActor(ActorList[i]).RecogId = id then begin
+      if TargetCret = TActor(ActorList[i]) then
+        TargetCret := nil;
+      if FocusCret = TActor(ActorList[i]) then
+        FocusCret := nil;
+      if MagicTarget = TActor(ActorList[i]) then
+        MagicTarget := nil;
+//      TActor(ActorList[i]).DeleteTime := GetTickCount;
+//      FreeActorList.Add(ActorList[i]);
+//         //TActor(ActorList[i]).Free;
+//      ActorList.Delete(i);
+
+      TActor(ActorList[i]).DeleteTime := GetTickCount;
+      FreeActorList.Add(ActorList[i]);
+      ActorList.Delete(i);
+      Break;
+    end
+    else
+      Inc(i);
+  end;
+end;
+
+procedure TPlayScene.DelActor(actor: TObject);
+var
+  i: integer;
+begin
+  for i := 0 to ActorList.Count - 1 do
+    if ActorList[i] = actor then begin
+      TActor(ActorList[i]).DeleteTime := GetTickCount;
+      FreeActorList.Add(ActorList[i]);
+      ActorList.Delete(i);
+      break;
+    end;
+end;
+
+function TPlayScene.ButchAnimal(x, y: integer): TActor;
+var
+  i: integer;
+  a: TActor;
+begin
+  Result := nil;
+  for i := 0 to ActorList.Count - 1 do begin
+    a := TActor(ActorList[i]);
+    if a.Death and (a.Race <> 0) then begin //µ¿¹° ½ÃÃ¼
+      if (abs(a.XX - x) <= 1) and (abs(a.YY - y) <= 1) then begin
+        Result := a;
+        break;
+      end;
+    end;
+  end;
+end;
+
+
+{------------------------- Msg -------------------------}
+
+
+//¸Þ¼¼Áö¸¦ ¹öÆÛ¸µÇÏ´Â ÀÌÀ¯´Â ?
+//Ä³¸¯ÅÍÀÇ ¸Þ¼¼Áö ¹öÆÛ¿¡ ¸Þ¼¼Áö°¡ ³²¾Æ ÀÖ´Â »óÅÂ¿¡¼­
+//´ÙÀ½ ¸Þ¼¼Áö°¡ Ã³¸®µÇ¸é ¾ÈµÇ±â ¶§¹®ÀÓ.
+procedure TPlayScene.SendMsg(ident, chrid, x, y, cdir, feature, state, param:
+  integer; str: string);
+var
+  actor: TActor;
+  meff: TMagicEff;
+  i: Integer;
+begin
+  case ident of
+    SM_TEST:
+      begin
+        actor := NewActor(111, 254{x}, 214{y}, 0, 0, 0);
+        Myself := THumActor(actor);
+        Map.LoadMap('0', Myself.XX, Myself.YY);
+      end;
+    SM_CHANGEMAP, SM_NEWMAP:
+      begin
+        Map.LoadMap(str, x, y);
+        DarkLevel := cdir;
+           // DayBright_fake := msg.Param;
+
+        DarkLevel_fake := cdir;
+        pDarkLevelCheck^ := cdir;
+
+        if (DarkLevel = 0) or (g_boMirDark) then
+          ViewFog := FALSE
+        else
+          ViewFog := TRUE;
+        if (ident = SM_NEWMAP) and (Myself <> nil) then begin  //¼­¹öÀÌµ¿ ÇÒ¶§ ºÎµå·´°Ô ¸ÊÀÌµ¿À» ÇÏ°Ô ¸¸µé·Á°í
+          Myself.XX := x;
+          Myself.YY := y;
+          Myself.RX := x;
+          Myself.RY := y;
+          DelActor(Myself);
+        end;
+
+            //BoViewMiniMap := FALSE;
+        if BoWantMiniMap then begin
+          if MiniMapIndex <= 0 then
+            FrmMain.SendWantMiniMap;
+        end;
+//        if ViewGeneralMapStyle > 0 then
+//          FrmMain.SendWantMiniMap;
+      end;
+    SM_LOGON:
+      begin
+        actor := FindActor(chrid);
+        if actor = nil then begin
+          actor := NewActor(chrid, x, y, Lobyte(cdir), feature, state);
+          actor.ChrLight := Hibyte(cdir);
+          cdir := Lobyte(cdir);
+          actor.SendMsg(SM_TURN, x, y, cdir, feature, state, '', 0);
+        end;
+        if Myself <> nil then begin
+          Myself := nil;
+        end;
+        Myself := THumActor(actor);
+        FillChar(g_DuraWarning, SizeOf(TDuraWarning) * 12, #0);
+        for i := U_DRESS to U_TRANS do begin
+          g_DuraWarning[i].TAKEON_OK := True;
+        end;
+        g_MapDuraWarning := True;
+        g_boOwnerMsg := True;            //ÊÇ·ñ¾Ü¾ø¹«ÁÄ
+        g_RefuseCRY := True;      //¾Ü¾øº°»°
+        g_Refuseguild := True;    //¾Ü¾øÐÐ»áÁÄÌìÐÅÏ¢
+        g_RefuseWHISPER := True;  //¾Ü¾øË½ÁÄÐÅÏ¢
+      end;
+    SM_HIDE:
+      begin
+        actor := FindActor(chrid);
+        if actor <> nil then begin
+          if actor.BoDelActionAfterFinished then begin //¶¥À¸·Î »ç¶óÁö´Â ¾Ö´Ï¸ÞÀÌ¼ÇÀÌ ³¡³ª¸é ÀÚµ¿À¸·Î »ç¶óÁü.
+            exit;
+          end;
+          if actor.WaitForRecogId <> 0 then begin  //º¯½ÅÁß.. º¯½ÅÀÌ ³¡³ª¸é ÀÚµ¿À¸·Î »ç¶óÁü
+            exit;
+          end;
+        end;
+        DeleteActor(chrid);
+      end;
+  else
+    begin
+      actor := FindActor(chrid);
+      if (ident = SM_TURN) or (ident = SM_RUN) or (ident = SM_WALK) or (ident =
+        SM_BACKSTEP) or (ident = SM_DEATH) or (ident = SM_SKELETON) or (ident =
+        SM_DIGUP) or (ident = SM_ALIVE) then begin
+        if actor = nil then
+          actor := NewActor(chrid, x, y, Lobyte(cdir), feature, state);
+        if actor <> nil then begin
+          actor.ChrLight := Hibyte(cdir);
+          cdir := Lobyte(cdir);
+          if ident = SM_SKELETON then begin
+            actor.Death := TRUE;
+            actor.Skeleton := TRUE;
+          end
+          else if ident = SM_ALIVE then begin  //2005/05/11 ºÎÈ° //####
+            actor.Feature := feature;
+            actor.FeatureChanged;
+            if (DarkLevel = 0) or (g_boMirDark) then
+              ViewFog := FALSE
+            else
+              ViewFog := TRUE;
+            actor.Death := False;
+            actor.Skeleton := False;
+          end;
+
+        end;
+      end;
+      if actor = nil then
+        exit;
+      case ident of
+        SM_FEATURECHANGED:
+          begin
+            actor.Feature := feature;
+            Actor.FeatureEx := State; //³á°òÔö¼Ó
+            actor.FeatureChanged;
+            Actor.bShowTrans := param;
+            actor.bUpdateShowTrans := True;
+          end;
+        SM_CHARSTATUSCHANGED:
+          begin
+            actor.State := feature;
+            actor.HitSpeed := state;
+            if actor = Myself then begin
+              ChangeWalkHitValues(Myself.Abil.Level, Myself.HitSpeed, Myself.Abil.Weight
+                + Myself.Abil.MaxWeight + Myself.Abil.WearWeight + Myself.Abil.MaxWearWeight
+                + Myself.Abil.HandWeight + Myself.Abil.MaxHandWeight, RUN_STRUCK_DELAY);
+//                        if Myself.State and $10000000 <> 0 then begin        //POISON_STUN
+//                           DizzyDelayStart := GetTickCount;
+//                           DizzyDelayTime  := 1500; //µô·¹ÀÌ
+//                        end;
+            end;
+                     // 2003/07/15 ½ºÅÏ¿¡ ´ëÇÑ »óÅÂÀÌ»ó ÀÌÆåÆ® Ãß°¡
+            if feature and $10000000 <> 0 then begin        //POISON_STUN
+              meff := TCharEffect.Create(380, 6, actor);
+              meff.NextFrameTime := 100;
+              meff.ImgLib := WMagic2;
+              meff.RepeatUntil := GetTickCount + 2000;
+              EffectList.Add(meff);
+            end;
+          end;
+      else
+        begin             //2022/10/30ÐÞ¸Ä
+          case ident of
+            SM_TURN:
+              begin
+                if str <> '' then
+                  actor.UserName := str;
+              end;
+            SM_WALK:
+              begin
+                if param > 0 then
+                  actor.WalkFrameDelay := param;
+              end;
+            SM_SPACEMOVE_SHOW, SM_SPACEMOVE_SHOW2:        //2022/10/29¸üÐÂ
+              begin
+                actor.Feature := feature;
+                actor.FeatureEx := state; //³á°òÔö¼Ó
+                actor.FeatureChanged;
+                actor.bShowTrans := param;
+                actor.bUpdateShowTrans := True;
+              end;
+          end;
+          actor.SendMsg(ident, x, y, cdir, feature, state, '', 0);
+        end;
+      end;
+    end;
+  end;
+
+end;
+
+end.
+

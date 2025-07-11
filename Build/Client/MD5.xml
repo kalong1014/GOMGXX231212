@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="MD5" platform="Win32">
+  <array name="MD5Count" low="0" high="1">
+    <element type="Cardinal" />
+  </array>
+  <array name="MD5State" low="0" high="3">
+    <element type="Cardinal" />
+  </array>
+  <array name="MD5Block" low="0" high="15">
+    <element type="Cardinal" />
+  </array>
+  <array name="MD5CBits" low="0" high="7">
+    <element type="Byte" />
+  </array>
+  <array name="MD5Digest" low="0" high="15">
+    <element type="Byte" />
+  </array>
+  <pointer name="PMD5Digest" type="MD5Digest" indircnt="1" file="MD5.pas" line="15" />
+  <array name="MD5Buffer" low="0" high="63">
+    <element type="Byte" />
+  </array>
+  <struct name="MD5Context" size="88" file="MD5.pas" line="18">
+    <field name="State" type="MD5State" visibility="public" size="16" offset="0" file="MD5.pas" line="19" />
+    <field name="Count" type="MD5Count" visibility="public" size="8" offset="16" file="MD5.pas" line="20" />
+    <field name="Buffer" type="MD5Buffer" visibility="public" size="64" offset="24" file="MD5.pas" line="21" />
+  </struct>
+  <variable name="g_MD5EmptyDigest" type="MD5Digest" visibility="public" file="MD5.pas" line="36" />
+  <procedure name="MD5Init" visibility="public" file="MD5.pas" line="241">
+    <parameters>
+      <parameter name="Context" type="MD5Context" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="MD5Update" visibility="public" file="MD5.pas" line="256">
+    <parameters>
+      <parameter name="Context" type="MD5Context" paramflags="var" />
+      <parameter name="Input" type="PWideChar" />
+      <parameter name="Length" type="Cardinal" />
+    </parameters>
+  </procedure>
+  <procedure name="MD5Final" visibility="public" file="MD5.pas" line="284">
+    <parameters>
+      <parameter name="Context" type="MD5Context" paramflags="var" />
+      <parameter name="Digest" type="MD5Digest" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="MD5String" visibility="public" file="MD5.pas" line="303">
+    <parameters>
+      <parameter name="m" type="string" />
+      <retval type="MD5Digest" />
+    </parameters>
+  </function>
+  <function name="MD5File" visibility="public" file="MD5.pas" line="314">
+    <parameters>
+      <parameter name="n" type="string" />
+      <retval type="MD5Digest" />
+    </parameters>
+  </function>
+  <function name="MD5Print" visibility="public" file="MD5.pas" line="344">
+    <parameters>
+      <parameter name="d" type="MD5Digest" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="MD5UnPrint" visibility="public" file="MD5.pas" line="355">
+    <parameters>
+      <parameter name="s" type="string" />
+      <retval type="MD5Digest" />
+    </parameters>
+  </function>
+  <function name="MD5Match" visibility="public" file="MD5.pas" line="377">
+    <parameters>
+      <parameter name="D1" type="MD5Digest" />
+      <parameter name="D2" type="MD5Digest" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+</namespace>

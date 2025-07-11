@@ -1,0 +1,60 @@
+首先在下载的文件里你会找到一个文件，位置在
+Replacement BorlndMM DLL\Precompiled\for Delphi IDE\Performance\BorlndMM.dll，
+替换掉Delphi\Bin下的相应文件就可以完成对IDE的提速。
+
+对自己编的程序的提速也非常简单，只要在.dpr工程文件里的uses部分加上FastMM4就可以了，但必须是加在第一位，还要记得设置 路径。重新编译你的程序就可以完成提速。一般情况下，感觉程序的启动速度会有提高。如果你的程序有内存泄漏的话那就会在程序关闭时弹出一个对话框告诉你你 的程序有内存泄漏，并指出相应的有内存泄漏的类。例如，我的程序中用到了IntraWeb 7.1.12。就会有内存的泄漏，而且是没有法子改的。于是乎就在每次程序结束时留有一个对话框，着实郁闷。其实也是有办法解决的。
+
+打开FastMM4Options.inc文件。在文件的末尾添加如下代码：
+
+{$define Release} 
+{$ifdef Release}
+
+  {Specify the options you use for release versions below}
+
+  {$undef FullDebugMode}
+
+  {$undef CheckHeapForCorruption}
+
+  {$define ASMVersion}
+
+  {$undef EnableMemoryLeakReporting}
+
+  {$undef UseOutputDebugString}
+
+  {$undef LogErrorsToFile}
+
+  {$undef LogMemoryLeakDetailToFile}
+
+{$else}
+
+  {Specify the options you use for debugging below}
+
+  {$define FullDebugMode}
+
+  {$define EnableMemoryLeakReporting}
+
+  {$define UseOutputDebugString}{$endif}
+
+
+再编译你的程序，现在，即使你的程序有内存泄漏，FastMM也不会提醒你了。当然，要恢复也很容易，只要将上面的第一行注释掉就可以了。如下：
+
+//{$define Release} 
+…
+
+
+总的来说，FastMM给我的感觉是非常好，我将我负责的两个程序全都重新编译了一下，启动速度的提高让人满意。网上有人说对使用DevExpress公司的控件组效果很明显，呵呵，我用的就是这套控件组，及时雨呀！
+
+ 
+
+ FastMM对BCB6或BCB2007而言，对编译加速有非常明显的效果，建议大家去试用。有网友说原来需要6分钟编译完成的程序，使用后只要不到2分钟就完成了，还有一网友（网名：好小）更牛，原BCB中Build All 从1.5小时到2分钟不到！（见：http://bbs.codegear-cn.com/viewthread.php?tid=349&extra=page%3D3）
+使用方法（现在最新稳定版是4.78了）:
+    1、解开FastMM470.zip，找到里面的FastMm470\Replacement BorlndMM DLL\Precompiled\for Delphi IDE\Performance目录下的borlndMM.dll文件，把它复制到Delphi安装目录的bin中，覆盖原文件；
+    2、把FastMM470\Translations\Chinese (Simplified)目录下的FastMM4Messages.pas文件和FastMM470目录下的FastMM4.pas以及FastMM4Options.inc拷到你的项目中，在dpr文件uses后面第一个引用文件FastMM4.pas，第二个引用文件FastMM4Messages.pas；
+    3、重新编译项目。
+对RAD207用户：
+    FastMM对rad2007也有效么？我在d7下一直用着，听说RAD2007不是已经把FastMM加进去了么？原以为新版对内存管理已有改进，不用再用FastMM了。。。
+    >>>>>Fastmm478对BCB2007和DELPHI2007都是有效的。2007中集成的FastMM是4.6版本。直接替换就可以了。
+对BCB用户：
+    对于BCB用户来说，使用fastmm4.78,只要把...\Replacement BorlndMM DLL\Precompiled\for Delphi IDE\Performance目录下的borlndMM.dll文件，复制到BCB安装目录的bin中，覆盖原文件就可以了，非常方便。因为borlndMM.dll是BCB启动时需要加载的内核管理文件，因此只要替换后重启BCB,一切OK!
+
+     注意：程序修改后只MAKE恐怕还不行，最好要BUILDER ALL 一下。

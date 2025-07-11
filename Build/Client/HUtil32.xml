@@ -1,0 +1,908 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="HUtil32" platform="Win32">
+  <struct name="TDouble" size="8" file="HUtil32.pas" line="32">
+    <field name="d" visibility="public" size="8" offset="0" file="HUtil32.pas" line="33">
+      <array name="d" visibility="public" low="0" high="1">
+        <element type="Integer" />
+      </array>
+    </field>
+  </struct>
+  <array name="Str4096" low="0" high="4096">
+    <element type="Char" />
+  </array>
+  <array name="Str256" low="0" high="256">
+    <element type="Char" />
+  </array>
+  <struct name="TyNameTable" size="8" file="HUtil32.pas" line="38">
+    <field name="Name" type="string" visibility="public" size="4" offset="0" file="HUtil32.pas" line="39" />
+    <field name="varl" type="Integer" visibility="public" size="4" offset="4" file="HUtil32.pas" line="40" />
+  </struct>
+  <struct name="TLRect" size="16" file="HUtil32.pas" line="43">
+    <field name="Left" type="Integer" visibility="public" size="4" offset="0" file="HUtil32.pas" line="44" />
+    <field name="Top" type="Integer" visibility="public" size="4" offset="4" file="HUtil32.pas" line="44" />
+    <field name="Right" type="Integer" visibility="public" size="4" offset="8" file="HUtil32.pas" line="44" />
+    <field name="Bottom" type="Integer" visibility="public" size="4" offset="12" file="HUtil32.pas" line="44" />
+  </struct>
+  <const name="MAXDEFCOLOR" type="Integer" file="HUtil32.pas" line="48">
+    <value>
+      $10
+    </value>
+  </const>
+  <variable name="ColorNames" visibility="public" file="HUtil32.pas" line="49">
+    <array low="1" high="16" generated="true">
+      <element type="TyNameTable" />
+    </array>
+  </variable>
+  <const name="MAXLISTMARKER" type="Integer" file="HUtil32.pas" line="68">
+    <value>
+      $3
+    </value>
+  </const>
+  <variable name="LiMarkerNames" visibility="public" file="HUtil32.pas" line="69">
+    <array low="1" high="3" generated="true">
+      <element type="TyNameTable" />
+    </array>
+  </variable>
+  <const name="MAXPREDEFINE" type="Integer" file="HUtil32.pas" line="75">
+    <value>
+      $3
+    </value>
+  </const>
+  <variable name="PreDefineNames" visibility="public" file="HUtil32.pas" line="76">
+    <array low="1" high="3" generated="true">
+      <element type="TyNameTable" />
+    </array>
+  </variable>
+  <function name="CheckNumber" visibility="public" file="HUtil32.pas" line="226">
+    <parameters>
+      <parameter name="checkStr" type="string" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <procedure name="SafeFillChar" visibility="public" procflags="overload" file="HUtil32.pas" line="279">
+    <parameters>
+      <parameter name="X" paramflags="out" />
+      <parameter name="Count" type="Integer" />
+      <parameter name="Value" type="Char" />
+    </parameters>
+  </procedure>
+  <procedure name="SafeFillChar" visibility="public" procflags="overload" file="HUtil32.pas" line="284">
+    <parameters>
+      <parameter name="X" paramflags="out" />
+      <parameter name="Count" type="Integer" />
+      <parameter name="Value" type="Byte" />
+    </parameters>
+  </procedure>
+  <procedure name="SafeFillChar" visibility="public" procflags="overload" file="HUtil32.pas" line="289">
+    <parameters>
+      <parameter name="X" paramflags="out" />
+      <parameter name="Count" type="Integer" />
+      <parameter name="Value" type="Boolean" />
+    </parameters>
+  </procedure>
+  <function name="IsIPaddr" visibility="public" file="HUtil32.pas" line="294">
+    <parameters>
+      <parameter name="IP" type="string" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="PackDouble" visibility="public" file="HUtil32.pas" line="335">
+    <parameters>
+      <parameter name="d" type="Double" />
+      <retval type="TDouble" />
+    </parameters>
+  </function>
+  <function name="SolveDouble" visibility="public" file="HUtil32.pas" line="340">
+    <parameters>
+      <parameter name="d" type="TDouble" />
+      <retval type="Double" />
+    </parameters>
+  </function>
+  <function name="CaptureString" visibility="public" file="HUtil32.pas" line="349">
+    <parameters>
+      <parameter name="source" type="string" />
+      <parameter name="rdstr" type="string" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="CountGarbage" visibility="public" file="HUtil32.pas" line="408">
+    <parameters>
+      <parameter name="paper" type="TCanvas" />
+      <parameter name="Src" type="PWideChar" />
+      <parameter name="TargWidth" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="GetSpaceCount" visibility="public" file="HUtil32.pas" line="420">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="RemoveSpace" visibility="public" file="HUtil32.pas" line="431">
+    <parameters>
+      <parameter name="str" type="string" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="KillFirstSpace" visibility="public" file="HUtil32.pas" line="441">
+    <parameters>
+      <parameter name="Str" type="string" paramflags="var" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <procedure name="KillGabageSpace" visibility="public" file="HUtil32.pas" line="455">
+    <parameters>
+      <parameter name="Str" type="string" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="GetFirstWord" visibility="public" file="HUtil32.pas" line="468">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <parameter name="sWord" type="string" paramflags="var" />
+      <parameter name="FrontSpace" type="Integer" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="HexToIntEx" visibility="public" file="HUtil32.pas" line="500">
+    <parameters>
+      <parameter name="shap_str" type="string" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="HexToInt" visibility="public" file="HUtil32.pas" line="505">
+    <parameters>
+      <parameter name="str" type="string" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="Str_ToInt" visibility="public" file="HUtil32.pas" line="538">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <parameter name="def" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="Str_ToInt64" visibility="public" file="HUtil32.pas" line="548">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <parameter name="def" type="Integer" />
+      <retval type="Int64" />
+    </parameters>
+  </function>
+  <function name="Str_ToDate" visibility="public" file="HUtil32.pas" line="561">
+    <parameters>
+      <parameter name="str" type="string" />
+      <retval type="TDateTime" />
+    </parameters>
+  </function>
+  <function name="Str_ToTime" visibility="public" file="HUtil32.pas" line="568">
+    <parameters>
+      <parameter name="str" type="string" />
+      <retval type="TDateTime" />
+    </parameters>
+  </function>
+  <function name="Str_ToFloat" visibility="public" file="HUtil32.pas" line="575">
+    <parameters>
+      <parameter name="str" type="string" />
+      <retval type="Real" />
+    </parameters>
+  </function>
+  <procedure name="DrawingGhost" visibility="public" file="HUtil32.pas" line="586">
+    <parameters>
+      <parameter name="Rc" type="TRect" />
+    </parameters>
+  </procedure>
+  <function name="ExtractFileNameOnly" visibility="public" file="HUtil32.pas" line="595">
+    <parameters>
+      <parameter name="fname" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="FloatToString" visibility="public" file="HUtil32.pas" line="609">
+    <parameters>
+      <parameter name="F" type="Real" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="FloatToStrFixFmt" visibility="public" file="HUtil32.pas" line="614">
+    <parameters>
+      <parameter name="fVal" type="Double" />
+      <parameter name="prec" type="Integer" />
+      <parameter name="digit" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="FileSize" visibility="public" file="HUtil32.pas" line="650">
+    <parameters>
+      <parameter name="FName" type="string" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="FileCopy" visibility="public" file="HUtil32.pas" line="660">
+    <parameters>
+      <parameter name="source" type="string" />
+      <parameter name="dest" type="string" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="FileCopyEx" visibility="public" file="HUtil32.pas" line="689">
+    <parameters>
+      <parameter name="source" type="string" />
+      <parameter name="dest" type="string" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="GetDefColorByName" visibility="public" file="HUtil32.pas" line="719">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <retval type="TColor" />
+    </parameters>
+  </function>
+  <function name="GetULMarkerType" visibility="public" file="HUtil32.pas" line="734">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="GetDefines" visibility="public" file="HUtil32.pas" line="749">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <procedure name="ClearWindow" visibility="public" file="HUtil32.pas" line="764">
+    <parameters>
+      <parameter name="aCanvas" type="TCanvas" />
+      <parameter name="aLeft" type="Integer" />
+      <parameter name="aTop" type="Integer" />
+      <parameter name="aRight" type="Integer" />
+      <parameter name="aBottom" type="Integer" />
+      <parameter name="aColor" type="TColor" />
+    </parameters>
+  </procedure>
+  <procedure name="DrawTileImage" visibility="public" file="HUtil32.pas" line="774">
+    <parameters>
+      <parameter name="Canv" type="TCanvas" />
+      <parameter name="Rect" type="TRect" />
+      <parameter name="TileImage" type="TBitmap" />
+    </parameters>
+  </procedure>
+  <procedure name="TiledImage" visibility="public" file="HUtil32.pas" line="815">
+    <parameters>
+      <parameter name="Canv" type="TCanvas" />
+      <parameter name="Rect" type="TLRect" />
+      <parameter name="TileImage" type="TBitmap" />
+    </parameters>
+  </procedure>
+  <function name="GetValidStrEx" visibility="public" file="HUtil32.pas" line="877">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <parameter name="Dest" type="string" paramflags="var" />
+      <parameter name="Divider" paramflags="const">
+        <array name="Divider">
+          <element type="Char" />
+        </array>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="GetValidStr3" visibility="public" file="HUtil32.pas" line="956">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <parameter name="Dest" type="string" paramflags="var" />
+      <parameter name="Divider" paramflags="const">
+        <array name="Divider">
+          <element type="Char" />
+        </array>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="GetValidStr4" visibility="public" file="HUtil32.pas" line="1025">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <parameter name="Dest" type="string" paramflags="var" />
+      <parameter name="Divider" paramflags="const">
+        <array name="Divider">
+          <element type="Char" />
+        </array>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="GetValidStrVal" visibility="public" file="HUtil32.pas" line="1090">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <parameter name="Dest" type="string" paramflags="var" />
+      <parameter name="Divider" paramflags="const">
+        <array name="Divider">
+          <element type="Char" />
+        </array>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="GetValidStrCap" visibility="public" file="HUtil32.pas" line="1189">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <parameter name="Dest" type="string" paramflags="var" />
+      <parameter name="Divider" paramflags="const">
+        <array name="Divider">
+          <element type="Char" />
+        </array>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IntToStrFill" visibility="public" file="HUtil32.pas" line="1205">
+    <parameters>
+      <parameter name="num" type="Integer" />
+      <parameter name="len" type="Integer" />
+      <parameter name="fill" type="Char" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IsInB" visibility="public" file="HUtil32.pas" line="1217">
+    <parameters>
+      <parameter name="Src" type="string" />
+      <parameter name="Pos" type="Integer" />
+      <parameter name="Targ" type="string" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsInRect" visibility="public" file="HUtil32.pas" line="1230">
+    <parameters>
+      <parameter name="X" type="Integer" />
+      <parameter name="Y" type="Integer" />
+      <parameter name="Rect" type="TRect" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsStringNumber" visibility="public" file="HUtil32.pas" line="1237">
+    <parameters>
+      <parameter name="str" type="string" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="ArrestString" visibility="public" file="HUtil32.pas" line="1255">
+    <parameters>
+      <parameter name="Source" type="string" />
+      <parameter name="SearchAfter" type="string" />
+      <parameter name="ArrestBefore" type="string" />
+      <parameter name="DropTags" paramflags="const">
+        <array name="DropTags">
+          <element type="string" />
+        </array>
+      </parameter>
+      <parameter name="RsltStr" type="string" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="ArrestStringEx" visibility="public" file="HUtil32.pas" line="1321">
+    <parameters>
+      <parameter name="Source" type="string" />
+      <parameter name="SearchAfter" type="string" />
+      <parameter name="ArrestBefore" type="string" />
+      <parameter name="ArrestStr" type="string" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="SkipStr" visibility="public" file="HUtil32.pas" line="1379">
+    <parameters>
+      <parameter name="Src" type="string" />
+      <parameter name="Skips" paramflags="const">
+        <array name="Skips">
+          <element type="Char" />
+        </array>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="GetStrToCoords" visibility="public" file="HUtil32.pas" line="1402">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <retval type="TRect" />
+    </parameters>
+  </function>
+  <function name="GetValidStrNoVal" visibility="public" file="HUtil32.pas" line="1415">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <parameter name="Dest" type="string" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="CombineDirFile" visibility="public" file="HUtil32.pas" line="1439">
+    <parameters>
+      <parameter name="SrcDir" type="string" />
+      <parameter name="TargName" type="string" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="CompareLStr" visibility="public" file="HUtil32.pas" line="1450">
+    <parameters>
+      <parameter name="src" type="string" />
+      <parameter name="targ" type="string" />
+      <parameter name="compn" type="Integer" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="CompareBackLStr" visibility="public" file="HUtil32.pas" line="1466">
+    <parameters>
+      <parameter name="src" type="string" />
+      <parameter name="targ" type="string" />
+      <parameter name="compn" type="Integer" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsEnglish" visibility="public" file="HUtil32.pas" line="1485">
+    <parameters>
+      <parameter name="Ch" type="Char" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsEngNumeric" visibility="public" file="HUtil32.pas" line="1492">
+    <parameters>
+      <parameter name="Ch" type="Char" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsFloatNumeric" visibility="public" file="HUtil32.pas" line="1499">
+    <parameters>
+      <parameter name="str" type="string" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <procedure name="PCharSet" visibility="public" file="HUtil32.pas" line="1513">
+    <parameters>
+      <parameter name="P" type="PWideChar" />
+      <parameter name="n" type="Integer" />
+      <parameter name="ch" type="Char" />
+    </parameters>
+  </procedure>
+  <function name="ReplaceChar" visibility="public" file="HUtil32.pas" line="1521">
+    <parameters>
+      <parameter name="src" type="string" />
+      <parameter name="srcchr" type="Char" />
+      <parameter name="repchr" type="Char" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IsUniformStr" visibility="public" file="HUtil32.pas" line="1534">
+    <parameters>
+      <parameter name="src" type="string" />
+      <parameter name="ch" type="Char" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="CreateMask" visibility="public" file="HUtil32.pas" line="1550">
+    <parameters>
+      <parameter name="Src" type="PWideChar" />
+      <parameter name="TargPos" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="GetValueFromMask" visibility="public" file="HUtil32.pas" line="1636">
+    <parameters>
+      <parameter name="Src" type="PWideChar" />
+      <parameter name="Mask" type="string" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <procedure name="GetDirList" visibility="public" file="HUtil32.pas" line="1748">
+    <parameters>
+      <parameter name="path" type="string" />
+      <parameter name="fllist" type="TStringList" />
+    </parameters>
+  </procedure>
+  <function name="GetFileDate" visibility="public" file="HUtil32.pas" line="1765">
+    <parameters>
+      <parameter name="filename" type="string" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <procedure name="ShlStr" visibility="public" file="HUtil32.pas" line="1779">
+    <parameters>
+      <parameter name="Source" type="PWideChar" />
+      <parameter name="count" type="Integer" />
+    </parameters>
+  </procedure>
+  <procedure name="ShrStr" visibility="public" file="HUtil32.pas" line="1793">
+    <parameters>
+      <parameter name="Source" type="PWideChar" />
+      <parameter name="count" type="Integer" />
+    </parameters>
+  </procedure>
+  <function name="LRect" visibility="public" file="HUtil32.pas" line="1807">
+    <parameters>
+      <parameter name="l" type="Integer" />
+      <parameter name="t" type="Integer" />
+      <parameter name="r" type="Integer" />
+      <parameter name="b" type="Integer" />
+      <retval type="TLRect" />
+    </parameters>
+  </function>
+  <procedure name="MemPCopy" visibility="public" file="HUtil32.pas" line="1815">
+    <parameters>
+      <parameter name="Dest" type="PWideChar" />
+      <parameter name="Src" type="string" />
+    </parameters>
+  </procedure>
+  <procedure name="MemCpy" visibility="public" file="HUtil32.pas" line="1821">
+    <parameters>
+      <parameter name="Dest" type="PWideChar" />
+      <parameter name="Src" type="PWideChar" />
+      <parameter name="Count" type="Integer" />
+    </parameters>
+  </procedure>
+  <procedure name="memcpy2" visibility="public" file="HUtil32.pas" line="1830">
+    <parameters>
+      <parameter name="TargAddr" type="Integer" />
+      <parameter name="SrcAddr" type="Integer" />
+      <parameter name="count" type="Integer" />
+    </parameters>
+  </procedure>
+  <procedure name="memset" visibility="public" file="HUtil32.pas" line="1838">
+    <parameters>
+      <parameter name="buffer" type="PWideChar" />
+      <parameter name="fillchar" type="Char" />
+      <parameter name="count" type="Integer" />
+    </parameters>
+  </procedure>
+  <procedure name="Str256PCopy" visibility="public" file="HUtil32.pas" line="1845">
+    <parameters>
+      <parameter name="Dest" type="PWideChar" />
+      <parameter name="Src" type="string" paramflags="const" />
+    </parameters>
+  </procedure>
+  <function name="_StrPas" visibility="public" file="HUtil32.pas" line="1850">
+    <parameters>
+      <parameter name="dest" type="PWideChar" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="Str_PCopy" visibility="public" file="HUtil32.pas" line="1862">
+    <parameters>
+      <parameter name="dest" type="PWideChar" />
+      <parameter name="src" type="string" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="Str_PCopyEx" visibility="public" file="HUtil32.pas" line="1872">
+    <parameters>
+      <parameter name="dest" type="PWideChar" />
+      <parameter name="src" type="string" paramflags="const" />
+      <parameter name="buflen" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="Trim_R" visibility="public" file="HUtil32.pas" line="1887">
+    <parameters>
+      <parameter name="str" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IsEqualFont" visibility="public" file="HUtil32.pas" line="1899">
+    <parameters>
+      <parameter name="SrcFont" type="TFont" />
+      <parameter name="TarFont" type="TFont" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="CutHalfCode" visibility="public" file="HUtil32.pas" line="1909">
+    <parameters>
+      <parameter name="Str" type="string" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="ConvertToShortName" visibility="public" file="HUtil32.pas" line="1938">
+    <parameters>
+      <parameter name="Canvas" type="TCanvas" />
+      <parameter name="Source" type="string" />
+      <parameter name="WantWidth" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <procedure name="SpliteBitmap" visibility="public" file="HUtil32.pas" line="1997">
+    <parameters>
+      <parameter name="DC" type="HDC" />
+      <parameter name="X" type="Integer" />
+      <parameter name="Y" type="Integer" />
+      <parameter name="bitmap" type="TBitmap" />
+      <parameter name="transcolor" type="TColor" />
+    </parameters>
+  </procedure>
+  <function name="TimeIsOut" visibility="public" file="HUtil32.pas" line="2056">
+    <parameters>
+      <parameter name="dtime" type="TDateTime" />
+      <parameter name="taghour" type="Integer" />
+      <parameter name="tagmin" type="Integer" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="TagCount" visibility="public" file="HUtil32.pas" line="2090">
+    <parameters>
+      <parameter name="source" type="string" />
+      <parameter name="tag" type="Char" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="CatchString" visibility="public" file="HUtil32.pas" line="2110">
+    <parameters>
+      <parameter name="source" type="string" />
+      <parameter name="cap" type="Char" />
+      <parameter name="catched" type="string" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="DivString" visibility="public" file="HUtil32.pas" line="2140">
+    <parameters>
+      <parameter name="source" type="string" />
+      <parameter name="cap" type="Char" />
+      <parameter name="sel" type="string" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="DivTailString" visibility="public" file="HUtil32.pas" line="2159">
+    <parameters>
+      <parameter name="source" type="string" />
+      <parameter name="cap" type="Char" />
+      <parameter name="sel" type="string" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="SPos" visibility="public" file="HUtil32.pas" line="2184">
+    <parameters>
+      <parameter name="substr" type="string" />
+      <parameter name="str" type="string" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="NumCopy" visibility="public" file="HUtil32.pas" line="2220">
+    <parameters>
+      <parameter name="str" type="string" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="GetMonDay" visibility="public" file="HUtil32.pas" line="2235">
+    <parameters>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="BoolToStr" visibility="public" file="HUtil32.pas" line="2249">
+    <parameters>
+      <parameter name="boo" type="Boolean" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="BoolToInt" visibility="public" file="HUtil32.pas" line="2255">
+    <parameters>
+      <parameter name="boo" type="Boolean" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="TimeStr" visibility="public" file="HUtil32.pas" line="2261">
+    <parameters>
+      <parameter name="atime" type="TDateTime" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="_MIN" visibility="public" file="HUtil32.pas" line="2270">
+    <parameters>
+      <parameter name="n1" type="Integer" />
+      <parameter name="n2" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="_MAX" visibility="public" file="HUtil32.pas" line="2276">
+    <parameters>
+      <parameter name="n1" type="Integer" />
+      <parameter name="n2" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="StrToSQLSafe" visibility="public" file="HUtil32.pas" line="2285">
+    <parameters>
+      <parameter name="str" type="string" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="SQLSafeToStr" visibility="public" file="HUtil32.pas" line="2315">
+    <parameters>
+      <parameter name="sqlstr" type="string" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="StrToVisibleOnly" visibility="public" file="HUtil32.pas" line="2353">
+    <parameters>
+      <parameter name="str" type="string" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="StrToHint" visibility="public" file="HUtil32.pas" line="2382">
+    <parameters>
+      <parameter name="str" type="string" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="AnsiCaptureString" visibility="public" file="HUtil32.pas" line="2428">
+    <parameters>
+      <parameter name="Source" type="AnsiString" paramflags="const" />
+      <parameter name="rdstr" type="AnsiString" paramflags="var" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="DBAnsiGetValidStr2" visibility="public" file="HUtil32.pas" line="2481">
+    <parameters>
+      <parameter name="Str" type="AnsiString" paramflags="const" />
+      <parameter name="Dest" type="AnsiString" paramflags="var" />
+      <parameter name="Divider" paramflags="const">
+        <array name="Divider">
+          <element type="AnsiChar" />
+        </array>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="AnsiGetValidStr2" visibility="public" file="HUtil32.pas" line="2564">
+    <parameters>
+      <parameter name="Str" type="AnsiString" paramflags="const" />
+      <parameter name="Dest" type="AnsiString" paramflags="var" />
+      <parameter name="Divider" paramflags="const">
+        <array name="Divider">
+          <element type="AnsiChar" />
+        </array>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="DBAnsiGetValidStr3" visibility="public" file="HUtil32.pas" line="2647">
+    <parameters>
+      <parameter name="Str" type="AnsiString" paramflags="const" />
+      <parameter name="Dest" type="AnsiString" paramflags="var" />
+      <parameter name="Divider" paramflags="const">
+        <array name="Divider">
+          <element type="AnsiChar" />
+        </array>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="AnsiGetValidStr3" visibility="public" file="HUtil32.pas" line="2729">
+    <parameters>
+      <parameter name="Str" type="AnsiString" paramflags="const" />
+      <parameter name="Dest" type="AnsiString" paramflags="var" />
+      <parameter name="Divider" paramflags="const">
+        <array name="Divider">
+          <element type="AnsiChar" />
+        </array>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="AnsiGetValidStr4" visibility="public" file="HUtil32.pas" line="2811">
+    <parameters>
+      <parameter name="Str" type="AnsiString" paramflags="const" />
+      <parameter name="Dest" type="AnsiString" paramflags="var" />
+      <parameter name="Divider" paramflags="const">
+        <array name="Divider">
+          <element type="AnsiChar" />
+        </array>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="AnsiGetValidStrVal" visibility="public" file="HUtil32.pas" line="2886">
+    <parameters>
+      <parameter name="Str" type="AnsiString" paramflags="const" />
+      <parameter name="Dest" type="AnsiString" paramflags="var" />
+      <parameter name="Divider" paramflags="const">
+        <array name="Divider">
+          <element type="AnsiChar" />
+        </array>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="AnsiGetValidStrCap" visibility="public" file="HUtil32.pas" line="2996">
+    <parameters>
+      <parameter name="Str" type="AnsiString" />
+      <parameter name="Dest" type="AnsiString" paramflags="var" />
+      <parameter name="Divider" paramflags="const">
+        <array name="Divider">
+          <element type="AnsiChar" />
+        </array>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="AnsiIsInB" visibility="public" file="HUtil32.pas" line="3015">
+    <parameters>
+      <parameter name="Src" type="AnsiString" paramflags="const" />
+      <parameter name="Pos" type="Integer" />
+      <parameter name="targ" type="AnsiString" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="AnsiArrestString" visibility="public" file="HUtil32.pas" line="3030">
+    <parameters>
+      <parameter name="Source" type="AnsiString" paramflags="const" />
+      <parameter name="SearchAfter" type="AnsiString" paramflags="const" />
+      <parameter name="ArrestBefore" type="AnsiString" paramflags="const" />
+      <parameter name="DropTags" paramflags="const">
+        <array name="DropTags">
+          <element type="AnsiString" />
+        </array>
+      </parameter>
+      <parameter name="RsltStr" type="AnsiString" paramflags="var" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="AnsiArrestStringEx" visibility="public" procflags="inline" file="HUtil32.pas" line="3108">
+    <parameters>
+      <parameter name="Source" type="AnsiString" />
+      <parameter name="SearchAfter" type="AnsiString" paramflags="const" />
+      <parameter name="ArrestBefore" type="AnsiString" paramflags="const" />
+      <parameter name="ArrestStr" type="AnsiString" paramflags="var" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="AnsiDivString" visibility="public" file="HUtil32.pas" line="3172">
+    <parameters>
+      <parameter name="Source" type="AnsiString" paramflags="const" />
+      <parameter name="cap" type="AnsiChar" />
+      <parameter name="sel" type="AnsiString" paramflags="var" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="AnsiDivTailString" visibility="public" file="HUtil32.pas" line="3195">
+    <parameters>
+      <parameter name="Source" type="AnsiString" paramflags="const" />
+      <parameter name="cap" type="AnsiChar" />
+      <parameter name="sel" type="AnsiString" paramflags="var" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="AnsiTagCount" visibility="public" file="HUtil32.pas" line="3224">
+    <parameters>
+      <parameter name="Source" type="AnsiString" paramflags="const" />
+      <parameter name="Tag" type="AnsiChar" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="AnsiTextLength" visibility="public" file="HUtil32.pas" line="3234">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="CopyAnisText" visibility="public" file="HUtil32.pas" line="3242">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <parameter name="index" type="Integer" />
+      <parameter name="Length" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="DecStr" visibility="public" file="HUtil32.pas" line="3251">
+    <parameters>
+      <parameter name="SourStr" type="string" />
+      <parameter name="X" type="Integer" />
+      <parameter name="Y" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="AnsiCompareBackLStr" visibility="public" file="HUtil32.pas" line="3263">
+    <parameters>
+      <parameter name="src" type="AnsiString" />
+      <parameter name="targ" type="AnsiString" />
+      <parameter name="compn" type="Integer" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <procedure name="DisPoseAndNil" visibility="public" file="HUtil32.pas" line="3281">
+    <parameters>
+      <parameter name="Obj" paramflags="var" />
+    </parameters>
+  </procedure>
+</namespace>

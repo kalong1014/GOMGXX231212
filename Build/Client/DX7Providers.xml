@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="DX7Providers" platform="Win32">
+  <const name="idDirectX7" type="Integer" file="DX7Providers.pas" line="46">
+    <value>
+      $10000700
+    </value>
+  </const>
+  <class name="TDX7Provider" file="DX7Providers.pas" line="50">
+    <ancestor name="TAsphyreProvider" namespace="AsphyreFactory">
+      <propertyref name="ProviderID" visibility="public" />
+      <methodref name="CreateDevice" visibility="public" procflags="abstract virtual" />
+      <methodref name="CreateCanvas" visibility="public" procflags="abstract virtual" />
+      <methodref name="CreateRasterizer" visibility="public" procflags="abstract virtual" />
+      <methodref name="CreateLockableTexture" visibility="public" procflags="abstract virtual" />
+      <methodref name="CreateRenderTargetTexture" visibility="public" procflags="abstract virtual" />
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <function name="CreateDevice" visibility="public" procflags="override" file="DX7Providers.pas" line="53">
+        <parameters>
+          <retval type="TAsphyreDevice" />
+        </parameters>
+      </function>
+      <function name="CreateCanvas" visibility="public" procflags="override" file="DX7Providers.pas" line="54">
+        <parameters>
+          <retval type="TAsphyreCanvas" />
+        </parameters>
+      </function>
+      <function name="CreateRasterizer" visibility="public" procflags="override" file="DX7Providers.pas" line="55">
+        <parameters>
+          <retval type="TAsphyreRasterizer" />
+        </parameters>
+      </function>
+      <function name="CreateLockableTexture" visibility="public" procflags="override" file="DX7Providers.pas" line="56">
+        <parameters>
+          <retval type="TAsphyreLockableTexture" />
+        </parameters>
+      </function>
+      <function name="CreateRenderTargetTexture" visibility="public" procflags="override" file="DX7Providers.pas" line="57">
+        <parameters>
+          <retval type="TAsphyreRenderTargetTexture" />
+        </parameters>
+      </function>
+      <constructor name="Create" visibility="public" file="DX7Providers.pas" line="59">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="DX7Providers.pas" line="60">
+        <parameters>
+        </parameters>
+      </destructor>
+    </members>
+  </class>
+  <variable name="DX7Provider" type="TDX7Provider" visibility="public" file="DX7Providers.pas" line="65" />
+</namespace>

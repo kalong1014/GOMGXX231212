@@ -1,0 +1,787 @@
+unit LoginSvrWnd;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, Grids, Menus, ExtCtrls, ScktComp, ComCtrls, ImgList, ToolWin,
+  RzButton, RzPanel, RzStatus, RzListVw, GList, Clipbrd, EDcode, LSShare,
+  Grobal2, System.ImageList;
+
+type
+  TCLoginSvrWnd = class(TForm)
+    MainMenu: TMainMenu;
+    MENU_CONTROL: TMenuItem;
+    MENU_START: TMenuItem;
+    MENU_STOP: TMenuItem;
+    N7: TMenuItem;
+    MENU_RELOADSET: TMenuItem;
+    N8: TMenuItem;
+    MENU_CONTROL_EXIT: TMenuItem;
+    MENU_OPTION: TMenuItem;
+    MENU_CONFIG: TMenuItem;
+    N3: TMenuItem;
+    MENU_CLEAELOG: TMenuItem;
+    NENU_INITDB: TMenuItem;
+    N9: TMenuItem;
+    MENU_NOSERVICE: TMenuItem;
+    TimerStart: TTimer;
+    imlMain: TImageList;
+    RzToolbar1: TRzToolbar;
+    ButtonStart: TRzToolButton;
+    ButtonStop: TRzToolButton;
+    StatusBar: TRzStatusBar;
+    StatusPane1: TRzStatusPane;
+    Timer: TTimer;
+    ListViewLog: TRzListView;
+    PopupMenu: TPopupMenu;
+    POPUPMENU_COPY: TMenuItem;
+    POPUPMENU_SELALL: TMenuItem;
+    POPUPMENU_SAVE: TMenuItem;
+    CountLogTimer: TTimer;
+    CheckExpireTimer: TTimer;
+    CheckCertTimer: TTimer;
+    MENU_ACCOUNTTOOL: TMenuItem;
+    N1: TMenuItem;
+    N2: TMenuItem;
+    procedure FormCreate(Sender: TObject);
+    procedure StringGrid1DrawCell(Sender: TObject; ACol, ARow: Integer; Rect:
+      TRect; State: TGridDrawState);
+    procedure FormResize(Sender: TObject);
+    procedure TimerTimer(Sender: TObject);
+    procedure ListViewLogCustomDrawItem(Sender: TCustomListView; Item: TListItem;
+      State: TCustomDrawState; var DefaultDraw: Boolean);
+    procedure POPUPMENU_COPYClick(Sender: TObject);
+    procedure POPUPMENU_SAVEClick(Sender: TObject);
+    procedure POPUPMENU_SELALLClick(Sender: TObject);
+    procedure TimerStartTimer(Sender: TObject);
+    procedure ButtonStartClick(Sender: TObject);
+    procedure MENU_RELOADSETClick(Sender: TObject);
+    procedure MENU_CONTROL_EXITClick(Sender: TObject);
+    procedure MENU_CONFIGClick(Sender: TObject);
+    procedure MENU_CLEAELOGClick(Sender: TObject);
+    procedure NENU_INITDBClick(Sender: TObject);
+    procedure MENU_NOSERVICEClick(Sender: TObject);
+    procedure CountLogTimerTimer(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure CheckExpireTimerTimer(Sender: TObject);
+    procedure CheckCertTimerTimer(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure MENU_ACCOUNTTOOLClick(Sender: TObject);
+    procedure N1Click(Sender: TObject);
+  private
+    { Private declarations }
+    function LoadDBTables: Boolean;
+    procedure StopService;
+    procedure StartService;
+    procedure CheckCertListTimeOuts;
+    procedure CheckAccountExpire;
+  public
+    { Public declarations }
+    procedure SendAccountExpireUser(pCert: PTCertUser);
+  end;
+
+var
+  CLoginSvrWnd: TCLoginSvrWnd;
+
+implementation
+
+uses
+  NetGameServer, NetCheckServer, NetLoginGate, GeneralConfig, SQLIDDB, ADODB,
+  FrmFindId, GrobalSession;
+
+{$R *.dfm}
+
+procedure TCLoginSvrWnd.ButtonStartClick(Sender: TObject);
+begin
+  TimerStart.Enabled := True;
+end;
+
+procedure TCLoginSvrWnd.CountLogTimerTimer(Sender: TObject);
+begin
+  SaveCountLog;
+end;
+
+procedure TCLoginSvrWnd.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  if Sender <> nil then begin
+    if mrYes = MessageDlg('Would terminate mir Login server ?', mtWarning, mbYesNoCancel, 0) then begin
+      CanClose := TRUE;
+      CCheckServer.CheckServerSocket.Active := FALSE;
+      CGameServer.GameServerSocket.Active := FALSE;
+      CLoginGate.LoginGateSocket.Active := FALSE;
+//         AddLog ('Server closed...');
+    end else
+      CanClose := FALSE;
+  end;
+end;
+
+procedure TCLoginSvrWnd.FormCreate(Sender: TObject);
+begin
+  Self.Caption := APPCAPTION;
+  MainLogMsgList := TGStringList.Create;
+
+  CGameServer := TCGameServer.Create();
+  CCheckServer := TCCheckServer.Create();
+  CLoginGate := TCLoginGate.Create();
+
+  IsNotInServiceMode := FALSE;
+  FSQLIDDB := TSQLIdDB.Create;
+
+  m_listGameServer := TGList.Create;
+  m_listLoginGate := TList.Create;
+  m_csListCert := TGList.Create;
+  m_listServerIP := TList.Create;
+  m_listGateIP := TList.Create;
+  m_listGmIP := TList.Create;
+  m_listServerInfo := TList.Create;
+
+  StatusPane1.Caption := 'Ready..';
+  CINFO := RGB(0, 0, 255);
+  CERR := RGB(255, 0, 0);
+  CNORMAL := RGB(0, 0, 0);
+  CDBG := RGB(255, 128, 64);
+  CSEND := RGB(64, 64, 128);
+  CRECV := RGB(32, 128, 64);
+  Timer.Enabled := TRUE;
+  TimerStart.Enabled := TRUE;
+end;
+
+procedure TCLoginSvrWnd.FormDestroy(Sender: TObject);
+var
+  i, j: Integer;
+  pServerInfo: pTGameServerInfo;
+  pSelectGateInfo: pTTblSelectGateIP;
+begin
+  if FSQLIDDB <> nil then
+    FSQLIDDB.Free;
+
+  CGameServer.Free;
+  CCheckServer.Free;
+  CLoginGate.Free;
+
+  if m_listGameServer <> nil then begin
+    for i := 0 to m_listGameServer.Count - 1 do
+      Dispose(pTGameServer(m_listGameServer[i]));
+    m_listGameServer.Free;
+  end;
+
+  if m_listLoginGate <> nil then begin
+    for i := 0 to m_listLoginGate.Count - 1 do
+      Dispose(pTLoginGate(m_listLoginGate[i]));
+    m_listLoginGate.Free;
+  end;
+
+  if m_csListCert <> nil then begin
+    for i := 0 to m_csListCert.Count - 1 do
+      Dispose(pTCertUser(m_csListCert[i]));
+    m_csListCert.Free;
+  end;
+  m_csListCert.Free;
+
+  m_listServerIP.Free;
+
+  if m_listGateIP <> nil then begin
+    for i := 0 to m_listGateIP.Count - 1 do
+      Dispose(pTTablePubIP(m_listGateIP[i]));
+    m_listGateIP.Free;
+  end;
+
+  if m_listGmIP <> nil then begin
+    for i := 0 to m_listGmIP.Count - 1 do
+      Dispose(pTTablePubIP(m_listGmIP[i]));
+    m_listGmIP.Free;
+  end;
+
+  if m_listServerInfo <> nil then begin
+    for i := 0 to m_listServerInfo.Count - 1 do begin
+      pServerInfo := pTGameServerInfo(m_listServerInfo[i]);
+      for j := 0 to pServerInfo.listSelectGate.Count - 1 do begin
+        pSelectGateInfo := pTTblSelectGateIP(pServerInfo.listSelectGate[j]);
+        Dispose(pSelectGateInfo);
+      end;
+      pServerInfo.listSelectGate.Free;
+      Dispose(pServerInfo);
+    end;
+    m_listServerInfo.Free;
+  end;
+
+  if MainLogMsgList<> nil then begin
+    for I := 0 to MainLogMsgList.Count - 1 do begin
+      Dispose(pTMsgLog(MainLogMsgList.Objects[I]));
+    end;
+    MainLogMsgList.Free;
+  end;
+end;
+
+procedure TCLoginSvrWnd.FormResize(Sender: TObject);
+begin
+  with ListViewLog do begin
+    Columns[1].Width := Width - Columns[0].Width - GetSystemMetrics(SM_CXVSCROLL) - 5;
+  end;
+end;
+
+procedure TCLoginSvrWnd.ListViewLogCustomDrawItem(Sender: TCustomListView; Item:
+  TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
+begin
+  if Item.Data <> nil then begin
+    ListViewLog.Canvas.Font.Color := pTMsgLog(Item.Data).nFColor;
+  end;
+end;
+
+procedure TCLoginSvrWnd.MENU_ACCOUNTTOOLClick(Sender: TObject);
+begin
+  FrmFindUserId := TFrmFindUserId.Create(nil);
+  FrmFindUserId.Top := Self.Top + 28;
+  FrmFindUserId.Left := Self.Left;
+  FrmFindUserId.Open;
+  FrmFindUserId.Free;
+end;
+
+procedure TCLoginSvrWnd.MENU_CLEAELOGClick(Sender: TObject);
+begin
+  ListViewLog.Items.Clear;
+end;
+
+procedure TCLoginSvrWnd.MENU_CONFIGClick(Sender: TObject);
+begin
+  frmGeneralConfig := TfrmGeneralConfig.Create(Owner);
+  frmGeneralConfig.Top := Self.Top + 28;
+  frmGeneralConfig.Left := Self.Left;
+  frmGeneralConfig.Open();
+  frmGeneralConfig.Free;
+end;
+
+procedure TCLoginSvrWnd.MENU_CONTROL_EXITClick(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TCLoginSvrWnd.MENU_NOSERVICEClick(Sender: TObject);
+begin
+  IsNotInServiceMode := not IsNotInServiceMode;
+  MENU_NOSERVICE.Checked := IsNotInServiceMode;
+  if IsNotInServiceMode then begin
+    Caption := APPCAPTION + '(NOT IN SERVICE MODE)';
+    MainOutMessage(0, 'LoginServer is not In Service Mode');
+  end
+  else begin
+    Caption := APPCAPTION + '(SERVICE MODE)';
+    MainOutMessage(0, 'LoginServer is  In Service Mode');
+  end;
+end;
+
+procedure TCLoginSvrWnd.MENU_RELOADSETClick(Sender: TObject);
+begin
+  LoadDBTables;
+  MainOutMessage(CINFO, 'Server DB Tables is Reloaded.');
+end;
+
+procedure TCLoginSvrWnd.N1Click(Sender: TObject);
+begin
+  frmGrobalSession := TfrmGrobalSession.Create(nil);
+  frmGrobalSession.Top := Self.Top + 28;
+  frmGrobalSession.Left := Self.Left;
+  frmGrobalSession.Open;
+  frmGrobalSession.Free;
+end;
+
+procedure TCLoginSvrWnd.NENU_INITDBClick(Sender: TObject);
+var
+  nPCRoomIndex: Integer;
+  szQuery: string;
+begin
+   // 1. Delete TBL_USINGIP where FLD_GAMETYPE='MIR2'
+	 // 2. Update TBL_DUPIP Set FLD_ISOK='1' where FLD_GAMETYPE='MIR2'
+	 // 3. Update MR3_PCRoomStatusTable Set PCRoomStatus_UsingIPCount = 0
+   nPCRoomIndex := 0;
+
+	if not FSQLIDDB.Open then Exit;
+
+	 // 1. Delete TBL_USINGIP where FLD_GAMETYPE='MIR2'
+   szQuery := Format('DELETE TBL_USINGIP WHERE FLD_GAMETYPE=''%s''', [m_szGameType]);
+{$IFDEF DEBUG}
+	 MainOutMessage( 0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+   FSQLIDDB.UseDB (tManage);
+	 FSQLIDDB.ExeCuteSQL (szQuery);
+
+   // 2. Update TBL_DUPIP Set FLD_ISOK='1' where FLD_GAMETYPE='MIR2'
+	 szQuery := Format('UPDATE TBL_DUPIP SET FLD_ISOK=1 WHERE FLD_GAMETYPE=''%s''', [m_szGameType]);
+{$IFDEF DEBUG}
+	 MainOutMessage( 0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+	 FSQLIDDB.ExeCuteSQL (szQuery);
+
+	 // 3. Update MR3_PCRoomStatusTable Set PCRoomStatus_UsingIPCount = 0
+	 szQuery := 'UPDATE MR3_PCRoomStatusTable SET PCRoomStatus_UsingIPCount = 0';
+{$IFDEF DEBUG}
+	 MainOutMessage( 0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+	 FSQLIDDB.ExeCuteSQL (szQuery);
+end;
+
+procedure TCLoginSvrWnd.POPUPMENU_COPYClick(Sender: TObject);
+var
+  I: Integer;
+  ListItem: TListItem;
+  SaveList: TStringList;
+  Clipboard: TClipboard;
+begin
+  SaveList := TStringList.Create;
+  ListViewLog.Items.BeginUpdate;
+  try
+    for I := 0 to ListViewLog.Items.Count - 1 do begin
+      ListItem := ListViewLog.Items.Item[I];
+      if ListItem.Selected then begin
+        if ListItem.SubItems.Count >= 2 then begin
+          SaveList.Add(ListItem.Caption + #9 + ListItem.SubItems.Strings[0] + #9
+            + ListItem.SubItems.Strings[1]);
+        end
+        else begin
+          SaveList.Add(ListItem.Caption + #9 + ListItem.SubItems.Strings[0]);
+        end;
+      end;
+    end;
+  finally
+    ListViewLog.Items.EndUpdate;
+  end;
+  Clipboard := TClipboard.Create();
+  Clipboard.AsText := SaveList.Text;
+  Clipboard.Free();
+  SaveList.Free;
+end;
+
+procedure TCLoginSvrWnd.POPUPMENU_SAVEClick(Sender: TObject);
+var
+  I: Integer;
+  SaveList: TStringList;
+  MsgLog: pTMsgLog;
+begin
+  SaveList := TStringList.Create;
+  MainLogMsgList.Lock;
+  try
+    for I := 0 to MainLogMsgList.Count - 1 do begin
+      MsgLog := pTMsgLog(MainLogMsgList.Objects[I]);
+      SaveList.Add(DateTimeToStr(MsgLog.dAddTime) + #9 + MainLogMsgList.Strings[I]);
+    end;
+  finally
+    MainLogMsgList.UnLock;
+  end;
+  SaveList.SaveToFile('.\Log.txt');
+  SaveList.Free;
+end;
+
+procedure TCLoginSvrWnd.POPUPMENU_SELALLClick(Sender: TObject);
+begin
+  ListViewLog.SelectAll;
+end;
+
+procedure TCLoginSvrWnd.TimerStartTimer(Sender: TObject);
+begin
+  TimerStart.Enabled := False;
+  if not g_Config.boStarted then begin
+    StartService;
+  end else begin
+    StopService;
+  end;
+end;
+
+procedure TCLoginSvrWnd.StartService;
+begin
+  try
+    LoadConfig;
+    LoadPublicKey('EncKey');
+    Application.ProcessMessages;
+    if not FSQLIDDB.Connect('(Local)', g_Config.ODBC_ID, g_Config.ODBC_PW) then exit; //初始化数据库连接
+
+    if not LoadDBTables then Exit;  //加载服务器信息
+    // start listen
+    CCheckServer.CheckServerSocket.Active := FALSE;
+    CGameServer.GameServerSocket.Active := FALSE;
+    CLoginGate.LoginGateSocket.Active := FALSE;
+    CCheckServer.CheckServerSocket.Port := g_Config.CS_BPORT;
+    CGameServer.GameServerSocket.Port := g_Config.GS_BPORT;
+    CLoginGate.LoginGateSocket.Port := g_Config.LG_BPORT;
+    try
+      CCheckServer.CheckServerSocket.Active := TRUE;
+      CGameServer.GameServerSocket.Active := TRUE;
+      CLoginGate.LoginGateSocket.Active := TRUE;
+    except
+      MainOutMessage(RGB(255, 0, 0), '[Win32 Error] ' + Exception(ExceptObject).Message);
+      Exit;
+    end;
+
+	// start timer
+    CCheckServer.CheckServerTimer.Enabled := TRUE;
+    CLoginGate.DecodeTimer.Enabled := TRUE;
+    CountLogTimer.Enabled := TRUE;
+    CheckExpireTimer.Enabled := TRUE;
+    CheckCertTimer.Enabled := TRUE;
+
+	// success!!
+    MainOutMessage(CINFO, 'Login Server initialized...');
+
+    g_Config.boStarted := True;
+    ButtonStart.Enabled := False;
+    ButtonStop.Enabled := True;
+    MENU_START.Enabled := False;
+    MENU_STOP.Enabled := True;
+//    SendGameCenterMsg(SG_STARTOK, 'SelectGate started successfully');
+{$IFDEF DEBUG}
+    MainOutMessage(CDBG,
+      'Login Server is running in Debug Mode. This will puts all input/output packets.');
+{$ENDIF}
+    StatusPane1.Caption := 'Running..';
+    if g_Config.boMinimize then begin
+      Application.Minimize;
+    end;
+  except
+    on E: Exception do begin
+      ButtonStart.Enabled := True;
+      ButtonStop.Enabled := False;
+      MENU_START.Enabled := True;
+      MENU_STOP.Enabled := False;
+      MainOutMessage(CERR, E.Message);
+    end;
+  end;
+end;
+
+procedure TCLoginSvrWnd.StopService;
+begin
+  g_Config.boStarted := False;
+  CountLogTimer.Enabled := FALSE;
+  CheckExpireTimer.Enabled := FALSE;
+  CheckCertTimer.Enabled := FALSE;
+  // release ODBC resources
+  FSQLIDDB.Close;
+
+  CCheckServer.CheckServerSocket.Close;
+  CGameServer.GameServerSocket.Close;
+  CLoginGate.LoginGateSocket.Close;
+
+  CCheckServer.CheckServerTimer.Enabled := FALSE;
+  CLoginGate.DecodeTimer.Enabled := FALSE;
+
+  ButtonStart.Enabled := True;
+  ButtonStop.Enabled := False;
+  MENU_START.Enabled := True;
+  MENU_STOP.Enabled := False;
+  MainOutMessage(CINFO, 'Login Server finalized...');
+  StatusPane1.Caption := 'Ready..';
+end;
+
+function TCLoginSvrWnd.LoadDBTables: Boolean;
+var
+  pRec: TADOQuery;
+  pGateRec: _Recordset;
+  szQuery: string;
+  pSvrInfo: PTTableSvrIP;
+  pGateInfo: PTTablePubIP;
+  pGmInfo: PTTablePubIP;
+  pServerInfo: PTGameServerInfo;
+  pSelectGateInfo: PTTblSelectGateIP;
+  szPubIp, szGmIp, szName, szServerName, szServerIP: string;
+begin
+  Result := FALSE;
+  if not FSQLIDDB.Open then Exit;
+(*
+	pRec := SQLExecute ('SELECT * FROM TBL_SERVERIPS');
+	if ( pRec <> nil ) and ( pRec.RecordCount > 0 ) then
+	begin
+		//SetLog( 'SELECT * FROM TBL_SERVERIPS' );
+    pRec.MoveFirst;
+		while ( not pRec.EOF ) do
+		begin
+			New (pSvrInfo);
+			FillChar( pSvrInfo^, sizeof( TTableSvrIP ), #0 );
+
+			pSvrInfo.szName := pRec.Fields['FLD_NAME'].Value;
+			pSvrInfo.szIP := pRec.Fields['FLD_SERVERIP'].Value;
+			pSvrInfo.ID := StrToInt( pRec.Fields['FLD_INDEX'].Value );
+
+			listServerIP.Add( pSvrInfo );
+
+      pRec.MoveNext;
+		end;
+    pRec.Close;
+	end;
+	pRec := nil; *)
+
+  szQuery := Format('SELECT * FROM TBL_PUBIPS WHERE FLD_GAMETYPE=''%s''', [m_szGameType]);
+{$IFDEF DEBUG}
+  MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+
+  FSQLIDDB.UseDB(tAccount);
+  pRec := FSQLIDDB.OpenQuery(szQuery);
+  if (pRec <> nil) and (pRec.RecordCount > 0) then begin
+    pRec.First;
+    while (not pRec.EOF) do begin
+      New(pGateInfo);
+      FillChar(pGateInfo^, sizeof(TTablePubIP), #0);
+
+      szPubIp := Trim(pRec.FieldByName('FLD_PUBIP').AsString);
+
+      pGateInfo.szIP := szPubIp;
+      pGateInfo.szDesc := pRec.FieldByName('FLD_DESCRIPTION').AsString;
+			// COPark...
+{$IFDEF DEBUG}
+      MainOutMessage(0, Format('[PUBIPS] %s(%s)', [pGateInfo.szDesc, pGateInfo.szIP]));
+{$ENDIF}
+      m_listGateIP.Add(pGateInfo);
+
+      pRec.Next;
+    end;
+    pRec.Close;
+  end;
+  pRec := nil;
+
+  szQuery := Format('SELECT * FROM TBL_SERVERINFO WHERE FLD_GAMETYPE=''%s''', [m_szGameType]);
+  pRec := FSQLIDDB.OpenQuery(szQuery);
+{$IFDEF DEBUG}
+  MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+
+  if (pRec <> nil) and (pRec.RecordCount > 0) then begin
+    pRec.First;
+    while (not pRec.EOF) do begin
+      New(pServerInfo);
+      szName := Trim(pRec.FieldByName('FLD_SERVERNAME').AsString);
+      pServerInfo.szName := szName;
+      pServerInfo.bFreeMode := pRec.FieldByName('FLD_FREEMODE').AsInteger;
+      pServerInfo.nMaxUserCount := pRec.FieldByName('FLD_MAXUSERCOUNT').AsInteger;
+      pServerInfo.nGateCount := 0;
+      pServerInfo.nCurrentIndex := 0;
+      pServerInfo.listSelectGate := TList.Create;
+
+      m_listServerInfo.Add(pServerInfo);
+
+      szQuery := Format('SELECT * FROM TBL_SELECTGATEIPS WHERE FLD_NAME = N''%s'' AND FLD_GAMETYPE=''%s''',
+        [pServerInfo.szName, m_szGameType]);
+{$IFDEF DEBUG}
+      MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+      pGateRec := FSQLIDDB.OpenConn(szQuery);
+      if (pGateRec <> nil) and (pGateRec.RecordCount > 0) then begin
+        pGateRec.MoveFirst;
+        while (not pGateRec.EOF) do begin
+          Inc(pServerInfo.nGateCount);
+          New(pSelectGateInfo);
+          FillChar(pSelectGateInfo^, sizeof(TTblSelectGateIP), #0);
+          pSelectGateInfo.Port := StrToInt(pGateRec.Fields['FLD_PORT'].Value);
+          szServerName := Trim(pGateRec.Fields['FLD_NAME'].Value);
+          szServerIP := Trim(pGateRec.Fields['FLD_IP'].Value);
+
+					// COPark...
+          pSelectGateInfo.szIP := szServerIP;
+          pSelectGateInfo.szName := szServerName;
+{$IFDEF DEBUG}
+          MainOutMessage(0, Format('[SELECTGATEIPS] %s(%s)', [pSelectGateInfo.szName,
+            pSelectGateInfo.szIP]));
+{$ENDIF}
+          pServerInfo.listSelectGate.Add(pSelectGateInfo);
+          pGateRec.MoveNext;
+        end;
+        pGateRec.Close;
+      end;
+      pGateRec := nil;
+      pRec.Next;
+    end;
+    pRec.Close;
+  end;
+  pRec := nil;
+
+  szQuery := Format('SELECT * FROM TBL_GMIP WHERE FLD_GAMETYPE=''%s''', [m_szGameType]);
+{$IFDEF DEBUG}
+  MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+
+  FSQLIDDB.UseDB(tAccount);
+  pRec := FSQLIDDB.OpenQuery(szQuery);
+  if (pRec <> nil) and (pRec.RecordCount > 0) then begin
+    pRec.First;
+    while (not pRec.EOF) do begin
+      New(pGmInfo);
+      FillChar(pGmInfo^, sizeof(TTableGmIP), #0);
+
+      szGmIp := Trim(pRec.FieldByName('FLD_IP').AsString);
+
+      pGmInfo.szIP := szGmIp;
+      pGmInfo.szDesc := pRec.FieldByName('FLD_DESCRIPTION').AsString;
+			// COPark...
+{$IFDEF DEBUG}
+      MainOutMessage(0, Format('[GMIP] %s(%s)', [pGmInfo.szDesc, pGmInfo.szIP]));
+{$ENDIF}
+      m_listGmIP.Add(pGmInfo);
+
+      pRec.Next;
+    end;
+    pRec.Close;
+  end;
+  pRec := nil;
+
+//	if ( m_listServerIP.IsEmpty() ) and ( m_listGateIP.IsEmpty() ) then
+//		Result := FALSE;
+  Result := TRUE;
+end;
+
+procedure TCLoginSvrWnd.StringGrid1DrawCell(Sender: TObject; ACol, ARow: Integer;
+  Rect: TRect; State: TGridDrawState);
+var
+  str: string;
+  R: TRect;
+begin
+  with Sender as TStringGrid do begin
+    if gdFixed in State then begin
+      Canvas.Font.Color := clWindowText;
+      Canvas.Brush.Color := FixedColor;
+      Canvas.FillRect(Rect);
+      DrawEdge(Canvas.Handle, Rect, BDR_RAISEDINNER, BF_RIGHT or BF_BOTTOM);
+      DrawEdge(Canvas.Handle, Rect, BDR_RAISEDINNER, BF_LEFT or BF_TOP);
+    end
+    else begin
+      if gdSelected in State then begin
+        Canvas.Brush.Color := clHighlight;
+        Canvas.Font.Color := clHighlightText;
+      end
+      else begin
+        Canvas.Brush.Color := Color;
+        Canvas.Font.Color := Integer(Objects[0, ARow]);
+      end;
+      Canvas.FillRect(Rect);
+    end;
+    str := Cells[ACol, ARow];
+    UniqueString(str);
+    R := Classes.Rect(Rect.Left + 2, Rect.Top + 1, Rect.Right, Rect.Bottom);
+    DrawText(Canvas.Handle, PChar(str), Length(str), R, DT_END_ELLIPSIS or
+      DT_MODIFYSTRING);
+  end;
+end;
+
+procedure TCLoginSvrWnd.TimerTimer(Sender: TObject);
+var
+  I: Integer;
+  ListItem: TListItem;
+  MsgLog: pTMsgLog;
+begin
+  if GetTickCount - g_dwUpdateListViewTick > 1000 then begin
+    g_dwUpdateListViewTick := GetTickCount;
+    MainLogMsgList.Lock;
+    try
+      try
+        for I := 0 to MainLogMsgList.Count - 1 do begin
+          MsgLog := pTMsgLog(MainLogMsgList.Objects[I]);
+          if MsgLog.boAdd then begin
+            MsgLog.boAdd := False;
+            ListViewLog.Items.BeginUpdate;
+            try
+              ListItem := ListViewLog.Items.Add;
+              ListItem.Data := Pointer(MsgLog);
+              ListItem.Caption := DateTimeToStr(MsgLog.dAddTime);
+              ListItem.SubItems.Add(MainLogMsgList.Strings[I]);
+            finally
+              ListViewLog.Items.Item[ListViewLog.Items.Count - 1].MakeVisible(False);
+              ListViewLog.Items.EndUpdate;
+            end;
+          end;
+        end;
+      except
+
+      end;
+    finally
+      MainLogMsgList.UnLock;
+    end;
+    if ListViewLog.Items.Count >= 200 then
+    ListViewLog.Items.Clear;
+  end;
+end;
+
+procedure TCLoginSvrWnd.SendAccountExpireUser(pCert: PTCertUser);
+begin
+  if not pCert.bClosing then
+    CGameServer.SendNamedServerMsg(pCert.szServerName, ISM_ACCOUNTEXPIRED, pCert.szLoginID
+      + '/' + IntToStr(pCert.nCertification));
+//   pCert.OpenTime := GetTickCount;
+//   pCert.Closing := TRUE;
+{$IFDEF DEBUG}
+  MainOutMessage(0, Format('[GameServer/Send] ISM_ACCOUNTEXPIRED : %s TO (%s)',
+    [pCert.szLoginID, pCert.szAddr]));
+{$ENDIF}
+end;
+
+procedure TCLoginSvrWnd.CheckCertListTimeOuts;
+var
+  i: integer;
+  pUser: PTCertUser;
+begin
+  for i := m_csListCert.Count - 1 downto 0 do begin
+    pUser := PTCertUser(m_csListCert[i]);
+    if pUser.bClosing then begin
+      if GetTickCount - pUser.nOpenTime > 5 * 1000 then begin
+{$IFDEF _DEBUG}
+        MainOutMessage(0, Format('DELETE CERTINFO LOGINID:  %s', [pUser.LoginID]));
+{$ENDIF}
+        Dispose(pUser);
+        m_csListCert.Delete(i);
+      end;
+    end;
+  end;
+end;
+
+procedure TCLoginSvrWnd.CheckCertTimerTimer(Sender: TObject);
+begin
+  CheckCertListTimeOuts;
+end;
+
+procedure TCLoginSvrWnd.CheckExpireTimerTimer(Sender: TObject);
+begin
+  CheckAccountExpire;  //检查账户充值点数
+end;
+
+procedure TCLoginSvrWnd.CheckAccountExpire;
+var
+  i: integer;
+  pUser: PTCertUser;
+begin
+  for i := m_csListCert.Count - 1 downto 0 do begin
+    pUser := PTCertUser(m_csListCert[i]);
+{$IFDEF DEBUG}
+	  MainOutMessage(CDBG, Format('[CheckAccountExpire] freemode : %d, availabletype : %d, opentime : %d, idhour : %d',
+                                [Integer(pUser.bFreeMode), pUser.nAvailableType, pUser.nOpenTime, pUser.nIDHour]));
+{$ENDIF}
+    if (not pUser.bFreeMode) and (not pUser.bClosing) and (not BoTestMode) then begin
+//       if GetTickCount - pc.AccountCheckTime > 60 * 10 * 1000 then begin
+//          pc.AccountCheckTime := GetTickCount;
+      // 2:个人定量, 6:传奇2模式, 7:传奇3模式, 8:公共免费模式, 9:公共传奇2模式, 10:公共传奇3模式
+
+			// 2:俺牢沥樊, 6:固福2沥樊, 7:固福3沥樊, 8:公丰烹钦沥樊, 9:公丰固福2沥樊, 10:公丰固福3沥樊
+			if ((pUser.nAvailableType = 2) or ((pUser.nAvailableType >= 6) and (pUser.nAvailableType <= 10)))
+			  	and ((GetTickCount() - pUser.nOpenTime) > (pUser.nIDHour*1000)) then begin
+
+//      if ((pUser.nAvailableType = 2) and ((GetTickCount - pUser.nOpenTime) > (pUser.nIDHour * 1000) {+ 100*1000})) or  // 100檬 敲矾胶 矫埃
+//        ((pUser.nAvailableType = 6) and ((GetTickCount - pUser.nOpenTime) > (pUser.nIDHour * 1000) {+ 100*1000})) or
+//        ((pUser.nAvailableType = 4) and ((GetTickCount - pUser.nOpenTime) > (pUser.nIPHour * 1000) {+ 100*1000})) then begin
+
+//			if (((pUser.nAvailableType = 2) or ((pUser.nAvailableType >= 6) and (pUser.nAvailableType <= 10)))
+//				and ((GetTickCount() - pUser.nOpenTime) > (pUser.nIDHour*1000))) then begin
+            //	FILE *fp = fopen( "d:\\Admission.txt", "ab" );
+            //	fprintf( fp, "CLoginSvr::CheckCertListTimeOuts\r\n" );
+            //	fclose( fp );
+//{$IFDEF DEBUG}
+        MainOutMessage(CDBG, Format('[SendAccountExpireUser] %s : Now - OpenTime : %d, IDHour(Sec) : %d',
+                       [pUser.szLoginID, GetTickCount - pUser.nOpenTime, pUser.nIDHour]));
+//{$ENDIF}
+//            SendCancelAdmissionUser( pUser );
+        SendAccountExpireUser(pUser);
+
+            //Dispose (pUser);  //拌沥 富丰
+            //listCert.Delete (i);
+      end;
+//       end;
+    end;
+  end;
+end;
+
+end.
+

@@ -1,0 +1,315 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="PixelSurfaces" platform="Win32">
+  <class name="TPixelSurface" file="PixelSurfaces.pas" line="48">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FMipMaps" type="TPixelSurfaces" visibility="private" size="4" offset="4" file="PixelSurfaces.pas" line="50" />
+      <field name="FName" type="string" visibility="private" size="4" offset="8" file="PixelSurfaces.pas" line="52" />
+      <field name="FBits" type="Pointer" visibility="private" size="4" offset="12" file="PixelSurfaces.pas" line="53" />
+      <field name="FPitch" type="Integer" visibility="private" size="4" offset="16" file="PixelSurfaces.pas" line="54" />
+      <field name="FWidth" type="Integer" visibility="private" size="4" offset="20" file="PixelSurfaces.pas" line="55" />
+      <field name="FHeight" type="Integer" visibility="private" size="4" offset="24" file="PixelSurfaces.pas" line="56" />
+      <field name="FPixelFormat" type="TAsphyrePixelFormat" visibility="private" size="1" offset="28" file="PixelSurfaces.pas" line="57" />
+      <field name="FBytesPerPixel" type="Integer" visibility="private" size="4" offset="32" file="PixelSurfaces.pas" line="58" />
+      <function name="GetScanline" visibility="private" file="PixelSurfaces.pas" line="60">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <retval type="Pointer" />
+        </parameters>
+      </function>
+      <function name="GetPixel" visibility="private" file="PixelSurfaces.pas" line="61">
+        <parameters>
+          <parameter name="x" type="Integer" />
+          <parameter name="y" type="Integer" />
+          <retval type="Cardinal" />
+        </parameters>
+      </function>
+      <procedure name="SetPixel" visibility="private" file="PixelSurfaces.pas" line="62">
+        <parameters>
+          <parameter name="x" type="Integer" />
+          <parameter name="y" type="Integer" />
+          <parameter name="Value" type="Cardinal" paramflags="const" />
+        </parameters>
+      </procedure>
+      <property name="Name" visibility="public" read="FName" type="string" default="0" file="PixelSurfaces.pas" line="64" />
+      <property name="Bits" visibility="public" read="FBits" type="Pointer" file="PixelSurfaces.pas" line="66" />
+      <property name="Pitch" visibility="public" read="FPitch" type="Integer" file="PixelSurfaces.pas" line="67" />
+      <property name="Width" visibility="public" read="FWidth" type="Integer" file="PixelSurfaces.pas" line="69" />
+      <property name="Height" visibility="public" read="FHeight" type="Integer" file="PixelSurfaces.pas" line="70" />
+      <property name="PixelFormat" visibility="public" read="FPixelFormat" type="TAsphyrePixelFormat" file="PixelSurfaces.pas" line="72" />
+      <property name="Scanline[Index]" visibility="public" read="GetScanline" type="Pointer" file="PixelSurfaces.pas" line="74" />
+      <property name="Pixels[x][y]" visibility="public" read="GetPixel" write="SetPixel" type="Cardinal" file="PixelSurfaces.pas" line="75" />
+      <property name="BytesPerPixel" visibility="public" read="FBytesPerPixel" type="Integer" file="PixelSurfaces.pas" line="77" />
+      <property name="MipMaps" visibility="public" read="FMipMaps" type="TPixelSurfaces" file="PixelSurfaces.pas" line="79" />
+      <function name="GetPixelPtr" visibility="public" file="PixelSurfaces.pas" line="81">
+        <parameters>
+          <parameter name="x" type="Integer" />
+          <parameter name="y" type="Integer" />
+          <retval type="Pointer" />
+        </parameters>
+      </function>
+      <procedure name="SetSize" visibility="public" file="PixelSurfaces.pas" line="83">
+        <parameters>
+          <parameter name="AWidth" type="Integer" />
+          <parameter name="AHeight" type="Integer" />
+          <parameter name="APixelFormat" type="TAsphyrePixelFormat">
+            <value>
+              apf_Unknown
+            </value>
+          </parameter>
+          <parameter name="ABytesPerPixel" type="Integer">
+            <value>
+              $0
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <function name="ConvertPixelFormat" visibility="public" file="PixelSurfaces.pas" line="87">
+        <parameters>
+          <parameter name="NewFormat" type="TAsphyrePixelFormat" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="CopyFrom" visibility="public" file="PixelSurfaces.pas" line="89">
+        <parameters>
+          <parameter name="Source" type="TPixelSurface" />
+        </parameters>
+      </procedure>
+      <procedure name="Clear" visibility="public" file="PixelSurfaces.pas" line="91">
+        <parameters>
+          <parameter name="Color" type="Cardinal" />
+        </parameters>
+      </procedure>
+      <procedure name="ResetAlpha" visibility="public" file="PixelSurfaces.pas" line="92">
+      </procedure>
+      <function name="HasAlphaChannel" visibility="public" file="PixelSurfaces.pas" line="94">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="Shrink2xFrom" visibility="public" file="PixelSurfaces.pas" line="95">
+        <parameters>
+          <parameter name="Source" type="TPixelSurface" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="GenerateMipMaps" visibility="public" file="PixelSurfaces.pas" line="97">
+      </procedure>
+      <procedure name="RemoveMipMaps" visibility="public" file="PixelSurfaces.pas" line="98">
+      </procedure>
+      <constructor name="Create" visibility="public" file="PixelSurfaces.pas" line="100">
+        <parameters>
+          <parameter name="AName" type="string" paramflags="const">
+            <value>
+              
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="PixelSurfaces.pas" line="101">
+        <parameters>
+        </parameters>
+      </destructor>
+    </members>
+  </class>
+  <class name="TPixelSurfaces" file="PixelSurfaces.pas" line="105">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="Data" type=":TPixelSurfaces.:1" visibility="private" size="4" offset="4" file="PixelSurfaces.pas" line="107" />
+      <function name="GetCount" visibility="private" file="PixelSurfaces.pas" line="109">
+        <parameters>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetItem" visibility="private" file="PixelSurfaces.pas" line="110">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <retval type="TPixelSurface" />
+        </parameters>
+      </function>
+      <property name="Count" visibility="public" read="GetCount" type="Integer" file="PixelSurfaces.pas" line="112" />
+      <property name="Items[Index]" visibility="public" read="GetItem" type="TPixelSurface" file="PixelSurfaces.pas" line="113" />
+      <function name="Add" visibility="public" file="PixelSurfaces.pas" line="115">
+        <parameters>
+          <parameter name="AName" type="string" paramflags="const">
+            <value>
+              
+            </value>
+          </parameter>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <procedure name="Remove" visibility="public" file="PixelSurfaces.pas" line="116">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="RemoveAll" visibility="public" file="PixelSurfaces.pas" line="117">
+      </procedure>
+      <function name="IndexOf" visibility="public" file="PixelSurfaces.pas" line="119">
+        <parameters>
+          <parameter name="AName" type="string" paramflags="const" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <constructor name="Create" visibility="public" file="PixelSurfaces.pas" line="121">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="PixelSurfaces.pas" line="122">
+        <parameters>
+        </parameters>
+      </destructor>
+    </members>
+  </class>
+</namespace>

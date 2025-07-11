@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="AsphyreFormats" platform="Win32">
+  <class name="TAsphyreFormatList" file="AsphyreFormats.pas" line="52">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="Items" type=":TAsphyreFormatList.:1" visibility="private" size="4" offset="4" file="AsphyreFormats.pas" line="54" />
+      <field name="SortReqFormat" type="TAsphyrePixelFormat" visibility="private" size="1" offset="8" file="AsphyreFormats.pas" line="56" />
+      <function name="GetCount" visibility="private" file="AsphyreFormats.pas" line="58">
+        <parameters>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetFormat" visibility="private" file="AsphyreFormats.pas" line="59">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <retval type="TAsphyrePixelFormat" />
+        </parameters>
+      </function>
+      <procedure name="ItemSortSwap" visibility="private" file="AsphyreFormats.pas" line="60">
+        <parameters>
+          <parameter name="Index1" type="Integer" />
+          <parameter name="Index2" type="Integer" />
+        </parameters>
+      </procedure>
+      <function name="ItemSortCompare" visibility="private" file="AsphyreFormats.pas" line="61">
+        <parameters>
+          <parameter name="Item1" type="TAsphyrePixelFormat" />
+          <parameter name="Item2" type="TAsphyrePixelFormat" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="ItemSortSplit" visibility="private" file="AsphyreFormats.pas" line="62">
+        <parameters>
+          <parameter name="Start" type="Integer" />
+          <parameter name="Stop" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <procedure name="ItemSortExec" visibility="private" file="AsphyreFormats.pas" line="63">
+        <parameters>
+          <parameter name="Start" type="Integer" />
+          <parameter name="Stop" type="Integer" />
+        </parameters>
+      </procedure>
+      <property name="Count" visibility="public" read="GetCount" type="Integer" file="AsphyreFormats.pas" line="65" />
+      <property name="Format[Index]" visibility="public" read="GetFormat" type="TAsphyrePixelFormat" file="AsphyreFormats.pas" line="66" />
+      <function name="Insert" visibility="public" file="AsphyreFormats.pas" line="68">
+        <parameters>
+          <parameter name="AFormat" type="TAsphyrePixelFormat" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="IndexOf" visibility="public" file="AsphyreFormats.pas" line="69">
+        <parameters>
+          <parameter name="AFormat" type="TAsphyrePixelFormat" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="Include" visibility="public" file="AsphyreFormats.pas" line="70">
+        <parameters>
+          <parameter name="AFormat" type="TAsphyrePixelFormat" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <procedure name="Remove" visibility="public" file="AsphyreFormats.pas" line="71">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="Clear" visibility="public" file="AsphyreFormats.pas" line="72">
+      </procedure>
+      <procedure name="SortBestMatch" visibility="public" file="AsphyreFormats.pas" line="73">
+        <parameters>
+          <parameter name="AFormat" type="TAsphyrePixelFormat" />
+        </parameters>
+      </procedure>
+      <procedure name="InsertAll" visibility="public" file="AsphyreFormats.pas" line="74">
+      </procedure>
+      <constructor name="Create" visibility="public" file="AsphyreFormats.pas" line="76">
+        <parameters>
+        </parameters>
+      </constructor>
+    </members>
+  </class>
+  <variable name="FormatList" type="TAsphyreFormatList" visibility="public" file="AsphyreFormats.pas" line="81" />
+  <function name="FindClosestFormat" visibility="public" file="AsphyreFormats.pas" line="234">
+    <parameters>
+      <parameter name="Format" type="TAsphyrePixelFormat" />
+      <parameter name="ExistingFormats" type="TAsphyreFormatList" />
+      <retval type="TAsphyrePixelFormat" />
+    </parameters>
+  </function>
+  <procedure name="GetFormatCompatibilityList" visibility="public" file="AsphyreFormats.pas" line="257">
+    <parameters>
+      <parameter name="Format" type="TAsphyrePixelFormat" />
+      <parameter name="Strings" type="TStrings" />
+    </parameters>
+  </procedure>
+</namespace>

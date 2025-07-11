@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="EDcode" platform="Win32">
+  <variable name="CSEncode" type="_RTL_CRITICAL_SECTION" file="EDCode.pas" line="25" />
+  <function name="LoadPublicKey" visibility="public" file="EDCode.pas" line="126">
+    <parameters>
+      <parameter name="fname" type="string" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <procedure name="SetPublicKey" visibility="public" file="EDCode.pas" line="145">
+    <parameters>
+      <parameter name="pubkey" type="Word" />
+    </parameters>
+  </procedure>
+  <function name="GetPublicKey" visibility="public" file="EDCode.pas" line="151">
+    <parameters>
+      <retval type="Word" />
+    </parameters>
+  </function>
+  <function name="GetSavedKey" visibility="public" file="EDCode.pas" line="156">
+    <parameters>
+      <retval type="Word" />
+    </parameters>
+  </function>
+  <procedure name="ChangeByDefaultKey" visibility="public" file="EDCode.pas" line="161">
+  </procedure>
+  <procedure name="ChangeBySavedKey" visibility="public" file="EDCode.pas" line="167">
+  </procedure>
+  <function name="DecodeMessage" visibility="public" file="EDCode.pas" line="377">
+    <parameters>
+      <parameter name="str" type="AnsiString" />
+      <retval type="TDefaultMessage" />
+    </parameters>
+  </function>
+  <function name="DecodeString" visibility="public" file="EDCode.pas" line="392">
+    <parameters>
+      <parameter name="str" type="AnsiString" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="DecodeString_old" visibility="public" file="EDCode.pas" line="403">
+    <parameters>
+      <parameter name="str" type="AnsiString" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <procedure name="DecodeBuffer" visibility="public" file="EDCode.pas" line="414">
+    <parameters>
+      <parameter name="src" type="AnsiString" />
+      <parameter name="buf" type="PAnsiChar" />
+      <parameter name="bufsize" type="Integer" />
+    </parameters>
+  </procedure>
+  <function name="EncodeMessage" visibility="public" file="EDCode.pas" line="426">
+    <parameters>
+      <parameter name="smsg" type="TDefaultMessage" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="EncodeString" visibility="public" file="EDCode.pas" line="447">
+    <parameters>
+      <parameter name="str" type="AnsiString" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="EncodeBuffer" visibility="public" file="EDCode.pas" line="459">
+    <parameters>
+      <parameter name="buf" type="PAnsiChar" />
+      <parameter name="bufsize" type="Integer" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+</namespace>

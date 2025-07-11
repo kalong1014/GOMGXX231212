@@ -1,0 +1,1713 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="Bass" platform="Win32">
+  <const name="BASSVERSION" type="Integer" file="Bass.pas" line="24">
+    <value>
+      $203
+    </value>
+  </const>
+  <const name="DW_ERROR" type="Cardinal" file="Bass.pas" line="27">
+    <value>
+      $FFFFFFFF
+    </value>
+  </const>
+  <const name="QW_ERROR" type="Int64" file="Bass.pas" line="28">
+    <value>
+      $FFFFFFFFFFFFFFFF
+    </value>
+  </const>
+  <const name="BASS_OK" type="Integer" file="Bass.pas" line="31">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_ERROR_MEM" type="Integer" file="Bass.pas" line="32">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_ERROR_FILEOPEN" type="Integer" file="Bass.pas" line="33">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_ERROR_DRIVER" type="Integer" file="Bass.pas" line="34">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="BASS_ERROR_BUFLOST" type="Integer" file="Bass.pas" line="35">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_ERROR_HANDLE" type="Integer" file="Bass.pas" line="36">
+    <value>
+      $5
+    </value>
+  </const>
+  <const name="BASS_ERROR_FORMAT" type="Integer" file="Bass.pas" line="37">
+    <value>
+      $6
+    </value>
+  </const>
+  <const name="BASS_ERROR_POSITION" type="Integer" file="Bass.pas" line="38">
+    <value>
+      $7
+    </value>
+  </const>
+  <const name="BASS_ERROR_INIT" type="Integer" file="Bass.pas" line="39">
+    <value>
+      $8
+    </value>
+  </const>
+  <const name="BASS_ERROR_START" type="Integer" file="Bass.pas" line="40">
+    <value>
+      $9
+    </value>
+  </const>
+  <const name="BASS_ERROR_ALREADY" type="Integer" file="Bass.pas" line="41">
+    <value>
+      $E
+    </value>
+  </const>
+  <const name="BASS_ERROR_NOPAUSE" type="Integer" file="Bass.pas" line="42">
+    <value>
+      $10
+    </value>
+  </const>
+  <const name="BASS_ERROR_NOCHAN" type="Integer" file="Bass.pas" line="43">
+    <value>
+      $12
+    </value>
+  </const>
+  <const name="BASS_ERROR_ILLTYPE" type="Integer" file="Bass.pas" line="44">
+    <value>
+      $13
+    </value>
+  </const>
+  <const name="BASS_ERROR_ILLPARAM" type="Integer" file="Bass.pas" line="45">
+    <value>
+      $14
+    </value>
+  </const>
+  <const name="BASS_ERROR_NO3D" type="Integer" file="Bass.pas" line="46">
+    <value>
+      $15
+    </value>
+  </const>
+  <const name="BASS_ERROR_NOEAX" type="Integer" file="Bass.pas" line="47">
+    <value>
+      $16
+    </value>
+  </const>
+  <const name="BASS_ERROR_DEVICE" type="Integer" file="Bass.pas" line="48">
+    <value>
+      $17
+    </value>
+  </const>
+  <const name="BASS_ERROR_NOPLAY" type="Integer" file="Bass.pas" line="49">
+    <value>
+      $18
+    </value>
+  </const>
+  <const name="BASS_ERROR_FREQ" type="Integer" file="Bass.pas" line="50">
+    <value>
+      $19
+    </value>
+  </const>
+  <const name="BASS_ERROR_NOTFILE" type="Integer" file="Bass.pas" line="51">
+    <value>
+      $1B
+    </value>
+  </const>
+  <const name="BASS_ERROR_NOHW" type="Integer" file="Bass.pas" line="52">
+    <value>
+      $1D
+    </value>
+  </const>
+  <const name="BASS_ERROR_EMPTY" type="Integer" file="Bass.pas" line="53">
+    <value>
+      $1F
+    </value>
+  </const>
+  <const name="BASS_ERROR_NONET" type="Integer" file="Bass.pas" line="54">
+    <value>
+      $20
+    </value>
+  </const>
+  <const name="BASS_ERROR_CREATE" type="Integer" file="Bass.pas" line="55">
+    <value>
+      $21
+    </value>
+  </const>
+  <const name="BASS_ERROR_NOFX" type="Integer" file="Bass.pas" line="56">
+    <value>
+      $22
+    </value>
+  </const>
+  <const name="BASS_ERROR_PLAYING" type="Integer" file="Bass.pas" line="57">
+    <value>
+      $23
+    </value>
+  </const>
+  <const name="BASS_ERROR_NOTAVAIL" type="Integer" file="Bass.pas" line="58">
+    <value>
+      $25
+    </value>
+  </const>
+  <const name="BASS_ERROR_DECODE" type="Integer" file="Bass.pas" line="59">
+    <value>
+      $26
+    </value>
+  </const>
+  <const name="BASS_ERROR_DX" type="Integer" file="Bass.pas" line="60">
+    <value>
+      $27
+    </value>
+  </const>
+  <const name="BASS_ERROR_TIMEOUT" type="Integer" file="Bass.pas" line="61">
+    <value>
+      $28
+    </value>
+  </const>
+  <const name="BASS_ERROR_FILEFORM" type="Integer" file="Bass.pas" line="62">
+    <value>
+      $29
+    </value>
+  </const>
+  <const name="BASS_ERROR_SPEAKER" type="Integer" file="Bass.pas" line="63">
+    <value>
+      $2A
+    </value>
+  </const>
+  <const name="BASS_ERROR_VERSION" type="Integer" file="Bass.pas" line="64">
+    <value>
+      $2B
+    </value>
+  </const>
+  <const name="BASS_ERROR_CODEC" type="Integer" file="Bass.pas" line="65">
+    <value>
+      $2C
+    </value>
+  </const>
+  <const name="BASS_ERROR_UNKNOWN" type="Integer" file="Bass.pas" line="66">
+    <value>
+      $FFFFFFFF
+    </value>
+  </const>
+  <const name="BASS_DEVICE_8BITS" type="Integer" file="Bass.pas" line="69">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_DEVICE_MONO" type="Integer" file="Bass.pas" line="70">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_DEVICE_3D" type="Integer" file="Bass.pas" line="71">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_DEVICE_LATENCY" type="Integer" file="Bass.pas" line="78">
+    <value>
+      $100
+    </value>
+  </const>
+  <const name="BASS_DEVICE_SPEAKERS" type="Integer" file="Bass.pas" line="79">
+    <value>
+      $800
+    </value>
+  </const>
+  <const name="BASS_DEVICE_NOSPEAKER" type="Integer" file="Bass.pas" line="80">
+    <value>
+      $1000
+    </value>
+  </const>
+  <const name="BASS_OBJECT_DS" type="Integer" file="Bass.pas" line="83">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_OBJECT_DS3DL" type="Integer" file="Bass.pas" line="84">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="DSCAPS_CONTINUOUSRATE" type="Integer" file="Bass.pas" line="87">
+    <value>
+      $10
+    </value>
+  </const>
+  <const name="DSCAPS_EMULDRIVER" type="Integer" file="Bass.pas" line="89">
+    <value>
+      $20
+    </value>
+  </const>
+  <const name="DSCAPS_CERTIFIED" type="Integer" file="Bass.pas" line="91">
+    <value>
+      $40
+    </value>
+  </const>
+  <const name="DSCAPS_SECONDARYMONO" type="Integer" file="Bass.pas" line="98">
+    <value>
+      $100
+    </value>
+  </const>
+  <const name="DSCAPS_SECONDARYSTEREO" type="Integer" file="Bass.pas" line="99">
+    <value>
+      $200
+    </value>
+  </const>
+  <const name="DSCAPS_SECONDARY8BIT" type="Integer" file="Bass.pas" line="100">
+    <value>
+      $400
+    </value>
+  </const>
+  <const name="DSCAPS_SECONDARY16BIT" type="Integer" file="Bass.pas" line="101">
+    <value>
+      $800
+    </value>
+  </const>
+  <const name="DSCCAPS_EMULDRIVER" type="Integer" file="Bass.pas" line="104">
+    <value>
+      $20
+    </value>
+  </const>
+  <const name="DSCCAPS_CERTIFIED" type="Integer" file="Bass.pas" line="106">
+    <value>
+      $40
+    </value>
+  </const>
+  <const name="WAVE_FORMAT_1M08" type="Integer" file="Bass.pas" line="110">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="WAVE_FORMAT_1S08" type="Integer" file="Bass.pas" line="111">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="WAVE_FORMAT_1M16" type="Integer" file="Bass.pas" line="112">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="WAVE_FORMAT_1S16" type="Integer" file="Bass.pas" line="113">
+    <value>
+      $8
+    </value>
+  </const>
+  <const name="WAVE_FORMAT_2M08" type="Integer" file="Bass.pas" line="114">
+    <value>
+      $10
+    </value>
+  </const>
+  <const name="WAVE_FORMAT_2S08" type="Integer" file="Bass.pas" line="115">
+    <value>
+      $20
+    </value>
+  </const>
+  <const name="WAVE_FORMAT_2M16" type="Integer" file="Bass.pas" line="116">
+    <value>
+      $40
+    </value>
+  </const>
+  <const name="WAVE_FORMAT_2S16" type="Integer" file="Bass.pas" line="117">
+    <value>
+      $80
+    </value>
+  </const>
+  <const name="WAVE_FORMAT_4M08" type="Integer" file="Bass.pas" line="118">
+    <value>
+      $100
+    </value>
+  </const>
+  <const name="WAVE_FORMAT_4S08" type="Integer" file="Bass.pas" line="119">
+    <value>
+      $200
+    </value>
+  </const>
+  <const name="WAVE_FORMAT_4M16" type="Integer" file="Bass.pas" line="120">
+    <value>
+      $400
+    </value>
+  </const>
+  <const name="WAVE_FORMAT_4S16" type="Integer" file="Bass.pas" line="121">
+    <value>
+      $800
+    </value>
+  </const>
+  <const name="BASS_SAMPLE_8BITS" type="Integer" file="Bass.pas" line="124">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_SAMPLE_FLOAT" type="Integer" file="Bass.pas" line="125">
+    <value>
+      $100
+    </value>
+  </const>
+  <const name="BASS_SAMPLE_MONO" type="Integer" file="Bass.pas" line="126">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_SAMPLE_LOOP" type="Integer" file="Bass.pas" line="127">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_SAMPLE_3D" type="Integer" file="Bass.pas" line="128">
+    <value>
+      $8
+    </value>
+  </const>
+  <const name="BASS_SAMPLE_SOFTWARE" type="Integer" file="Bass.pas" line="129">
+    <value>
+      $10
+    </value>
+  </const>
+  <const name="BASS_SAMPLE_MUTEMAX" type="Integer" file="Bass.pas" line="130">
+    <value>
+      $20
+    </value>
+  </const>
+  <const name="BASS_SAMPLE_VAM" type="Integer" file="Bass.pas" line="131">
+    <value>
+      $40
+    </value>
+  </const>
+  <const name="BASS_SAMPLE_FX" type="Integer" file="Bass.pas" line="132">
+    <value>
+      $80
+    </value>
+  </const>
+  <const name="BASS_SAMPLE_OVER_VOL" type="Integer" file="Bass.pas" line="133">
+    <value>
+      $10000
+    </value>
+  </const>
+  <const name="BASS_SAMPLE_OVER_POS" type="Integer" file="Bass.pas" line="134">
+    <value>
+      $20000
+    </value>
+  </const>
+  <const name="BASS_SAMPLE_OVER_DIST" type="Integer" file="Bass.pas" line="135">
+    <value>
+      $30000
+    </value>
+  </const>
+  <const name="BASS_STREAM_PRESCAN" type="Integer" file="Bass.pas" line="137">
+    <value>
+      $20000
+    </value>
+  </const>
+  <const name="BASS_MP3_SETPOS" type="Integer" file="Bass.pas" line="138">
+    <value>
+      $20000
+    </value>
+  </const>
+  <const name="BASS_STREAM_AUTOFREE" type="Integer" file="Bass.pas" line="139">
+    <value>
+      $40000
+    </value>
+  </const>
+  <const name="BASS_STREAM_RESTRATE" type="Integer" file="Bass.pas" line="140">
+    <value>
+      $80000
+    </value>
+  </const>
+  <const name="BASS_STREAM_BLOCK" type="Integer" file="Bass.pas" line="141">
+    <value>
+      $100000
+    </value>
+  </const>
+  <const name="BASS_STREAM_DECODE" type="Integer" file="Bass.pas" line="142">
+    <value>
+      $200000
+    </value>
+  </const>
+  <const name="BASS_STREAM_STATUS" type="Integer" file="Bass.pas" line="143">
+    <value>
+      $800000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_FLOAT" type="Integer" file="Bass.pas" line="145">
+    <value>
+      $100
+    </value>
+  </const>
+  <const name="BASS_MUSIC_MONO" type="Integer" file="Bass.pas" line="146">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_MUSIC_LOOP" type="Integer" file="Bass.pas" line="147">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_MUSIC_3D" type="Integer" file="Bass.pas" line="148">
+    <value>
+      $8
+    </value>
+  </const>
+  <const name="BASS_MUSIC_FX" type="Integer" file="Bass.pas" line="149">
+    <value>
+      $80
+    </value>
+  </const>
+  <const name="BASS_MUSIC_AUTOFREE" type="Integer" file="Bass.pas" line="150">
+    <value>
+      $40000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_DECODE" type="Integer" file="Bass.pas" line="151">
+    <value>
+      $200000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_PRESCAN" type="Integer" file="Bass.pas" line="152">
+    <value>
+      $20000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_CALCLEN" type="Integer" file="Bass.pas" line="153">
+    <value>
+      $20000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_RAMP" type="Integer" file="Bass.pas" line="154">
+    <value>
+      $200
+    </value>
+  </const>
+  <const name="BASS_MUSIC_RAMPS" type="Integer" file="Bass.pas" line="155">
+    <value>
+      $400
+    </value>
+  </const>
+  <const name="BASS_MUSIC_SURROUND" type="Integer" file="Bass.pas" line="156">
+    <value>
+      $800
+    </value>
+  </const>
+  <const name="BASS_MUSIC_SURROUND2" type="Integer" file="Bass.pas" line="157">
+    <value>
+      $1000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_FT2MOD" type="Integer" file="Bass.pas" line="158">
+    <value>
+      $2000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_PT1MOD" type="Integer" file="Bass.pas" line="159">
+    <value>
+      $4000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_NONINTER" type="Integer" file="Bass.pas" line="160">
+    <value>
+      $10000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_POSRESET" type="Integer" file="Bass.pas" line="161">
+    <value>
+      $8000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_POSRESETEX" type="Integer" file="Bass.pas" line="162">
+    <value>
+      $400000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_STOPBACK" type="Integer" file="Bass.pas" line="163">
+    <value>
+      $80000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_NOSAMPLE" type="Integer" file="Bass.pas" line="164">
+    <value>
+      $100000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_FRONT" type="Integer" file="Bass.pas" line="167">
+    <value>
+      $1000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_REAR" type="Integer" file="Bass.pas" line="168">
+    <value>
+      $2000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_CENLFE" type="Integer" file="Bass.pas" line="169">
+    <value>
+      $3000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_REAR2" type="Integer" file="Bass.pas" line="170">
+    <value>
+      $4000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_LEFT" type="Integer" file="Bass.pas" line="171">
+    <value>
+      $10000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_RIGHT" type="Integer" file="Bass.pas" line="172">
+    <value>
+      $20000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_FRONTLEFT" type="Integer" file="Bass.pas" line="173">
+    <value>
+      $11000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_FRONTRIGHT" type="Integer" file="Bass.pas" line="174">
+    <value>
+      $21000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_REARLEFT" type="Integer" file="Bass.pas" line="175">
+    <value>
+      $12000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_REARRIGHT" type="Integer" file="Bass.pas" line="176">
+    <value>
+      $22000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_CENTER" type="Integer" file="Bass.pas" line="177">
+    <value>
+      $13000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_LFE" type="Integer" file="Bass.pas" line="178">
+    <value>
+      $23000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_REAR2LEFT" type="Integer" file="Bass.pas" line="179">
+    <value>
+      $14000000
+    </value>
+  </const>
+  <const name="BASS_SPEAKER_REAR2RIGHT" type="Integer" file="Bass.pas" line="180">
+    <value>
+      $24000000
+    </value>
+  </const>
+  <const name="BASS_UNICODE" type="Integer" file="Bass.pas" line="182">
+    <value>
+      $80000000
+    </value>
+  </const>
+  <const name="BASS_RECORD_PAUSE" type="Integer" file="Bass.pas" line="184">
+    <value>
+      $8000
+    </value>
+  </const>
+  <const name="BASS_VAM_HARDWARE" type="Integer" file="Bass.pas" line="187">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_VAM_SOFTWARE" type="Integer" file="Bass.pas" line="192">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_VAM_TERM_TIME" type="Integer" file="Bass.pas" line="206">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_VAM_TERM_DIST" type="Integer" file="Bass.pas" line="211">
+    <value>
+      $8
+    </value>
+  </const>
+  <const name="BASS_VAM_TERM_PRIO" type="Integer" file="Bass.pas" line="219">
+    <value>
+      $10
+    </value>
+  </const>
+  <const name="BASS_CTYPE_SAMPLE" type="Integer" file="Bass.pas" line="226">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_CTYPE_RECORD" type="Integer" file="Bass.pas" line="227">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_CTYPE_STREAM" type="Integer" file="Bass.pas" line="228">
+    <value>
+      $10000
+    </value>
+  </const>
+  <const name="BASS_CTYPE_STREAM_OGG" type="Integer" file="Bass.pas" line="229">
+    <value>
+      $10002
+    </value>
+  </const>
+  <const name="BASS_CTYPE_STREAM_MP1" type="Integer" file="Bass.pas" line="230">
+    <value>
+      $10003
+    </value>
+  </const>
+  <const name="BASS_CTYPE_STREAM_MP2" type="Integer" file="Bass.pas" line="231">
+    <value>
+      $10004
+    </value>
+  </const>
+  <const name="BASS_CTYPE_STREAM_MP3" type="Integer" file="Bass.pas" line="232">
+    <value>
+      $10005
+    </value>
+  </const>
+  <const name="BASS_CTYPE_STREAM_AIFF" type="Integer" file="Bass.pas" line="233">
+    <value>
+      $10006
+    </value>
+  </const>
+  <const name="BASS_CTYPE_STREAM_WAV" type="Integer" file="Bass.pas" line="234">
+    <value>
+      $40000
+    </value>
+  </const>
+  <const name="BASS_CTYPE_STREAM_WAV_PCM" type="Integer" file="Bass.pas" line="235">
+    <value>
+      $50001
+    </value>
+  </const>
+  <const name="BASS_CTYPE_STREAM_WAV_FLOAT" type="Integer" file="Bass.pas" line="236">
+    <value>
+      $50003
+    </value>
+  </const>
+  <const name="BASS_CTYPE_MUSIC_MOD" type="Integer" file="Bass.pas" line="237">
+    <value>
+      $20000
+    </value>
+  </const>
+  <const name="BASS_CTYPE_MUSIC_MTM" type="Integer" file="Bass.pas" line="238">
+    <value>
+      $20001
+    </value>
+  </const>
+  <const name="BASS_CTYPE_MUSIC_S3M" type="Integer" file="Bass.pas" line="239">
+    <value>
+      $20002
+    </value>
+  </const>
+  <const name="BASS_CTYPE_MUSIC_XM" type="Integer" file="Bass.pas" line="240">
+    <value>
+      $20003
+    </value>
+  </const>
+  <const name="BASS_CTYPE_MUSIC_IT" type="Integer" file="Bass.pas" line="241">
+    <value>
+      $20004
+    </value>
+  </const>
+  <const name="BASS_CTYPE_MUSIC_MO3" type="Integer" file="Bass.pas" line="242">
+    <value>
+      $100
+    </value>
+  </const>
+  <const name="BASS_3DMODE_NORMAL" type="Integer" file="Bass.pas" line="245">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_3DMODE_RELATIVE" type="Integer" file="Bass.pas" line="247">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_3DMODE_OFF" type="Integer" file="Bass.pas" line="255">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_GENERIC" type="Integer" file="Bass.pas" line="262">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_PADDEDCELL" type="Integer" file="Bass.pas" line="263">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_ROOM" type="Integer" file="Bass.pas" line="264">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_BATHROOM" type="Integer" file="Bass.pas" line="265">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_LIVINGROOM" type="Integer" file="Bass.pas" line="266">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_STONEROOM" type="Integer" file="Bass.pas" line="267">
+    <value>
+      $5
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_AUDITORIUM" type="Integer" file="Bass.pas" line="268">
+    <value>
+      $6
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_CONCERTHALL" type="Integer" file="Bass.pas" line="269">
+    <value>
+      $7
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_CAVE" type="Integer" file="Bass.pas" line="270">
+    <value>
+      $8
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_ARENA" type="Integer" file="Bass.pas" line="271">
+    <value>
+      $9
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_HANGAR" type="Integer" file="Bass.pas" line="272">
+    <value>
+      $A
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_CARPETEDHALLWAY" type="Integer" file="Bass.pas" line="273">
+    <value>
+      $B
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_HALLWAY" type="Integer" file="Bass.pas" line="274">
+    <value>
+      $C
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_STONECORRIDOR" type="Integer" file="Bass.pas" line="275">
+    <value>
+      $D
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_ALLEY" type="Integer" file="Bass.pas" line="276">
+    <value>
+      $E
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_FOREST" type="Integer" file="Bass.pas" line="277">
+    <value>
+      $F
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_CITY" type="Integer" file="Bass.pas" line="278">
+    <value>
+      $10
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_MOUNTAINS" type="Integer" file="Bass.pas" line="279">
+    <value>
+      $11
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_QUARRY" type="Integer" file="Bass.pas" line="280">
+    <value>
+      $12
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_PLAIN" type="Integer" file="Bass.pas" line="281">
+    <value>
+      $13
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_PARKINGLOT" type="Integer" file="Bass.pas" line="282">
+    <value>
+      $14
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_SEWERPIPE" type="Integer" file="Bass.pas" line="283">
+    <value>
+      $15
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_UNDERWATER" type="Integer" file="Bass.pas" line="284">
+    <value>
+      $16
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_DRUGGED" type="Integer" file="Bass.pas" line="285">
+    <value>
+      $17
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_DIZZY" type="Integer" file="Bass.pas" line="286">
+    <value>
+      $18
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_PSYCHOTIC" type="Integer" file="Bass.pas" line="287">
+    <value>
+      $19
+    </value>
+  </const>
+  <const name="EAX_ENVIRONMENT_COUNT" type="Integer" file="Bass.pas" line="289">
+    <value>
+      $1A
+    </value>
+  </const>
+  <const name="BASS_3DALG_DEFAULT" type="Integer" file="Bass.pas" line="292">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_3DALG_OFF" type="Integer" file="Bass.pas" line="296">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_3DALG_FULL" type="Integer" file="Bass.pas" line="307">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_3DALG_LIGHT" type="Integer" file="Bass.pas" line="314">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="BASS_SYNC_POS" type="Integer" file="Bass.pas" line="326">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_SYNC_END" type="Integer" file="Bass.pas" line="332">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_SYNC_META" type="Integer" file="Bass.pas" line="338">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_SYNC_SLIDE" type="Integer" file="Bass.pas" line="344">
+    <value>
+      $5
+    </value>
+  </const>
+  <const name="BASS_SYNC_STALL" type="Integer" file="Bass.pas" line="350">
+    <value>
+      $6
+    </value>
+  </const>
+  <const name="BASS_SYNC_DOWNLOAD" type="Integer" file="Bass.pas" line="356">
+    <value>
+      $7
+    </value>
+  </const>
+  <const name="BASS_SYNC_FREE" type="Integer" file="Bass.pas" line="362">
+    <value>
+      $8
+    </value>
+  </const>
+  <const name="BASS_SYNC_MUSICPOS" type="Integer" file="Bass.pas" line="368">
+    <value>
+      $A
+    </value>
+  </const>
+  <const name="BASS_SYNC_MUSICINST" type="Integer" file="Bass.pas" line="374">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_SYNC_MUSICFX" type="Integer" file="Bass.pas" line="381">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="BASS_SYNC_MESSAGE" type="Integer" file="Bass.pas" line="387">
+    <value>
+      $20000000
+    </value>
+  </const>
+  <const name="BASS_SYNC_MIXTIME" type="Integer" file="Bass.pas" line="393">
+    <value>
+      $40000000
+    </value>
+  </const>
+  <const name="BASS_SYNC_ONETIME" type="Integer" file="Bass.pas" line="395">
+    <value>
+      $80000000
+    </value>
+  </const>
+  <const name="BASS_ACTIVE_STOPPED" type="Integer" file="Bass.pas" line="399">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_ACTIVE_PLAYING" type="Integer" file="Bass.pas" line="400">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_ACTIVE_STALLED" type="Integer" file="Bass.pas" line="401">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_ACTIVE_PAUSED" type="Integer" file="Bass.pas" line="402">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="BASS_SLIDE_FREQ" type="Integer" file="Bass.pas" line="405">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_SLIDE_VOL" type="Integer" file="Bass.pas" line="406">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_SLIDE_PAN" type="Integer" file="Bass.pas" line="407">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_DATA_AVAILABLE" type="Integer" file="Bass.pas" line="410">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_DATA_FLOAT" type="Integer" file="Bass.pas" line="411">
+    <value>
+      $40000000
+    </value>
+  </const>
+  <const name="BASS_DATA_FFT512" type="Integer" file="Bass.pas" line="412">
+    <value>
+      $80000000
+    </value>
+  </const>
+  <const name="BASS_DATA_FFT1024" type="Integer" file="Bass.pas" line="413">
+    <value>
+      $80000001
+    </value>
+  </const>
+  <const name="BASS_DATA_FFT2048" type="Integer" file="Bass.pas" line="414">
+    <value>
+      $80000002
+    </value>
+  </const>
+  <const name="BASS_DATA_FFT4096" type="Integer" file="Bass.pas" line="415">
+    <value>
+      $80000003
+    </value>
+  </const>
+  <const name="BASS_DATA_FFT_INDIVIDUAL" type="Integer" file="Bass.pas" line="416">
+    <value>
+      $10
+    </value>
+  </const>
+  <const name="BASS_DATA_FFT_NOWINDOW" type="Integer" file="Bass.pas" line="417">
+    <value>
+      $20
+    </value>
+  </const>
+  <const name="BASS_TAG_ID3" type="Integer" file="Bass.pas" line="420">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_TAG_ID3V2" type="Integer" file="Bass.pas" line="421">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_TAG_OGG" type="Integer" file="Bass.pas" line="422">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_TAG_HTTP" type="Integer" file="Bass.pas" line="423">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="BASS_TAG_ICY" type="Integer" file="Bass.pas" line="424">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_TAG_META" type="Integer" file="Bass.pas" line="425">
+    <value>
+      $5
+    </value>
+  </const>
+  <const name="BASS_TAG_VENDOR" type="Integer" file="Bass.pas" line="426">
+    <value>
+      $9
+    </value>
+  </const>
+  <const name="BASS_TAG_RIFF_INFO" type="Integer" file="Bass.pas" line="427">
+    <value>
+      $100
+    </value>
+  </const>
+  <const name="BASS_TAG_MUSIC_NAME" type="Integer" file="Bass.pas" line="428">
+    <value>
+      $10000
+    </value>
+  </const>
+  <const name="BASS_TAG_MUSIC_MESSAGE" type="Integer" file="Bass.pas" line="429">
+    <value>
+      $10001
+    </value>
+  </const>
+  <const name="BASS_TAG_MUSIC_INST" type="Integer" file="Bass.pas" line="430">
+    <value>
+      $10100
+    </value>
+  </const>
+  <const name="BASS_TAG_MUSIC_SAMPLE" type="Integer" file="Bass.pas" line="431">
+    <value>
+      $10300
+    </value>
+  </const>
+  <const name="BASS_FX_CHORUS" type="Integer" file="Bass.pas" line="433">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_FX_COMPRESSOR" type="Integer" file="Bass.pas" line="434">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_FX_DISTORTION" type="Integer" file="Bass.pas" line="435">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_FX_ECHO" type="Integer" file="Bass.pas" line="436">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="BASS_FX_FLANGER" type="Integer" file="Bass.pas" line="437">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_FX_GARGLE" type="Integer" file="Bass.pas" line="438">
+    <value>
+      $5
+    </value>
+  </const>
+  <const name="BASS_FX_I3DL2REVERB" type="Integer" file="Bass.pas" line="439">
+    <value>
+      $6
+    </value>
+  </const>
+  <const name="BASS_FX_PARAMEQ" type="Integer" file="Bass.pas" line="440">
+    <value>
+      $7
+    </value>
+  </const>
+  <const name="BASS_FX_REVERB" type="Integer" file="Bass.pas" line="441">
+    <value>
+      $8
+    </value>
+  </const>
+  <const name="BASS_FX_PHASE_NEG_180" type="Integer" file="Bass.pas" line="443">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_FX_PHASE_NEG_90" type="Integer" file="Bass.pas" line="444">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_FX_PHASE_ZERO" type="Integer" file="Bass.pas" line="445">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_FX_PHASE_90" type="Integer" file="Bass.pas" line="446">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="BASS_FX_PHASE_180" type="Integer" file="Bass.pas" line="447">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_INPUT_OFF" type="Integer" file="Bass.pas" line="450">
+    <value>
+      $10000
+    </value>
+  </const>
+  <const name="BASS_INPUT_ON" type="Integer" file="Bass.pas" line="451">
+    <value>
+      $20000
+    </value>
+  </const>
+  <const name="BASS_INPUT_LEVEL" type="Integer" file="Bass.pas" line="452">
+    <value>
+      $40000
+    </value>
+  </const>
+  <const name="BASS_INPUT_TYPE_MASK" type="Integer" file="Bass.pas" line="454">
+    <value>
+      $FF000000
+    </value>
+  </const>
+  <const name="BASS_INPUT_TYPE_UNDEF" type="Integer" file="Bass.pas" line="455">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_INPUT_TYPE_DIGITAL" type="Integer" file="Bass.pas" line="456">
+    <value>
+      $1000000
+    </value>
+  </const>
+  <const name="BASS_INPUT_TYPE_LINE" type="Integer" file="Bass.pas" line="457">
+    <value>
+      $2000000
+    </value>
+  </const>
+  <const name="BASS_INPUT_TYPE_MIC" type="Integer" file="Bass.pas" line="458">
+    <value>
+      $3000000
+    </value>
+  </const>
+  <const name="BASS_INPUT_TYPE_SYNTH" type="Integer" file="Bass.pas" line="459">
+    <value>
+      $4000000
+    </value>
+  </const>
+  <const name="BASS_INPUT_TYPE_CD" type="Integer" file="Bass.pas" line="460">
+    <value>
+      $5000000
+    </value>
+  </const>
+  <const name="BASS_INPUT_TYPE_PHONE" type="Integer" file="Bass.pas" line="461">
+    <value>
+      $6000000
+    </value>
+  </const>
+  <const name="BASS_INPUT_TYPE_SPEAKER" type="Integer" file="Bass.pas" line="462">
+    <value>
+      $7000000
+    </value>
+  </const>
+  <const name="BASS_INPUT_TYPE_WAVE" type="Integer" file="Bass.pas" line="463">
+    <value>
+      $8000000
+    </value>
+  </const>
+  <const name="BASS_INPUT_TYPE_AUX" type="Integer" file="Bass.pas" line="464">
+    <value>
+      $9000000
+    </value>
+  </const>
+  <const name="BASS_INPUT_TYPE_ANALOG" type="Integer" file="Bass.pas" line="465">
+    <value>
+      $A000000
+    </value>
+  </const>
+  <const name="BASS_NET_TIMEOUT" type="Integer" file="Bass.pas" line="468">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_NET_BUFFER" type="Integer" file="Bass.pas" line="469">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_FILEPOS_CURRENT" type="Integer" file="Bass.pas" line="472">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_FILEPOS_DECODE" type="Integer" file="Bass.pas" line="473">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_FILEPOS_DOWNLOAD" type="Integer" file="Bass.pas" line="474">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_FILEPOS_END" type="Integer" file="Bass.pas" line="475">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_FILEPOS_START" type="Integer" file="Bass.pas" line="476">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="BASS_FILE_CLOSE" type="Integer" file="Bass.pas" line="479">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_FILE_READ" type="Integer" file="Bass.pas" line="480">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_FILE_LEN" type="Integer" file="Bass.pas" line="481">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="BASS_FILE_SEEK" type="Integer" file="Bass.pas" line="482">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_STREAMPROC_END" type="Integer" file="Bass.pas" line="484">
+    <value>
+      $80000000
+    </value>
+  </const>
+  <const name="BASS_MUSIC_ATTRIB_AMPLIFY" type="Integer" file="Bass.pas" line="487">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_MUSIC_ATTRIB_PANSEP" type="Integer" file="Bass.pas" line="488">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_MUSIC_ATTRIB_PSCALER" type="Integer" file="Bass.pas" line="489">
+    <value>
+      $2
+    </value>
+  </const>
+  <const name="BASS_MUSIC_ATTRIB_BPM" type="Integer" file="Bass.pas" line="490">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="BASS_MUSIC_ATTRIB_SPEED" type="Integer" file="Bass.pas" line="491">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_MUSIC_ATTRIB_VOL_GLOBAL" type="Integer" file="Bass.pas" line="492">
+    <value>
+      $5
+    </value>
+  </const>
+  <const name="BASS_MUSIC_ATTRIB_VOL_CHAN" type="Integer" file="Bass.pas" line="493">
+    <value>
+      $100
+    </value>
+  </const>
+  <const name="BASS_MUSIC_ATTRIB_VOL_INST" type="Integer" file="Bass.pas" line="494">
+    <value>
+      $200
+    </value>
+  </const>
+  <const name="BASS_CONFIG_BUFFER" type="Integer" file="Bass.pas" line="497">
+    <value>
+      $0
+    </value>
+  </const>
+  <const name="BASS_CONFIG_UPDATEPERIOD" type="Integer" file="Bass.pas" line="498">
+    <value>
+      $1
+    </value>
+  </const>
+  <const name="BASS_CONFIG_MAXVOL" type="Integer" file="Bass.pas" line="499">
+    <value>
+      $3
+    </value>
+  </const>
+  <const name="BASS_CONFIG_GVOL_SAMPLE" type="Integer" file="Bass.pas" line="500">
+    <value>
+      $4
+    </value>
+  </const>
+  <const name="BASS_CONFIG_GVOL_STREAM" type="Integer" file="Bass.pas" line="501">
+    <value>
+      $5
+    </value>
+  </const>
+  <const name="BASS_CONFIG_GVOL_MUSIC" type="Integer" file="Bass.pas" line="502">
+    <value>
+      $6
+    </value>
+  </const>
+  <const name="BASS_CONFIG_CURVE_VOL" type="Integer" file="Bass.pas" line="503">
+    <value>
+      $7
+    </value>
+  </const>
+  <const name="BASS_CONFIG_CURVE_PAN" type="Integer" file="Bass.pas" line="504">
+    <value>
+      $8
+    </value>
+  </const>
+  <const name="BASS_CONFIG_FLOATDSP" type="Integer" file="Bass.pas" line="505">
+    <value>
+      $9
+    </value>
+  </const>
+  <const name="BASS_CONFIG_3DALGORITHM" type="Integer" file="Bass.pas" line="506">
+    <value>
+      $A
+    </value>
+  </const>
+  <const name="BASS_CONFIG_NET_TIMEOUT" type="Integer" file="Bass.pas" line="507">
+    <value>
+      $B
+    </value>
+  </const>
+  <const name="BASS_CONFIG_NET_BUFFER" type="Integer" file="Bass.pas" line="508">
+    <value>
+      $C
+    </value>
+  </const>
+  <const name="BASS_CONFIG_PAUSE_NOPLAY" type="Integer" file="Bass.pas" line="509">
+    <value>
+      $D
+    </value>
+  </const>
+  <const name="BASS_CONFIG_NET_PREBUF" type="Integer" file="Bass.pas" line="510">
+    <value>
+      $F
+    </value>
+  </const>
+  <const name="BASS_CONFIG_NET_AGENT" type="Integer" file="Bass.pas" line="511">
+    <value>
+      $10
+    </value>
+  </const>
+  <const name="BASS_CONFIG_NET_PROXY" type="Integer" file="Bass.pas" line="512">
+    <value>
+      $11
+    </value>
+  </const>
+  <const name="BASS_CONFIG_NET_PASSIVE" type="Integer" file="Bass.pas" line="513">
+    <value>
+      $12
+    </value>
+  </const>
+  <const name="BASS_CONFIG_MP3_CODEC" type="Integer" file="Bass.pas" line="514">
+    <value>
+      $13
+    </value>
+  </const>
+  <type name="DWORD" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <type name="BOOL" type="LongBool" file="System.pas" line="12" />
+  <type name="FLOAT" type="Float" file="System.pas" line="12" />
+  <type name="QWORD" type="Int64" file="System.pas" line="12" />
+  <type name="HMUSIC" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <type name="HSAMPLE" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <type name="HCHANNEL" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <type name="HSTREAM" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <type name="HRECORD" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <type name="HSYNC" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <type name="HDSP" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <type name="HFX" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <type name="HPLUGIN" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <struct name="BASS_INFO" size="60" file="Bass.pas" line="532">
+    <field name="flags" type="Cardinal" visibility="public" size="4" offset="0" file="Bass.pas" line="533" />
+    <field name="hwsize" type="Cardinal" visibility="public" size="4" offset="4" file="Bass.pas" line="534" />
+    <field name="hwfree" type="Cardinal" visibility="public" size="4" offset="8" file="Bass.pas" line="535" />
+    <field name="freesam" type="Cardinal" visibility="public" size="4" offset="12" file="Bass.pas" line="536" />
+    <field name="free3d" type="Cardinal" visibility="public" size="4" offset="16" file="Bass.pas" line="537" />
+    <field name="minrate" type="Cardinal" visibility="public" size="4" offset="20" file="Bass.pas" line="538" />
+    <field name="maxrate" type="Cardinal" visibility="public" size="4" offset="24" file="Bass.pas" line="539" />
+    <field name="eax" type="LongBool" visibility="public" size="4" offset="28" file="Bass.pas" line="540" />
+    <field name="minbuf" type="Cardinal" visibility="public" size="4" offset="32" file="Bass.pas" line="541" />
+    <field name="dsver" type="Cardinal" visibility="public" size="4" offset="36" file="Bass.pas" line="542" />
+    <field name="latency" type="Cardinal" visibility="public" size="4" offset="40" file="Bass.pas" line="543" />
+    <field name="initflags" type="Cardinal" visibility="public" size="4" offset="44" file="Bass.pas" line="544" />
+    <field name="speakers" type="Cardinal" visibility="public" size="4" offset="48" file="Bass.pas" line="545" />
+    <field name="driver" type="PWideChar" visibility="public" size="4" offset="52" file="Bass.pas" line="546" />
+    <field name="freq" type="Cardinal" visibility="public" size="4" offset="56" file="Bass.pas" line="547" />
+  </struct>
+  <struct name="BASS_RECORDINFO" size="24" file="Bass.pas" line="550">
+    <field name="flags" type="Cardinal" visibility="public" size="4" offset="0" file="Bass.pas" line="551" />
+    <field name="formats" type="Cardinal" visibility="public" size="4" offset="4" file="Bass.pas" line="552" />
+    <field name="inputs" type="Cardinal" visibility="public" size="4" offset="8" file="Bass.pas" line="553" />
+    <field name="singlein" type="LongBool" visibility="public" size="4" offset="12" file="Bass.pas" line="554" />
+    <field name="driver" type="PWideChar" visibility="public" size="4" offset="16" file="Bass.pas" line="555" />
+    <field name="freq" type="Cardinal" visibility="public" size="4" offset="20" file="Bass.pas" line="556" />
+  </struct>
+  <struct name="BASS_CHANNELINFO" size="24" file="Bass.pas" line="559">
+    <field name="freq" type="Cardinal" visibility="public" size="4" offset="0" file="Bass.pas" line="560" />
+    <field name="chans" type="Cardinal" visibility="public" size="4" offset="4" file="Bass.pas" line="561" />
+    <field name="flags" type="Cardinal" visibility="public" size="4" offset="8" file="Bass.pas" line="562" />
+    <field name="ctype" type="Cardinal" visibility="public" size="4" offset="12" file="Bass.pas" line="563" />
+    <field name="origres" type="Cardinal" visibility="public" size="4" offset="16" file="Bass.pas" line="564" />
+    <field name="plugin" type="Cardinal" visibility="public" size="4" offset="20" file="Bass.pas" line="565" />
+  </struct>
+  <struct name="BASS_PLUGINFORM" size="12" file="Bass.pas" line="568">
+    <field name="ctype" type="Cardinal" visibility="public" size="4" offset="0" file="Bass.pas" line="569" />
+    <field name="Name" type="PWideChar" visibility="public" size="4" offset="4" file="Bass.pas" line="570" />
+    <field name="exts" type="PWideChar" visibility="public" size="4" offset="8" file="Bass.pas" line="571" />
+  </struct>
+  <pointer name="PBASS_PLUGINFORMS" type="TBASS_PLUGINFORMS" indircnt="1" file="Bass.pas" line="573" />
+  <array name="TBASS_PLUGINFORMS" low="0" high="178956969">
+    <element type="BASS_PLUGINFORM" />
+  </array>
+  <struct name="BASS_PLUGININFO" size="12" file="Bass.pas" line="576">
+    <field name="version" type="Cardinal" visibility="public" size="4" offset="0" file="Bass.pas" line="577" />
+    <field name="formatc" type="Cardinal" visibility="public" size="4" offset="4" file="Bass.pas" line="578" />
+    <field name="formats" type="PBASS_PLUGINFORMS" visibility="public" size="4" offset="8" file="Bass.pas" line="579" />
+  </struct>
+  <pointer name="PBASS_PLUGININFO" type="BASS_PLUGININFO" indircnt="1" file="Bass.pas" line="581" />
+  <struct name="BASS_SAMPLE" size="68" file="Bass.pas" line="584">
+    <field name="freq" type="Cardinal" visibility="public" size="4" offset="0" file="Bass.pas" line="585" />
+    <field name="volume" type="Cardinal" visibility="public" size="4" offset="4" file="Bass.pas" line="586" />
+    <field name="pan" type="Integer" visibility="public" size="4" offset="8" file="Bass.pas" line="587" />
+    <field name="flags" type="Cardinal" visibility="public" size="4" offset="12" file="Bass.pas" line="588" />
+    <field name="Length" type="Cardinal" visibility="public" size="4" offset="16" file="Bass.pas" line="589" />
+    <field name="Max" type="Cardinal" visibility="public" size="4" offset="20" file="Bass.pas" line="590" />
+    <field name="origres" type="Cardinal" visibility="public" size="4" offset="24" file="Bass.pas" line="591" />
+    <field name="chans" type="Cardinal" visibility="public" size="4" offset="28" file="Bass.pas" line="592" />
+    <field name="mingap" type="Cardinal" visibility="public" size="4" offset="32" file="Bass.pas" line="593" />
+    <field name="mode3d" type="Cardinal" visibility="public" size="4" offset="36" file="Bass.pas" line="599" />
+    <field name="mindist" type="Single" visibility="public" size="4" offset="40" file="Bass.pas" line="600" />
+    <field name="maxdist" type="Single" visibility="public" size="4" offset="44" file="Bass.pas" line="601" />
+    <field name="iangle" type="Cardinal" visibility="public" size="4" offset="48" file="Bass.pas" line="602" />
+    <field name="oangle" type="Cardinal" visibility="public" size="4" offset="52" file="Bass.pas" line="603" />
+    <field name="outvol" type="Cardinal" visibility="public" size="4" offset="56" file="Bass.pas" line="604" />
+    <field name="vam" type="Cardinal" visibility="public" size="4" offset="60" file="Bass.pas" line="609" />
+    <field name="priority" type="Cardinal" visibility="public" size="4" offset="64" file="Bass.pas" line="610" />
+  </struct>
+  <struct name="BASS_3DVECTOR" size="12" file="Bass.pas" line="614">
+    <field name="x" type="Single" visibility="public" size="4" offset="0" file="Bass.pas" line="615" />
+    <field name="y" type="Single" visibility="public" size="4" offset="4" file="Bass.pas" line="616" />
+    <field name="z" type="Single" visibility="public" size="4" offset="8" file="Bass.pas" line="617" />
+  </struct>
+  <struct name="BASS_FXCHORUS" size="28" file="Bass.pas" line="620">
+    <field name="fWetDryMix" type="Single" visibility="public" size="4" offset="0" file="Bass.pas" line="621" />
+    <field name="fDepth" type="Single" visibility="public" size="4" offset="4" file="Bass.pas" line="622" />
+    <field name="fFeedback" type="Single" visibility="public" size="4" offset="8" file="Bass.pas" line="623" />
+    <field name="fFrequency" type="Single" visibility="public" size="4" offset="12" file="Bass.pas" line="624" />
+    <field name="lWaveform" type="Cardinal" visibility="public" size="4" offset="16" file="Bass.pas" line="625" />
+    <field name="fDelay" type="Single" visibility="public" size="4" offset="20" file="Bass.pas" line="626" />
+    <field name="lPhase" type="Cardinal" visibility="public" size="4" offset="24" file="Bass.pas" line="627" />
+  </struct>
+  <struct name="BASS_FXCOMPRESSOR" size="24" file="Bass.pas" line="630">
+    <field name="fGain" type="Single" visibility="public" size="4" offset="0" file="Bass.pas" line="631" />
+    <field name="fAttack" type="Single" visibility="public" size="4" offset="4" file="Bass.pas" line="632" />
+    <field name="fRelease" type="Single" visibility="public" size="4" offset="8" file="Bass.pas" line="633" />
+    <field name="fThreshold" type="Single" visibility="public" size="4" offset="12" file="Bass.pas" line="634" />
+    <field name="fRatio" type="Single" visibility="public" size="4" offset="16" file="Bass.pas" line="635" />
+    <field name="fPredelay" type="Single" visibility="public" size="4" offset="20" file="Bass.pas" line="636" />
+  </struct>
+  <struct name="BASS_FXDISTORTION" size="20" file="Bass.pas" line="639">
+    <field name="fGain" type="Single" visibility="public" size="4" offset="0" file="Bass.pas" line="640" />
+    <field name="fEdge" type="Single" visibility="public" size="4" offset="4" file="Bass.pas" line="641" />
+    <field name="fPostEQCenterFrequency" type="Single" visibility="public" size="4" offset="8" file="Bass.pas" line="642" />
+    <field name="fPostEQBandwidth" type="Single" visibility="public" size="4" offset="12" file="Bass.pas" line="643" />
+    <field name="fPreLowpassCutoff" type="Single" visibility="public" size="4" offset="16" file="Bass.pas" line="644" />
+  </struct>
+  <struct name="BASS_FXECHO" size="20" file="Bass.pas" line="647">
+    <field name="fWetDryMix" type="Single" visibility="public" size="4" offset="0" file="Bass.pas" line="648" />
+    <field name="fFeedback" type="Single" visibility="public" size="4" offset="4" file="Bass.pas" line="649" />
+    <field name="fLeftDelay" type="Single" visibility="public" size="4" offset="8" file="Bass.pas" line="650" />
+    <field name="fRightDelay" type="Single" visibility="public" size="4" offset="12" file="Bass.pas" line="651" />
+    <field name="lPanDelay" type="LongBool" visibility="public" size="4" offset="16" file="Bass.pas" line="652" />
+  </struct>
+  <struct name="BASS_FXFLANGER" size="28" file="Bass.pas" line="655">
+    <field name="fWetDryMix" type="Single" visibility="public" size="4" offset="0" file="Bass.pas" line="656" />
+    <field name="fDepth" type="Single" visibility="public" size="4" offset="4" file="Bass.pas" line="657" />
+    <field name="fFeedback" type="Single" visibility="public" size="4" offset="8" file="Bass.pas" line="658" />
+    <field name="fFrequency" type="Single" visibility="public" size="4" offset="12" file="Bass.pas" line="659" />
+    <field name="lWaveform" type="Cardinal" visibility="public" size="4" offset="16" file="Bass.pas" line="660" />
+    <field name="fDelay" type="Single" visibility="public" size="4" offset="20" file="Bass.pas" line="661" />
+    <field name="lPhase" type="Cardinal" visibility="public" size="4" offset="24" file="Bass.pas" line="662" />
+  </struct>
+  <struct name="BASS_FXGARGLE" size="8" file="Bass.pas" line="665">
+    <field name="dwRateHz" type="Cardinal" visibility="public" size="4" offset="0" file="Bass.pas" line="666" />
+    <field name="dwWaveShape" type="Cardinal" visibility="public" size="4" offset="4" file="Bass.pas" line="667" />
+  </struct>
+  <struct name="BASS_FXI3DL2REVERB" size="48" file="Bass.pas" line="670">
+    <field name="lRoom" type="Integer" visibility="public" size="4" offset="0" file="Bass.pas" line="671" />
+    <field name="lRoomHF" type="Integer" visibility="public" size="4" offset="4" file="Bass.pas" line="672" />
+    <field name="flRoomRolloffFactor" type="Single" visibility="public" size="4" offset="8" file="Bass.pas" line="673" />
+    <field name="flDecayTime" type="Single" visibility="public" size="4" offset="12" file="Bass.pas" line="674" />
+    <field name="flDecayHFRatio" type="Single" visibility="public" size="4" offset="16" file="Bass.pas" line="675" />
+    <field name="lReflections" type="Integer" visibility="public" size="4" offset="20" file="Bass.pas" line="676" />
+    <field name="flReflectionsDelay" type="Single" visibility="public" size="4" offset="24" file="Bass.pas" line="677" />
+    <field name="lReverb" type="Integer" visibility="public" size="4" offset="28" file="Bass.pas" line="678" />
+    <field name="flReverbDelay" type="Single" visibility="public" size="4" offset="32" file="Bass.pas" line="679" />
+    <field name="flDiffusion" type="Single" visibility="public" size="4" offset="36" file="Bass.pas" line="680" />
+    <field name="flDensity" type="Single" visibility="public" size="4" offset="40" file="Bass.pas" line="681" />
+    <field name="flHFReference" type="Single" visibility="public" size="4" offset="44" file="Bass.pas" line="682" />
+  </struct>
+  <struct name="BASS_FXPARAMEQ" size="12" file="Bass.pas" line="685">
+    <field name="fCenter" type="Single" visibility="public" size="4" offset="0" file="Bass.pas" line="686" />
+    <field name="fBandwidth" type="Single" visibility="public" size="4" offset="4" file="Bass.pas" line="687" />
+    <field name="fGain" type="Single" visibility="public" size="4" offset="8" file="Bass.pas" line="688" />
+  </struct>
+  <struct name="BASS_FXREVERB" size="16" file="Bass.pas" line="691">
+    <field name="fInGain" type="Single" visibility="public" size="4" offset="0" file="Bass.pas" line="692" />
+    <field name="fReverbMix" type="Single" visibility="public" size="4" offset="4" file="Bass.pas" line="693" />
+    <field name="fReverbTime" type="Single" visibility="public" size="4" offset="8" file="Bass.pas" line="694" />
+    <field name="fHighFreqRTRatio" type="Single" visibility="public" size="4" offset="12" file="Bass.pas" line="695" />
+  </struct>
+  <variable name="BASS_SetConfig" type="function(option: Cardinal; value: Cardinal): Cardinal;" file="Bass.pas" line="766" />
+  <variable name="BASS_GetConfig" type="function(option: Cardinal): Cardinal;" file="Bass.pas" line="767" />
+  <variable name="BASS_GetVersion" type="function: Cardinal;" file="Bass.pas" line="768" />
+  <variable name="BASS_GetDeviceDescription" type="function(device: Cardinal): PWideChar;" file="Bass.pas" line="769" />
+  <variable name="BASS_ErrorGetCode" type="function: Integer;" file="Bass.pas" line="770" />
+  <variable name="BASS_Init" type="function(device: Integer; freq: Cardinal; flags: Cardinal; win: HWND; clsid: PGUID): LongBool;" file="Bass.pas" line="771" />
+  <variable name="BASS_SetDevice" type="function(device: Cardinal): LongBool;" file="Bass.pas" line="772" />
+  <variable name="BASS_GetDevice" type="function: Cardinal;" file="Bass.pas" line="773" />
+  <variable name="BASS_Free" type="function: LongBool;" file="Bass.pas" line="774" />
+  <variable name="BASS_GetDSoundObject" type="function(obj: Cardinal): Pointer;" file="Bass.pas" line="775" />
+  <variable name="BASS_GetInfo" type="function(info: BASS_INFO): LongBool;" file="Bass.pas" line="776" />
+  <variable name="BASS_Update" type="function: LongBool;" file="Bass.pas" line="777" />
+  <variable name="BASS_GetCPU" type="function: Single;" file="Bass.pas" line="778" />
+  <variable name="BASS_Start" type="function: LongBool;" file="Bass.pas" line="779" />
+  <variable name="BASS_Stop" type="function: LongBool;" file="Bass.pas" line="780" />
+  <variable name="BASS_Pause" type="function: LongBool;" file="Bass.pas" line="781" />
+  <variable name="BASS_SetVolume" type="function(volume: Cardinal): LongBool;" file="Bass.pas" line="782" />
+  <variable name="BASS_GetVolume" type="function: Integer;" file="Bass.pas" line="783" />
+  <variable name="BASS_PluginLoad" type="function(filename: PWideChar; flags: Cardinal): Cardinal;" file="Bass.pas" line="785" />
+  <variable name="BASS_PluginFree" type="function(handle: Cardinal): LongBool;" file="Bass.pas" line="786" />
+  <variable name="BASS_PluginGetInfo" type="function(handle: Cardinal): PBASS_PLUGININFO;" file="Bass.pas" line="787" />
+  <variable name="BASS_Set3DFactors" type="function(distf: Single; rollf: Single; doppf: Single): LongBool;" file="Bass.pas" line="789" />
+  <variable name="BASS_Get3DFactors" type="function(distf: Single; rollf: Single; doppf: Single): LongBool;" file="Bass.pas" line="790" />
+  <variable name="BASS_Set3DPosition" type="function(Pos: BASS_3DVECTOR; vel: BASS_3DVECTOR; front: BASS_3DVECTOR; top: BASS_3DVECTOR): LongBool;" file="Bass.pas" line="791" />
+  <variable name="BASS_Get3DPosition" type="function(Pos: BASS_3DVECTOR; vel: BASS_3DVECTOR; front: BASS_3DVECTOR; top: BASS_3DVECTOR): LongBool;" file="Bass.pas" line="792" />
+  <variable name="BASS_Apply3D" type="procedure" file="Bass.pas" line="793" />
+  <variable name="BASS_SetEAXParameters" type="function(env: Integer; vol: Single; decay: Single; damp: Single): LongBool;" file="Bass.pas" line="794" />
+  <variable name="BASS_GetEAXParameters" type="function(env: Cardinal; vol: Single; decay: Single; damp: Single): LongBool;" file="Bass.pas" line="795" />
+  <variable name="BASS_MusicLoad" type="function(mem: LongBool; f: Pointer; offset: Cardinal; Length: Cardinal; flags: Cardinal; freq: Cardinal): Cardinal;" file="Bass.pas" line="797" />
+  <variable name="BASS_MusicFree" type="function(handle: Cardinal): LongBool;" file="Bass.pas" line="798" />
+  <variable name="BASS_MusicSetAttribute" type="function(handle: Cardinal; attrib: Cardinal; value: Cardinal): Cardinal;" file="Bass.pas" line="799" />
+  <variable name="BASS_MusicGetAttribute" type="function(handle: Cardinal; attrib: Cardinal): Cardinal;" file="Bass.pas" line="800" />
+  <variable name="BASS_MusicGetOrders" type="function(handle: Cardinal): Cardinal;" file="Bass.pas" line="801" />
+  <variable name="BASS_MusicGetOrderPosition" type="function(handle: Cardinal): Cardinal;" file="Bass.pas" line="802" />
+  <variable name="BASS_SampleLoad" type="function(mem: LongBool; f: Pointer; offset: Cardinal; Length: Cardinal; Max: Cardinal; flags: Cardinal): Cardinal;" file="Bass.pas" line="804" />
+  <variable name="BASS_SampleCreate" type="function(Length: Cardinal; freq: Cardinal; chans: Cardinal; Max: Cardinal; flags: Cardinal): Pointer;" file="Bass.pas" line="805" />
+  <variable name="BASS_SampleCreateDone" type="function: Cardinal;" file="Bass.pas" line="806" />
+  <variable name="BASS_SampleFree" type="function(handle: Cardinal): LongBool;" file="Bass.pas" line="807" />
+  <variable name="BASS_SampleGetInfo" type="function(handle: Cardinal; info: BASS_SAMPLE): LongBool;" file="Bass.pas" line="808" />
+  <variable name="BASS_SampleSetInfo" type="function(handle: Cardinal; info: BASS_SAMPLE): LongBool;" file="Bass.pas" line="809" />
+  <variable name="BASS_SampleGetChannel" type="function(handle: Cardinal; onlynew: LongBool): Cardinal;" file="Bass.pas" line="810" />
+  <variable name="BASS_SampleStop" type="function(handle: Cardinal): LongBool;" file="Bass.pas" line="811" />
+  <variable name="BASS_StreamCreate" type="function(freq: Cardinal; chans: Cardinal; flags: Cardinal; proc: Pointer; user: Cardinal): Cardinal;" file="Bass.pas" line="813" />
+  <variable name="BASS_StreamCreateFile" type="function(mem: LongBool; f: Pointer; offset: Cardinal; Length: Cardinal; flags: Cardinal): Cardinal;" file="Bass.pas" line="814" />
+  <variable name="BASS_StreamCreateURL" type="function(url: PWideChar; offset: Cardinal; flags: Cardinal; proc: DOWNLOADPROC; user: Cardinal): Cardinal;" file="Bass.pas" line="815" />
+  <variable name="BASS_StreamCreateFileUser" type="function(buffered: LongBool; flags: Cardinal; proc: STREAMFILEPROC; user: Cardinal): Cardinal;" file="Bass.pas" line="816" />
+  <variable name="BASS_StreamFree" type="function(handle: Cardinal): LongBool;" file="Bass.pas" line="817" />
+  <variable name="BASS_StreamGetFilePosition" type="function(handle: Cardinal; mode: Cardinal): Cardinal;" file="Bass.pas" line="818" />
+  <variable name="BASS_RecordGetDeviceDescription" type="function(devnum: Cardinal): PWideChar;" file="Bass.pas" line="820" />
+  <variable name="BASS_RecordInit" type="function(device: Integer): LongBool;" file="Bass.pas" line="821" />
+  <variable name="BASS_RecordSetDevice" type="function(device: Cardinal): LongBool;" file="Bass.pas" line="822" />
+  <variable name="BASS_RecordGetDevice" type="function: Cardinal;" file="Bass.pas" line="823" />
+  <variable name="BASS_RecordFree" type="function: LongBool;" file="Bass.pas" line="824" />
+  <variable name="BASS_RecordGetInfo" type="function(info: BASS_RECORDINFO): LongBool;" file="Bass.pas" line="825" />
+  <variable name="BASS_RecordGetInputName" type="function(input: Integer): PWideChar;" file="Bass.pas" line="826" />
+  <variable name="BASS_RecordSetInput" type="function(input: Integer; setting: Cardinal): LongBool;" file="Bass.pas" line="827" />
+  <variable name="BASS_RecordGetInput" type="function(input: Integer): Cardinal;" file="Bass.pas" line="828" />
+  <variable name="BASS_RecordStart" type="function(freq: Cardinal; chans: Cardinal; flags: Cardinal; proc: RECORDPROC; user: Cardinal): Cardinal;" file="Bass.pas" line="829" />
+  <variable name="BASS_ChannelBytes2Seconds" type="function(handle: Cardinal; Pos: Int64): Single;" file="Bass.pas" line="831" />
+  <variable name="BASS_ChannelSeconds2Bytes" type="function(handle: Cardinal; Pos: Single): Int64;" file="Bass.pas" line="832" />
+  <variable name="BASS_ChannelGetDevice" type="function(handle: Cardinal): Cardinal;" file="Bass.pas" line="833" />
+  <variable name="BASS_ChannelSetDevice" type="function(handle: Cardinal; device: Cardinal): LongBool;" file="Bass.pas" line="834" />
+  <variable name="BASS_ChannelIsActive" type="function(handle: Cardinal): Cardinal;" file="Bass.pas" line="835" />
+  <variable name="BASS_ChannelGetInfo" type="function(handle: Cardinal; info: BASS_CHANNELINFO): LongBool;" file="Bass.pas" line="836" />
+  <variable name="BASS_ChannelGetTags" type="function(handle: Cardinal; tags: Cardinal): PWideChar;" file="Bass.pas" line="837" />
+  <variable name="BASS_ChannelSetFlags" type="function(handle: Cardinal; flags: Cardinal): LongBool;" file="Bass.pas" line="838" />
+  <variable name="BASS_ChannelPreBuf" type="function(handle: Cardinal; Length: Cardinal): LongBool;" file="Bass.pas" line="839" />
+  <variable name="BASS_ChannelPlay" type="function(handle: Cardinal; restart: LongBool): LongBool;" file="Bass.pas" line="840" />
+  <variable name="BASS_ChannelStop" type="function(handle: Cardinal): LongBool;" file="Bass.pas" line="841" />
+  <variable name="BASS_ChannelPause" type="function(handle: Cardinal): LongBool;" file="Bass.pas" line="842" />
+  <variable name="BASS_ChannelSetAttributes" type="function(handle: Cardinal; freq: Integer; volume: Integer; pan: Integer): LongBool;" file="Bass.pas" line="843" />
+  <variable name="BASS_ChannelGetAttributes" type="function(handle: Cardinal; freq: Cardinal; volume: Cardinal; pan: Integer): LongBool;" file="Bass.pas" line="844" />
+  <variable name="BASS_ChannelSlideAttributes" type="function(handle: Cardinal; freq: Integer; volume: Integer; pan: Integer; Time: Cardinal): LongBool;" file="Bass.pas" line="845" />
+  <variable name="BASS_ChannelIsSliding" type="function(handle: Cardinal): Cardinal;" file="Bass.pas" line="846" />
+  <variable name="BASS_ChannelSet3DAttributes" type="function(handle: Cardinal; mode: Integer; Min: Single; Max: Single; iangle: Integer; oangle: Integer; outvol: Integer): LongBool;" file="Bass.pas" line="847" />
+  <variable name="BASS_ChannelGet3DAttributes" type="function(handle: Cardinal; mode: Cardinal; Min: Single; Max: Single; iangle: Cardinal; oangle: Cardinal; outvol: Cardinal): LongBool;" file="Bass.pas" line="848" />
+  <variable name="BASS_ChannelSet3DPosition" type="function(handle: Cardinal; Pos: BASS_3DVECTOR; orient: BASS_3DVECTOR; vel: BASS_3DVECTOR): LongBool;" file="Bass.pas" line="849" />
+  <variable name="BASS_ChannelGet3DPosition" type="function(handle: Cardinal; Pos: BASS_3DVECTOR; orient: BASS_3DVECTOR; vel: BASS_3DVECTOR): LongBool;" file="Bass.pas" line="850" />
+  <variable name="BASS_ChannelGetLength" type="function(handle: Cardinal): Int64;" file="Bass.pas" line="851" />
+  <variable name="BASS_ChannelSetPosition" type="function(handle: Cardinal; Pos: Int64): LongBool;" file="Bass.pas" line="852" />
+  <variable name="BASS_ChannelGetPosition" type="function(handle: Cardinal): Int64;" file="Bass.pas" line="853" />
+  <variable name="BASS_ChannelGetLevel" type="function(handle: Cardinal): Cardinal;" file="Bass.pas" line="854" />
+  <variable name="BASS_ChannelGetData" type="function(handle: Cardinal; buffer: Pointer; Length: Cardinal): Cardinal;" file="Bass.pas" line="855" />
+  <variable name="BASS_ChannelSetSync" type="function(handle: Cardinal; stype: Cardinal; param: Int64; proc: SYNCPROC; user: Cardinal): Cardinal;" file="Bass.pas" line="856" />
+  <variable name="BASS_ChannelRemoveSync" type="function(handle: Cardinal; sync: Cardinal): LongBool;" file="Bass.pas" line="857" />
+  <variable name="BASS_ChannelSetDSP" type="function(handle: Cardinal; proc: DSPPROC; user: Cardinal; priority: Integer): Cardinal;" file="Bass.pas" line="858" />
+  <variable name="BASS_ChannelRemoveDSP" type="function(handle: Cardinal; dsp: Cardinal): LongBool;" file="Bass.pas" line="859" />
+  <variable name="BASS_ChannelSetEAXMix" type="function(handle: Cardinal; mix: Single): LongBool;" file="Bass.pas" line="860" />
+  <variable name="BASS_ChannelGetEAXMix" type="function(handle: Cardinal; mix: Single): LongBool;" file="Bass.pas" line="861" />
+  <variable name="BASS_ChannelSetLink" type="function(handle: Cardinal; chan: Cardinal): LongBool;" file="Bass.pas" line="862" />
+  <variable name="BASS_ChannelRemoveLink" type="function(handle: Cardinal; chan: Cardinal): LongBool;" file="Bass.pas" line="863" />
+  <variable name="BASS_ChannelSetFX" type="function(handle: Cardinal; etype: Cardinal; priority: Integer): Cardinal;" file="Bass.pas" line="864" />
+  <variable name="BASS_ChannelRemoveFX" type="function(handle: Cardinal; fx: Cardinal): LongBool;" file="Bass.pas" line="865" />
+  <variable name="BASS_FXGetParameters" type="function(handle: Cardinal; par: Pointer): LongBool;" file="Bass.pas" line="867" />
+  <variable name="BassHandle" type="NativeUInt" visibility="public" file="Bass.pas" line="884" />
+  <function name="BASS_SPEAKER_N" visibility="public" file="Bass.pas" line="891">
+    <parameters>
+      <parameter name="n" type="Cardinal" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="MAKEMUSICPOS" visibility="public" file="Bass.pas" line="896">
+    <parameters>
+      <parameter name="order" type="Cardinal" />
+      <parameter name="row" type="Cardinal" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="BASS_SetEAXPreset" visibility="public" file="Bass.pas" line="901">
+    <parameters>
+      <parameter name="env" type="Integer" />
+      <retval type="LongBool" />
+    </parameters>
+  </function>
+  <function name="InitializeBassDLL" visibility="public" file="Bass.pas" line="964">
+    <parameters>
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <procedure name="FinalizeBassDLL" visibility="public" file="Bass.pas" line="1096">
+  </procedure>
+  <function name="GetBassDLLHandle" visibility="public" file="Bass.pas" line="1104">
+    <parameters>
+      <retval type="NativeUInt" />
+    </parameters>
+  </function>
+</namespace>

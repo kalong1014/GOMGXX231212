@@ -1,0 +1,843 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsCharsetUtils" platform="Win32">
+  <const name="MAX_CODEPAGE" type="Integer" file="OverbyteIcsCharsetUtils.pas" line="287">
+    <value>
+      $FFFF
+    </value>
+  </const>
+  <const name="ERR_CP_NOTMAPPED" type="Integer" file="OverbyteIcsCharsetUtils.pas" line="288">
+    <value>
+      $10000
+    </value>
+  </const>
+  <const name="ERR_CP_NOTAVAILABLE" type="Integer" file="OverbyteIcsCharsetUtils.pas" line="289">
+    <value>
+      $10001
+    </value>
+  </const>
+  <const name="CP_US_ASCII" type="Integer" file="OverbyteIcsCharsetUtils.pas" line="291">
+    <value>
+      $4E9F
+    </value>
+  </const>
+  <const name="CS_DEFAULT" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="298">
+    <value>
+      CS_DEFAULT
+    </value>
+  </const>
+  <const name="CS_NOTMAPPED" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="299">
+    <value>
+      CS_NOTMAPPED
+    </value>
+  </const>
+  <const name="UTF_8" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="300">
+    <value>
+      UTF_8
+    </value>
+  </const>
+  <const name="WIN_1250" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="301">
+    <value>
+      WIN_1250
+    </value>
+  </const>
+  <const name="WIN_1251" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="302">
+    <value>
+      WIN_1251
+    </value>
+  </const>
+  <const name="WIN_1252" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="303">
+    <value>
+      WIN_1252
+    </value>
+  </const>
+  <const name="WIN_1253" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="304">
+    <value>
+      WIN_1253
+    </value>
+  </const>
+  <const name="WIN_1254" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="305">
+    <value>
+      WIN_1254
+    </value>
+  </const>
+  <const name="WIN_1255" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="306">
+    <value>
+      WIN_1255
+    </value>
+  </const>
+  <const name="WIN_1256" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="307">
+    <value>
+      WIN_1256
+    </value>
+  </const>
+  <const name="WIN_1257" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="308">
+    <value>
+      WIN_1257
+    </value>
+  </const>
+  <const name="WIN_1258" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="309">
+    <value>
+      WIN_1258
+    </value>
+  </const>
+  <const name="ISO_8859_1" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="310">
+    <value>
+      ISO_8859_1
+    </value>
+  </const>
+  <const name="ISO_8859_2" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="311">
+    <value>
+      ISO_8859_2
+    </value>
+  </const>
+  <const name="ISO_8859_3" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="312">
+    <value>
+      ISO_8859_3
+    </value>
+  </const>
+  <const name="ISO_8859_4" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="313">
+    <value>
+      ISO_8859_4
+    </value>
+  </const>
+  <const name="ISO_8859_5" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="314">
+    <value>
+      ISO_8859_5
+    </value>
+  </const>
+  <const name="ISO_8859_6" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="315">
+    <value>
+      ISO_8859_6
+    </value>
+  </const>
+  <const name="ISO_8859_7" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="316">
+    <value>
+      ISO_8859_7
+    </value>
+  </const>
+  <const name="ISO_8859_8" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="317">
+    <value>
+      ISO_8859_8
+    </value>
+  </const>
+  <const name="ISO_8859_8_i" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="318">
+    <value>
+      ISO_8859_8_i
+    </value>
+  </const>
+  <const name="ISO_8859_9" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="319">
+    <value>
+      ISO_8859_9
+    </value>
+  </const>
+  <const name="ISO_8859_13" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="320">
+    <value>
+      ISO_8859_13
+    </value>
+  </const>
+  <const name="ISO_8859_15" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="321">
+    <value>
+      ISO_8859_15
+    </value>
+  </const>
+  <const name="ISO_2022_JP" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="322">
+    <value>
+      ISO_2022_JP
+    </value>
+  </const>
+  <const name="ISO_2022_JP_1" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="323">
+    <value>
+      ISO_2022_JP_1
+    </value>
+  </const>
+  <const name="ISO_2022_JP_2" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="324">
+    <value>
+      ISO_2022_JP_2
+    </value>
+  </const>
+  <const name="ISO_2022_KR" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="325">
+    <value>
+      ISO_2022_KR
+    </value>
+  </const>
+  <const name="ISO_2022_CN" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="326">
+    <value>
+      ISO_2022_CN
+    </value>
+  </const>
+  <const name="X_CP50227" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="327">
+    <value>
+      X_CP50227
+    </value>
+  </const>
+  <const name="EUC_JP" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="328">
+    <value>
+      EUC_JP
+    </value>
+  </const>
+  <const name="GB_2312_80" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="329">
+    <value>
+      GB_2312_80
+    </value>
+  </const>
+  <const name="GB_2312" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="330">
+    <value>
+      GB_2312
+    </value>
+  </const>
+  <const name="HZ_GB_2312" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="331">
+    <value>
+      HZ_GB_2312
+    </value>
+  </const>
+  <const name="GB_18030" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="332">
+    <value>
+      GB_18030
+    </value>
+  </const>
+  <const name="EUC_CN" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="333">
+    <value>
+      EUC_CN
+    </value>
+  </const>
+  <const name="KOI8_R" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="334">
+    <value>
+      KOI8_R
+    </value>
+  </const>
+  <const name="KOI8_U" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="335">
+    <value>
+      KOI8_U
+    </value>
+  </const>
+  <const name="UTF_16LE" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="336">
+    <value>
+      UTF_16LE
+    </value>
+  </const>
+  <const name="UTF_16BE" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="337">
+    <value>
+      UTF_16BE
+    </value>
+  </const>
+  <const name="UTF_7" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="338">
+    <value>
+      UTF_7
+    </value>
+  </const>
+  <const name="SHIFT_JIS" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="339">
+    <value>
+      SHIFT_JIS
+    </value>
+  </const>
+  <const name="BIG_5" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="340">
+    <value>
+      BIG_5
+    </value>
+  </const>
+  <const name="KOREAN_HANGUL" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="341">
+    <value>
+      KOREAN_HANGUL
+    </value>
+  </const>
+  <const name="EUC_KR" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="342">
+    <value>
+      EUC_KR
+    </value>
+  </const>
+  <const name="WIN_874" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="343">
+    <value>
+      WIN_874
+    </value>
+  </const>
+  <const name="IBM_037" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="344">
+    <value>
+      IBM_037
+    </value>
+  </const>
+  <const name="IBM_437" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="345">
+    <value>
+      IBM_437
+    </value>
+  </const>
+  <const name="IBM_500" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="346">
+    <value>
+      IBM_500
+    </value>
+  </const>
+  <const name="IBM_850" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="347">
+    <value>
+      IBM_850
+    </value>
+  </const>
+  <const name="IBM_852" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="348">
+    <value>
+      IBM_852
+    </value>
+  </const>
+  <const name="IBM_855" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="349">
+    <value>
+      IBM_855
+    </value>
+  </const>
+  <const name="IBM_857" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="350">
+    <value>
+      IBM_857
+    </value>
+  </const>
+  <const name="IBM_00858" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="351">
+    <value>
+      IBM_00858
+    </value>
+  </const>
+  <const name="IBM_860" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="352">
+    <value>
+      IBM_860
+    </value>
+  </const>
+  <const name="IBM_861" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="353">
+    <value>
+      IBM_861
+    </value>
+  </const>
+  <const name="IBM_862" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="354">
+    <value>
+      IBM_862
+    </value>
+  </const>
+  <const name="IBM_863" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="355">
+    <value>
+      IBM_863
+    </value>
+  </const>
+  <const name="IBM_864" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="356">
+    <value>
+      IBM_864
+    </value>
+  </const>
+  <const name="IBM_865" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="357">
+    <value>
+      IBM_865
+    </value>
+  </const>
+  <const name="IBM_866" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="358">
+    <value>
+      IBM_866
+    </value>
+  </const>
+  <const name="IBM_869" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="359">
+    <value>
+      IBM_869
+    </value>
+  </const>
+  <const name="IBM_870" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="360">
+    <value>
+      IBM_870
+    </value>
+  </const>
+  <const name="IBM_1026" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="361">
+    <value>
+      IBM_1026
+    </value>
+  </const>
+  <const name="IBM_01047" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="362">
+    <value>
+      IBM_01047
+    </value>
+  </const>
+  <const name="IBM_01140" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="363">
+    <value>
+      IBM_01140
+    </value>
+  </const>
+  <const name="IBM_01141" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="364">
+    <value>
+      IBM_01141
+    </value>
+  </const>
+  <const name="IBM_01142" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="365">
+    <value>
+      IBM_01142
+    </value>
+  </const>
+  <const name="IBM_01143" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="366">
+    <value>
+      IBM_01143
+    </value>
+  </const>
+  <const name="IBM_01144" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="367">
+    <value>
+      IBM_01144
+    </value>
+  </const>
+  <const name="IBM_01145" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="368">
+    <value>
+      IBM_01145
+    </value>
+  </const>
+  <const name="IBM_01146" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="369">
+    <value>
+      IBM_01146
+    </value>
+  </const>
+  <const name="IBM_01147" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="370">
+    <value>
+      IBM_01147
+    </value>
+  </const>
+  <const name="IBM_01148" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="371">
+    <value>
+      IBM_01148
+    </value>
+  </const>
+  <const name="IBM_01149" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="372">
+    <value>
+      IBM_01149
+    </value>
+  </const>
+  <const name="MACINTOSH" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="373">
+    <value>
+      MACINTOSH
+    </value>
+  </const>
+  <const name="UTF_32LE" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="374">
+    <value>
+      UTF_32LE
+    </value>
+  </const>
+  <const name="UTF_32BE" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="375">
+    <value>
+      UTF_32BE
+    </value>
+  </const>
+  <const name="US_ASCII" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="376">
+    <value>
+      US_ASCII
+    </value>
+  </const>
+  <const name="T_61" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="377">
+    <value>
+      T_61
+    </value>
+  </const>
+  <const name="CS_LAST_ITEM" type="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="378">
+    <value>
+      CS_LAST_ITEM
+    </value>
+  </const>
+  <type name="CsuString" type="UnicodeString" file="System.pas" line="12" />
+  <enum name="TMimeCharset" file="OverbyteIcsCharsetUtils.pas" line="297">
+    <element value="0" name="CS_DEFAULT" file="OverbyteIcsCharsetUtils.pas" line="298" />
+    <element value="1" name="CS_NOTMAPPED" file="OverbyteIcsCharsetUtils.pas" line="299" />
+    <element value="2" name="UTF_8" file="OverbyteIcsCharsetUtils.pas" line="300" />
+    <element value="3" name="WIN_1250" file="OverbyteIcsCharsetUtils.pas" line="301" />
+    <element value="4" name="WIN_1251" file="OverbyteIcsCharsetUtils.pas" line="302" />
+    <element value="5" name="WIN_1252" file="OverbyteIcsCharsetUtils.pas" line="303" />
+    <element value="6" name="WIN_1253" file="OverbyteIcsCharsetUtils.pas" line="304" />
+    <element value="7" name="WIN_1254" file="OverbyteIcsCharsetUtils.pas" line="305" />
+    <element value="8" name="WIN_1255" file="OverbyteIcsCharsetUtils.pas" line="306" />
+    <element value="9" name="WIN_1256" file="OverbyteIcsCharsetUtils.pas" line="307" />
+    <element value="10" name="WIN_1257" file="OverbyteIcsCharsetUtils.pas" line="308" />
+    <element value="11" name="WIN_1258" file="OverbyteIcsCharsetUtils.pas" line="309" />
+    <element value="12" name="ISO_8859_1" file="OverbyteIcsCharsetUtils.pas" line="310" />
+    <element value="13" name="ISO_8859_2" file="OverbyteIcsCharsetUtils.pas" line="311" />
+    <element value="14" name="ISO_8859_3" file="OverbyteIcsCharsetUtils.pas" line="312" />
+    <element value="15" name="ISO_8859_4" file="OverbyteIcsCharsetUtils.pas" line="313" />
+    <element value="16" name="ISO_8859_5" file="OverbyteIcsCharsetUtils.pas" line="314" />
+    <element value="17" name="ISO_8859_6" file="OverbyteIcsCharsetUtils.pas" line="315" />
+    <element value="18" name="ISO_8859_7" file="OverbyteIcsCharsetUtils.pas" line="316" />
+    <element value="19" name="ISO_8859_8" file="OverbyteIcsCharsetUtils.pas" line="317" />
+    <element value="20" name="ISO_8859_8_i" file="OverbyteIcsCharsetUtils.pas" line="318" />
+    <element value="21" name="ISO_8859_9" file="OverbyteIcsCharsetUtils.pas" line="319" />
+    <element value="22" name="ISO_8859_13" file="OverbyteIcsCharsetUtils.pas" line="320" />
+    <element value="23" name="ISO_8859_15" file="OverbyteIcsCharsetUtils.pas" line="321" />
+    <element value="24" name="ISO_2022_JP" file="OverbyteIcsCharsetUtils.pas" line="322" />
+    <element value="25" name="ISO_2022_JP_1" file="OverbyteIcsCharsetUtils.pas" line="323" />
+    <element value="26" name="ISO_2022_JP_2" file="OverbyteIcsCharsetUtils.pas" line="324" />
+    <element value="27" name="ISO_2022_KR" file="OverbyteIcsCharsetUtils.pas" line="325" />
+    <element value="28" name="ISO_2022_CN" file="OverbyteIcsCharsetUtils.pas" line="326" />
+    <element value="29" name="X_CP50227" file="OverbyteIcsCharsetUtils.pas" line="327" />
+    <element value="30" name="EUC_JP" file="OverbyteIcsCharsetUtils.pas" line="328" />
+    <element value="31" name="GB_2312_80" file="OverbyteIcsCharsetUtils.pas" line="329" />
+    <element value="32" name="GB_2312" file="OverbyteIcsCharsetUtils.pas" line="330" />
+    <element value="33" name="HZ_GB_2312" file="OverbyteIcsCharsetUtils.pas" line="331" />
+    <element value="34" name="GB_18030" file="OverbyteIcsCharsetUtils.pas" line="332" />
+    <element value="35" name="EUC_CN" file="OverbyteIcsCharsetUtils.pas" line="333" />
+    <element value="36" name="KOI8_R" file="OverbyteIcsCharsetUtils.pas" line="334" />
+    <element value="37" name="KOI8_U" file="OverbyteIcsCharsetUtils.pas" line="335" />
+    <element value="38" name="UTF_16LE" file="OverbyteIcsCharsetUtils.pas" line="336" />
+    <element value="39" name="UTF_16BE" file="OverbyteIcsCharsetUtils.pas" line="337" />
+    <element value="40" name="UTF_7" file="OverbyteIcsCharsetUtils.pas" line="338" />
+    <element value="41" name="SHIFT_JIS" file="OverbyteIcsCharsetUtils.pas" line="339" />
+    <element value="42" name="BIG_5" file="OverbyteIcsCharsetUtils.pas" line="340" />
+    <element value="43" name="KOREAN_HANGUL" file="OverbyteIcsCharsetUtils.pas" line="341" />
+    <element value="44" name="EUC_KR" file="OverbyteIcsCharsetUtils.pas" line="342" />
+    <element value="45" name="WIN_874" file="OverbyteIcsCharsetUtils.pas" line="343" />
+    <element value="46" name="IBM_037" file="OverbyteIcsCharsetUtils.pas" line="344" />
+    <element value="47" name="IBM_437" file="OverbyteIcsCharsetUtils.pas" line="345" />
+    <element value="48" name="IBM_500" file="OverbyteIcsCharsetUtils.pas" line="346" />
+    <element value="49" name="IBM_850" file="OverbyteIcsCharsetUtils.pas" line="347" />
+    <element value="50" name="IBM_852" file="OverbyteIcsCharsetUtils.pas" line="348" />
+    <element value="51" name="IBM_855" file="OverbyteIcsCharsetUtils.pas" line="349" />
+    <element value="52" name="IBM_857" file="OverbyteIcsCharsetUtils.pas" line="350" />
+    <element value="53" name="IBM_00858" file="OverbyteIcsCharsetUtils.pas" line="351" />
+    <element value="54" name="IBM_860" file="OverbyteIcsCharsetUtils.pas" line="352" />
+    <element value="55" name="IBM_861" file="OverbyteIcsCharsetUtils.pas" line="353" />
+    <element value="56" name="IBM_862" file="OverbyteIcsCharsetUtils.pas" line="354" />
+    <element value="57" name="IBM_863" file="OverbyteIcsCharsetUtils.pas" line="355" />
+    <element value="58" name="IBM_864" file="OverbyteIcsCharsetUtils.pas" line="356" />
+    <element value="59" name="IBM_865" file="OverbyteIcsCharsetUtils.pas" line="357" />
+    <element value="60" name="IBM_866" file="OverbyteIcsCharsetUtils.pas" line="358" />
+    <element value="61" name="IBM_869" file="OverbyteIcsCharsetUtils.pas" line="359" />
+    <element value="62" name="IBM_870" file="OverbyteIcsCharsetUtils.pas" line="360" />
+    <element value="63" name="IBM_1026" file="OverbyteIcsCharsetUtils.pas" line="361" />
+    <element value="64" name="IBM_01047" file="OverbyteIcsCharsetUtils.pas" line="362" />
+    <element value="65" name="IBM_01140" file="OverbyteIcsCharsetUtils.pas" line="363" />
+    <element value="66" name="IBM_01141" file="OverbyteIcsCharsetUtils.pas" line="364" />
+    <element value="67" name="IBM_01142" file="OverbyteIcsCharsetUtils.pas" line="365" />
+    <element value="68" name="IBM_01143" file="OverbyteIcsCharsetUtils.pas" line="366" />
+    <element value="69" name="IBM_01144" file="OverbyteIcsCharsetUtils.pas" line="367" />
+    <element value="70" name="IBM_01145" file="OverbyteIcsCharsetUtils.pas" line="368" />
+    <element value="71" name="IBM_01146" file="OverbyteIcsCharsetUtils.pas" line="369" />
+    <element value="72" name="IBM_01147" file="OverbyteIcsCharsetUtils.pas" line="370" />
+    <element value="73" name="IBM_01148" file="OverbyteIcsCharsetUtils.pas" line="371" />
+    <element value="74" name="IBM_01149" file="OverbyteIcsCharsetUtils.pas" line="372" />
+    <element value="75" name="MACINTOSH" file="OverbyteIcsCharsetUtils.pas" line="373" />
+    <element value="76" name="UTF_32LE" file="OverbyteIcsCharsetUtils.pas" line="374" />
+    <element value="77" name="UTF_32BE" file="OverbyteIcsCharsetUtils.pas" line="375" />
+    <element value="78" name="US_ASCII" file="OverbyteIcsCharsetUtils.pas" line="376" />
+    <element value="79" name="T_61" file="OverbyteIcsCharsetUtils.pas" line="377" />
+    <element value="80" name="CS_LAST_ITEM" file="OverbyteIcsCharsetUtils.pas" line="378" />
+  </enum>
+  <set name="TMimeCharsets" type="TMimeCharset">
+    <element name="CS_DEFAULT" />
+    <element name="CS_NOTMAPPED" />
+    <element name="UTF_8" />
+    <element name="WIN_1250" />
+    <element name="WIN_1251" />
+    <element name="WIN_1252" />
+    <element name="WIN_1253" />
+    <element name="WIN_1254" />
+    <element name="WIN_1255" />
+    <element name="WIN_1256" />
+    <element name="WIN_1257" />
+    <element name="WIN_1258" />
+    <element name="ISO_8859_1" />
+    <element name="ISO_8859_2" />
+    <element name="ISO_8859_3" />
+    <element name="ISO_8859_4" />
+    <element name="ISO_8859_5" />
+    <element name="ISO_8859_6" />
+    <element name="ISO_8859_7" />
+    <element name="ISO_8859_8" />
+    <element name="ISO_8859_8_i" />
+    <element name="ISO_8859_9" />
+    <element name="ISO_8859_13" />
+    <element name="ISO_8859_15" />
+    <element name="ISO_2022_JP" />
+    <element name="ISO_2022_JP_1" />
+    <element name="ISO_2022_JP_2" />
+    <element name="ISO_2022_KR" />
+    <element name="ISO_2022_CN" />
+    <element name="X_CP50227" />
+    <element name="EUC_JP" />
+    <element name="GB_2312_80" />
+    <element name="GB_2312" />
+    <element name="HZ_GB_2312" />
+    <element name="GB_18030" />
+    <element name="EUC_CN" />
+    <element name="KOI8_R" />
+    <element name="KOI8_U" />
+    <element name="UTF_16LE" />
+    <element name="UTF_16BE" />
+    <element name="UTF_7" />
+    <element name="SHIFT_JIS" />
+    <element name="BIG_5" />
+    <element name="KOREAN_HANGUL" />
+    <element name="EUC_KR" />
+    <element name="WIN_874" />
+    <element name="IBM_037" />
+    <element name="IBM_437" />
+    <element name="IBM_500" />
+    <element name="IBM_850" />
+    <element name="IBM_852" />
+    <element name="IBM_855" />
+    <element name="IBM_857" />
+    <element name="IBM_00858" />
+    <element name="IBM_860" />
+    <element name="IBM_861" />
+    <element name="IBM_862" />
+    <element name="IBM_863" />
+    <element name="IBM_864" />
+    <element name="IBM_865" />
+    <element name="IBM_866" />
+    <element name="IBM_869" />
+    <element name="IBM_870" />
+    <element name="IBM_1026" />
+    <element name="IBM_01047" />
+    <element name="IBM_01140" />
+    <element name="IBM_01141" />
+    <element name="IBM_01142" />
+    <element name="IBM_01143" />
+    <element name="IBM_01144" />
+    <element name="IBM_01145" />
+    <element name="IBM_01146" />
+    <element name="IBM_01147" />
+    <element name="IBM_01148" />
+    <element name="IBM_01149" />
+    <element name="MACINTOSH" />
+    <element name="UTF_32LE" />
+    <element name="UTF_32BE" />
+    <element name="US_ASCII" />
+    <element name="T_61" />
+    <element name="CS_LAST_ITEM" />
+  </set>
+  <pointer name="PCharsetInfo" type="TCharsetInfo" indircnt="1" file="OverbyteIcsCharsetUtils.pas" line="382" />
+  <struct name="TCharsetInfo" size="16" file="OverbyteIcsCharsetUtils.pas" line="383">
+    <field name="MimeCharset" type="TMimeCharset" visibility="public" size="1" offset="0" file="OverbyteIcsCharsetUtils.pas" line="384" />
+    <field name="CodePage" type="Cardinal" visibility="public" size="4" offset="4" file="OverbyteIcsCharsetUtils.pas" line="385" />
+    <field name="MimeName" type="string" visibility="public" size="4" offset="8" file="OverbyteIcsCharsetUtils.pas" line="386" />
+    <field name="FriendlyName" type="string" visibility="public" size="4" offset="12" file="OverbyteIcsCharsetUtils.pas" line="387" />
+  </struct>
+  <array name="TCharsetInfos">
+    <element type="TCharsetInfo" />
+  </array>
+  <class name="TCodePageObj" file="OverbyteIcsCharsetUtils.pas" line="446">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FCodePage" type="Cardinal" visibility="private" size="4" offset="4" file="OverbyteIcsCharsetUtils.pas" line="448" />
+      <field name="FCodePageName" type="string" visibility="private" size="4" offset="8" file="OverbyteIcsCharsetUtils.pas" line="449" />
+      <property name="CodePage" visibility="public" read="FCodePage" type="Cardinal" file="OverbyteIcsCharsetUtils.pas" line="451" />
+      <property name="CodePageName" visibility="public" read="FCodePageName" type="string" default="0" file="OverbyteIcsCharsetUtils.pas" line="452" />
+    </members>
+  </class>
+  <variable name="IcsSystemCodePage" type="Cardinal" file="OverbyteIcsCharsetUtils.pas" line="538" />
+  <variable name="IcsSystemMaxCharSize" type="Integer" file="OverbyteIcsCharsetUtils.pas" line="540" />
+  <variable name="IcsSystemIsSingleByte" type="Boolean" file="OverbyteIcsCharsetUtils.pas" line="542" />
+  <procedure name="GetFriendlyCharsetList" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="598">
+    <parameters>
+      <parameter name="Items" type="TStrings" />
+      <parameter name="IncludeList" type="TMimeCharsets" />
+      <parameter name="ClearItems" type="Boolean">
+        <value>
+          True
+        </value>
+      </parameter>
+    </parameters>
+  </procedure>
+  <procedure name="GetMimeCharsetList" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="617">
+    <parameters>
+      <parameter name="Items" type="TStrings" />
+      <parameter name="IncludeList" type="TMimeCharsets" />
+      <parameter name="ClearItems" type="Boolean">
+        <value>
+          True
+        </value>
+      </parameter>
+    </parameters>
+  </procedure>
+  <function name="IsValidAnsiCodePage" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="632">
+    <parameters>
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsIsValidCodePageID" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="672">
+    <parameters>
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsSingleByteCodePage" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="681">
+    <parameters>
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="AnsiCodePageFromLocale" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="689">
+    <parameters>
+      <parameter name="ALcid" type="Cardinal" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="OemCodePageFromLocale" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="699">
+    <parameters>
+      <parameter name="ALcid" type="Cardinal" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="GetUserDefaultAnsiCodePage" visibility="public" procflags="inline" file="OverbyteIcsCharsetUtils.pas" line="709">
+    <parameters>
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="GetThreadAnsiCodePage" visibility="public" procflags="inline" file="OverbyteIcsCharsetUtils.pas" line="716">
+    <parameters>
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="GetUserDefaultOemCodePage" visibility="public" procflags="inline" file="OverbyteIcsCharsetUtils.pas" line="723">
+    <parameters>
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="GetThreadOemCodePage" visibility="public" procflags="inline" file="OverbyteIcsCharsetUtils.pas" line="730">
+    <parameters>
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <procedure name="GetSystemCodePageList" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="761">
+    <parameters>
+      <parameter name="AOwnsObjectList" type="TObjectList" />
+    </parameters>
+  </procedure>
+  <function name="CodePageToMimeCharset" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="776">
+    <parameters>
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="TMimeCharset" />
+    </parameters>
+  </function>
+  <function name="CodePageToMimeCharsetString" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="880">
+    <parameters>
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="GetMimeInfo" visibility="public" procflags="overload" file="OverbyteIcsCharsetUtils.pas" line="890">
+    <parameters>
+      <parameter name="AMimeCharSet" type="TMimeCharset" />
+      <retval type="PCharsetInfo" />
+    </parameters>
+  </function>
+  <function name="GetMimeInfo" visibility="public" procflags="overload" file="OverbyteIcsCharsetUtils.pas" line="899">
+    <parameters>
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="PCharsetInfo" />
+    </parameters>
+  </function>
+  <function name="GetMimeInfo" visibility="public" procflags="overload" file="OverbyteIcsCharsetUtils.pas" line="908">
+    <parameters>
+      <parameter name="AMimeCharSetString" type="string" paramflags="const" />
+      <retval type="PCharsetInfo" />
+    </parameters>
+  </function>
+  <function name="MimeCharsetToCodePage" visibility="public" procflags="overload" file="OverbyteIcsCharsetUtils.pas" line="956">
+    <parameters>
+      <parameter name="AMimeCharSet" type="TMimeCharset" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="MimeCharsetToCodePage" visibility="public" procflags="overload" file="OverbyteIcsCharsetUtils.pas" line="970">
+    <parameters>
+      <parameter name="AMimeCharSetString" type="string" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal" paramflags="out" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="MimeCharsetToCodePageDef" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="988">
+    <parameters>
+      <parameter name="AMimeCharSetString" type="string" paramflags="const" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="MimeCharsetToCodePageEx" visibility="public" procflags="overload" file="OverbyteIcsCharsetUtils.pas" line="997">
+    <parameters>
+      <parameter name="AMimeCharSetString" type="string" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal" paramflags="out" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="MimeCharsetToCodePageExDef" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="1015">
+    <parameters>
+      <parameter name="AMimeCharSetString" type="string" paramflags="const" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="MimeCharsetToCharsetString" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="1023">
+    <parameters>
+      <parameter name="AMimeCharSet" type="TMimeCharset" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="ExtractMimeName" visibility="public" file="OverbyteIcsCharsetUtils.pas" line="1043">
+    <parameters>
+      <parameter name="PInfo" type="PCharsetInfo" />
+      <retval type="string" />
+    </parameters>
+  </function>
+</namespace>

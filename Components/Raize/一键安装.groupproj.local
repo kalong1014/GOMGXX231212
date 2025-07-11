@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899/12/30 00:00:00.000.903,D:\GameOfMir\Component\Raize\一键安装.groupproj=C:\Users\51231\Documents\Embarcadero\Studio\Projects\ProjectGroup1.groupproj</Transaction>
+  </Transactions>
+	<Default.Personality>
+		<Projects ActiveProject="D:\Mir\GameOfMir_hwmir2\Components\Raize\Source\RaizeComponentsVcl.dproj"/>
+	</Default.Personality>
+</BorlandProject>

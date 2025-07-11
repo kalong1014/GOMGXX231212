@@ -1,0 +1,624 @@
+unit uMainFrm;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, cxGraphics, ImgList, dxBar, cxPC, cxControls, dxStatusBar, cxClasses,
+  StdCtrls, rtcInfo, rtcConn, rtcDataSrv, rtcHttpSrv, Spin, cxCustomData,
+  cxStyles, cxTL, cxTextEdit, cxInplaceContainer, Buttons, Registry,
+  IOUtils, uTypes, uEDCode, uResModule, uStaticModule, uWil, uCommon,
+  cxContainer, cxEdit, cxCheckBox, ComCtrls, cxListView, cxMaskEdit,
+  cxButtonEdit, dxSkinsCore, dxSkinsdxStatusBarPainter, dxSkinscxPCPainter,
+  dxSkinsdxBarPainter, ExtCtrls, FileCtrl, cxLookAndFeels, uLog, StrUtils,
+  cxLookAndFeelPainters, cxPCdxBarPopupMenu, cxTLdxBarBuiltInMenu,
+  dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinVisualStudio2013Blue,
+  dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxBarBuiltInMenu;
+
+const
+  APP_VERSION = '版本: 2020.02.27';
+  CFG_FILE = 'Config.xml';
+
+type
+  TMainForm = class(TForm, ILogger)
+    BarManager: TdxBarManager;
+    ToolBar: TdxBar;
+    StatusBar: TdxStatusBar;
+    PageControl: TcxPageControl;
+    TabLog: TcxTabSheet;
+    TabSetting: TcxTabSheet;
+    BtnStartServer: TdxBarButton;
+    ImageList: TcxImageList;
+    BtnClose: TdxBarButton;
+    mmLog: TMemo;
+    GrpHttpCfg: TGroupBox;
+    AddrLabel: TLabel;
+    EdtServerAddr: TEdit;
+    EdtServerPort: TSpinEdit;
+    PortLabel: TLabel;
+    GrpFiles: TGroupBox;
+    BtnRemoveFile: TSpeedButton;
+    BtnAddFile: TSpeedButton;
+    TreeListFiles: TcxTreeList;
+    ColumnFiles: TcxTreeListColumn;
+    PwdLabel: TLabel;
+    EdtPwd: TEdit;
+    BtnSave: TdxBarButton;
+    BtnConfig: TdxBarButton;
+    CheckBlackList: TcxCheckBox;
+    BtnBlackList: TdxBarButton;
+    GroupBox1: TGroupBox;
+    Label4: TLabel;
+    CheckAutoRarList: TcxCheckBox;
+    EditRARPath: TcxButtonEdit;
+    WinRarLabel: TLabel;
+    ColumnPwd: TcxTreeListColumn;
+    EditBufferSize: TSpinEdit;
+    BufSizeLabel: TLabel;
+    Panel1: TPanel;
+    Label1: TLabel;
+    EdtClientPath: TcxButtonEdit;
+    Label2: TLabel;
+    procedure FormCreate(Sender: TObject);
+    procedure BtnStartServerClick(Sender: TObject);
+    procedure BtnCloseClick(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+    procedure HttpServerRequestNotAccepted(Sender: TRtcConnection);
+    procedure TreeListFilesSelectionChanged(Sender: TObject);
+    procedure BtnAddFileClick(Sender: TObject);
+    procedure BtnRemoveFileClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure BtnSaveClick(Sender: TObject);
+    procedure EdtServerAddrChange(Sender: TObject);
+    procedure CheckBlackListPropertiesChange(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure EditRARPathPropertiesButtonClick(Sender: TObject;
+      AButtonIndex: Integer);
+    procedure CheckAutoRarListPropertiesChange(Sender: TObject);
+    procedure ColumnPwdPropertiesChange(Sender: TObject);
+    procedure EdtClientPathPropertiesButtonClick(Sender: TObject;
+      AButtonIndex: Integer);
+    procedure EditRARPathPropertiesChange(Sender: TObject);
+  private
+    { Private declarations }
+    FServer: TRtcHttpServer;
+    FStarted: Boolean;
+    FManager: TWMImagesManager;
+    FReading: Boolean;
+    FResourcePath: String;
+    procedure SetStarted(const Value: Boolean);
+    procedure Start;
+    procedure ExtractFiles;
+    procedure Stop;
+    procedure AdjustControls;
+    procedure SaveConfig;
+    function FileInList(const AFileName: String): Boolean;
+    procedure AddTreeListItem(AFile: TMiniFile; const FileName: String);
+    procedure DoClientConnected(Sender:TRtcConnection);
+    function SearchWinRarPath: String;
+  protected
+    procedure WriteLog(const Value: String);
+  public
+    { Public declarations }
+    property Started: Boolean read FStarted write SetStarted;
+  end;
+
+var
+  MainForm: TMainForm;
+
+implementation
+  uses Grobal2, ShellAPI;
+
+{$R *.dfm}
+
+function MakeNewGUID38: String;
+var
+  AGuid: TGUID;
+begin
+  CreateGUID(AGuid);
+  Result := GuidToString(AGuid);
+end;
+
+function MakeNewGUID36: String;
+begin
+  Result := Copy(MakeNewGUID38, 2, 36);
+end;
+
+function MakeNewGUID32: String;
+begin
+  Result := StrUtils.ReplaceStr(MakeNewGUID36, '-', '');
+end;
+
+function MakeNewGUID16: String;
+var
+  Tmp: String;
+  I: Integer;
+begin
+  Tmp := MakeNewGUID32;
+  for I := 1 to Length(Tmp) do
+  begin
+    if I mod 2 = 0 then
+      Result  :=  Result + Tmp[I];
+  end;
+end;
+
+
+procedure TMainForm.AddTreeListItem(AFile: TMiniFile; const FileName: String);
+begin
+  if not FileInList(FileName) and FileExists(FileName) then
+  begin
+    with TreeListFiles.Add do
+    begin
+      StateIndex := 2;
+      Texts[0] := FileName;
+      Texts[1] := uEDCode.DecodeSource(AFile.Password);
+      Data := AFile;
+    end;
+  end;
+end;
+
+procedure TMainForm.AdjustControls;
+var
+  ATop: Integer;
+
+  procedure SetControlPostion(AControl: TControl);
+  begin
+    AControl.Left := 8;
+    AControl.Width := TabSetting.Width - 16;
+    AControl.Top := ATop;
+    if AControl = GrpFiles then
+      AControl.Height := TabSetting.Height - ATop - 8;
+    ATop := ATop + AControl.Height + 8;
+  end;
+
+begin
+  ATop := 8;
+  SetControlPostion(GrpHttpCfg);
+  SetControlPostion(GrpFiles);
+  BtnAddFile.Left := GrpFiles.Width - 56;
+  BtnRemoveFile.Left := GrpFiles.Width - 30;
+  mmLog.Left := 0;
+  mmLog.Top := 0;
+  mmLog.Width := TabLog.Width;
+  mmLog.Height := TabLog.Height;
+  BtnAddFile.Top := 0;
+  BtnRemoveFile.Top := 0;
+end;
+
+procedure TMainForm.BtnAddFileClick(Sender: TObject);
+var
+  I: Integer;
+  AFile: TMiniFile;
+begin
+  with TOpenDialog.Create(nil) do
+    try
+      Filter := '资源文件|*.wzl;*.wil;*.data|音频文件|*.wav;*.mp3;*.ogg|地图文件|*.map';
+      Options := Options + [ofAllowMultiSelect];
+      if Execute then
+      begin
+        for I := 0 to Files.Count - 1 do
+        begin
+          if not MiniConfigure.Files.Exists(Files[I]) then
+          begin
+            AFile := TMiniFile.Create(MiniConfigure.Files);
+            AFile.FileName := Files[I];
+            AFile.Password := '';
+            AddTreeListItem(AFile, Files[I]);
+          end;
+        end;
+        BtnSave.Enabled := True;
+      end;
+    finally
+      Free;
+    end;
+end;
+
+procedure TMainForm.BtnCloseClick(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TMainForm.BtnRemoveFileClick(Sender: TObject);
+begin
+  if TreeListFiles.SelectionCount > 0 then
+  begin
+    TreeListFiles.DeleteSelection;
+    BtnSave.Enabled := True;
+  end;
+end;
+
+procedure TMainForm.BtnSaveClick(Sender: TObject);
+begin
+  BtnSave.Enabled := False;
+  SaveConfig;
+end;
+
+procedure TMainForm.BtnStartServerClick(Sender: TObject);
+begin
+  Started := not Started;
+end;
+
+procedure TMainForm.CheckAutoRarListPropertiesChange(Sender: TObject);
+begin
+  if not FReading then
+    BtnSave.Enabled := True;
+end;
+
+procedure TMainForm.CheckBlackListPropertiesChange(Sender: TObject);
+begin
+  if not FReading then
+    BtnSave.Enabled := True;
+end;
+
+procedure TMainForm.ColumnPwdPropertiesChange(Sender: TObject);
+begin
+  if not FReading then
+  begin
+    if TreeListFiles.FocusedNode <> nil then
+    begin
+      if TMiniFile(TreeListFiles.FocusedNode.Data).Password <> TcxTextEdit(Sender).Text then
+      begin
+        TMiniFile(TreeListFiles.FocusedNode.Data).Password := uEDCode.EncodeSource(TcxTextEdit(Sender).Text);
+        BtnSave.Enabled := True;
+      end;
+    end;
+  end;
+end;
+
+procedure TMainForm.DoClientConnected(Sender: TRtcConnection);
+begin
+  if MiniConfigure.InBlackList(Sender.PeerAddr) then
+  begin
+    Logger.WriteLog('禁止黑名单连接(IP:' + Sender.PeerAddr + ')');
+    Sender.Disconnect;
+  end;
+end;
+
+procedure TMainForm.TreeListFilesSelectionChanged(Sender: TObject);
+begin
+  BtnRemoveFile.Enabled := not FStarted and (TreeListFiles.SelectionCount > 0);
+end;
+
+procedure TMainForm.EditRARPathPropertiesButtonClick(Sender: TObject;
+  AButtonIndex: Integer);
+begin
+  with TOpendialog.Create(nil) do
+    try
+      Filter := 'WinRar|WinRAR.exe';
+      if Execute then
+        EditRARPath.Text := FileName;
+    finally
+      Free;
+    end;
+end;
+
+procedure TMainForm.EditRARPathPropertiesChange(Sender: TObject);
+begin
+  if not FReading then
+    BtnSave.Enabled := True;
+end;
+
+procedure TMainForm.EdtClientPathPropertiesButtonClick(Sender: TObject;
+  AButtonIndex: Integer);
+var
+  APath: String;
+begin
+  APath := EdtClientPath.Text;
+  if FileCtrl.SelectDirectory('请选择游戏客户端路径(77Client.dat所在的目录)', '', APath) then
+    EdtClientPath.Text := IncludeTrailingPathDelimiter(APath);
+end;
+
+procedure TMainForm.EdtServerAddrChange(Sender: TObject);
+begin
+  if not FReading then
+    BtnSave.Enabled := True;
+end;
+
+function GetRelativePath(const AFileName: String): String;
+begin
+  Result := StringReplace(AFileName, MiniConfigure.ClientPath, '', []);
+end;
+
+procedure TMainForm.ExtractFiles;
+var
+  I: Integer;
+  ARarItem: TRarFileItem;
+  AFileName, APassword, ARarFileName, ARelativePath: String;
+  ARarList,
+  ABatList: TStrings;
+  AWinRar, ASource, ADest, ABatFile: String;
+begin
+  if not IOUtils.TDirectory.Exists(FResourcePath) then
+    IOUtils.TDirectory.CreateDirectory(FResourcePath);
+
+  ARarList := TStringList.Create;
+  try
+    for I := 0 to TreeListFiles.Count - 1 do
+    begin
+      AFileName := TreeListFiles.Items[I].Texts[0];
+      APassword := TreeListFiles.Items[I].Texts[1];
+      if FileExists(AFileName) and ISResourceFileName(AFileName) then
+      begin
+        try
+          if file_size(AFileName) > 0 then
+            ImagesManager.Add(APassword, AFileName, GetRelativePath(AFileName));
+        except
+          on E: Exception do
+            uLog.TLogger.AddLog('错误: 资源文件 "' + AFileName + '" 加载失败');
+        end;
+      end
+      else
+      begin
+        ARarFileName := FResourcePath + GetRelativePath(AFileName) + '.rar';
+        if FileExists(ARarFileName, False) then
+        begin
+          ARarItem := TRarFileItem.Create;
+          ARarItem.Name := GetRelativePath(AFileName);
+          ARarItem.FileName := AFileName;
+          ARarItem.RarName := FResourcePath + ARarItem.Name + '.rar';
+          FileManager.AddFile(UPPERCASE(GetRelativePath(AFileName)), ARarItem);
+        end
+        else if FileExists(AFileName) then
+          ARarList.Add(AFileName);
+      end;
+    end;
+
+    AWinRar := EditRARPath.Text;
+    if CheckAutoRarList.Checked and (AWinRar <> '') and (ARarList.Count > 0) then
+    begin
+      ABatList := TStringList.Create;
+      try
+        for I := 0 to ARarList.Count - 1 do
+        begin
+          ASource := ARarList[I];
+          ADest := FResourcePath + GetRelativePath(ASource) + '.rar';
+          if not IOUtils.TDirectory.Exists(ExtractFilePath(ADest), False) then
+            IOUtils.TDirectory.CreateDirectory(ExtractFilePath(ADest));
+          ABatList.Add(Format('"%s" a -ibck -inul -ep "%s" "%s"', [AWinRar, ADest, ASource]));
+
+          ARarItem := TRarFileItem.Create;
+          ARarItem.Name := GetRelativePath(ASource);
+          ARarItem.FileName := ASource;
+          ARarItem.RarName := ADest;
+          FileManager.AddFile(UPPERCASE(GetRelativePath(ASource)), ARarItem);
+        end;
+        ABatFile := IOUtils.TPath.GetTempPath + MakeNewGUID32 + '.bat';
+        ABatList.SaveToFile(ABatFile);
+        ShellExecute(0, nil, PChar(ABatFile), nil, nil, SW_HIDE);
+      finally
+        ABatList.Free;
+      end;
+    end;
+  finally
+    ARarList.Free;
+  end;
+end;
+
+function TMainForm.FileInList(const AFileName: String): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := 0 to TreeListFiles.Count - 1 do
+    if SameText(AFileName, TreeListFiles.Items[I].Texts[0]) then
+    begin
+      Result := True;
+      Exit;
+    end;
+end;
+
+procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  if FStarted then
+  begin
+    case Application.MessageBox('微端正在运行中，确定关闭吗？', '提示', MB_YESNO) of
+      ID_YES: SaveConfig;
+      ID_NO:
+      begin
+        CanClose := False;
+        Exit;
+      end;
+    end;
+  end;
+  if BtnSave.Enabled then
+  begin
+    case Application.MessageBox('配置已经改变，需要保存吗？', '提示', MB_YESNOCANCEL) of
+      ID_YES: SaveConfig;
+      ID_NO: ;
+      ID_CANCEL: CanClose := False;
+    end;
+  end;
+end;
+
+procedure TMainForm.FormCreate(Sender: TObject);
+var
+  I: Integer;
+begin
+  FReading := True;
+  Logger := Self;
+  FServer := TRtcHttpServer.Create(Self);
+  FServer.OnClientConnect := DoClientConnected;
+  MiniConfigure.LoadFromXMLFile(CFG_FILE);
+  if not FileExists(MiniConfigure.RarPath) then
+  begin
+    MiniConfigure.RarPath := '';
+  end;
+
+  HTTPManager.WWWRoot := ExtractFilePath(Application.ExeName) + '\wwwroot\';
+  FResourcePath := Sysutils.IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + 'Resources\';
+  Started := False;
+  EdtServerAddr.Text := MiniConfigure.Addr;
+  EdtServerPort.Text := IntToStr(MiniConfigure.Port);
+  EdtPwd.Text := uEDCode.DecodeSource(MiniConfigure.PassWord);
+
+  EditBufferSize.Value := MiniConfigure.BufferSize;
+  CheckBlackList.Checked := MiniConfigure.EnabledBlackList;
+  CheckAutoRarList.Checked := MiniConfigure.AutoCompress;
+  EdtClientPath.Text := MiniConfigure.ClientPath;
+  for I := 0 to MiniConfigure.Files.Count - 1 do
+    AddTreeListItem(MiniConfigure.Files.Items[I], MiniConfigure.Files.Items[I].FileName);
+  HTTPManager.Server := FServer;
+  FManager := TWMImagesManager.Create;
+  FReading := False;
+  EditRarPath.Text := SearchWinRarPath;
+  if EditRARPath.Text = '' then
+    EditRARPath.Text := MiniConfigure.RarPath;
+  ImagesManager.OnLog := WriteLog;
+  StatusBar.Panels[1].Text := APP_VERSION;
+end;
+
+procedure TMainForm.FormDestroy(Sender: TObject);
+begin
+  FreeAndNil(FManager);
+end;
+
+procedure TMainForm.FormResize(Sender: TObject);
+begin
+  AdjustControls;
+end;
+
+procedure TMainForm.HttpServerRequestNotAccepted(Sender: TRtcConnection);
+begin
+  Logger.WriteLog(Format('请求的路径不被允许: %s', [TRtcDataServer(Sender).Request.URL]));
+  KickSession(TRtcDataServer(Sender));
+end;
+
+procedure TMainForm.WriteLog(const Value: String);
+begin
+  mmLog.Lines.BeginUpdate;
+  mmLog.Lines.Add(FormatDateTime('YYYY-MM-DD hh:mm:ss', Now) + ':' + Value);
+  if mmLog.Lines.Count > 100 then
+    mmLog.Lines.Delete(0);
+  mmLog.Lines.EndUpdate;
+end;
+
+procedure TMainForm.SaveConfig;
+var
+  I: Integer;
+  AFile: TMiniFile;
+begin
+  MiniConfigure.Addr := EdtServerAddr.Text;
+  MiniConfigure.Port := StrToIntDef(EdtServerPort.Text, 0);
+  MiniConfigure.PassWord := uEDCode.EncodeSource(EdtPwd.Text);
+  MiniConfigure.EnabledBlackList := CheckBlackList.Checked;
+  MiniConfigure.AutoCompress := CheckAutoRarList.Checked;
+  MiniConfigure.ClientPath := EdtClientPath.Text;
+  MiniConfigure.Files.Clear;
+  MiniConfigure.RarPath := EditRARPath.Text;
+  for I := 0 to TreeListFiles.Count - 1 do
+  begin
+    AFile := MiniConfigure.Files.Add;
+    AFile.FileName := TreeListFiles.Items[I].Texts[0];
+    AFile.Password := uEDCode.EncodeSource(TreeListFiles.Items[I].Texts[1]);
+    TreeListFiles.Items[I].Data := AFile;
+  end;
+  MiniConfigure.SaveToXMLFile(ExtractFilePath(Application.ExeName) + '\' + CFG_FILE);
+end;
+
+function TMainForm.SearchWinRarPath: String;
+var
+  Reg: Registry.TRegistry;
+begin
+  Result := '';
+  Reg := TRegistry.Create;
+  try
+    Reg.RootKey := HKEY_LOCAL_MACHINE;
+    if Reg.OpenKey('SOFTWARE\WinRAR', False) then
+    begin
+      if Reg.ValueExists('exe32') then
+        Result := Reg.ReadString('exe32')
+      else if Reg.ValueExists('exe64') then
+        Result := Reg.ReadString('exe64');
+    end;
+  finally
+    Reg.Free;
+  end;
+end;
+
+procedure TMainForm.SetStarted(const Value: Boolean);
+begin
+  FStarted := Value;
+  BtnStartServer.Enabled := False;
+  if FStarted then
+  begin
+    if (EdtClientPath.Text = '') or (not IOUtils.TDirectory.Exists(EdtClientPath.Text, False)) then
+    begin
+      Application.MessageBox('请设置游戏客户端路径', '错误', MB_ICONERROR);
+      Exit;
+    end;
+    mmLog.Lines.Clear;
+    BtnStartServer.Caption := '停止服务器';
+    BtnStartServer.ImageIndex := 1;
+    TreeListFiles.OptionsBehavior.AlwaysShowEditor := False;
+    ColumnPwd.Options.Editing := False;
+    Start;
+  end
+  else
+  begin
+    BtnStartServer.Caption := '启动服务器';
+    BtnStartServer.ImageIndex := 0;
+    TreeListFiles.OptionsBehavior.AlwaysShowEditor := True;
+    ColumnPwd.Options.Editing := True;
+    Stop;
+  end;
+  BtnStartServer.Enabled := True;
+end;
+
+procedure TMainForm.Start;
+begin
+  SysUtils.SetCurrentDir(ExtractFilePath(Application.ExeName));
+  StatusBar.Panels[0].Text := '资源处理中...';
+  FServer.ServerAddr := EdtServerAddr.Text;
+  FServer.ServerPort := IntToStr(EdtServerPort.Value);
+  MiniConfigure.PassWord := uEDCode.EncodeSource(EdtPwd.Text);
+  uCommon.BufferSize := EditBufferSize.Value;
+  if uCommon.BufferSize <= 0 then
+    uCommon.BufferSize := 8192;
+  EdtServerAddr.Enabled := False;
+  EdtServerPort.Enabled := False;
+  BtnAddFile.Enabled := False;
+  BtnRemoveFile.Enabled := False;
+  CheckAutoRarList.Enabled := False;
+  EditBufferSize.Enabled := False;
+  EditRARPath.Enabled := False;
+  CheckBlackList.Enabled := False;
+  EdtPwd.Enabled := False;
+  EdtClientPath.Enabled := False;
+  ExtractFiles;
+  HTTPManager.InitModules;
+  try
+    FServer.Listen;
+    StatusBar.Panels[0].Text := '运行中...';
+  except
+    on E: Exception do
+    begin
+      SetStarted(False);
+      if E is ERtcConnection then
+      begin
+        ShowMessage('服务器启动失败,可能是端口已经被占用');
+      end else
+      begin
+        raise E;
+      end;
+    end;
+  end;
+end;
+
+procedure TMainForm.Stop;
+begin
+  FServer.StopListen;
+  ImagesManager.ClearAllImages;
+  EdtServerAddr.Enabled := True;
+  EdtServerPort.Enabled := True;
+  BtnAddFile.Enabled := True;
+  BtnRemoveFile.Enabled := True;
+  CheckAutoRarList.Enabled := True;
+  EditRARPath.Enabled := True;
+  CheckBlackList.Enabled := True;
+  EdtPwd.Enabled := True;
+  EditBufferSize.Enabled := True;
+  EdtClientPath.Enabled := True;
+  StatusBar.Panels[0].Text := '已停止...';
+end;
+
+end.

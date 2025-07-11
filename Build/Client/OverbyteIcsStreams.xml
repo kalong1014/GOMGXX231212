@@ -1,0 +1,3462 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsStreams" platform="Win32">
+  <const name="SFCreateErrorEx" type="string" resourcestring="true" file="OverbyteIcsStreams.pas" line="118">
+    <value>
+      Cannot create file &quot;%%s&quot;. %%s
+    </value>
+  </const>
+  <const name="SFOpenErrorEx" type="string" resourcestring="true" file="OverbyteIcsStreams.pas" line="119">
+    <value>
+      Cannot open file &quot;%%s&quot;. %%s
+    </value>
+  </const>
+  <const name="DEFAULT_BUFSIZE" type="Integer" file="OverbyteIcsStreams.pas" line="122">
+    <value>
+      $1000
+    </value>
+  </const>
+  <const name="MIN_BUFSIZE" type="Integer" file="OverbyteIcsStreams.pas" line="123">
+    <value>
+      $80
+    </value>
+  </const>
+  <const name="MAX_BUFSIZE" type="Integer" file="OverbyteIcsStreams.pas" line="124">
+    <value>
+      $10000
+    </value>
+  </const>
+  <const name="tsmReadLn" type="TTextStreamMode" file="OverbyteIcsStreams.pas" line="207">
+    <value>
+      tsmReadLn
+    </value>
+  </const>
+  <const name="tsmWriteLn" type="TTextStreamMode" file="OverbyteIcsStreams.pas" line="207">
+    <value>
+      tsmWriteLn
+    </value>
+  </const>
+  <const name="tsmRead" type="TTextStreamMode" file="OverbyteIcsStreams.pas" line="207">
+    <value>
+      tsmRead
+    </value>
+  </const>
+  <const name="tsmWrite" type="TTextStreamMode" file="OverbyteIcsStreams.pas" line="207">
+    <value>
+      tsmWrite
+    </value>
+  </const>
+  <const name="ilbsCRLF" type="TIcsLineBreakStyle" file="OverbyteIcsStreams.pas" line="289">
+    <value>
+      ilbsCRLF
+    </value>
+  </const>
+  <const name="ilbsLF" type="TIcsLineBreakStyle" file="OverbyteIcsStreams.pas" line="289">
+    <value>
+      ilbsLF
+    </value>
+  </const>
+  <const name="ilbsCR" type="TIcsLineBreakStyle" file="OverbyteIcsStreams.pas" line="289">
+    <value>
+      ilbsCR
+    </value>
+  </const>
+  <type name="BigInt" type="Int64" file="System.pas" line="12" />
+  <class name="EBufferedStreamError" file="OverbyteIcsStreams.pas" line="128">
+    <ancestor name="Exception" namespace="System.SysUtils">
+      <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+      </methodref>
+      <methodref name="Destroy@" visibility="class private" procflags="class destructor noself">
+      </methodref>
+      <methodref name="SetInnerException" visibility="protected">
+      </methodref>
+      <methodref name="SetStackInfo" visibility="protected">
+      </methodref>
+      <methodref name="GetStackTrace" visibility="protected">
+      </methodref>
+      <methodref name="RaisingException" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmt" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmtHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="GetBaseException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="override">
+      </methodref>
+      <propertyref name="BaseException" visibility="public">
+      </propertyref>
+      <propertyref name="HelpContext" visibility="public">
+      </propertyref>
+      <propertyref name="InnerException" visibility="public">
+      </propertyref>
+      <propertyref name="Message" visibility="public">
+      </propertyref>
+      <propertyref name="StackTrace" visibility="public">
+      </propertyref>
+      <propertyref name="StackInfo" visibility="public">
+      </propertyref>
+      <methodref name="RaiseOuterException" visibility="public" procflags="static">
+      </methodref>
+      <methodref name="ThrowOuterException" visibility="public" procflags="static">
+      </methodref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+  </class>
+  <class name="TBufferedFileStream" file="OverbyteIcsStreams.pas" line="134">
+    <ancestor name="TStream" namespace="System.Classes">
+      <methodref name="GetPosition" visibility="private">
+      </methodref>
+      <methodref name="SetPosition" visibility="private">
+      </methodref>
+      <methodref name="SetSize64" visibility="private">
+      </methodref>
+      <methodref name="Skip" visibility="private">
+      </methodref>
+      <methodref name="GetSize" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="SetSize" visibility="protected" procflags="overload virtual" symflags="deprecated">
+      </methodref>
+      <methodref name="SetSize" visibility="protected" procflags="overload virtual">
+      </methodref>
+      <methodref name="Read" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Write" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Read" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Write" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Read" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="Write" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="Read64" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Write64" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="Seek32" visibility="public" procflags="overload inline">
+      </methodref>
+      <methodref name="Seek" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Seek" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="ReadBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="CopyFrom" visibility="public">
+      </methodref>
+      <methodref name="ReadComponent" visibility="public">
+      </methodref>
+      <methodref name="ReadComponentRes" visibility="public">
+      </methodref>
+      <methodref name="WriteComponent" visibility="public">
+      </methodref>
+      <methodref name="WriteComponentRes" visibility="public">
+      </methodref>
+      <methodref name="WriteDescendent" visibility="public">
+      </methodref>
+      <methodref name="WriteDescendentRes" visibility="public">
+      </methodref>
+      <methodref name="WriteResourceHeader" visibility="public">
+      </methodref>
+      <methodref name="FixupResourceHeader" visibility="public">
+      </methodref>
+      <methodref name="ReadResHeader" visibility="public">
+      </methodref>
+      <propertyref name="Position" visibility="public">
+      </propertyref>
+      <propertyref name="Size" visibility="public">
+      </propertyref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FHandle" type="NativeUInt" visibility="private" size="4" offset="4" file="OverbyteIcsStreams.pas" line="136" />
+      <field name="FFileSize" type="Int64" visibility="private" size="8" offset="8" file="OverbyteIcsStreams.pas" line="137" />
+      <field name="FFileOffset" type="Int64" visibility="private" size="8" offset="16" file="OverbyteIcsStreams.pas" line="138" />
+      <field name="FBuf" type="TBytes" visibility="private" size="4" offset="24" file="OverbyteIcsStreams.pas" line="139" />
+      <field name="FBufSize" type="Integer" visibility="private" size="4" offset="28" file="OverbyteIcsStreams.pas" line="140" />
+      <field name="FBufCount" type="Integer" visibility="private" size="4" offset="32" file="OverbyteIcsStreams.pas" line="141" />
+      <field name="FBufPos" type="Integer" visibility="private" size="4" offset="36" file="OverbyteIcsStreams.pas" line="142" />
+      <field name="FDirty" type="Boolean" visibility="private" size="1" offset="40" file="OverbyteIcsStreams.pas" line="143" />
+      <field name="FMode" type="Word" visibility="private" size="2" offset="42" file="OverbyteIcsStreams.pas" line="144" />
+      <procedure name="SetSize" visibility="protected" procflags="overload override" file="OverbyteIcsStreams.pas" line="146">
+        <parameters>
+          <parameter name="NewSize" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="SetSize" visibility="protected" procflags="overload override" file="OverbyteIcsStreams.pas" line="147">
+        <parameters>
+          <parameter name="NewSize" type="Int64" paramflags="const" />
+        </parameters>
+      </procedure>
+      <function name="GetFileSize" visibility="protected" file="OverbyteIcsStreams.pas" line="148">
+        <parameters>
+          <retval type="Int64" />
+        </parameters>
+      </function>
+      <procedure name="Init" visibility="protected" file="OverbyteIcsStreams.pas" line="149">
+        <parameters>
+          <parameter name="BufSize" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="ReadFromFile" visibility="protected" file="OverbyteIcsStreams.pas" line="150">
+      </procedure>
+      <procedure name="WriteToFile" visibility="protected" file="OverbyteIcsStreams.pas" line="151">
+      </procedure>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="153">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="BufferSize" type="Integer" />
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="154">
+        <parameters>
+          <parameter name="FileName" type="WideString" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="BufferSize" type="Integer" />
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="155">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="Rights" type="Cardinal" />
+          <parameter name="BufferSize" type="Integer" />
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="156">
+        <parameters>
+          <parameter name="FileName" type="WideString" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="Rights" type="Cardinal" />
+          <parameter name="BufferSize" type="Integer" />
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="OverbyteIcsStreams.pas" line="158">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="Flush" visibility="public" file="OverbyteIcsStreams.pas" line="160">
+      </procedure>
+      <function name="Read" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="161">
+        <parameters>
+          <parameter name="Buffer" paramflags="var" />
+          <parameter name="Count" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="Seek" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="163">
+        <parameters>
+          <parameter name="Offset" type="Integer" />
+          <parameter name="Origin" type="Word" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="Seek" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="164">
+        <parameters>
+          <parameter name="Offset" type="Int64" paramflags="const" />
+          <parameter name="Origin" type="TSeekOrigin" />
+          <retval type="Int64" />
+        </parameters>
+      </function>
+      <function name="Write" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="165">
+        <parameters>
+          <parameter name="Buffer" paramflags="const" />
+          <parameter name="Count" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <property name="FastSize" visibility="public" read="FFileSize" type="Int64" file="OverbyteIcsStreams.pas" line="166" />
+      <property name="Mode" visibility="public" read="FMode" type="Word" file="OverbyteIcsStreams.pas" line="167" />
+    </members>
+  </class>
+  <class name="EMultiPartFileReaderException" file="OverbyteIcsStreams.pas" line="171">
+    <ancestor name="Exception" namespace="System.SysUtils">
+      <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+      </methodref>
+      <methodref name="Destroy@" visibility="class private" procflags="class destructor noself">
+      </methodref>
+      <methodref name="SetInnerException" visibility="protected">
+      </methodref>
+      <methodref name="SetStackInfo" visibility="protected">
+      </methodref>
+      <methodref name="GetStackTrace" visibility="protected">
+      </methodref>
+      <methodref name="RaisingException" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmt" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmtHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="GetBaseException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="override">
+      </methodref>
+      <propertyref name="BaseException" visibility="public">
+      </propertyref>
+      <propertyref name="HelpContext" visibility="public">
+      </propertyref>
+      <propertyref name="InnerException" visibility="public">
+      </propertyref>
+      <propertyref name="Message" visibility="public">
+      </propertyref>
+      <propertyref name="StackTrace" visibility="public">
+      </propertyref>
+      <propertyref name="StackInfo" visibility="public">
+      </propertyref>
+      <methodref name="RaiseOuterException" visibility="public" procflags="static">
+      </methodref>
+      <methodref name="ThrowOuterException" visibility="public" procflags="static">
+      </methodref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+  </class>
+  <class name="TMultiPartFileReader" file="OverbyteIcsStreams.pas" line="175">
+    <ancestor name="TFileStream" namespace="System.Classes">
+      <methodref name="Create" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <propertyref name="FileName" visibility="public">
+      </propertyref>
+      <ancestor name="THandleStream" namespace="System.Classes">
+        <methodref name="SetSize" visibility="protected" procflags="overload override">
+        </methodref>
+        <methodref name="SetSize" visibility="protected" procflags="overload override">
+        </methodref>
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Read" visibility="public" procflags="overload override">
+        </methodref>
+        <methodref name="Write" visibility="public" procflags="overload override">
+        </methodref>
+        <methodref name="Read" visibility="public" procflags="overload override">
+        </methodref>
+        <methodref name="Write" visibility="public" procflags="overload override">
+        </methodref>
+        <methodref name="Seek" visibility="public" procflags="overload override">
+        </methodref>
+        <propertyref name="Handle" visibility="public">
+        </propertyref>
+        <ancestor name="TStream" namespace="System.Classes">
+          <methodref name="GetPosition" visibility="private">
+          </methodref>
+          <methodref name="SetPosition" visibility="private">
+          </methodref>
+          <methodref name="SetSize64" visibility="private">
+          </methodref>
+          <methodref name="Skip" visibility="private">
+          </methodref>
+          <methodref name="GetSize" visibility="protected" procflags="virtual">
+          </methodref>
+          <methodref name="SetSize" visibility="protected" procflags="overload virtual" symflags="deprecated">
+          </methodref>
+          <methodref name="SetSize" visibility="protected" procflags="overload virtual">
+          </methodref>
+          <methodref name="Read" visibility="public" procflags="overload virtual">
+          </methodref>
+          <methodref name="Write" visibility="public" procflags="overload virtual">
+          </methodref>
+          <methodref name="Read" visibility="public" procflags="overload virtual">
+          </methodref>
+          <methodref name="Write" visibility="public" procflags="overload virtual">
+          </methodref>
+          <methodref name="Read" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="Write" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="Read64" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Write64" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="Seek32" visibility="public" procflags="overload inline">
+          </methodref>
+          <methodref name="Seek" visibility="public" procflags="overload virtual">
+          </methodref>
+          <methodref name="Seek" visibility="public" procflags="overload virtual">
+          </methodref>
+          <methodref name="ReadBuffer" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBuffer" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBuffer" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteBuffer" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteBuffer" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteBuffer" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="CopyFrom" visibility="public">
+          </methodref>
+          <methodref name="ReadComponent" visibility="public">
+          </methodref>
+          <methodref name="ReadComponentRes" visibility="public">
+          </methodref>
+          <methodref name="WriteComponent" visibility="public">
+          </methodref>
+          <methodref name="WriteComponentRes" visibility="public">
+          </methodref>
+          <methodref name="WriteDescendent" visibility="public">
+          </methodref>
+          <methodref name="WriteDescendentRes" visibility="public">
+          </methodref>
+          <methodref name="WriteResourceHeader" visibility="public">
+          </methodref>
+          <methodref name="FixupResourceHeader" visibility="public">
+          </methodref>
+          <methodref name="ReadResHeader" visibility="public">
+          </methodref>
+          <propertyref name="Position" visibility="public">
+          </propertyref>
+          <propertyref name="Size" visibility="public">
+          </propertyref>
+          <ancestor name="TObject" namespace="System">
+            <methodref name="Create" visibility="public" procflags="constructor">
+            </methodref>
+            <methodref name="Free" visibility="public">
+            </methodref>
+            <methodref name="DisposeOf" visibility="public" procflags="inline">
+            </methodref>
+            <methodref name="InitInstance" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="CleanupInstance" visibility="public">
+            </methodref>
+            <methodref name="ClassType" visibility="public" procflags="inline">
+            </methodref>
+            <methodref name="ClassName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="ClassNameIs" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="ClassParent" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="ClassInfo" visibility="public" procflags="class inline">
+            </methodref>
+            <methodref name="InstanceSize" visibility="public" procflags="class inline">
+            </methodref>
+            <methodref name="InheritsFrom" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="MethodAddress" visibility="public" procflags="class overload">
+            </methodref>
+            <methodref name="MethodAddress" visibility="public" procflags="class overload">
+            </methodref>
+            <methodref name="MethodName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="QualifiedClassName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="FieldAddress" visibility="public" procflags="overload">
+            </methodref>
+            <methodref name="FieldAddress" visibility="public" procflags="overload">
+            </methodref>
+            <methodref name="GetInterface" visibility="public">
+            </methodref>
+            <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+            </methodref>
+            <methodref name="UnitName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="UnitScope" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="Equals" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="GetHashCode" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="ToString" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="SafeCallException" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="Dispatch" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="NewInstance" visibility="public" procflags="class virtual">
+            </methodref>
+            <methodref name="FreeInstance" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+            </methodref>
+            <methodref name="GetDisposed" visibility="protected" procflags="inline">
+            </methodref>
+            <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+            </methodref>
+            <propertyref name="Disposed" visibility="protected">
+            </propertyref>
+          </ancestor>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FHeader" type="RawByteString" visibility="private" size="4" offset="12" file="OverbyteIcsStreams.pas" line="177" />
+      <field name="FFooter" type="RawByteString" visibility="private" size="4" offset="16" file="OverbyteIcsStreams.pas" line="178" />
+      <field name="FFooterLen" type="Integer" visibility="private" size="4" offset="20" file="OverbyteIcsStreams.pas" line="179" />
+      <field name="FHeaderLen" type="Integer" visibility="private" size="4" offset="24" file="OverbyteIcsStreams.pas" line="180" />
+      <field name="FCurrentPos" type="Int64" visibility="private" size="8" offset="32" file="OverbyteIcsStreams.pas" line="181" />
+      <field name="FFileSize" type="Int64" visibility="private" size="8" offset="40" file="OverbyteIcsStreams.pas" line="182" />
+      <field name="FTotSize" type="Int64" visibility="private" size="8" offset="48" file="OverbyteIcsStreams.pas" line="183" />
+      <function name="GetFooter" visibility="private" file="OverbyteIcsStreams.pas" line="184">
+        <parameters>
+          <retval type="string" />
+        </parameters>
+      </function>
+      <function name="GetHeader" visibility="private" file="OverbyteIcsStreams.pas" line="185">
+        <parameters>
+          <retval type="string" />
+        </parameters>
+      </function>
+      <function name="GetSize" visibility="protected" procflags="override" file="OverbyteIcsStreams.pas" line="187">
+        <parameters>
+          <retval type="Int64" />
+        </parameters>
+      </function>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="190">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Header" type="RawByteString" paramflags="const" />
+          <parameter name="Footer" type="RawByteString" paramflags="const" />
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="192">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Header" type="string" paramflags="const" />
+          <parameter name="Footer" type="string" paramflags="const" />
+          <parameter name="AStringCodePage" type="Cardinal">
+            <value>
+              $0
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="194">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="Header" type="string" paramflags="const" />
+          <parameter name="Footer" type="string" paramflags="const" />
+          <parameter name="AStringCodePage" type="Cardinal">
+            <value>
+              $0
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="196">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="Rights" type="Cardinal" />
+          <parameter name="Header" type="string" paramflags="const" />
+          <parameter name="Footer" type="string" paramflags="const" />
+          <parameter name="AStringCodePage" type="Cardinal">
+            <value>
+              $0
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <procedure name="SetSize" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="198">
+        <parameters>
+          <parameter name="NewSize" type="Int64" paramflags="const" />
+        </parameters>
+      </procedure>
+      <function name="Seek" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="199">
+        <parameters>
+          <parameter name="Offset" type="Integer" />
+          <parameter name="Origin" type="Word" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="Seek" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="200">
+        <parameters>
+          <parameter name="Offset" type="Int64" paramflags="const" />
+          <parameter name="Origin" type="TSeekOrigin" />
+          <retval type="Int64" />
+        </parameters>
+      </function>
+      <function name="Read" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="201">
+        <parameters>
+          <parameter name="Buffer" paramflags="var" />
+          <parameter name="Count" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="Write" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="202">
+        <parameters>
+          <parameter name="Buffer" paramflags="const" />
+          <parameter name="Count" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <property name="Header" visibility="public" read="GetHeader" type="string" default="0" file="OverbyteIcsStreams.pas" line="203" />
+      <property name="Footer" visibility="public" read="GetFooter" type="string" default="0" file="OverbyteIcsStreams.pas" line="204" />
+    </members>
+  </class>
+  <enum name="TTextStreamMode" file="OverbyteIcsStreams.pas" line="207">
+    <element value="0" name="tsmReadLn" file="OverbyteIcsStreams.pas" line="207" />
+    <element value="1" name="tsmWriteLn" file="OverbyteIcsStreams.pas" line="207" />
+    <element value="2" name="tsmRead" file="OverbyteIcsStreams.pas" line="207" />
+    <element value="3" name="tsmWrite" file="OverbyteIcsStreams.pas" line="207" />
+  </enum>
+  <class name="TTextStream" file="OverbyteIcsStreams.pas" line="208">
+    <ancestor name="TStream" namespace="System.Classes">
+      <methodref name="GetPosition" visibility="private">
+      </methodref>
+      <methodref name="SetPosition" visibility="private">
+      </methodref>
+      <methodref name="SetSize64" visibility="private">
+      </methodref>
+      <methodref name="Skip" visibility="private">
+      </methodref>
+      <methodref name="GetSize" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="SetSize" visibility="protected" procflags="overload virtual" symflags="deprecated">
+      </methodref>
+      <methodref name="SetSize" visibility="protected" procflags="overload virtual">
+      </methodref>
+      <methodref name="Read" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Write" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Read" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Write" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Read" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="Write" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="Read64" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Write64" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="Seek32" visibility="public" procflags="overload inline">
+      </methodref>
+      <methodref name="Seek" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Seek" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="ReadBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="CopyFrom" visibility="public">
+      </methodref>
+      <methodref name="ReadComponent" visibility="public">
+      </methodref>
+      <methodref name="ReadComponentRes" visibility="public">
+      </methodref>
+      <methodref name="WriteComponent" visibility="public">
+      </methodref>
+      <methodref name="WriteComponentRes" visibility="public">
+      </methodref>
+      <methodref name="WriteDescendent" visibility="public">
+      </methodref>
+      <methodref name="WriteDescendentRes" visibility="public">
+      </methodref>
+      <methodref name="WriteResourceHeader" visibility="public">
+      </methodref>
+      <methodref name="FixupResourceHeader" visibility="public">
+      </methodref>
+      <methodref name="ReadResHeader" visibility="public">
+      </methodref>
+      <propertyref name="Position" visibility="public">
+      </propertyref>
+      <propertyref name="Size" visibility="public">
+      </propertyref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FStream" type="TStream" visibility="private" size="4" offset="4" file="OverbyteIcsStreams.pas" line="210" />
+      <field name="FBuf" type=":TTextStream.:1" visibility="private" size="4" offset="8" file="OverbyteIcsStreams.pas" line="211" />
+      <field name="TF" type="Text" visibility="private" size="730" offset="12" file="OverbyteIcsStreams.pas" line="212" />
+      <field name="FMode" type="TTextStreamMode" visibility="private" size="1" offset="742" file="OverbyteIcsStreams.pas" line="213" />
+      <procedure name="SetRealPos" visibility="private" file="OverbyteIcsStreams.pas" line="214">
+      </procedure>
+      <procedure name="SetMode" visibility="private" file="OverbyteIcsStreams.pas" line="215">
+        <parameters>
+          <parameter name="NewMode" type="TTextStreamMode" />
+        </parameters>
+      </procedure>
+      <procedure name="SetSize" visibility="protected" procflags="overload override" file="OverbyteIcsStreams.pas" line="217">
+        <parameters>
+          <parameter name="NewSize" type="Int64" paramflags="const" />
+        </parameters>
+      </procedure>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="219">
+        <parameters>
+          <parameter name="AStream" type="TStream" />
+          <parameter name="BufferSize" type="Integer">
+            <value>
+              $100
+            </value>
+          </parameter>
+          <parameter name="Style" type="TTextLineBreakStyle">
+            <value>
+              tlbsCRLF
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="OverbyteIcsStreams.pas" line="220">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="Flush" visibility="public" file="OverbyteIcsStreams.pas" line="221">
+      </procedure>
+      <function name="ReadLn" visibility="public" procflags="overload" file="OverbyteIcsStreams.pas" line="222">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="ReadLn" visibility="public" procflags="overload" file="OverbyteIcsStreams.pas" line="223">
+        <parameters>
+          <parameter name="S" type="AnsiString" paramflags="var" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="ReadLn" visibility="public" procflags="overload" file="OverbyteIcsStreams.pas" line="224">
+        <parameters>
+          <parameter name="WS" type="WideString" paramflags="var" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="WriteLn" visibility="public" procflags="overload" file="OverbyteIcsStreams.pas" line="225">
+        <parameters>
+          <parameter name="S" type="AnsiString" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="WriteLn" visibility="public" procflags="overload" file="OverbyteIcsStreams.pas" line="226">
+        <parameters>
+          <parameter name="WS" type="WideString" paramflags="const" />
+        </parameters>
+      </procedure>
+      <function name="Read" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="227">
+        <parameters>
+          <parameter name="Buffer" paramflags="var" />
+          <parameter name="Count" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="Write" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="228">
+        <parameters>
+          <parameter name="Buffer" paramflags="const" />
+          <parameter name="Count" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="Seek" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="229">
+        <parameters>
+          <parameter name="Offset" type="Integer" />
+          <parameter name="Origin" type="Word" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="Seek" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="230">
+        <parameters>
+          <parameter name="Offset" type="Int64" paramflags="const" />
+          <parameter name="Origin" type="TSeekOrigin" />
+          <retval type="Int64" />
+        </parameters>
+      </function>
+    </members>
+  </class>
+  <class name="TIcsBufferedStream" file="OverbyteIcsStreams.pas" line="236">
+    <ancestor name="TStream" namespace="System.Classes">
+      <methodref name="GetPosition" visibility="private">
+      </methodref>
+      <methodref name="SetPosition" visibility="private">
+      </methodref>
+      <methodref name="SetSize64" visibility="private">
+      </methodref>
+      <methodref name="Skip" visibility="private">
+      </methodref>
+      <methodref name="GetSize" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="SetSize" visibility="protected" procflags="overload virtual" symflags="deprecated">
+      </methodref>
+      <methodref name="SetSize" visibility="protected" procflags="overload virtual">
+      </methodref>
+      <methodref name="Read" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Write" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Read" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Write" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Read" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="Write" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="Read64" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Write64" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="Seek32" visibility="public" procflags="overload inline">
+      </methodref>
+      <methodref name="Seek" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="Seek" visibility="public" procflags="overload virtual">
+      </methodref>
+      <methodref name="ReadBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="ReadBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteBuffer" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="WriteBufferData" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="CopyFrom" visibility="public">
+      </methodref>
+      <methodref name="ReadComponent" visibility="public">
+      </methodref>
+      <methodref name="ReadComponentRes" visibility="public">
+      </methodref>
+      <methodref name="WriteComponent" visibility="public">
+      </methodref>
+      <methodref name="WriteComponentRes" visibility="public">
+      </methodref>
+      <methodref name="WriteDescendent" visibility="public">
+      </methodref>
+      <methodref name="WriteDescendentRes" visibility="public">
+      </methodref>
+      <methodref name="WriteResourceHeader" visibility="public">
+      </methodref>
+      <methodref name="FixupResourceHeader" visibility="public">
+      </methodref>
+      <methodref name="ReadResHeader" visibility="public">
+      </methodref>
+      <propertyref name="Position" visibility="public">
+      </propertyref>
+      <propertyref name="Size" visibility="public">
+      </propertyref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FStream" type="TStream" visibility="private" size="4" offset="4" file="OverbyteIcsStreams.pas" line="238" />
+      <field name="FOwnsStream" type="Boolean" visibility="private" size="1" offset="8" file="OverbyteIcsStreams.pas" line="239" />
+      <field name="FBuffer" type="TBytes" visibility="private" size="4" offset="12" file="OverbyteIcsStreams.pas" line="240" />
+      <field name="FBufferSize" type="Integer" visibility="private" size="4" offset="16" file="OverbyteIcsStreams.pas" line="241" />
+      <field name="FBufferedDataSize" type="Integer" visibility="private" size="4" offset="20" file="OverbyteIcsStreams.pas" line="242" />
+      <field name="FDirtyCount" type="Integer" visibility="private" size="4" offset="24" file="OverbyteIcsStreams.pas" line="243" />
+      <field name="FStreamBufPos" type="Int64" visibility="private" size="8" offset="32" file="OverbyteIcsStreams.pas" line="244" />
+      <field name="FPosition" type="Int64" visibility="private" size="8" offset="40" file="OverbyteIcsStreams.pas" line="245" />
+      <field name="FFastSize" type="Int64" visibility="private" size="8" offset="48" file="OverbyteIcsStreams.pas" line="246" />
+      <field name="FIsReadOnly" type="Boolean" visibility="private" size="1" offset="56" file="OverbyteIcsStreams.pas" line="247" />
+      <procedure name="SetIsReadOnly" visibility="protected" file="OverbyteIcsStreams.pas" line="249">
+        <parameters>
+          <parameter name="Value" type="Boolean" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="SetSize" visibility="protected" procflags="overload override" file="OverbyteIcsStreams.pas" line="250">
+        <parameters>
+          <parameter name="NewSize" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="SetSize" visibility="protected" procflags="overload override" file="OverbyteIcsStreams.pas" line="251">
+        <parameters>
+          <parameter name="NewSize" type="Int64" paramflags="const" />
+        </parameters>
+      </procedure>
+      <function name="InternalGetSize" visibility="protected" procflags="inline" file="OverbyteIcsStreams.pas" line="252">
+        <parameters>
+          <retval type="Int64" />
+        </parameters>
+      </function>
+      <function name="GetSize" visibility="protected" procflags="override" file="OverbyteIcsStreams.pas" line="253">
+        <parameters>
+          <retval type="Int64" />
+        </parameters>
+      </function>
+      <procedure name="Init" visibility="protected" procflags="virtual" file="OverbyteIcsStreams.pas" line="254">
+      </procedure>
+      <function name="FillBuffer" visibility="protected" procflags="inline" file="OverbyteIcsStreams.pas" line="255">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="257">
+        <parameters>
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="258">
+        <parameters>
+          <parameter name="Stream" type="TStream" />
+          <parameter name="BufferSize" type="Integer" />
+          <parameter name="OwnsStream" type="Boolean">
+            <value>
+              False
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="262">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="Rights" type="Cardinal" />
+          <parameter name="BufferSize" type="Integer" />
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="266">
+        <parameters>
+          <parameter name="FileName" type="WideString" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="Rights" type="Cardinal" />
+          <parameter name="BufferSize" type="Integer" />
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="270">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="BufferSize" type="Integer" />
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="271">
+        <parameters>
+          <parameter name="FileName" type="WideString" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="BufferSize" type="Integer" />
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="OverbyteIcsStreams.pas" line="272">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="Flush" visibility="public" procflags="inline" file="OverbyteIcsStreams.pas" line="274">
+      </procedure>
+      <function name="Read" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="275">
+        <parameters>
+          <parameter name="Buffer" paramflags="var" />
+          <parameter name="Count" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="Seek" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="277">
+        <parameters>
+          <parameter name="Offset" type="Integer" />
+          <parameter name="Origin" type="Word" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="Seek" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="278">
+        <parameters>
+          <parameter name="Offset" type="Int64" paramflags="const" />
+          <parameter name="Origin" type="TSeekOrigin" />
+          <retval type="Int64" />
+        </parameters>
+      </function>
+      <function name="Write" visibility="public" procflags="overload override" file="OverbyteIcsStreams.pas" line="279">
+        <parameters>
+          <parameter name="Buffer" paramflags="const" />
+          <parameter name="Count" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <property name="IsReadOnly" visibility="public" read="FIsReadOnly" write="SetIsReadOnly" type="Boolean" file="OverbyteIcsStreams.pas" line="284" />
+      <property name="FastSize" visibility="public" read="GetSize" type="Int64" file="OverbyteIcsStreams.pas" line="285" />
+    </members>
+  </class>
+  <class name="EStreamReaderError" file="OverbyteIcsStreams.pas" line="288">
+    <ancestor name="Exception" namespace="System.SysUtils">
+      <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+      </methodref>
+      <methodref name="Destroy@" visibility="class private" procflags="class destructor noself">
+      </methodref>
+      <methodref name="SetInnerException" visibility="protected">
+      </methodref>
+      <methodref name="SetStackInfo" visibility="protected">
+      </methodref>
+      <methodref name="GetStackTrace" visibility="protected">
+      </methodref>
+      <methodref name="RaisingException" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmt" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmtHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="GetBaseException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="override">
+      </methodref>
+      <propertyref name="BaseException" visibility="public">
+      </propertyref>
+      <propertyref name="HelpContext" visibility="public">
+      </propertyref>
+      <propertyref name="InnerException" visibility="public">
+      </propertyref>
+      <propertyref name="Message" visibility="public">
+      </propertyref>
+      <propertyref name="StackTrace" visibility="public">
+      </propertyref>
+      <propertyref name="StackInfo" visibility="public">
+      </propertyref>
+      <methodref name="RaiseOuterException" visibility="public" procflags="static">
+      </methodref>
+      <methodref name="ThrowOuterException" visibility="public" procflags="static">
+      </methodref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+  </class>
+  <enum name="TIcsLineBreakStyle" file="OverbyteIcsStreams.pas" line="289">
+    <element value="0" name="ilbsCRLF" file="OverbyteIcsStreams.pas" line="289" />
+    <element value="1" name="ilbsLF" file="OverbyteIcsStreams.pas" line="289" />
+    <element value="2" name="ilbsCR" file="OverbyteIcsStreams.pas" line="289" />
+  </enum>
+  <class name="TIcsStreamReader" file="OverbyteIcsStreams.pas" line="290">
+    <ancestor name="TIcsBufferedStream" namespace="OverbyteIcsStreams">
+      <methodref name="SetIsReadOnly" visibility="protected" />
+      <methodref name="SetSize" visibility="protected" procflags="overload override" />
+      <methodref name="SetSize" visibility="protected" procflags="overload override" />
+      <methodref name="InternalGetSize" visibility="protected" procflags="inline" />
+      <methodref name="GetSize" visibility="protected" procflags="override" />
+      <methodref name="Init" visibility="protected" procflags="virtual" />
+      <methodref name="FillBuffer" visibility="protected" procflags="inline" />
+      <methodref name="Create" visibility="public" procflags="constructor overload" />
+      <methodref name="Create" visibility="public" procflags="constructor overload virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor overload virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor overload virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor overload virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor overload virtual" />
+      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+      <methodref name="Flush" visibility="public" procflags="inline" />
+      <methodref name="Read" visibility="public" procflags="overload override" />
+      <methodref name="Seek" visibility="public" procflags="overload override" />
+      <methodref name="Seek" visibility="public" procflags="overload override" />
+      <methodref name="Write" visibility="public" procflags="overload override" />
+      <propertyref name="IsReadOnly" visibility="public" />
+      <propertyref name="FastSize" visibility="public" />
+      <ancestor name="TStream" namespace="System.Classes">
+        <methodref name="GetPosition" visibility="private">
+        </methodref>
+        <methodref name="SetPosition" visibility="private">
+        </methodref>
+        <methodref name="SetSize64" visibility="private">
+        </methodref>
+        <methodref name="Skip" visibility="private">
+        </methodref>
+        <methodref name="GetSize" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="SetSize" visibility="protected" procflags="overload virtual" symflags="deprecated">
+        </methodref>
+        <methodref name="SetSize" visibility="protected" procflags="overload virtual">
+        </methodref>
+        <methodref name="Read" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="Write" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="Read" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="Write" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="Read" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="Write" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="Read64" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Write64" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="Seek32" visibility="public" procflags="overload inline">
+        </methodref>
+        <methodref name="Seek" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="Seek" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="ReadBuffer" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBuffer" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBuffer" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteBuffer" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteBuffer" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteBuffer" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="CopyFrom" visibility="public">
+        </methodref>
+        <methodref name="ReadComponent" visibility="public">
+        </methodref>
+        <methodref name="ReadComponentRes" visibility="public">
+        </methodref>
+        <methodref name="WriteComponent" visibility="public">
+        </methodref>
+        <methodref name="WriteComponentRes" visibility="public">
+        </methodref>
+        <methodref name="WriteDescendent" visibility="public">
+        </methodref>
+        <methodref name="WriteDescendentRes" visibility="public">
+        </methodref>
+        <methodref name="WriteResourceHeader" visibility="public">
+        </methodref>
+        <methodref name="FixupResourceHeader" visibility="public">
+        </methodref>
+        <methodref name="ReadResHeader" visibility="public">
+        </methodref>
+        <propertyref name="Position" visibility="public">
+        </propertyref>
+        <propertyref name="Size" visibility="public">
+        </propertyref>
+        <ancestor name="TObject" namespace="System">
+          <methodref name="Create" visibility="public" procflags="constructor">
+          </methodref>
+          <methodref name="Free" visibility="public">
+          </methodref>
+          <methodref name="DisposeOf" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="InitInstance" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="CleanupInstance" visibility="public">
+          </methodref>
+          <methodref name="ClassType" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="ClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassNameIs" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassParent" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassInfo" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InstanceSize" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InheritsFrom" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="QualifiedClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="GetInterface" visibility="public">
+          </methodref>
+          <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="UnitName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="UnitScope" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="Equals" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="GetHashCode" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="ToString" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="SafeCallException" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Dispatch" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="NewInstance" visibility="public" procflags="class virtual">
+          </methodref>
+          <methodref name="FreeInstance" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+          </methodref>
+          <methodref name="GetDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <propertyref name="Disposed" visibility="protected">
+          </propertyref>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FReadBuffer" type="TBytes" visibility="private" size="4" offset="64" file="OverbyteIcsStreams.pas" line="292" />
+      <field name="FReadBufSize" type="Integer" visibility="private" size="4" offset="68" file="OverbyteIcsStreams.pas" line="293" />
+      <field name="FCodePage" type="Cardinal" visibility="private" size="4" offset="72" file="OverbyteIcsStreams.pas" line="294" />
+      <field name="FLeadBytes" visibility="private" size="32" offset="76" file="OverbyteIcsStreams.pas" line="295">
+        <set name="FLeadBytes" type="AnsiChar" />
+      </field>
+      <field name="FDetectBOM" type="Boolean" visibility="private" size="1" offset="108" file="OverbyteIcsStreams.pas" line="296" />
+      <field name="FMaxLineLength" type="Integer" visibility="private" size="4" offset="112" file="OverbyteIcsStreams.pas" line="301" />
+      <function name="InternalReadLn" visibility="private" file="OverbyteIcsStreams.pas" line="302">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="InternalReadLnWLe" visibility="private" file="OverbyteIcsStreams.pas" line="303">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="InternalReadLnWBe" visibility="private" file="OverbyteIcsStreams.pas" line="304">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="EnsureReadBufferW" visibility="private" procflags="inline" file="OverbyteIcsStreams.pas" line="305">
+        <parameters>
+          <parameter name="Size" type="Integer" />
+          <parameter name="P" type="PWideChar" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="EnsureReadBufferA" visibility="private" procflags="inline" file="OverbyteIcsStreams.pas" line="307">
+        <parameters>
+          <parameter name="Size" type="Integer" />
+          <parameter name="P" type="PAnsiChar" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="SetMaxLineLength" visibility="private" file="OverbyteIcsStreams.pas" line="309">
+        <parameters>
+          <parameter name="Value" type="Integer" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="SetCodePage" visibility="private" file="OverbyteIcsStreams.pas" line="310">
+        <parameters>
+          <parameter name="Value" type="Cardinal" paramflags="const" />
+        </parameters>
+      </procedure>
+      <function name="GetCodePageFromBOM" visibility="protected" procflags="virtual" file="OverbyteIcsStreams.pas" line="312">
+        <parameters>
+          <retval type="Cardinal" />
+        </parameters>
+      </function>
+      <procedure name="Init" visibility="protected" procflags="override" file="OverbyteIcsStreams.pas" line="313">
+      </procedure>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="315">
+        <parameters>
+          <parameter name="Stream" type="TStream" />
+          <parameter name="BufferSize" type="Integer">
+            <value>
+              $1000
+            </value>
+          </parameter>
+          <parameter name="OwnsStream" type="Boolean">
+            <value>
+              False
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="318">
+        <parameters>
+          <parameter name="Stream" type="TStream" />
+          <parameter name="DetectBOM" type="Boolean">
+            <value>
+              False
+            </value>
+          </parameter>
+          <parameter name="CodePage" type="Cardinal">
+            <value>
+              $0
+            </value>
+          </parameter>
+          <parameter name="OwnsStream" type="Boolean">
+            <value>
+              False
+            </value>
+          </parameter>
+          <parameter name="BufferSize" type="Integer">
+            <value>
+              $1000
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="324">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="BufferSize" type="Integer">
+            <value>
+              $1000
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="327">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="DetectBOM" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+          <parameter name="CodePage" type="Cardinal">
+            <value>
+              $0
+            </value>
+          </parameter>
+          <parameter name="BufferSize" type="Integer">
+            <value>
+              $1000
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="332">
+        <parameters>
+          <parameter name="FileName" type="WideString" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="BufferSize" type="Integer">
+            <value>
+              $1000
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="335">
+        <parameters>
+          <parameter name="FileName" type="WideString" paramflags="const" />
+          <parameter name="DetectBOM" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+          <parameter name="CodePage" type="Cardinal">
+            <value>
+              $0
+            </value>
+          </parameter>
+          <parameter name="BufferSize" type="Integer">
+            <value>
+              $1000
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <function name="DetectLineBreakStyle" visibility="public" file="OverbyteIcsStreams.pas" line="340">
+        <parameters>
+          <retval type="TIcsLineBreakStyle" />
+        </parameters>
+      </function>
+      <function name="ReadLine" visibility="public" procflags="overload virtual" file="OverbyteIcsStreams.pas" line="341">
+        <parameters>
+          <parameter name="S" type="RawByteString" paramflags="var" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="ReadLine" visibility="public" procflags="overload virtual" file="OverbyteIcsStreams.pas" line="342">
+        <parameters>
+          <parameter name="S" type="string" paramflags="var" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="ReadToEnd" visibility="public" procflags="overload virtual" file="OverbyteIcsStreams.pas" line="343">
+        <parameters>
+          <parameter name="S" type="RawByteString" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="ReadToEnd" visibility="public" procflags="overload virtual" file="OverbyteIcsStreams.pas" line="344">
+        <parameters>
+          <parameter name="S" type="string" paramflags="var" />
+        </parameters>
+      </procedure>
+      <property name="CurrentCodePage" visibility="public" read="FCodePage" write="SetCodePage" type="Cardinal" file="OverbyteIcsStreams.pas" line="346" />
+      <property name="MaxLineLength" visibility="public" read="FMaxLineLength" write="SetMaxLineLength" type="Integer" file="OverbyteIcsStreams.pas" line="347" />
+    </members>
+  </class>
+  <class name="TIcsStreamWriter" file="OverbyteIcsStreams.pas" line="350">
+    <ancestor name="TIcsBufferedStream" namespace="OverbyteIcsStreams">
+      <methodref name="SetIsReadOnly" visibility="protected" />
+      <methodref name="SetSize" visibility="protected" procflags="overload override" />
+      <methodref name="SetSize" visibility="protected" procflags="overload override" />
+      <methodref name="InternalGetSize" visibility="protected" procflags="inline" />
+      <methodref name="GetSize" visibility="protected" procflags="override" />
+      <methodref name="Init" visibility="protected" procflags="virtual" />
+      <methodref name="FillBuffer" visibility="protected" procflags="inline" />
+      <methodref name="Create" visibility="public" procflags="constructor overload" />
+      <methodref name="Create" visibility="public" procflags="constructor overload virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor overload virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor overload virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor overload virtual" />
+      <methodref name="Create" visibility="public" procflags="constructor overload virtual" />
+      <methodref name="Destroy" visibility="public" procflags="destructor override" />
+      <methodref name="Flush" visibility="public" procflags="inline" />
+      <methodref name="Read" visibility="public" procflags="overload override" />
+      <methodref name="Seek" visibility="public" procflags="overload override" />
+      <methodref name="Seek" visibility="public" procflags="overload override" />
+      <methodref name="Write" visibility="public" procflags="overload override" />
+      <propertyref name="IsReadOnly" visibility="public" />
+      <propertyref name="FastSize" visibility="public" />
+      <ancestor name="TStream" namespace="System.Classes">
+        <methodref name="GetPosition" visibility="private">
+        </methodref>
+        <methodref name="SetPosition" visibility="private">
+        </methodref>
+        <methodref name="SetSize64" visibility="private">
+        </methodref>
+        <methodref name="Skip" visibility="private">
+        </methodref>
+        <methodref name="GetSize" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="SetSize" visibility="protected" procflags="overload virtual" symflags="deprecated">
+        </methodref>
+        <methodref name="SetSize" visibility="protected" procflags="overload virtual">
+        </methodref>
+        <methodref name="Read" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="Write" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="Read" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="Write" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="Read" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="Write" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="Read64" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Write64" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="Seek32" visibility="public" procflags="overload inline">
+        </methodref>
+        <methodref name="Seek" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="Seek" visibility="public" procflags="overload virtual">
+        </methodref>
+        <methodref name="ReadBuffer" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBuffer" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBuffer" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="ReadBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteBuffer" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteBuffer" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteBuffer" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="WriteBufferData" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="CopyFrom" visibility="public">
+        </methodref>
+        <methodref name="ReadComponent" visibility="public">
+        </methodref>
+        <methodref name="ReadComponentRes" visibility="public">
+        </methodref>
+        <methodref name="WriteComponent" visibility="public">
+        </methodref>
+        <methodref name="WriteComponentRes" visibility="public">
+        </methodref>
+        <methodref name="WriteDescendent" visibility="public">
+        </methodref>
+        <methodref name="WriteDescendentRes" visibility="public">
+        </methodref>
+        <methodref name="WriteResourceHeader" visibility="public">
+        </methodref>
+        <methodref name="FixupResourceHeader" visibility="public">
+        </methodref>
+        <methodref name="ReadResHeader" visibility="public">
+        </methodref>
+        <propertyref name="Position" visibility="public">
+        </propertyref>
+        <propertyref name="Size" visibility="public">
+        </propertyref>
+        <ancestor name="TObject" namespace="System">
+          <methodref name="Create" visibility="public" procflags="constructor">
+          </methodref>
+          <methodref name="Free" visibility="public">
+          </methodref>
+          <methodref name="DisposeOf" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="InitInstance" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="CleanupInstance" visibility="public">
+          </methodref>
+          <methodref name="ClassType" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="ClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassNameIs" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassParent" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassInfo" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InstanceSize" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InheritsFrom" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="QualifiedClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="GetInterface" visibility="public">
+          </methodref>
+          <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="UnitName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="UnitScope" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="Equals" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="GetHashCode" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="ToString" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="SafeCallException" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Dispatch" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="NewInstance" visibility="public" procflags="class virtual">
+          </methodref>
+          <methodref name="FreeInstance" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+          </methodref>
+          <methodref name="GetDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <propertyref name="Disposed" visibility="protected">
+          </propertyref>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FWriteBuffer" type="TBytes" visibility="private" size="4" offset="64" file="OverbyteIcsStreams.pas" line="352" />
+      <field name="FWriteBufSize" type="Integer" visibility="private" size="4" offset="68" file="OverbyteIcsStreams.pas" line="353" />
+      <field name="FReadBuffer" type="TBytes" visibility="private" size="4" offset="72" file="OverbyteIcsStreams.pas" line="354" />
+      <field name="FReadBufSize" type="Integer" visibility="private" size="4" offset="76" file="OverbyteIcsStreams.pas" line="355" />
+      <field name="FLineBreakStyle" type="TIcsLineBreakStyle" visibility="private" size="1" offset="80" file="OverbyteIcsStreams.pas" line="356" />
+      <field name="FCodePage" type="Cardinal" visibility="private" size="4" offset="84" file="OverbyteIcsStreams.pas" line="357" />
+      <field name="FLineBreak" type="AnsiString" visibility="private" size="4" offset="88" file="OverbyteIcsStreams.pas" line="358" />
+      <procedure name="SetLineBreakStyle" visibility="private" file="OverbyteIcsStreams.pas" line="359">
+        <parameters>
+          <parameter name="Value" type="TIcsLineBreakStyle" />
+        </parameters>
+      </procedure>
+      <procedure name="EnsureWriteBuffer" visibility="private" procflags="inline" file="OverbyteIcsStreams.pas" line="360">
+        <parameters>
+          <parameter name="Size" type="Integer" />
+        </parameters>
+      </procedure>
+      <procedure name="EnsureReadBuffer" visibility="private" procflags="inline" file="OverbyteIcsStreams.pas" line="361">
+        <parameters>
+          <parameter name="Size" type="Integer" />
+        </parameters>
+      </procedure>
+      <function name="GetBomFromCodePage" visibility="protected" procflags="virtual" file="OverbyteIcsStreams.pas" line="363">
+        <parameters>
+          <parameter name="ACodePage" type="Cardinal" />
+          <retval type="TBytes" />
+        </parameters>
+      </function>
+      <function name="GetCodePageFromBOM" visibility="protected" procflags="virtual" file="OverbyteIcsStreams.pas" line="364">
+        <parameters>
+          <retval type="Cardinal" />
+        </parameters>
+      </function>
+      <procedure name="Init" visibility="protected" procflags="override" file="OverbyteIcsStreams.pas" line="365">
+      </procedure>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="367">
+        <parameters>
+          <parameter name="Stream" type="TStream" />
+          <parameter name="BufferSize" type="Integer">
+            <value>
+              $1000
+            </value>
+          </parameter>
+          <parameter name="OwnsStream" type="Boolean">
+            <value>
+              False
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="370">
+        <parameters>
+          <parameter name="Stream" type="TStream" />
+          <parameter name="Append" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+          <parameter name="DetectBOM" type="Boolean">
+            <value>
+              False
+            </value>
+          </parameter>
+          <parameter name="CodePage" type="Cardinal">
+            <value>
+              $0
+            </value>
+          </parameter>
+          <parameter name="OwnsStream" type="Boolean">
+            <value>
+              False
+            </value>
+          </parameter>
+          <parameter name="BufferSize" type="Integer">
+            <value>
+              $1000
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="377">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="Rights" type="Cardinal" />
+          <parameter name="BufferSize" type="Integer" />
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="381">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Append" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+          <parameter name="DetectBOM" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+          <parameter name="CodePage" type="Cardinal">
+            <value>
+              $0
+            </value>
+          </parameter>
+          <parameter name="BufferSize" type="Integer">
+            <value>
+              $1000
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="387">
+        <parameters>
+          <parameter name="FileName" type="WideString" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="Rights" type="Cardinal" />
+          <parameter name="BufferSize" type="Integer" />
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsStreams.pas" line="391">
+        <parameters>
+          <parameter name="FileName" type="WideString" paramflags="const" />
+          <parameter name="Append" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+          <parameter name="DetectBOM" type="Boolean">
+            <value>
+              True
+            </value>
+          </parameter>
+          <parameter name="CodePage" type="Cardinal">
+            <value>
+              $0
+            </value>
+          </parameter>
+          <parameter name="BufferSize" type="Integer">
+            <value>
+              $1000
+            </value>
+          </parameter>
+        </parameters>
+      </constructor>
+      <function name="DetectLineBreakStyle" visibility="public" file="OverbyteIcsStreams.pas" line="397">
+        <parameters>
+          <retval type="TIcsLineBreakStyle" />
+        </parameters>
+      </function>
+      <procedure name="Write" visibility="public" procflags="overload virtual" file="OverbyteIcsStreams.pas" line="398">
+        <parameters>
+          <parameter name="S" type="string" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="Write" visibility="public" procflags="overload virtual" file="OverbyteIcsStreams.pas" line="399">
+        <parameters>
+          <parameter name="S" type="RawByteString" paramflags="const" />
+          <parameter name="SrcCodePage" type="Cardinal">
+            <value>
+              $0
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="WriteLine" visibility="public" procflags="overload inline" file="OverbyteIcsStreams.pas" line="407">
+        <parameters>
+          <parameter name="S" type="string" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="WriteLine" visibility="public" procflags="overload inline" file="OverbyteIcsStreams.pas" line="408">
+        <parameters>
+          <parameter name="S" type="RawByteString" paramflags="const" />
+          <parameter name="SrcCodePage" type="Cardinal">
+            <value>
+              $0
+            </value>
+          </parameter>
+        </parameters>
+      </procedure>
+      <procedure name="WriteBOM" visibility="public" file="OverbyteIcsStreams.pas" line="410">
+      </procedure>
+      <property name="CurrentCodePage" visibility="public" read="FCodePage" write="FCodePage" type="Cardinal" file="OverbyteIcsStreams.pas" line="411" />
+      <property name="LineBreakStyle" visibility="public" read="FLineBreakStyle" write="SetLineBreakStyle" type="TIcsLineBreakStyle" file="OverbyteIcsStreams.pas" line="412" />
+    </members>
+  </class>
+</namespace>

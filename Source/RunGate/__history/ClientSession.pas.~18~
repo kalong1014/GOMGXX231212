@@ -1,0 +1,2008 @@
+unit ClientSession;
+
+interface
+
+uses
+  Windows, dialogs, Messages, SysUtils, Classes, ClientThread, AcceptExWorkedThread, IOCPTypeDef, ThreadPool,
+  Protocol, MD5, SHSocket, SyncObj, {UJxModule, }EdCode;
+
+type
+  TCheckStep = (csCheckLogin, csSendCheck, csSendSmu, csSendFinsh, csCheckTick);
+type
+  TSessionObj = class(TSyncObj)
+  private
+    procedure AfterSendSmug;
+    function ReadforSmuggle: Boolean;
+  public
+    m_xHWID: MD5.MD5Digest;
+    m_fOverClientCount: Boolean;
+    m_pUserOBJ: PUserOBJ;
+    m_pOverlapRecv: PIOCPCommObj;
+    m_pOverlapSend: PIOCPCommObj;
+    m_tIOCPSender: TIOCPWriter;
+    m_tLastGameSvr: TClientThread;
+
+    m_fKickFlag: Boolean;
+    m_fSpeedLimit: Boolean;
+    m_fHandleLogin: Byte;
+    m_dwSessionID: LongWord;
+    m_nSvrListIdx: Integer;
+    m_szAccount: string[15];
+    m_szChrName: string[15];
+    m_szTrimChrName: string[15];
+    //m_szLoginPacket: string[198];
+    m_nSvrObject: Integer;
+    m_nChrStutas: Integer;
+    m_nItemSpeed: Integer;
+    m_nDefItemSpeed: Integer;
+
+    m_dwChatTick: LongWord;
+    m_dwLastDirection: LongWord;
+    m_dwEatTick: LongWord;
+    m_dwHeroEatTick: LongWord;
+    m_dwPickupTick: LongWord;
+    m_dwMoveTick: LongWord;
+    m_dwAttackTick: LongWord;
+    m_dwSpellTick: LongWord;
+    m_dwSitDownTick: LongWord;
+    m_dwTurnTick: LongWord;
+    m_dwButchTick: LongWord;
+
+    m_dwDealTick: LongWord;
+    m_dwOpenStoreTick: LongWord;
+    m_dwWaringTick: LongWord;
+    m_dwClientTimeOutTick: LongWord;
+
+    m_xMsgList: Classes.TList;
+
+    //    m_Vtable: PVtalbe;
+
+    // 对发送的数据
+//    m_SendClientData: LongWord;
+    m_SendIndx: LongWord;
+        // 最后一次发送的数据
+    m_LastSmu: LongWord;
+
+        //发送之后  1000  ms 之内有确认包，
+    //如果没有，就当发送失败，再发一次 容忍 3次错误 3次失败之后，就当成功
+
+    // 重入 ,
+    m_reEnter: Boolean;
+    m_lastSmuTick: LongWord;
+    m_SendSucess: Boolean;
+    m_ErrSend: LongWord;
+    //m_JxModule: TJxMoudle;
+
+//    m_SendCheck: Boolean;
+    m_SendCheckTick: LongWord;
+    m_checkstr: string;
+//    m_StartTick: LongWord;
+
+    m_Stat: TCheckStep;
+    m_FinishTick: LongWord;
+   //2018.4.21 增加
+    SId: string[255];
+    FIsGetPass: BOOL;
+    constructor Create;
+    destructor Destroy; override;
+    procedure WriteIndex(value: LongWord);
+    property SendIndex: LongWord read m_SendIndx write WriteIndex;
+
+    function PeekDelayMsg(nCmd: Integer): Boolean;
+    function GetDelayMsg(pMsg: pTDelayMsg): Boolean;
+    function GetDelayMsgCount(): Integer;
+    procedure ProcessDelayMsg();
+    procedure SendDelayMsg(nMid, nDir, nIdx, nLen: Integer; pMsg: PAnsiChar; dwDelay: LongWord);
+    //2018.4.21 增加
+    procedure SendServerMsg(nIdent: Integer; wSocketIndex: Word; nSocket, nUserListIndex: Integer; nLen: Integer; Data: PAnsiChar);
+    procedure ProcessCltData(const Addr: Integer; const Len: Integer; var Succeed: BOOL; const fCDPacket: Boolean = False);
+    procedure ProcessSvrData(GS: TClientThread; const Addr: Integer; const Len: Integer);
+    procedure ReCreate;
+    procedure UserEnter;
+    procedure UserLeave;
+    procedure HandleLogin(const Addr: Integer; Len: Integer; var Succeed: BOOL);
+    //2018.4.21 增加
+    procedure SendFirstPackEX;
+//    procedure SendFirstPack(const szPacket: string);
+    procedure SendKickMsg(KickType: Integer);
+    procedure SendSysMsg(const szMsg: string);
+    procedure SendDefMessage(wIdent: Word; nRecog: Integer; nParam, nTag, nSeries: Word; sMsg: string);
+    function GenRandString(len: Integer): string;
+    procedure ClientTick();
+  end;
+
+var
+  g_pFillUserObj: TSessionObj = nil;
+//  g_UserList                : array[0..USER_ARRAY_COUNT - 1] of TSessionObj;
+  g_UserList: array of TSessionObj;
+
+function timeGetTime: DWord; stdcall;
+function GetTickCount: DWord;
+
+implementation
+
+uses
+  FuncForComm, SendQueue, LogManager, ConfigManager, Misc, TableDef, HUtil32, Grobal2,
+  ChatCmdFilter, AbusiveFilter, Punishment, Filter, JxLogger;
+
+function timeGetTime; external _STR_LIB_MMSYSTEM Name 'timeGetTime';
+
+function GetTickCount: DWord;
+begin
+  Result := timeGetTime;
+end;
+
+procedure TSessionObj.AfterSendSmug;
+begin
+  m_lastSmuTick := GetTickCount;
+  m_SendSucess := False;
+end;
+
+procedure TSessionObj.ClientTick;
+begin
+//  if m_Stat = csCheckTick and m_Jx then
+//  begin
+//    m_checkstr := GenRandString(5 + Random(5));
+//    m_jx
+//
+//
+//  end;
+
+end;
+
+constructor TSessionObj.Create;
+var
+  i, dwCurrentTick: DWord;
+begin
+  inherited;
+  Randomize();
+
+  FillChar(m_xHWID, SizeOf(MD5Digest), 0);
+  m_fOverClientCount := False;
+  dwCurrentTick := GetTickCount();
+  m_fKickFlag := False;
+  m_xMsgList := Classes.TList.Create;
+  m_fSpeedLimit := False;
+  m_nSvrObject := 0;
+  m_nItemSpeed := 0;
+  m_nDefItemSpeed := 0;
+  m_dwLastDirection := LongWord(-1);
+  m_dwPickupTick := dwCurrentTick;
+  m_dwEatTick := dwCurrentTick;
+  m_dwHeroEatTick := dwCurrentTick;
+  m_dwMoveTick := dwCurrentTick;
+  m_dwSpellTick := dwCurrentTick;
+  m_dwAttackTick := dwCurrentTick;
+  m_dwChatTick := dwCurrentTick;
+  m_dwTurnTick := dwCurrentTick;
+  m_dwButchTick := dwCurrentTick;
+  m_dwSitDownTick := dwCurrentTick;
+  m_dwClientTimeOutTick := dwCurrentTick;
+  m_fHandleLogin := 0;
+  m_nSvrListIdx := 0;
+  m_szAccount := '';
+  m_szChrName := '';
+  m_szTrimChrName := '';
+
+  m_lastSmuTick := dwCurrentTick;
+  SendIndex := 0;
+  //m_JxModule := nil;
+//  m_StartTick := 0;
+  m_reEnter := False;
+  m_Stat := csCheckLogin;
+   FIsGetPass := False;
+end;
+
+procedure TSessionObj.ReCreate();
+begin
+  FillChar(m_xHWID, SizeOf(MD5Digest), 0);
+
+  m_fOverClientCount := False;
+  m_fKickFlag := False;
+  m_fSpeedLimit := False;
+  m_nSvrObject := 0;
+  m_nItemSpeed := 0;
+  m_nDefItemSpeed := 0;
+  m_fHandleLogin := 0;
+  m_dwClientTimeOutTick := GetTickCount;
+  m_szAccount := '';
+  m_szChrName := '';
+  m_szTrimChrName := '';
+
+  //m_JxModule := nil;
+//  m_StartTick := 0;
+  m_reEnter := False;
+  m_Stat := csCheckLogin;
+   FIsGetPass := False;
+end;
+
+destructor TSessionObj.Destroy;
+var
+  i: Integer;
+begin
+  Lock();
+  try
+    for i := 0 to m_xMsgList.Count - 1 do
+      Dispose(pTDelayMsg(m_xMsgList[i]));
+    m_xMsgList.Free;
+  finally
+    UnLock();
+  end;
+  inherited;
+end;
+
+procedure TSessionObj.SendDelayMsg(nMid, nDir, nIdx, nLen: Integer; pMsg: PAnsiChar; dwDelay: LongWord);
+var
+  pDelayMsg: pTDelayMsg;
+begin
+  if (nLen > 0) and (nLen < DELAY_BUFFER_LEN) then begin
+    New(pDelayMsg);
+    pDelayMsg.nMag := nMid;
+    pDelayMsg.nDir := nDir;
+    pDelayMsg.nCmd := nIdx;
+    pDelayMsg.dwDelayTime := GetTickCount + dwDelay;
+    pDelayMsg.nBufLen := nLen;
+    Move(pMsg^, pDelayMsg.pBuffer[0], nLen);
+    Lock();
+    m_xMsgList.Add(pDelayMsg);
+    UnLock();
+  end;
+end;
+
+function TSessionObj.PeekDelayMsg(nCmd: Integer): Boolean;
+var
+  i, iCmd: Integer;
+  pDelayMsg: pTDelayMsg;
+begin
+  Result := False;
+  Lock();
+  try
+    i := 0;
+    while m_xMsgList.Count > i do begin
+      iCmd := pTDelayMsg(m_xMsgList[i]).nCmd;
+      if nCmd = CM_HIT then begin
+        if (iCmd = CM_HIT) or
+          (iCmd = CM_HEAVYHIT) or
+          (iCmd = CM_BIGHIT) or
+          (iCmd = CM_POWERHIT) or
+          (iCmd = CM_LONGHIT) or
+          (iCmd = CM_WIDEHIT) or
+          (iCmd = CM_CROSSHIT) or
+          (iCmd = CM_TWINHIT) or
+          (iCmd = CM_FIREHIT)
+           then begin
+          Result := True;
+          Break;
+        end else
+          Inc(i);
+      end else if nCmd = CM_RUN then begin
+        if (iCmd = CM_WALK) or (iCmd = CM_RUN) then begin
+          Result := True;
+          Break;
+        end else
+          Inc(i);
+      end else if iCmd = nCmd then begin
+        Result := True;
+        Break;
+      end else
+        Inc(i);
+    end;
+  finally
+    UnLock();
+  end;
+end;
+
+function TSessionObj.GetDelayMsgCount(): Integer;
+begin
+  Result := 0;
+  Lock();
+  try
+    Result := m_xMsgList.Count;
+  finally
+    UnLock();
+  end;
+end;
+
+function TSessionObj.GenRandString(len: Integer): string;
+var i: Integer;
+const SourceStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+begin
+  randomize;
+  Result := '';
+  for i := 1 to len do
+    Result := Result + sourcestr[Random(62) + 1];
+
+end;
+
+function TSessionObj.GetDelayMsg(pMsg: pTDelayMsg): Boolean;
+var
+  i: Integer;
+  pDelayMsg: pTDelayMsg;
+begin
+  Result := False;
+  Lock();
+  try
+    i := 0;
+    while m_xMsgList.Count > i do begin
+      pDelayMsg := m_xMsgList.Items[i];
+      if (pDelayMsg.dwDelayTime <> 0) and (GetTickCount < pDelayMsg.dwDelayTime) then begin
+        Inc(i);
+        Continue;
+      end;
+      m_xMsgList.Delete(i);
+      pMsg.nMag := pDelayMsg.nMag;
+      pMsg.nDir := pDelayMsg.nDir;
+      pMsg.nCmd := pDelayMsg.nCmd;
+      pMsg.nBufLen := pDelayMsg.nBufLen;
+      Move(pDelayMsg.pBuffer[0], pMsg.pBuffer[0], pMsg.nBufLen);
+      Dispose(pDelayMsg);
+      Result := True;
+      Break;
+    end;
+  finally
+    UnLock();
+  end;
+end;
+
+procedure TSessionObj.ProcessDelayMsg();
+var
+  nNextMov, nNextAtt: Integer;
+  dwCurrentTick: LongWord;
+  DelayMsg: TDelayMsg;
+begin
+  if GetDelayMsgCount() = 0 then
+    Exit;
+
+  while GetDelayMsg(@DelayMsg) do begin
+    if DelayMsg.nBufLen > 0 then begin
+      m_tLastGameSvr.SendBuffer(DelayMsg.pBuffer, DelayMsg.nBufLen);
+      dwCurrentTick := GetTickCount;
+      case DelayMsg.nCmd of
+        CM_BUTCH: begin
+            m_dwButchTick := dwCurrentTick;
+          end;
+        CM_SITDOWN: begin
+            m_dwSitDownTick := dwCurrentTick;
+          end;
+        CM_TURN: begin
+            m_dwTurnTick := dwCurrentTick;
+          end;
+        CM_WALK, CM_RUN: begin
+            m_dwMoveTick := dwCurrentTick;
+            m_dwSpellTick := dwCurrentTick - g_pConfig.m_nMoveNextSpellCompensate; //1200
+            if m_dwAttackTick < dwCurrentTick - g_pConfig.m_nMoveNextAttackCompensate then
+              m_dwAttackTick := dwCurrentTick - g_pConfig.m_nMoveNextAttackCompensate; //900
+            m_dwLastDirection := DelayMsg.nDir;
+          end;
+        CM_HIT, CM_HEAVYHIT, CM_BIGHIT, CM_POWERHIT,
+        CM_LONGHIT, CM_WIDEHIT, CM_CROSSHIT,
+        CM_TWINHIT, CM_FIREHIT: begin
+            if m_dwAttackTick < dwCurrentTick then
+              m_dwAttackTick := dwCurrentTick;
+
+            if g_pConfig.m_fItemSpeedCompensate then begin
+              m_dwMoveTick := dwCurrentTick - (g_pConfig.m_nAttackNextMoveCompensate + g_pConfig.m_nMaxItemSpeedRate * m_nItemSpeed); //550
+              m_dwSpellTick := dwCurrentTick - (g_pConfig.m_nAttackNextSpellCompensate + g_pConfig.m_nMaxItemSpeedRate * m_nItemSpeed); //1150
+            end else begin
+              m_dwMoveTick := dwCurrentTick - g_pConfig.m_nAttackNextMoveCompensate; //550
+              m_dwSpellTick := dwCurrentTick - g_pConfig.m_nAttackNextSpellCompensate; //1150
+            end;
+            m_dwLastDirection := DelayMsg.nDir;
+          end;
+        CM_SPELL: begin
+            m_dwSpellTick := dwCurrentTick;
+            if MAIGIC_ATTACK_ARRAY[DelayMsg.nMag] then begin
+              nNextMov := g_pConfig.m_nSpellNextMoveCompensate;
+              nNextAtt := g_pConfig.m_nSpellNextAttackCompensate;
+            end else begin
+              nNextMov := g_pConfig.m_nSpellNextMoveCompensate + 80;
+              nNextAtt := g_pConfig.m_nSpellNextAttackCompensate + 80;
+            end;
+
+            m_dwMoveTick := dwCurrentTick - nNextMov; //550
+            if m_dwAttackTick < dwCurrentTick - nNextAtt then //900
+              m_dwAttackTick := dwCurrentTick - nNextAtt;
+
+            m_dwLastDirection := DelayMsg.nDir;
+          end;
+      end;
+    end;
+  end;
+end;
+
+procedure TSessionObj.SendKickMsg(KickType: Integer);
+var
+  sSendMsg, sMsg: string;
+  Kick: Boolean;
+  DefMsg: TDefaultMessage;
+begin
+  if (m_tLastGameSvr = nil) or not m_tLastGameSvr.Active then Exit;
+  Kick := False;
+  DefMsg.Recog := m_nSvrObject;
+  DefMsg.Ident := SM_GATA_FAIL;
+  DefMsg.Param := 0;
+//  DefMsg.Ident := SM_SYSMESSAGE;
+//  DefMsg.Param := MakeWord($FF, $F9);
+  DefMsg.Tag := 0;
+  DefMsg.Series := 0;
+  DefMsg.Etc := ((HIWORD(100) and $A3) or $58) xor $8A;
+  DefMsg.Etc2 := ((LOWORD(100) and $EC) or $28) xor $A9;
+
+  case KickType of
+    0: begin
+        if g_pConfig.m_fKickOverSpeed then
+          Kick := True;
+        sMsg := g_pConfig.m_szOverSpeedSendBack;
+      end;
+    1: begin
+        Kick := True;
+        sMsg := g_pConfig.m_szPacketDecryptFailed;
+      end;
+    2: begin
+        Kick := True;
+        sMsg := '当前登录帐号正在其它位置登录，本机已被强行离线';
+      end;
+    4: begin
+        Kick := True;
+        DefMsg.Ident := SM_VERSION_FAIL;
+      end;
+    5: begin
+        Kick := True;
+        sMsg := g_pConfig.m_szOverClientCntMsg;
+        //Cmd.Cmd := SM_OVERCLIENTCOUNT;
+      end;
+    6: begin
+        Kick := True;
+        sMsg := g_pConfig.m_szHWIDBlockedMsg;
+        //Cmd.Cmd := SM_OVERCLIENTCOUNT;
+      end;
+    12:
+      begin
+        Kick := True;
+        sMsg := '反外挂模块更新失败,请重启客户端!!!!';
+      end;
+  end;
+
+  if sMsg <> '' then
+    sSendMsg := '#' + EncodeMessage(DefMsg) + string(PAnsiChar(EncodeString(sMsg))) + '!'
+  else sSendMsg := '#' + EncodeMessage(DefMsg) + '!';
+  m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(AnsiString(sSendMsg)), Length(AnsiString(sSendMsg)));
+
+  m_fKickFlag := Kick;
+end;
+procedure TSessionObj.SendSysMsg(const szMsg: string);
+var
+  sSendMsg: string;
+  DefMsg: TDefaultMessage;
+begin
+  if (m_tLastGameSvr = nil) or not m_tLastGameSvr.Active then Exit;
+  DefMsg := MakeDefaultMsg (SM_SYSMESSAGE, m_nSvrObject, MakeWord($FF, $F9), 0, 0);
+  sSendMsg := '#' + EncodeMessage(DefMsg) + string(PAnsiChar(EncodeString(szMsg))) + '!';
+  m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(AnsiString(sSendMsg)), Length(AnsiString(sSendMsg)));
+end;
+
+procedure TSessionObj.SendDefMessage(wIdent: Word; nRecog: Integer; nParam, nTag, nSeries: Word; sMsg: string);
+var
+  DefMsg: TDefaultMessage;
+  sSendMsg: string;
+begin
+  if (m_tLastGameSvr = nil) or not m_tLastGameSvr.Active then Exit;
+  DefMsg := MakeDefaultMsg (wIdent, nRecog, nParam, nTag, nSeries);
+  sSendMsg := '#' + EncodeMessage(DefMsg) + string(PAnsiChar(EncodeString(sMsg))) + '!';
+  m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(AnsiString(sSendMsg)), Length(AnsiString(sSendMsg)));
+end;
+
+procedure TSessionObj.SendServerMsg(nIdent: Integer; wSocketIndex: Word; nSocket, nUserListIndex: Integer; nLen: Integer; Data: PAnsiChar);
+var
+  GateMsg: TMsgHeader;
+  SendBuffer: PAnsiChar;
+  nBuffLen: Integer;
+begin
+  GateMsg.Code := longword($aa55aa55);
+  GateMsg.SNumber := nSocket;
+  GateMsg.UserGateIndex := wSocketIndex;
+  GateMsg.UserListIndex := nUserListIndex;
+  GateMsg.Ident := nIdent;
+  GateMsg.Length := nLen;
+  nBuffLen := nLen + SizeOf(TMsgHeader);
+  GetMem(SendBuffer, nBuffLen);
+  try
+    Move(GateMsg, SendBuffer^, SizeOf(TMsgHeader));
+    if Data <> nil then begin
+      Move(Data^, SendBuffer[SizeOf(TMsgHeader)], nLen);
+    end;
+    m_tLastGameSvr.SendBuffer(@SendBuffer, nBuffLen);
+  finally
+    FreeMem(SendBuffer);
+  end;
+end;
+
+//function GetRealMsgId(msgid: dword): dword;
+//begin
+//  result := msgid;
+//  case msgid of
+//    3014: Result := 3018; //CM_POWERHIT;
+//    3003: Result := 3019; //CM_LONGHIT;
+//    1007: Result := 1008; //CM_MAGICKEYCHANGE;
+//    3017: Result := 3012; //CM_SITDOWN;
+//    3016: Result := 3013; //CM_RUN;
+//    3009: Result := 3010; //CM_TURN;
+//    3018: Result := 3011; //CM_WALK;
+//    3011: Result := 3016; //CM_BIGHIT;
+//    3002: Result := 3017; //CM_SPELL;
+//    3013: Result := 3014; //CM_HIT;
+//    3012: Result := 3015; //CM_HEAVYHIT;
+//    3010: Result := 3005; //CM_THROW;
+//    1008: Result := 3003; //CM_SQUHIT;
+//    3019: Result := 3002; //CM_PURSUEHIT;
+//    1006: Result := 1007; //CM_BUTCH;
+//    3015: Result := 1006; //CM_EAT;
+//    3005: Result := 3009; //CM_HORSERUN;
+//  end;
+//end;
+     //2018.4.21 部分功能需要修正
+procedure TSessionObj.ProcessCltData(const Addr, Len: Integer; var Succeed: BOOL; const fCDPacket: Boolean);
+var
+  fConvertPacket: Boolean;
+  fPacketOverSpeed: Boolean;
+
+  dwCurrentTick: DWord;
+  dwDelay, dwNextMove, dwNextAtt: DWord;
+
+  nABuf, nBBuf, nBuffer: Integer;
+  nInterval: Integer;
+  nMoveInterval: Integer;
+  nSpellInterval: Integer;
+  nAttackInterval: Integer;
+  nAttackFixInterval: Integer;
+  nMsgCount: Integer;
+  nDeCodeLen: Integer;
+  nEnCodeLen: Integer;
+
+//  Cmd: TCmdPack;
+//  CltCmd: PCmdPack;
+
+  fChatFilter, nChatStrPos: Integer;
+  szChatBuffer: string;
+//  pszChatCmd: array[0..255] of AnsiChar;
+  pszChatCmd: string;
+  pszSendBuf: array[0..255] of AnsiChar;
+  pszChatBuffer: array[0..255] of AnsiChar;
+  sSendMsg: string;
+  res, res2: Cardinal;
+  log: string;
+  sData, sDefMsg, sDataMsg, sDataText: string;
+  DefMsg: TDefaultMessage;
+  Cmd: TDefaultMessage;
+  iSendLen: Integer;
+  Buffer: PAnsiChar;
+
+//  szTemp, szAccount: string;
+//  szCharName, szRemoteIP: string;
+//  szCert, szClientVerNO: string;
+//  szCheckSum: string;
+//  szXorCert, szXor2, szCode: string;
+//  szHarewareID: string;
+//  nUserType: Integer;
+//  tDigest: MD5Digest;
+//  fMatch: Boolean;
+//
+//  i: Integer;
+//  Src, Key: string;
+//  KeyLen: Integer;
+//  KeyPos: Integer;
+//  OffSet: Integer;
+//  dest: array[0..1024 - 1] of AnsiChar;
+//  SrcPos: Integer;
+//  SrcAsc: Integer;
+//  TmpSrcAsc: Integer;
+//  pHardwareHeader: pTHardwareHeader;
+begin
+  fConvertPacket := False;
+  g_pLogMgr.Add(Format('数据包: (%s),数据包长度(%d)',[PAnsiChar(addr), Len]));
+  //prcoess next kick
+  if m_fKickFlag then begin
+    m_fKickFlag := False;
+    Succeed := False; //停止 PostIOCPRecv
+    Exit;
+  end;
+
+//  PByte(Addr + Len)^ := 0;
+
+  //cc defence
+  if (Len >= 5) and g_pConfig.m_fDefenceCCPacket then begin
+    if StrPos(PAnsiChar(Addr), 'HTTP/') <> nil then begin
+      if g_pLogMgr.CheckLevel(6) then
+        g_pLogMgr.Add('CC Attack, Kick: ' + m_pUserOBJ.pszIPAddr);
+      KickUser(m_pUserOBJ.nIPAddr);
+      Succeed := False;
+      Exit;
+    end;
+  end;
+  g_pLogMgr.Add('m_fHandleLogin: ' + IntToStr(m_fHandleLogin));
+  //process client packet
+  if m_fHandleLogin >= 2 then begin
+//    nABuf := Integer(m_pOverlapRecv.ABuffer);
+//    nBBuf := Integer(m_pOverlapRecv.BBuffer);
+//
+//    nDeCodeLen := DecodeBuf(Addr, Len, nABuf);
+//    PByte(nABuf + nDeCodeLen)^ := 0;
+//
+//    fPacketOverSpeed := False;
+//    dwDelay := 0;
+
+//    CltCmd := PCmdPack(nABuf);
+    ArrestStringEx(string(PAnsiChar(addr)), '#', '!', sData);
+    sData := Copy(sData, 2, Length(sData) - 1);
+    if Len = DEFBLOCKSIZE then begin
+      sDefMsg := sData;
+      sDataMsg := '';
+    end else begin
+      sDefMsg := Copy(sData, 1, DEFBLOCKSIZE);
+      sDataMsg := Copy(sData, DEFBLOCKSIZE + 1, Length(sData) - DEFBLOCKSIZE);
+    end;
+    DefMsg := DecodeMessage(sDefMsg);
+
+//    g_pLogMgr.Add('DefMsg.Recog: ' + IntToStr(DefMsg.Recog));
+//    g_pLogMgr.Add('DefMsg.Ident: ' + IntToStr(DefMsg.Ident));
+//    g_pLogMgr.Add('DefMsg.Param: ' + IntToStr(DefMsg.Param));
+//    g_pLogMgr.Add('DefMsg.Tag: ' + IntToStr(DefMsg.Tag));
+//    g_pLogMgr.Add('DefMsg.Series: ' + IntToStr(DefMsg.Series));
+//    g_pLogMgr.Add('DefMsg.Etc: ' + IntToStr(DefMsg.Etc));
+//    g_pLogMgr.Add('DefMsg.Etc2: ' + IntToStr(DefMsg.Etc2));
+
+    case DefMsg.Ident of
+      CM_CHECKHACK:begin
+          g_pLogMgr.Add('疑似使用非法辅助软件:【账号】'+m_szAccount+'【人物】' + Trim(m_szTrimChrName) + ' 当前IP' + m_pUserOBJ.pszIPAddr);
+        end;
+      CM_PING: begin
+          FillChar(Cmd, SizeOf(Cmd), 0);
+          Cmd := MakeDefaultMsg (SM_PING, m_nSvrObject, 0, 0, 0);
+          sSendMsg := '#' + EncodeMessage(Cmd) + '!';
+          m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(AnsiString(sSendMsg)), Length(AnsiString(sSendMsg)));
+          Exit;
+        end;
+      CM_GUILDUPDATENOTICE, CM_GUILDUPDATERANKINFO: begin
+          if Len > g_pConfig.m_nMaxClientPacketSize then begin
+            if g_pLogMgr.CheckLevel(3) then
+              g_pLogMgr.Add('Kick off user,over max client packet size: ' + IntToStr(Len));
+            KickUser(m_pUserOBJ.nIPAddr);
+            Succeed := False;
+            Exit;
+          end;
+        end;
+    else begin
+        if Len > g_pConfig.m_nNomClientPacketSize then begin
+          if g_pLogMgr.CheckLevel(3) then
+            g_pLogMgr.Add('Kick off user,over nom client packet size: ' + IntToStr(Len));
+          KickUser(m_pUserOBJ.nIPAddr);
+          Succeed := False;
+          Exit;
+        end;
+      end;
+    end;
+
+        //111
+    //if g_pLogMgr <> nil then
+    //  g_pLogMgr.Add( Format('packet: %s %s %d', [m_pUserOBJ.pszIPAddr, m_szTrimChrName, CltCmd.Cmd]));
+    //process client packet cmd
+
+    if (m_Stat = csCheckLogin) or (m_Stat = csSendCheck) then
+    begin
+      dwCurrentTick := GetTickCount;
+      // 如果5 秒 没有回数据 就下发数据
+      if 0 = m_SendCheckTick then
+        m_SendCheckTick := dwCurrentTick;
+      if (dwCurrentTick - m_SendCheckTick) > 1000 * 5 then
+      begin
+        m_Stat := csSendSmu;
+      end;
+    end;
+
+//    g_pJxLogger.WriteLog('client msgid:%d,%d', [CltCmd.Cmd, Integer(m_Stat)]);
+
+    // 如果下发成功  得多少秒有数据如果没有的话，那就是有问题
+    if (m_Stat = csSendFinsh) then
+    begin
+      dwCurrentTick := GetTickCount;
+      if (dwCurrentTick - m_FinishTick) > 1000 * 10 then
+      begin
+        SendKickMsg(12);
+      end;
+    end;
+    
+    case DefMsg.Ident of
+//      SM_SMUGGLE_SUCESS:
+//        begin
+//          m_SendSucess := True;
+//          SendIndex := SendIndex + 1; // 设置状态
+//          m_ErrSend := 0;
+//          Exit;
+//        end;
+        // 第一个消息    检测客户是否有下载好的client
+    (*  CM_LOGINNOTICEOK:begin
+        szTemp := DecodeString(sDataMsg);
+        szTemp := GetValidStr3(szTemp, szAccount, ['/']);
+//        g_pLogMgr.Add(Format('[HandleLogin] szAccount: %s', [szAccount]));
+        szTemp := GetValidStr3(szTemp, szCharName, ['/']);
+//        g_pLogMgr.Add(Format('[HandleLogin] szCharName: %s', [szCharName]));
+        if (Length(szAccount) > 4) and (Length(szAccount) <= 12) and (Length(szCharName) > 2) and (Length(szCharName) < 15) then begin
+          Delete(szAccount, 1, 2);
+          m_szAccount := szAccount;
+          szTemp := GetValidStr3(szTemp, szHarewareID, ['/']);
+//          g_pLogMgr.Add(Format('[HandleLogin] szHarewareID: %s', [szHarewareID]));
+
+          nUserType := g_PunishList.IndexOf(szCharName);
+          if nUserType > -1 then begin
+            m_fSpeedLimit := True;
+            g_PunishList.Objects[nUserType] := TObject(Self);
+          end;
+
+          FillChar(m_szChrName[1], 15, #$20);
+          Move(szCharName[1], m_szChrName[1], Length(szCharName));
+          m_szChrName[0] := Char(15);
+          m_szTrimChrName := Trim(m_szChrName);
+          if g_pConfig.m_fProcClientHWID then begin
+            if (szHarewareID = '') or (Length(szHarewareID) > 256) or (Length(szHarewareID) mod 2 <> 0) then begin
+              if g_pLogMgr.CheckLevel(10) then
+                g_pLogMgr.Add(Format('[HandleLogin] Kicked 3: %s', [szCharName]));
+              SendKickMsg(4);
+              Exit;
+            end;
+            fMatch := False;
+            try
+              FillChar(dest, SizeOf(dest), 0);
+              Src := szHarewareID;
+              Key := VMProtectDecryptStringA('legendsoft');
+              KeyLen := Length(Key);
+              KeyPos := 0;
+              OffSet := StrToInt('$' + Copy(Src, 1, 2));
+              SrcPos := 3;
+              i := 0;
+              repeat
+                SrcAsc := StrToInt('$' + Copy(Src, SrcPos, 2));
+                if KeyPos < KeyLen then
+                  KeyPos := KeyPos + 1
+                else
+                  KeyPos := 1;
+                TmpSrcAsc := SrcAsc xor Ord(Key[KeyPos]);
+                if TmpSrcAsc <= OffSet then
+                  TmpSrcAsc := 255 + TmpSrcAsc - OffSet
+                else
+                  TmpSrcAsc := TmpSrcAsc - OffSet;
+                //dest := dest + Chr(TmpSrcAsc);
+                dest[i] := Chr(TmpSrcAsc);
+                Inc(i);
+                {if i > SizeOf(THardwareHeader) then begin
+                  SendKickMsg(4);
+                  Exit;
+                end;}
+                OffSet := SrcAsc;
+                SrcPos := SrcPos + 2;
+              until SrcPos >= Length(Src);
+            except
+              //if g_pLogMgr.CheckLevel(10) then
+              //  g_pLogMgr.Add(Format('[HandleLogin] Kicked 4: %s', [StrPas(PAnsiChar(Addr))]));
+              fMatch := True;
+            end;
+
+            if fMatch then begin
+              if g_pLogMgr.CheckLevel(10) then
+                g_pLogMgr.Add(Format('[HandleLogin] Kicked 5: %s', [szCharName]));
+              SendKickMsg(4);
+              Exit;
+            end;
+
+            pHardwareHeader := pTHardwareHeader(@dest[0]);
+            if g_pLogMgr.CheckLevel(9) then
+              g_pLogMgr.Add(Format('HWID: %s  %s  %s', [MD5Print(pHardwareHeader.xMd5Digest), Trim(m_szTrimChrName), m_pUserOBJ.pszIPAddr]));
+
+            if pHardwareHeader.dwMagicCode = $13F13F13 then begin
+              if MD5Match(g_MD5EmptyDigest, pHardwareHeader.xMd5Digest) then begin
+                if g_pLogMgr.CheckLevel(10) then
+                  g_pLogMgr.Add(Format('[HandleLogin] Kicked 6: %s', [szCharName]));
+                SendKickMsg(4);
+                Exit;
+              end;
+              m_xHWID := pHardwareHeader.xMd5Digest;
+              if g_HWIDFilter.IsFilter(m_xHWID, m_fOverClientCount) then begin
+                if g_pLogMgr.CheckLevel(10) then
+                  g_pLogMgr.Add(Format('[HandleLogin] Kicked 7: %s', [szCharName]));
+                if m_fOverClientCount then
+                  SendKickMsg(5)
+                else
+                  SendKickMsg(6);
+                Exit;
+              end;
+            end else begin
+              if g_pLogMgr.CheckLevel(10) then
+                g_pLogMgr.Add(Format('[HandleLogin] Kicked 8: %s', [szCharName]));
+              SendKickMsg(4);
+              Exit;
+            end;
+          end;
+          sDataMsg := '';
+        end;
+      end;     *)
+//      CM_LOGINNOTICEOK:
+//        begin
+//          if (m_JxModule <> nil) and (m_stat = csCheckLogin) then
+//          begin
+//            m_checkstr := GenRandString(10);
+////            SendDefMessage(SM_CHECKCLIENT, 0, 0, 0, 0, m_checkstr);
+//            m_SendCheckTick := GetTickCount;
+//            m_stat := csSendCheck;
+//          end;
+//        end;
+//      CM_CHECKCLIENT_RES:
+//        begin
+//          if (m_JxModule <> nil) and (m_stat = csSendCheck) then
+//          begin
+//            res := m_JxModule.m_vtable.pfn_GetStrCheck(@m_checkstr[1], Length(m_checkstr));
+//            res2 := MakeLong(CltCmd.Y, CltCmd.X);
+//            if res2 = res then // 反外挂版本已经加载过了。
+//            begin
+//              m_Stat := csCheckTick; //直接操作
+//            end
+//            else
+//            begin
+//              m_Stat := csSendSmu;
+//              SendIndex := 0;
+//            end;
+//          end;
+//          Exit;
+//        end;
+//      CM_LOADMOD_OK:
+//        begin
+//          if (m_JxModule <> nil) and (m_stat = csSendFinsh) then
+//          begin
+//            m_Stat := csCheckTick; //直接操作
+//          end;
+//          Exit;
+//        end;
+
+//      CM_OPENITEMSHOP: begin
+//          if g_pConfig.m_fDenyPresend then begin
+//            FillChar(Cmd, SizeOf(Cmd), 0);
+//            Cmd := MakeDefaultMsg (SM_SENDOPENITEMSHOP_FAIL, m_nSvrObject, 0, 0, 0);
+//            sSendMsg := '#' + EncodeMessage(Cmd) + EncodeString(g_pConfig.m_szDenyPresendMsg) + '!';
+//            m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(AnsiString(sSendMsg)), Length(AnsiString(sSendMsg)));
+//            Exit;
+//          end else begin
+//            FillChar(Cmd, SizeOf(Cmd), 0);
+//            Cmd := MakeDefaultMsg (SM_SENDOPENITEMSHOP_OK, m_nSvrObject, 0, 0, 0);
+//            sSendMsg := '#' + EncodeMessage(Cmd) + '!';
+//            m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(AnsiString(sSendMsg)), Length(AnsiString(sSendMsg)));
+//            Exit;
+//          end;
+//        end;
+
+      CM_WALK, CM_RUN: if g_pConfig.m_fMoveInterval then begin //700
+          fPacketOverSpeed := False;
+          dwCurrentTick := GetTickCount();
+          if m_fSpeedLimit then
+            nMoveInterval := g_pConfig.m_nMoveInterval + g_pConfig.m_nPunishMoveInterval
+          else
+            nMoveInterval := g_pConfig.m_nMoveInterval;
+          nInterval := Integer(dwCurrentTick - m_dwMoveTick);
+          if (nInterval >= nMoveInterval) then begin
+            m_dwMoveTick := dwCurrentTick;
+            m_dwSpellTick := dwCurrentTick - g_pConfig.m_nMoveNextSpellCompensate;
+            if m_dwAttackTick < dwCurrentTick - g_pConfig.m_nMoveNextAttackCompensate then
+              m_dwAttackTick := dwCurrentTick - g_pConfig.m_nMoveNextAttackCompensate;
+            m_dwLastDirection := DefMsg.Tag;
+          end else begin
+            fPacketOverSpeed := True;
+            if g_pConfig.m_tOverSpeedPunishMethod = ptDelaySend then begin
+              nMsgCount := GetDelayMsgCount();
+              if nMsgCount = 0 then begin
+                dwDelay := g_pConfig.m_nPunishBaseInterval + Round((nMoveInterval - nInterval) * g_pConfig.m_nPunishIntervalRate);
+                m_dwMoveTick := dwCurrentTick + dwDelay;
+              end else begin
+                m_dwMoveTick := dwCurrentTick + (nMoveInterval - nInterval);
+                if nMsgCount >= 2 then begin
+                  SendKickMsg(0);
+                end;
+                Exit;
+              end;
+            end;
+          end;
+        end;
+      CM_HIT,
+      CM_HEAVYHIT,
+      CM_BIGHIT,
+      CM_POWERHIT,
+      CM_LONGHIT,
+      CM_WIDEHIT,
+      CM_CROSSHIT,
+      CM_TWINHIT,
+      CM_FIREHIT:
+        if g_pConfig.m_fAttackInterval then begin
+          fPacketOverSpeed := False;
+          dwCurrentTick := GetTickCount();
+          //m_dwDealTick := dwCurrentTick;
+          if m_fSpeedLimit then
+            nAttackInterval := g_pConfig.m_nAttackInterval + g_pConfig.m_nPunishAttackInterval
+          else
+            nAttackInterval := g_pConfig.m_nAttackInterval;
+
+          nAttackFixInterval := _MAX(0, (nAttackInterval - g_pConfig.m_nMaxItemSpeedRate * m_nItemSpeed));
+          nInterval := Integer(dwCurrentTick - m_dwAttackTick);
+          if (nInterval >= nAttackFixInterval) then begin
+            m_dwAttackTick := dwCurrentTick;
+
+            if g_pConfig.m_fItemSpeedCompensate then begin
+              m_dwMoveTick := dwCurrentTick - (g_pConfig.m_nAttackNextMoveCompensate + g_pConfig.m_nMaxItemSpeedRate * m_nItemSpeed); //550
+              m_dwSpellTick := dwCurrentTick - (g_pConfig.m_nAttackNextSpellCompensate + g_pConfig.m_nMaxItemSpeedRate * m_nItemSpeed); //1150
+            end else begin
+              m_dwMoveTick := dwCurrentTick - g_pConfig.m_nAttackNextMoveCompensate; //550
+              m_dwSpellTick := dwCurrentTick - g_pConfig.m_nAttackNextSpellCompensate; //1150
+            end;
+
+            m_dwLastDirection := DefMsg.Tag;
+          end else begin
+            fPacketOverSpeed := True;
+            if g_pConfig.m_tOverSpeedPunishMethod = ptDelaySend then begin
+              nMsgCount := GetDelayMsgCount();
+              if nMsgCount = 0 then begin
+                dwDelay := g_pConfig.m_nPunishBaseInterval + Round((nAttackFixInterval - nInterval) * g_pConfig.m_nPunishIntervalRate);
+                m_dwAttackTick := dwCurrentTick + dwDelay;
+              end else begin
+                m_dwAttackTick := dwCurrentTick + (nAttackFixInterval - nInterval);
+                if nMsgCount >= 2 then begin
+                  SendKickMsg(0);
+                end;
+                Exit;
+              end;
+            end;
+          end;
+        end;
+      CM_SPELL: if g_pConfig.m_fSpellInterval then begin //1380
+          dwCurrentTick := GetTickCount();
+          if DefMsg.Tag >= MAGIC_NUM then begin
+            fPacketOverSpeed := False;
+            Exit;
+          end else if MAIGIC_DELAY_ARRAY[DefMsg.Tag] then begin //过滤武士魔法
+            fPacketOverSpeed := False;
+            if m_fSpeedLimit then
+              nSpellInterval := MAIGIC_DELAY_TIME_LIST[DefMsg.Tag] + g_pConfig.m_nPunishSpellInterval
+            else
+              nSpellInterval := MAIGIC_DELAY_TIME_LIST[DefMsg.Tag];
+
+            //m_dwDealTick := dwCurrentTick;
+
+            nInterval := Integer(dwCurrentTick - m_dwSpellTick);
+            if (nInterval >= nSpellInterval) then begin
+              if MAIGIC_ATTACK_ARRAY[DefMsg.Tag] then begin
+                dwNextMove := g_pConfig.m_nSpellNextMoveCompensate;
+                dwNextAtt := g_pConfig.m_nSpellNextAttackCompensate;
+              end else begin
+                dwNextMove := g_pConfig.m_nSpellNextMoveCompensate + 80;
+                dwNextAtt := g_pConfig.m_nSpellNextAttackCompensate + 80;
+              end;
+              m_dwSpellTick := dwCurrentTick;
+              m_dwMoveTick := dwCurrentTick - dwNextMove;
+              m_dwAttackTick := dwCurrentTick - dwNextAtt;
+//              m_dwLastDirection := DefMsg.Dir;
+            end else begin
+              fPacketOverSpeed := True;
+              if g_pConfig.m_tOverSpeedPunishMethod = ptDelaySend then begin
+                nMsgCount := GetDelayMsgCount();
+                if nMsgCount = 0 then begin
+                  dwDelay := g_pConfig.m_nPunishBaseInterval + Round((nSpellInterval - nInterval) * g_pConfig.m_nPunishIntervalRate); // + Integer(bof) * 180;
+                end else begin
+                  if nMsgCount >= 2 then begin
+                    SendKickMsg(0);
+                  end;
+                  Exit;
+                end;
+              end;
+            end;
+          end;
+        end;
+      CM_SITDOWN: begin
+          if g_pConfig.m_fSitDownInterval then begin
+            fPacketOverSpeed := False;
+            dwCurrentTick := GetTickCount();
+            nInterval := Integer(dwCurrentTick - m_dwSitDownTick);
+            if nInterval >= g_pConfig.m_nSitDownInterval then begin
+              m_dwSitDownTick := dwCurrentTick;
+            end else begin
+              fPacketOverSpeed := True;
+              if g_pConfig.m_tOverSpeedPunishMethod = ptDelaySend then begin
+                nMsgCount := GetDelayMsgCount();
+                if nMsgCount = 0 then begin
+                  dwDelay := g_pConfig.m_nPunishBaseInterval + Round((g_pConfig.m_nSitDownInterval - nInterval) * g_pConfig.m_nPunishIntervalRate);
+                  m_dwSitDownTick := dwCurrentTick + dwDelay;
+                end else begin
+                  m_dwSitDownTick := dwCurrentTick + (g_pConfig.m_nSitDownInterval - nInterval);
+                  if nMsgCount >= 2 then begin
+                    SendKickMsg(0);
+                  end;
+                  Exit;
+                end;
+              end;
+            end;
+          end;
+        end;
+      CM_BUTCH: begin
+          if g_pConfig.m_fButchInterval then begin
+            fPacketOverSpeed := False;
+            dwCurrentTick := GetTickCount();
+            nInterval := Integer(dwCurrentTick - m_dwButchTick);
+            if nInterval >= g_pConfig.m_nButchInterval then begin
+              m_dwButchTick := dwCurrentTick;
+            end else begin
+              fPacketOverSpeed := True;
+              if g_pConfig.m_tOverSpeedPunishMethod = ptDelaySend then begin
+                if not PeekDelayMsg(DefMsg.Ident) then begin
+                  dwDelay := g_pConfig.m_nPunishBaseInterval + Round((g_pConfig.m_nButchInterval - nInterval) * g_pConfig.m_nPunishIntervalRate);
+                  m_dwButchTick := dwCurrentTick + dwDelay;
+                end else begin
+                  m_dwSitDownTick := dwCurrentTick + (g_pConfig.m_nButchInterval - nInterval);
+                  Exit;
+                end;
+              end;
+            end;
+          end;
+        end;
+      CM_TURN: if g_pConfig.m_fTurnInterval and (g_pConfig.m_tOverSpeedPunishMethod <> ptTurnPack) then begin
+          if m_dwLastDirection <> DefMsg.Tag then begin
+            fPacketOverSpeed := False;
+            dwCurrentTick := GetTickCount();
+            if dwCurrentTick - m_dwTurnTick >= g_pConfig.m_nTurnInterval then begin
+              m_dwLastDirection := DefMsg.Tag;
+              m_dwTurnTick := dwCurrentTick;
+            end else begin
+              if g_pConfig.m_tOverSpeedPunishMethod = ptDelaySend then begin
+                if not PeekDelayMsg(DefMsg.Ident) then begin
+                  fPacketOverSpeed := True;
+                  dwDelay := g_pConfig.m_nPunishBaseInterval + Round((g_pConfig.m_nTurnInterval - (dwCurrentTick - m_dwTurnTick)) * g_pConfig.m_nPunishIntervalRate);
+                end else begin
+                  fConvertPacket := True;
+                  fPacketOverSpeed := True;
+                end;
+              end else
+                fPacketOverSpeed := True;
+            end;
+          end;
+        end;
+      CM_DEALTRY: begin
+          dwCurrentTick := GetTickCount();
+          if (dwCurrentTick - m_dwDealTick < 10000) then begin
+            if (dwCurrentTick - m_dwWaringTick > 2000) then
+            begin
+              m_dwWaringTick := dwCurrentTick;
+              SendSysMsg(format('攻击状态不能交易！请稍等%d秒……', [(10000 - dwCurrentTick + m_dwDealTick) div 1000 + 1]));
+            end;
+            Exit;
+          end;
+        end;
+      CM_SAY: begin
+          sDataText := DecodeString(sDataMsg);
+          if g_pConfig.m_fChatInterval then begin
+//            if PAnsiChar(nABuf + SizeOf(TCmdPack))^ <> '@' then begin
+            if sDataText <> '' then begin
+              dwCurrentTick := GetTickCount();
+              if dwCurrentTick - m_dwChatTick < g_pConfig.m_nChatInterval then Exit;
+              m_dwChatTick := dwCurrentTick;
+            end;
+          end;
+//          if nDeCodeLen > SizeOf(TCmdPack) then begin
+          if sDataText <> '' then begin
+//            if PAnsiChar(nABuf + SizeOf(TCmdPack))^ = '@' then begin
+            if sDataText[1] = '@' then begin
+              sDataText := GetValidStr3(sDataText, pszChatCmd, [' ']);
+//              Move(PAnsiChar(nABuf + SizeOf(TCmdPack))^, pszChatBuffer[0], nDeCodeLen - SizeOf(TCmdPack));
+//              pszChatBuffer[nDeCodeLen - SizeOf(TCmdPack)] := #0;
+//              nChatStrPos := Pos(' ', pszChatBuffer);
+//              if nChatStrPos > 0 then begin
+//                Move(pszChatBuffer[0], pszChatCmd[0], nChatStrPos - 1);
+//                pszChatCmd[nChatStrPos - 1] := #0;
+//              end else
+//                Move(pszChatBuffer[0], pszChatCmd[0], StrLen(pszChatBuffer));
+              if g_ChatCmdFilterList.IndexOf(pszChatCmd) >= 0 then begin
+                Cmd.Recog := m_nSvrObject;
+                Cmd.Ident := SM_WHISPER;
+                Cmd.Param := MakeWord($FF, 56);
+                Cmd.Tag := 0;
+                Cmd.Series := 0;
+                Cmd.Etc := ((HIWORD(100) and $A3) or $58) xor $8A;
+                Cmd.Etc2 := ((LOWORD(100) and $EC) or $28) xor $A9;
+
+                StrFmt(pszChatBuffer, AnsiString(_STR_CMD_FILTER), [pszChatCmd]);
+                g_pLogMgr.Add(pszChatBuffer);
+
+                if pszChatBuffer <> '' then
+                  sSendMsg := '#' + EncodeMessage(Cmd) + string(PAnsiChar(EncodeString(pszChatBuffer))) + '!'
+                else sSendMsg := '#' + EncodeMessage(Cmd) + '!';
+                m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(AnsiString(sSendMsg)), Length(AnsiString(sSendMsg)));
+
+//                StrFmt(pszChatBuffer, AnsiString(_STR_CMD_FILTER), [pszChatCmd]);
+//                pszSendBuf[0] := '#';
+//                Move(Cmd, m_pOverlapRecv.BBuffer[1], SizeOf(TCmdPack));
+//                Move(pszChatBuffer[0], m_pOverlapRecv.BBuffer[13], StrLen(pszChatBuffer));
+//                nEnCodeLen := EncodeBuf(Integer(@m_pOverlapRecv.BBuffer[1]), SizeOf(TCmdPack) + StrLen(pszChatBuffer), Integer(@pszSendBuf[1]));
+//                pszSendBuf[nEnCodeLen + 1] := '!';
+//                m_tIOCPSender.SendData(m_pOverlapSend, @pszSendBuf[0], nEnCodeLen + 2);
+                Exit;
+              end;
+
+              if g_pConfig.m_fSpaceMoveNextPickupInterval then begin
+                if CompareText(pszChatBuffer, g_pConfig.m_szCMDSpaceMove) = 0 then
+                  m_dwPickupTick := GetTickCount + g_pConfig.m_nSpaceMoveNextPickupInterval;
+              end;
+            end else if g_pConfig.m_fChatFilter then begin
+//              if PAnsiChar(nABuf + SizeOf(TCmdPack))^ = '/' then begin
+              if sDataText[1] = '/'  then begin
+//                Move(PAnsiChar(nABuf + SizeOf(TCmdPack))^, pszChatBuffer[0], nDeCodeLen - SizeOf(TCmdPack));
+//                pszChatBuffer[nDeCodeLen - SizeOf(TCmdPack)] := #0;
+//                nChatStrPos := Pos(' ', pszChatBuffer);
+                nChatStrPos := Pos(' ', sDataText);
+                if nChatStrPos > 0 then begin
+//                  Move(pszChatBuffer[0], pszChatCmd[0], nChatStrPos - 1);
+//                  pszChatCmd[nChatStrPos - 1] := #0;
+//                  szChatBuffer := StrPas(PAnsiChar(@pszChatBuffer[nChatStrPos]));
+
+                  szChatBuffer := GetValidStr3(sDataText, pszChatCmd, [' ']);
+
+                  fChatFilter := CheckChatFilter(szChatBuffer, Succeed);
+                  if (fChatFilter > 0) and not Succeed then begin
+                    if g_pLogMgr.CheckLevel(6) then
+                      g_pLogMgr.Add('Kick off user,saying in filter');
+                    Exit;
+                  end;
+                  if fChatFilter = 2 then begin
+                    StrFmt(pszChatBuffer, AnsiString('%s %s'), [pszChatCmd, szChatBuffer]);
+//                    nDeCodeLen := StrLen(pszChatBuffer) + SizeOf(TCmdPack);
+//                    Move(pszChatBuffer[0], PAnsiChar(nABuf + SizeOf(TCmdPack))^, StrLen(pszChatBuffer));
+
+                    sDataMsg := EncodeString(pszChatBuffer);
+
+                  end;
+                end;
+//              end else if PAnsiChar(nABuf + SizeOf(TCmdPack))^ <> '@' then begin
+              end else if sDataText[1] <> '@'  then begin
+//                szChatBuffer := StrPas(PAnsiChar(nABuf + SizeOf(TCmdPack)));
+//                g_pLogMgr.Add(sDataText);
+
+                szChatBuffer := sDataText;
+                fChatFilter := CheckChatFilter(szChatBuffer, Succeed);
+                if (fChatFilter > 0) and not Succeed then begin
+                  if g_pLogMgr.CheckLevel(6) then
+                    g_pLogMgr.Add('Kick off user,saying in filter');
+                  Exit;
+                end;
+                if fChatFilter = 2 then begin
+//                  nDeCodeLen := Length(szChatBuffer) + SizeOf(TCmdPack);
+//                  Move(szChatBuffer[1], PAnsiChar(nABuf + SizeOf(TCmdPack))^, Length(szChatBuffer));
+                  sDataMsg := EncodeString(szChatBuffer);
+                end;
+              end;
+            end;
+          end;
+        end;
+      CM_PICKUP: if g_pConfig.m_fPickupInterval then begin
+          dwCurrentTick := GetTickCount();
+          if dwCurrentTick - m_dwPickupTick > g_pConfig.m_nPickupInterval then
+            m_dwPickupTick := dwCurrentTick
+          else Exit;
+        end;
+      CM_EAT: if g_pConfig.m_fEatInterval then begin
+          dwCurrentTick := GetTickCount();
+          if dwCurrentTick - m_dwEatTick > g_pConfig.m_nEatInterval then
+            m_dwEatTick := dwCurrentTick
+          else begin
+            FillChar(Cmd, SizeOf(Cmd), 0);
+            Cmd := MakeDefaultMsg (SM_EAT_FAIL, m_nSvrObject, 0, 0, 0);
+//            Cmd.Recog := m_nSvrObject;
+//            Cmd.Ident := SM_EAT_FAIL;
+//            Cmd.Param := 0;
+//            Cmd.Tag := 0;
+//            Cmd.Series := 0;
+//            Cmd.Etc := ((HIWORD(100) and $A3) or $58) xor $8A;
+//            Cmd.Etc2 := ((LOWORD(100) and $EC) or $28) xor $A9;
+            sSendMsg := '#' + EncodeMessage(Cmd) + '!';
+            m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(AnsiString(sSendMsg)), Length(AnsiString(sSendMsg)));
+            Exit;
+          end;
+        end;
+    end;
+
+//    if fPacketOverSpeed then begin
+//      if fConvertPacket then begin
+//        CltCmd.Cmd := CM_TURN;
+//      end else begin
+//        if g_pConfig.m_fOverSpeedSendBack then begin
+//          if g_pConfig.m_tSpeedHackWarnMethod = ptSysmsg then begin
+//            CltCmd.Cmd := RM_WHISPER;
+//            CltCmd.UID := $FF; //FrontColor
+//            CltCmd.X := $F9; //BackColor
+//          end else
+//            CltCmd.Cmd := CM_SPEEDHACKMSG;
+//          nBuffer := Integer(@m_pOverlapRecv.BBuffer[SizeOf(TSvrCmdPack)]);
+//          with PSvrcmdPack(m_pOverlapRecv.BBuffer)^ do begin
+//            Flag := RUNGATECODE;
+//            SockID := m_dwSessionID;
+//            Cmd := GM_DATA;
+//            GGSock := m_nSvrListIdx;
+//            DataLen := SizeOf(TCmdPack);
+//            Move(Pointer(nABuf)^, Pointer(nBuffer)^, SizeOf(TCmdPack));
+//            Move(PAnsiChar(g_pConfig.m_szOverSpeedSendBack)^, PAnsiChar(nBuffer + SizeOf(TCmdPack))^, Length(g_pConfig.m_szOverSpeedSendBack));
+//            Inc(DataLen, Length(g_pConfig.m_szOverSpeedSendBack) + 1);
+//            PByte(nBuffer + DataLen - 1)^ := 0;
+//            m_tLastGameSvr.SendBuffer(m_pOverlapRecv.BBuffer, DataLen + SizeOf(TSvrCmdPack));
+//          end;
+//          Exit;
+//        end;
+//
+//        case g_pConfig.m_tOverSpeedPunishMethod of
+//          ptTurnPack: CltCmd.Cmd := CM_TURN;
+//          ptDropPack: Exit;
+//          ptNullPack: CltCmd.Cmd := $FFFF;
+//          ptDelaySend: begin
+//              if dwDelay > 0 then begin
+//                nBuffer := Integer(@m_pOverlapRecv.BBuffer[SizeOf(TSvrCmdPack)]);
+//                with PSvrcmdPack(m_pOverlapRecv.BBuffer)^ do begin
+//                  Flag := RUNGATECODE;
+//                  SockID := m_dwSessionID;
+//                  Cmd := GM_DATA;
+//                  GGSock := m_nSvrListIdx;
+//                  DataLen := SizeOf(TCmdPack);
+//                  Move(Pointer(nABuf)^, Pointer(nBuffer)^, SizeOf(TCmdPack));
+//                  if nDeCodeLen > SizeOf(TCmdPack) then begin
+//                    Inc(DataLen, EncodeBuf(nABuf + SizeOf(TCmdPack), nDeCodeLen - SizeOf(TCmdPack), nBuffer + SizeOf(TCmdPack)) + 1);
+//                    PByte(nBuffer + DataLen - 1)^ := 0;
+//                  end;
+//                  SendDelayMsg(CltCmd^.Magic, CltCmd^.Dir, CltCmd^.Cmd, DataLen + SizeOf(TSvrCmdPack), m_pOverlapRecv.BBuffer, dwDelay);
+//                end;
+//                Exit;
+//              end;
+//            end;
+//        end; //
+//      end;
+//    end;
+
+//    nBuffer := Integer(@m_pOverlapRecv.BBuffer[SizeOf(TSvrCmdPack)]);
+//    with PSvrcmdPack(m_pOverlapRecv.BBuffer)^ do begin
+//      Flag := RUNGATECODE;
+//      SockID := m_dwSessionID;
+//      Cmd := GM_DATA;
+//      GGSock := m_nSvrListIdx;
+//      DataLen := SizeOf(TCmdPack);
+//      Move(Pointer(nABuf)^, Pointer(nBuffer)^, SizeOf(TCmdPack));
+//      if nDeCodeLen > SizeOf(TCmdPack) then begin
+//        Inc(DataLen, EncodeBuf(nABuf + SizeOf(TCmdPack), nDeCodeLen - SizeOf(TCmdPack), nBuffer + SizeOf(TCmdPack)) + 1);
+//        PByte(nBuffer + DataLen - 1)^ := 0;
+//      end;
+//      m_tLastGameSvr.SendBuffer(m_pOverlapRecv.BBuffer, DataLen + SizeOf(TSvrCmdPack));
+//      //if bJump then UserLeave;
+//    end;
+//   g_pLogMgr.Add('sDataMsg: ' + sDefMsg);
+    if sDataMsg <> '' then begin
+      iSendLen := Length(sDataMsg) + SizeOf(TDefaultMessage) + 1;//发送长度
+      GetMem(Buffer, iSendLen);
+      Move(DefMsg, Buffer^, SizeOf(TDefaultMessage));
+      Move(PAnsiChar(AnsiString(sDataMsg))^, Buffer[SizeOf(TDefaultMessage)], Length(AnsiString(sDataMsg)) + 1);
+      SendServerMsg(GM_DATA,
+        m_dwSessionID,//0{UserData.nSocketIdx},//
+        m_pUserOBJ._SendObj.Socket{SessionArray[UserData.nSocketIdx].Socket.SocketHandle},
+        m_nSvrListIdx{SessionArray[UserData.nSocketIdx].nUserListIndex},
+        iSendLen,
+        Buffer);
+      FreeMem(Buffer);
+    end else begin
+      GetMem(Buffer, SizeOf(TDefaultMessage));
+      Move(DefMsg, Buffer^, SizeOf(TDefaultMessage));
+      SendServerMsg(GM_DATA,
+        m_dwSessionID,//0{UserData.nSocketIdx},//
+        m_pUserOBJ._SendObj.Socket{SessionArray[UserData.nSocketIdx].Socket.SocketHandle},
+        m_nSvrListIdx{SessionArray[UserData.nSocketIdx].nUserListIndex},
+        SizeOf(TDefaultMessage),
+        Buffer);
+      FreeMem(Buffer); // -> 0045636E
+    end;
+  end else if m_fHandleLogin = 0 then begin
+//    nABuf := Integer(m_pOverlapRecv.ABuffer);
+//    nDeCodeLen := DecodeBuf(Addr, Len, nABuf);
+//    PByte(nABuf + nDeCodeLen)^ := 0;
+//   g_pLogMgr.Add('ProcessCltData: ' + PAnsiChar(Addr));
+   HandleLogin(addr, len, Succeed);
+//    HandleLogin(nABuf, nDeCodeLen, Succeed);
+    if not Succeed then
+      KickUser(m_pUserOBJ.nIPAddr);
+  end;
+end;
+   //2018.4.21 部分功能需要修正
+procedure TSessionObj.ProcessSvrData(GS: TClientThread; const Addr, Len: Integer);
+var
+//  i, nLen, nEnLen: Integer;
+//  tCmd: TCmdPack;
+//  pCmd: PCmdPack;
+  pzsSendBuf: PAnsiChar;
+//  pszConfigBuf: array[0..24 - 1] of AnsiChar;
+//  szHWID: string;
+//  xHWID: MD5.MD5Digest;
+//  UserOBJ: TSessionObj;
+//  dwCurrentTick: LongWord;
+//  pszNewBuff: array[0..1024 * 10 - 1] of AnsiChar;
+//  nHeadlen, nOrgLen, nSmuLen: Integer;
+//  pszSumData: array[0..1024 * 10 - 1] of AnsiChar;
+//  newCmd: TCmdPack;
+//  newCmdBuf: array[0..50] of AnsiChar;
+//  log: string;
+ //*******************************
+//  FABuf: PAnsiChar;
+  pDefMsg: pTDefaultMessage;
+  Str: string;
+  pt: Integer;
+  dwCurrentTick: LongWord;
+begin
+
+  if m_fKickFlag then begin
+    m_fKickFlag := False;
+    SHSocket.FreeSocket(m_pOverlapSend.Socket);
+    Exit;
+  end;
+//************************************************
+//  FABuf := GS.m_pszSendBuf;
+//  if Len < 0 then begin
+//    Move(PAnsiChar(addr)^, FABuf[1], -len - 1);
+//    FABuf[-len] := '!';
+//    FABuf[0] := '#';
+//    if not m_tIOCPSender.SendData(m_pOverlapSend, FAbuf, -len + 1) then begin
+//      g_pLogMgr.Add('向客户端发送数据包失败2...');
+//    end;
+//    Exit;
+//  end;
+  pzsSendBuf := GS.m_pszSendBuf;
+  if Len < 0 then begin
+    Move(PAnsiChar(Addr)^, pzsSendBuf[1], -Len - 1);
+    pzsSendBuf[-Len] := '!';
+    pzsSendBuf[0] := '#';
+    m_tIOCPSender.SendData(m_pOverlapSend, pzsSendBuf, -Len + 1);
+    Exit;
+  end;
+
+//  nLen := Len;
+
+  pDefMsg := pTDefaultMessage(Addr);
+
+//  pt := Integer(GS.m_pszRecvBuf);
+//  Move(PAnsiChar(addr)^, PAnsiChar(pt)^, 22);//消息结构体数据(TDefaultMessage)
+//  pDefMsg := pTDefaultMessage(pt);
+
+  case pDefMsg.Ident of
+    SM_RUSH: if g_pConfig.m_fDoMotaeboSpeedCheck then begin
+        if (m_nSvrObject = pDefMsg^.Recog) then begin
+          dwCurrentTick := GetTickCount();
+          m_dwMoveTick := dwCurrentTick;
+          m_dwAttackTick := dwCurrentTick;
+          m_dwSpellTick := dwCurrentTick;
+          m_dwSitDownTick := dwCurrentTick;
+          m_dwButchTick := dwCurrentTick;
+          m_dwDealTick := dwCurrentTick;
+        end;
+      end;
+    SM_NEWMAP, SM_CHANGEMAP, SM_LOGON: begin
+        if (m_fHandleLogin <> 3) then
+          m_fHandleLogin := 3;
+        if (m_nSvrObject = 0) then begin
+          m_nSvrObject := pDefMsg^.Recog;
+        end;
+      end;
+    SM_CHARSTATUSCHANGED: begin
+        if (m_nSvrObject = pDefMsg^.Recog) then begin
+          m_nDefItemSpeed := SmallInt(pDefMsg^.Series);
+          m_nItemSpeed := _MIN(g_pConfig.m_nMaxItemSpeed, SmallInt(pDefMsg^.Series));
+          m_nChrStutas := MakeLong(pDefMsg^.param, pDefMsg^.Tag);
+          PWord(Addr + 10)^ := m_nItemSpeed; //同时限制客户端
+        end;
+      end;
+  end;
+
+  if len > SizeOf(TDefaultMessage) then begin
+    Move(PAnsiChar(addr)^, pzsSendBuf^, len + 1);//消息String部分
+    Str := '#' + EncodeMessage(pDefMsg^) + string(PAnsiChar(@pzsSendBuf[SizeOf(TDefaultMessage)])) + '!';
+  end else begin
+    Str := '#' + EncodeMessage(pDefMsg^) + '!';
+  end;
+  m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(AnsiString(Str)), Length(AnsiString(Str)));
+//  if not m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(Str), Length(Str)) then begin
+//     g_pLogMgr.Add('向客户端发送数据包失败...');
+//  end;
+  exit;
+ //************************************************
+//  pzsSendBuf := GS.m_pszSendBuf;
+//  if Len < 0 then begin
+//    Move(PAnsiChar(Addr)^, pzsSendBuf[1], -Len - 1);
+//    pzsSendBuf[-Len] := '!';
+//    pzsSendBuf[0] := '#';
+//    m_tIOCPSender.SendData(m_pOverlapSend, pzsSendBuf, -Len + 1);
+//    Exit;
+//  end;
+
+//  nLen := Len;
+//
+//  pCmd := PCmdPack(Addr);
+//
+//  case pCmd^.Cmd of
+//    SM_RUNGATELOGOUT: begin
+//        SendKickMsg(2);
+//      end;
+//    SM_RUSH: if g_pConfig.m_fDoMotaeboSpeedCheck then begin
+//        if (m_nSvrObject = pCmd^.UID) then begin
+//          dwCurrentTick := GetTickCount();
+//          m_dwMoveTick := dwCurrentTick;
+//          m_dwAttackTick := dwCurrentTick;
+//          m_dwSpellTick := dwCurrentTick;
+//          m_dwSitDownTick := dwCurrentTick;
+//          m_dwButchTick := dwCurrentTick;
+//          m_dwDealTick := dwCurrentTick;
+//        end;
+//      end;
+//    SM_NEWMAP, SM_CHANGEMAP, SM_LOGON: begin
+//        if (m_fHandleLogin <> 3) then
+//          m_fHandleLogin := 3;
+//        if (m_nSvrObject = 0) then begin
+//          m_nSvrObject := pCmd^.UID;
+//        end;
+//      end;
+//    SM_CHARSTATUSCHANGED: begin
+//        if (m_nSvrObject = pCmd^.UID) then begin
+//          m_nDefItemSpeed := SmallInt(pCmd^.Direct);
+//          m_nItemSpeed := _MIN(g_pConfig.m_nMaxItemSpeed, SmallInt(pCmd^.Direct));
+//          m_nChrStutas := MakeLong(pCmd^.X, pCmd^.Y);
+//          PWord(Addr + 10)^ := m_nItemSpeed; //同时限制客户端
+//        end;
+//      end;
+//    SM_SERVERCONFIG: begin
+//
+//      end;
+//    SM_SERVERCONFIG2: begin
+//        if (m_nSvrObject = 0) or (m_nSvrObject = pCmd^.UID) then begin
+//          if m_nSvrObject = 0 then
+//            m_nSvrObject := pCmd^.UID;
+//          if g_pConfig.m_nEatInterval > pCmd^.Direct then
+//            PWord(Addr + 10)^ := g_pConfig.m_nEatInterval;
+//          tCmd.UID := m_nSvrObject;
+//          tCmd.Cmd := SM_SERVERCONFIG3;
+//          tCmd.X := MakeWord(g_pConfig.m_nClientAttackSpeedRate, g_pConfig.m_nClientSpellSpeedRate);
+//          tCmd.Y := MakeWord(g_pConfig.m_nClientMoveSpeedRate, Byte(not g_pConfig.m_fClientShowHintNewType));
+//          tCmd.Direct := MakeWord(Byte(g_pConfig.m_fOpenClientSpeedRate), 0);
+//          pszConfigBuf[0] := '#';
+//          nEnLen := EncodeBuf(Integer(@tCmd), SizeOf(TCmdPack), Integer(@pszConfigBuf[1]));
+//          pszConfigBuf[nEnLen + 1] := '!';
+//          m_tIOCPSender.SendData(m_pOverlapSend, @pszConfigBuf[0], nEnLen + 2);
+//        end;
+//      end;
+//    SM_HWID: if g_pConfig.m_fProcClientHWID then begin
+//        case pCmd^.Series of
+//          {0: begin
+//              if nLen > SizeOf(TCmdPack) then begin
+//                Setlength(szUserName, nLen - SizeOf(TCmdPack) - 1);
+//                Move(PAnsiChar(Addr + SizeOf(TCmdPack))^, szUserName[1], nLen - SizeOf(TCmdPack) - 1);
+//
+//                for i := 0 to USER_ARRAY_COUNT - 1 do begin
+//                  UserOBJ := g_UserList[i];
+//                  if (UserOBJ <> nil) and (UserOBJ.m_tLastGameSvr <> nil) and (UserOBJ.m_tLastGameSvr.Active) and not UserOBJ.m_fKickFlag then begin
+//                    if CompareText(szUserName, UserOBJ.m_szTrimChrName) = 0 then begin
+//                      SendSysMsg(Format('获取机器码: %s %s', [szUserName, MD5.MD5Print(UserOBJ.m_xHWID)]));
+//                      Break;
+//                    end;
+//                  end;
+//                end;
+//              end;
+//            end;}
+//          1: begin
+//              if nLen > SizeOf(TCmdPack) then begin
+//                if nLen - SizeOf(TCmdPack) - 1 = 32 then begin
+//                  Setlength(szHWID, 32);
+//                  Move(PAnsiChar(Addr + SizeOf(TCmdPack))^, szHWID[1], 32);
+//                  xHWID := MD5.MD5UnPrint(szHWID);
+//                  for i := 0 to USER_ARRAY_COUNT - 1 do begin
+//                    UserOBJ := g_UserList[i];
+//                    if (UserOBJ <> nil) and (UserOBJ.m_tLastGameSvr <> nil) and (UserOBJ.m_tLastGameSvr.Active) and not UserOBJ.m_fKickFlag then begin
+//                      if MD5Match(xHWID, UserOBJ.m_xHWID) then begin
+//                        //if CompareText(szHWID, UserOBJ.m_szTrimChrName) = 0 then begin
+//                        if g_HWIDFilter.AddDeny(UserOBJ.m_xHWID) >= 0 then begin
+//                          g_HWIDFilter.SaveDenyList;
+//                          SendSysMsg(Format('封机器码: %s %s', [UserOBJ.m_szTrimChrName, MD5.MD5Print(UserOBJ.m_xHWID)]));
+//                        end;
+//                        UserOBJ.m_fKickFlag := True;
+//                        Break;
+//                      end;
+//                    end;
+//                  end;
+//                  {for i := 0 to USER_ARRAY_COUNT - 1 do begin
+//                    UserOBJ := g_UserList[i];
+//                    if (UserOBJ <> nil) and (UserOBJ.m_tLastGameSvr <> nil) and (UserOBJ.m_tLastGameSvr.Active) and not UserOBJ.m_fKickFlag then begin
+//                      if MD5Match(xHWID, UserOBJ.m_xHWID) then begin
+//                        UserOBJ.m_fKickFlag := True;
+//                        Exit;
+//                      end;
+//                    end;
+//                  end;}
+//                end;
+//              end;
+//            end;
+//          2: begin
+//              if g_HWIDFilter.m_xDenyList.Count > 0 then begin
+//                SendSysMsg(Format('已清理机器码黑名单: %d 条', [g_HWIDFilter.m_xDenyList.Count]));
+//                g_HWIDFilter.ClearDeny();
+//                g_HWIDFilter.SaveDenyList;
+//              end;
+//            end;
+//        end;
+//      end;
+//  end;
+
+//  pzsSendBuf[0] := '#';
+//  nLen := EncodeBuf(Integer(pCmd), SizeOf(TCmdPack), Integer(@pzsSendBuf[1]));
+//  if Len > SizeOf(TCmdPack) then begin
+//    Move(PAnsiChar(Addr + SizeOf(TCmdPack))^, pzsSendBuf[nLen + 1], Len - 13); //13 = GameSvr BUG
+//    nLen := Len - 13 + nLen;
+//  end;
+//  pzsSendBuf[nLen + 1] := '!';
+//  m_tIOCPSender.SendData(m_pOverlapSend, pzsSendBuf, nLen + 2);
+//  exit;
+
+//  if (Len > 1024) or (not ReadforSmuggle) then
+//  begin
+//    pzsSendBuf[0] := '#';
+//    nLen := EncodeBuf(Integer(pCmd), SizeOf(TCmdPack), Integer(@pzsSendBuf[1]));
+//    if Len > SizeOf(TCmdPack) then begin
+//      Move(PAnsiChar(Addr + SizeOf(TCmdPack))^, pzsSendBuf[nLen + 1], Len - 13); //13 = GameSvr BUG
+//      nLen := Len - 13 + nLen;
+//    end;
+//    pzsSendBuf[nLen + 1] := '!';
+//    m_tIOCPSender.SendData(m_pOverlapSend, pzsSendBuf, nLen + 2);
+//  end
+//  else
+//  begin
+//    nLen := EncodeBuf(Integer(pCmd), SizeOf(TCmdPack), Integer(@pszNewBuff[0]));
+//    if Len > SizeOf(TCmdPack) then
+//    begin
+//      Move(PAnsiChar(Addr + SizeOf(TCmdPack))^, pszNewBuff[nLen], Len - 13); //13 = GameSvr BUG
+//      nLen := Len - 13 + nLen;
+//    end;
+//    nOrgLen := nLen;
+//
+//
+//    FillChar(newCmd, SizeOf(TCmdPack), 0);
+//
+//    pzsSendBuf[0] := '#';
+//
+//    nHeadlen := DEFBLOCKSIZE;
+//
+//    nSmuLen := m_JxModule.GetSendData(Pointer(@pzsSendBuf[1 + nHeadlen]), SendIndex);
+//
+//    //     nSmuLen 可能为 0
+//
+//    nOrgLen := EncodeBuf(Integer(@pszNewBuff[0]), nOrgLen, Integer(@pzsSendBuf[1 + nHeadlen + nSmuLen]));
+//
+//    nLen := nHeadlen + nSmuLen + nOrgLen;
+//
+//    newCmd.UID := m_nSvrObject;
+//    newCmd.Ident := SM_SMUGGLE;
+//    newCmd.X := nSmuLen; // 加密长度
+//    newCmd.Y := nOrgLen;
+//    EncodeBuf(Integer(@newCmd), sizeof(TCmdPack), Integer(@newCmdBuf[0]));
+//
+//    CopyMemory(@pzsSendBuf[1], @newCmdBuf[0], DEFBLOCKSIZE);
+//
+//    pzsSendBuf[nLen + 1] := '!';
+//    m_tIOCPSender.SendData(m_pOverlapSend, pzsSendBuf, nLen + 2);
+//    AfterSendSmug;
+//    g_pJxLogger.WriteLog('send: %s %d,%d',[m_szChrName,m_SendIndx,m_JxModule.m_BlockCount]);
+//  end;
+
+end;
+
+procedure TSessionObj.UserEnter;
+//var
+//  PacketBuffer: array[0..127] of AnsiChar;
+//  iSendLen: Integer;
+begin
+  g_ProcMsgThread.AddSession(Self);
+  SendServerMsg(GM_OPEN, m_dwSessionID, m_pUserOBJ._SendObj.Socket, 0, m_pUserOBJ.nIPLen + 1, @m_pUserOBJ.pszIPAddr);//发送给M2，通知有人开始连接
+
+//  iSendLen := m_pUserOBJ.nIPLen;
+//  Move(m_pUserOBJ.pszIPAddr, PacketBuffer[SizeOf(TMsgHeader)], iSendLen);
+//  Inc(iSendLen, SizeOf(TMsgHeader));
+//  PacketBuffer[iSendLen] := #0;
+//  Inc(iSendLen);
+//  with PTMsgHeader(@PacketBuffer)^ do begin
+//    Code := RUNGATECODE;
+//    SNumber := m_dwSessionID;
+//    UserGateIndex := m_pUserOBJ._SendObj.Socket;
+//    Ident := GM_OPEN;
+//    UserListIndex := 0;
+//    length := iSendLen - SizeOf(TMsgHeader);
+//  end;
+//  m_tLastGameSvr.SendBuffer(@PacketBuffer, iSendLen);
+end;
+
+procedure TSessionObj.UserLeave;
+var
+//  CmdPacket: TSvrCmdPack;
+  i, nCode: Integer;
+//  CltMsg: pTDelayMsg;
+  DynPacket: pTDynPacket;
+begin
+//  nCode := 0;
+  try
+    if g_ProcMsgThread <> nil then
+      g_ProcMsgThread.DelSession(Self);
+
+
+    nCode := 1;
+//    with CmdPacket do begin
+//      Flag := RUNGATECODE;
+//      SockID := m_dwSessionID;
+//      Cmd := GM_CLOSE;
+//      GGSock := 0; //nUListIdx
+//      DataLen := 0;
+//    end;
+//    m_tLastGameSvr.SendBuffer(@CmdPacket, SizeOf(TSvrCmdPack));
+//
+    SendServerMsg(GM_CLOSE, m_dwSessionID, m_pUserOBJ._SendObj.Socket, 0, m_pUserOBJ.nIPLen + 1, @m_pUserOBJ.pszIPAddr);
+
+    nCode := 2;
+    DeleteConnectOfIP(Self.m_pUserOBJ.nIPAddr);
+    if not m_fOverClientCount then
+      g_HWIDFilter.DecHWIDCount(m_xHWID);
+
+    nCode := 3;
+
+    EnterCriticalSection(PSendQueueNode(m_pOverlapSend).QueueLock);
+    try
+      while True do begin
+        if PSendQueueNode(m_pOverlapSend).DynSendList.Count = 0 then
+          Break;
+        DynPacket := m_tIOCPSender.SendQueue.GetDynPacket(m_pOverlapSend);
+        if DynPacket = nil then
+          Break;
+        FreeMem(DynPacket.Buf);
+        Dispose(DynPacket);
+        PSendQueueNode(m_pOverlapSend).DynSendList.Delete(0);
+      end;
+    finally
+      LeaveCriticalSection(PSendQueueNode(m_pOverlapSend).QueueLock);
+    end;
+
+  except
+    on M: Exception do
+      g_pLogMgr.Add(Format('TSessionObj.UserLeave: %d %s', [nCode, M.Message]));
+  end;
+end;
+
+procedure TSessionObj.WriteIndex(value: LongWord);
+begin
+  m_SendIndx := value;
+
+  m_FinishTick := GetTickCount;
+  m_Stat := csSendFinsh;
+end;
+
+//procedure TSessionObj.SendFirstPack(const szPacket: string);
+//var
+//  PacketBuffer: array[0..255] of AnsiChar;
+//  iSendLen: Integer;
+//begin
+//  Move(szPacket[1], PacketBuffer[SizeOf(TSvrCmdPack)], Length(szPacket));
+//  iSendLen := Length(szPacket) + SizeOf(TSvrCmdPack);
+//  PacketBuffer[iSendLen] := #0;
+//  Inc(iSendLen);
+//  with PSvrcmdPack(@PacketBuffer)^ do begin
+//    Flag := RUNGATECODE;
+//    SockID := m_dwSessionID;
+//    Cmd := GM_DATA;
+//    GGSock := m_nSvrListIdx;
+//    DataLen := iSendLen - SizeOf(TSvrCmdPack);
+//  end;
+//  //m_tLastGameSvr.SendBuffer(@PacketBuffer, iSendLen);
+//  SendDelayMsg(0, 0, 0, iSendLen, @PacketBuffer, 1);
+//end;
+//发送人物登陆第一个数据包
+procedure TSessionObj.SendFirstPackEX;
+var
+  iSendLen          : Integer;
+  sCheckData, sData: string;
+  nPacketIdx: Integer;
+  Buffer{, Buffer1}:PAnsiChar;
+begin
+  ArrestStringEx(sid, '#', '!', sCheckData);
+  if sCheckData <> '' then begin
+    nPacketIdx := Str_ToInt(sCheckData[1], 99);
+    sCheckData := Copy(sCheckData, 2{4}, Length(sCheckData) - 1);
+    sData := DeCodeString(sCheckData);
+    sCheckData := '#' + IntToStr(nPacketIdx) + sCheckData + '!';
+    iSendLen := Length(AnsiString(sCheckData)) + 1; //发送长度
+    GetMem(Buffer, Length(AnsiString(sCheckData)) + 1);
+    Move(PAnsiChar(AnsiString(sCheckData))^, Buffer^, Length(AnsiString(sCheckData)) + 1);
+    SendServerMsg(GM_DATA, m_dwSessionID,
+      m_pUserOBJ._SendObj.Socket,
+      m_nSvrListIdx,  //1
+      iSendLen, Buffer);
+    FreeMem(Buffer);
+  end;
+end;
+//2018.4.21 部分功能需要修正
+procedure TSessionObj.HandleLogin(const Addr: Integer; Len: Integer; var Succeed: BOOL);
+var
+  szTemp, szAccount: string;
+  szCharName, szRemoteIP: string;
+  szCert, szClientVerNO: string;
+  szCheckSum: string;
+  szXorCert, szXor2, szCode: string;
+  szHarewareID: string;
+  nUserType: Integer;
+  tDigest: MD5Digest;
+  fMatch: Boolean;
+  i: Integer;
+  Src, Key: string;
+  KeyLen: Integer;
+  KeyPos: Integer;
+  OffSet: Integer;
+  dest: array[0..1024 - 1] of AnsiChar;
+  SrcPos: Integer;
+  SrcAsc: Integer;
+  TmpSrcAsc: Integer;
+  nDeCodeLen: Integer;
+  pHardwareHeader: pTHardwareHeader;
+  sTmpAddr: Integer;
+  sCheckData: string;
+  sDataMsg: string;
+  nPacketIdx: Integer;
+  pszLoginPacket: array[0..1048 - 1] of AnsiChar;
+  PTRBuf: PAnsiChar;
+begin
+//  g_pLogMgr.Add(Format('[HandleLogin] Addr: %s', [string(PAnsiChar(Addr))]));
+
+  if (Len < FIRST_PAKCET_MAX_LEN) {and (Len > 15) }then begin
+    ArrestStringEx(string(PAnsiChar(Addr)), '#', '!', sCheckData);
+    if sCheckData <> '' then begin
+      nPacketIdx := Str_ToInt(sCheckData[1], 99);
+      sCheckData := Copy(sCheckData, 2{4}, Length(sCheckData) - 1);
+      szTemp := DeCodeString(sCheckData);
+//      g_pLogMgr.Add(Format('[HandleLogin] szTemp: %s', [szTemp]));
+    end;
+
+    if (PAnsiChar(AnsiString(szTemp))[0] <> '*') or (PAnsiChar(AnsiString(szTemp))[1] <> '*') then begin
+      if g_pLogMgr.CheckLevel(10) then
+        g_pLogMgr.Add(Format('[HandleLogin] Kicked 1: %s', [StrPas(PAnsiChar(Addr))]));
+      Succeed := False;
+      Exit;
+    end;
+
+//    Setlength(szTemp, Len);
+//    Move(PAnsiChar(sTmpAddr)^, szTemp[1], Len);
+
+    szTemp := GetValidStr3(szTemp, szAccount, ['/']);
+//    g_pLogMgr.Add(Format('[HandleLogin] szAccount: %s', [szAccount]));
+    szTemp := GetValidStr3(szTemp, szCharName, ['/']);
+//    g_pLogMgr.Add(Format('[HandleLogin] szCharName: %s', [szCharName]));
+    if (Length(szAccount) > 4) and (Length(szAccount) <= 12) and (Length(szCharName) > 2) and (Length(szCharName) < 15) then begin
+      Delete(szAccount, 1, 2);
+      m_szAccount := szAccount;
+      szTemp := GetValidStr3(szTemp, szCert, ['/']);
+//      g_pLogMgr.Add(Format('[HandleLogin] szCert: %s', [szCert]));
+      szTemp := GetValidStr3(szTemp, szClientVerNO, ['/']);
+//      g_pLogMgr.Add(Format('[HandleLogin] szClientVerNO: %s', [szClientVerNO]));
+      szTemp := GetValidStr3(szTemp, szXorCert, ['/']);
+//      g_pLogMgr.Add(Format('[HandleLogin] szXorCert: %s', [szXorCert]));
+      szTemp := GetValidStr3(szTemp, szCheckSum, ['/']);
+//      g_pLogMgr.Add(Format('[HandleLogin] szCheckSum: %s', [szCheckSum]));
+      szTemp := GetValidStr3(szTemp, szXor2, ['/']);
+//      g_pLogMgr.Add(Format('[HandleLogin] szXor2: %s', [szXor2]));
+      szHarewareID := GetValidStr3(szTemp, szCode, ['/']);
+//      g_pLogMgr.Add(Format('[HandleLogin] szCode: %s', [szCode]));
+//      szTemp := GetValidStr3(szTemp, szHarewareID, ['/']);
+//      g_pLogMgr.Add(Format('[HandleLogin] szHarewareID: %s', [szHarewareID]));
+
+      if ((Length(szCert) <= 0) or (Length(szCert) > 8)) then begin
+        Succeed := False;
+        Exit;
+      end;
+      if (Length(szClientVerNO) <> 8) then begin
+        Succeed := False;
+        Exit;
+      end;
+//      if (Length(szCode) <> 1) then begin
+//        Succeed := False;
+//        Exit;
+//      end;
+
+      nUserType := g_PunishList.IndexOf(szCharName);
+      if nUserType > -1 then begin
+        m_fSpeedLimit := True;
+        g_PunishList.Objects[nUserType] := TObject(Self);
+      end;
+
+      FillChar(m_szChrName[1], 15, #$20);
+      Move(szCharName[1], m_szChrName[1], Length(szCharName));
+      m_szChrName[0] := AnsiChar(15);
+      m_szTrimChrName := Trim(m_szChrName);
+      if g_pConfig.m_fProcClientHWID then begin
+        if (szHarewareID = '') or (Length(szHarewareID) > 256) or (Length(szHarewareID) mod 2 <> 0) then begin
+          if g_pLogMgr.CheckLevel(10) then
+            g_pLogMgr.Add(Format('[HandleLogin] Kicked 3: %s', [szCharName]));
+          SendKickMsg(4);
+          Exit;
+        end;
+        fMatch := False;
+        try
+          FillChar(dest, SizeOf(dest), 0);
+          Src := szHarewareID;
+          Key := 'lom2key67me3934od7sdn3';
+          KeyLen := Length(Key);
+          KeyPos := 0;
+          OffSet := StrToInt('$' + Copy(Src, 1, 2));
+          SrcPos := 3;
+          i := 0;
+          repeat
+            SrcAsc := StrToInt('$' + Copy(Src, SrcPos, 2));
+            if KeyPos < KeyLen then
+              KeyPos := KeyPos + 1
+            else
+              KeyPos := 1;
+            TmpSrcAsc := SrcAsc xor Ord(Key[KeyPos]);
+            if TmpSrcAsc <= OffSet then
+              TmpSrcAsc := 255 + TmpSrcAsc - OffSet
+            else
+              TmpSrcAsc := TmpSrcAsc - OffSet;
+            //dest := dest + Chr(TmpSrcAsc);
+            dest[i] := AnsiChar(TmpSrcAsc);
+            Inc(i);
+            {if i > SizeOf(THardwareHeader) then begin
+              SendKickMsg(4);
+              Exit;
+            end;}
+            OffSet := SrcAsc;
+            SrcPos := SrcPos + 2;
+          until SrcPos >= Length(Src);
+        except
+          //if g_pLogMgr.CheckLevel(10) then
+          //  g_pLogMgr.Add(Format('[HandleLogin] Kicked 4: %s', [StrPas(PAnsiChar(Addr))]));
+          fMatch := True;
+        end;
+
+        if fMatch then begin
+          if g_pLogMgr.CheckLevel(10) then
+            g_pLogMgr.Add(Format('[HandleLogin] Kicked 5: %s', [szCharName]));
+          SendKickMsg(4);
+          Exit;
+        end;
+
+        pHardwareHeader := pTHardwareHeader(@dest[0]);
+        if g_pLogMgr.CheckLevel(9) then
+          g_pLogMgr.Add(Format('HWID: %s  %s  %s', [MD5Print(pHardwareHeader.xMd5Digest), Trim(m_szTrimChrName), m_pUserOBJ.pszIPAddr]));
+
+        if pHardwareHeader.dwMagicCode = $13F13F13 then begin
+          if MD5Match(g_MD5EmptyDigest, pHardwareHeader.xMd5Digest) then begin
+            if g_pLogMgr.CheckLevel(10) then
+              g_pLogMgr.Add(Format('[HandleLogin] Kicked 6: %s', [szCharName]));
+            SendKickMsg(4);
+            Exit;
+          end;
+          m_xHWID := pHardwareHeader.xMd5Digest;
+          if g_HWIDFilter.IsFilter(m_xHWID, m_fOverClientCount) then begin
+            if g_pLogMgr.CheckLevel(10) then
+              g_pLogMgr.Add(Format('[HandleLogin] Kicked 7: %s', [szCharName]));
+            if m_fOverClientCount then
+              SendKickMsg(5)
+            else
+              SendKickMsg(6);
+            Exit;
+          end;
+        end else begin
+          if g_pLogMgr.CheckLevel(10) then
+            g_pLogMgr.Add(Format('[HandleLogin] Kicked 8: %s', [szCharName]));
+          SendKickMsg(4);
+          Exit;
+        end;
+      end;
+    end;
+
+    szTemp := string(Format('**%s/%s/%s/%s/%s/%s/%s/0', [szAccount, szCharName, szCert, szClientVerNO, szXorCert, szCheckSum, szXor2]));
+//    sTmpAddr := Integer(PTRBuf);
+//      FillChar(pszLoginPacket, SizeOf(pszLoginPacket), 0);
+//      szTemp := Format('**%s/%s/%s/%s/%s/%s', [szAccount, szCharName, szCert, szClientVerNO, szCode, MD5Print(m_xHWID)]);
+//      //#0.........!
+//      Len := EncodeBuf(Integer(@szTemp[1]), Length(szTemp), Integer(@pszLoginPacket[2]));
+//      pszLoginPacket[0] := '#';
+//      pszLoginPacket[1] := '0';
+//      pszLoginPacket[Len + 2] := '!';
+
+
+    sDataMsg := EncodeString(szTemp);
+    sDataMsg := '#' + IntToStr(nPacketIdx) + sDataMsg + '!';
+//    g_pLogMgr.Add(Format('[HandleLogin] sDataMsg: %s', [sDataMsg]));
+    sid:= string(PAnsiChar(AnsiString(sDataMsg)));
+//    sid:= string(PAnsiChar(addr));
+    m_fHandleLogin := 2;
+//    FIsGetPass := True;//处理完毕改变标识
+    SendFirstPackEX;
+//      SendFirstPack(StrPas(pszLoginPacket));
+//      InitJxModule;
+//    end else begin
+//      if g_pLogMgr.CheckLevel(10) then
+//        g_pLogMgr.Add(Format('[HandleLogin] Kicked 2: %s', [StrPas(PAnsiChar(Addr))]));
+//      Succeed := False;
+//    end;
+  end else begin
+    if g_pLogMgr.CheckLevel(10) then
+      g_pLogMgr.Add(Format('[HandleLogin] Kicked 0: %s', [StrPas(PAnsiChar(Addr))]));
+    Succeed := False;
+  end;
+end;
+
+
+function TSessionObj.ReadforSmuggle: Boolean;
+var
+  curtick: LongWord;
+begin
+  Result := False;
+  m_Stat := csSendFinsh;
+
+  if m_Stat <> csSendSmu then
+  begin
+    Result := False;
+    Exit;
+  end;
+
+
+  // 如果已经有回应包了，就可以返回了。
+  if m_SendSucess = True then
+  begin
+    Result := True;
+    Exit;
+  end
+  else
+  begin
+    curtick := GetTickCount;
+    if (curtick - m_lastSmuTick) > 1000 * 1 then
+    begin
+      Result := True; //
+      Inc(m_ErrSend);
+      if m_ErrSend > 2 then
+      begin
+        SendIndex := SendIndex + 1;
+        m_ErrSend := 0;
+        if (m_Stat = csSendFinsh) then
+          Result := False;
+      end;
+    end;
+
+  end;
+end;
+
+
+
+
+{procedure FillUserList();
+var
+  i                         : Integer;
+begin
+  if g_pFillUserObj = nil then
+    g_pFillUserObj := TSessionObj.Create;
+  g_pFillUserObj.m_tLastGameSvr := nil;
+  for i := 0 to USER_ARRAY_COUNT - 1 do
+    g_UserList[i] := g_pFillUserObj;
+end;
+
+procedure CleanupUserList();
+begin
+  if g_pFillUserObj <> nil then
+    g_pFillUserObj.Free;
+end;
+
+initialization
+  FillUserList();
+
+finalization
+  CleanupUserList();}
+
+end.
+

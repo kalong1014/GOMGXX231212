@@ -1,0 +1,244 @@
+program Login;
+
+{$WEAKLINKRTTI ON}
+{$RTTI EXPLICIT METHODS([]) PROPERTIES([]) FIELDS([])}
+
+{$R *.dres}
+
+uses
+  Windows,
+  SysUtils,
+  Forms,
+  ComObj,
+  ActiveX,
+  ShlObj,
+  ShellAPI,
+  uFirewall,
+  uEDCode,
+  IOUtils,
+  Dialogs,
+  uSplashFrm in 'uSplashFrm.pas' {SplashForm_Login_77M2},
+  uMainFrm in 'uMainFrm.pas' {MainForm},
+  uKernelMonitor in 'uKernelMonitor.pas' {DMKernelMonitor: TDataModule},
+  uChangPwd in 'uChangPwd.pas' {FRMChangePWD},
+  uGameSetting in 'uGameSetting.pas' {FrmSetting},
+  uHomeSearch in 'uHomeSearch.pas' {frmDirChoose},
+  uLogin in 'uLogin.pas',
+  uUpdateTools in 'uUpdateTools.pas',
+  uNewAccount in 'uNewAccount.pas' {FrmNewAccount},
+  uGetBackPwd in 'uGetBackPwd.pas' {frmGetBackPwd},
+  uLog in '..\Common\uLog.pas',
+  uMiniResDownloader in 'uMiniResDownloader.pas',
+  uMiniResFileInfo in 'uMiniResFileInfo.pas',
+  WzlMerge in '..\MiniClientTool\WzlMerge.pas',
+  WIL in '..\SceneUI\WIL.pas',
+  WzlSpliter in '..\MiniClientTool\WzlSpliter.pas';
+
+{$R *.res}
+
+procedure CreateAndExecBatFile(const OldExeName, NewExeName: String);
+var
+  BatchFile: TextFile;
+  BatchFileName: string;
+  ProcessInfo: TProcessInformation;
+  StartUpInfo: TStartupInfo;
+begin
+  BatchFileName := IOUtils.TPath.GetTempFileName;
+  DeleteFile(BatchFileName);
+  BatchFileName := BatchFileName + '.bat';
+  AssignFile(BatchFile, BatchFileName);
+  Rewrite(BatchFile);
+
+  WriteLn(BatchFile, Format('start "" /d"%s" "%s"', [ExtractFilePath(NewExeName), NewExeName]));
+
+  WriteLn(BatchFile, ':DelMySelf');
+  WriteLn(BatchFile, 'del "'+ OldExeName +'"');
+  WriteLn(BatchFile, 'if exist "'+OldExeName+'" goto DelMySelf');
+
+  Writeln(BatchFile, 'del %0');
+  CloseFile(BatchFile);
+
+  FillChar(StartUpInfo, SizeOf(StartUpInfo), $00);
+  StartUpInfo.dwFlags := STARTF_USESHOWWINDOW;
+  StartUpInfo.wShowWindow := SW_HIDE;
+  if CreateProcess(nil, PWideChar(BatchFileName), nil, nil,
+      False, IDLE_PRIORITY_CLASS, nil, nil, StartUpInfo,
+      ProcessInfo) then
+  begin
+    CloseHandle(ProcessInfo.hThread);
+    CloseHandle(ProcessInfo.hProcess);
+  end;
+end;
+
+procedure KillSelf();
+var
+  BatchFile: TextFile;
+  BatchFileName,FileName: string;
+  ProcessInfo: TProcessInformation;
+  StartUpInfo: TStartupInfo;
+begin
+  BatchFileName := IOUtils.TPath.GetTempFileName;
+  DeleteFile(BatchFileName);
+  BatchFileName := BatchFileName + '.bat';
+  AssignFile(BatchFile, BatchFileName);
+  Rewrite(BatchFile);
+  FileName := ExtractFileName(ParamStr(0));
+
+  WriteLn(BatchFile, Format('taskkill  /im %s /f', [FileName]));
+  CloseFile(BatchFile);
+
+  FillChar(StartUpInfo, SizeOf(StartUpInfo), $00);
+  StartUpInfo.dwFlags := STARTF_USESHOWWINDOW;
+  StartUpInfo.wShowWindow := SW_HIDE;
+  if CreateProcess(nil, PWideChar(BatchFileName), nil, nil,
+      False, IDLE_PRIORITY_CLASS, nil, nil, StartUpInfo,
+      ProcessInfo) then
+  begin
+    CloseHandle(ProcessInfo.hThread);
+    CloseHandle(ProcessInfo.hProcess);
+  end;
+end;
+
+var
+  _MutexName,
+  _Title: String;
+  MutexHandle: THandle;
+  I: Integer;
+
+function EnumWindowsProc(H: HWND; lParam: LPARAM): Boolean; stdcall;
+var
+  ClassName: PChar;
+  ParamPro: String;
+begin
+  GetMem(ClassName, 100);
+  GetClassName(H, ClassName, 100);
+  if ClassName = 'TSplashForm_Login_77M2' then
+  begin
+    ShowWindow( H, SW_SHOWNORMAL );
+    SetWindowPos( H, HWND_TOPMOST, 0,0,0,0, SWP_NOSIZE or SWP_NOMOVE );
+    SetWindowPos( H, HWND_NOTOPMOST, 0,0,0,0, SWP_NOSIZE or SWP_NOMOVE );
+    SetForegroundWindow(H);
+  end;
+  FreeMem(ClassName);
+  Result := True;
+end;
+
+procedure ActiveAndOpen;
+begin
+  EnumWindows(@EnumWindowsProc, 0);
+end;
+
+procedure InitDisplaySet();
+var
+  DevNumber: Cardinal;
+  Dev: TDisplayDevice;
+  MainDev: Integer;
+  DevMode: TDevMode;
+  PName: array of Char;
+  ChangeResult: Cardinal;
+begin
+  DevNumber := 0;
+  while True do
+  begin
+    Dev.cb := SizeOf(TDisplayDevice);
+    if not EnumDisplayDevices(nil, DevNumber, Dev, 0) then
+    begin
+      Break;
+    end
+    else
+    begin
+      if Dev.StateFlags and DISPLAY_DEVICE_PRIMARY_DEVICE <> 0 then
+      begin
+        MainDev := DevNumber;
+        SetLength(PName, Length(Dev.DeviceName));
+        Move(Dev.DeviceName[0], PName[0], Length(Dev.DeviceName));
+      end;
+    end;
+    DevNumber := DevNumber + 1;
+  end;
+
+  DevMode.dmSize := SizeOf(TDevMode);
+  DevMode.dmDriverExtra := 0;
+
+  if EnumDisplaySettings(@PName[0], High(Cardinal), DevMode) then
+  begin
+    if DevMode.dmBitsPerPel <> 32 then
+    begin
+      DevMode.dmBitsPerPel := 32;
+      ChangeResult := ChangeDisplaySettings(DevMode, 0);
+      if DISP_CHANGE_SUCCESSFUL <> ChangeResult then
+      begin
+        ShowMessage('由于您的显示器颜色位数被非法篡改,且尝试修正失败,游戏无法开启' +
+          #13#10'请您手动修改颜色位数为32位真彩色!' + #13#10 + '错误原因:' +
+          IntToStr(ChangeResult));
+      end;
+    end;
+  end;
+end;
+
+procedure Halt0;
+begin
+  Halt;
+end;
+
+begin
+  _Title := uClientApp.Title;
+  _MutexName  := Format('_91_LOGIN_%s', [_Title]);
+  MutexHandle := OpenMutexW(MUTEX_ALL_ACCESS, False, PChar(_MutexName));
+  if not ((MutexHandle = 0) and (Windows.GetLastError <> ERROR_ALREADY_EXISTS)) then
+  begin
+    ActiveAndOpen;
+    Exit;
+  end;
+  InitDisplaySet();
+  InitLoginData();
+  Windows.CreateMutexW(nil, False, PChar(_MutexName));
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.Title := _Title;
+  if IncludeTrailingPathDelimiter(GetCurrentDir) <> IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) then
+  begin
+    SetCurrentDir(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)));
+  end;
+
+  if CheckPathISRight then
+  begin
+    if not boNeedSuicide then
+    begin
+      uLog.InitLogger;
+      if ExtractFilePath(Application.ExeName) = uHomePath then
+        AddApplicationToFirewall('91Login', Application.ExeName);
+      Application.CreateForm(TSplashForm_Login_77M2, SplashForm_Login_77M2);
+      Application.CreateForm(TMainForm, MainForm);
+      Application.CreateForm(TDMKernelMonitor, DMKernelMonitor);
+      Application.CreateForm(TFRMChangePWD, FRMChangePWD);
+      Application.CreateForm(TFrmSetting, FrmSetting);
+      Application.CreateForm(TFrmNewAccount, FrmNewAccount);
+      Application.CreateForm(TfrmGetBackPwd, frmGetBackPwd);
+      Application.Run;
+      uLog.CleanUpLogger;
+    end else
+      CreateAndExecBatFile(Application.ExeName, uHomePath + ExtractFileName(Application.ExeName))
+
+  end else
+  begin
+    KillSelf();
+  end;
+
+  //屏蔽在退出程序时候出现的RunTimeError
+  asm
+  　xor edx, edx
+  　push ebp
+  　push OFFSET @@safecode
+  　 push dword ptr fs:[edx]
+  　mov fs:[edx],esp
+
+  　 call Halt0
+  　jmp @@exit;
+
+  　@@safecode:
+  　　call Halt0;
+
+  　 @@exit:
+  end;
+end.

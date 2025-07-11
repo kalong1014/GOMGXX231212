@@ -1,0 +1,811 @@
+unit M2ImageView;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtDlgs, ComCtrls, ExtCtrls, StdCtrls, Mask, Grids, ImgList,
+  DIB, Menus, ToolWin, M2Wil, dxBar, cxClasses, cxPC, dxDockControl,
+  dxDockPanel, PngImage, Jpeg, dxSkinsCore, dxSkinsdxBarPainter,
+  dxSkinsdxDockControlPainter, cxGraphics, cxControls, cxLookAndFeels,
+  cxLookAndFeelPainters, dxSkinsdxStatusBarPainter, cxContainer, cxEdit,
+  cxProgressBar, dxStatusBar, dxSkinOffice2016Colorful, dxSkinOffice2016Dark,
+  dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark,
+  dxSkinVisualStudio2013Light, dxSkinBlack, dxSkinBlue, dxSkinBlueprint,
+  dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide,
+  dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy,
+  dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian,
+  dxSkinLiquidSky, dxSkinLondonLiquidSky, dxSkinMcSkin, dxSkinMetropolis,
+  dxSkinMetropolisDark, dxSkinMoneyTwins, dxSkinOffice2007Black,
+  dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink,
+  dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue,
+  dxSkinOffice2010Silver, dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray,
+  dxSkinOffice2013White, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic,
+  dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust,
+  dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinsDefaultPainters,
+  dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue,
+  cxCheckBox, cxBarEditItem, dxSkinOffice2019Colorful, dxSkinTheBezier, System.ImageList;
+
+const
+  APP_VERSION = '版本: 2020.02.28';
+  LibFileExt : array [0..3] of string = ('.Data','.wil','.wzl','.wis');
+
+type
+  TuImageViewer = class(TForm)
+    OpenDialog: TOpenDialog;
+    SaveDialog1: TSaveDialog;
+    OPD1: TOpenPictureDialog;
+    LargeImages: TImageList;
+    SmallImages: TImageList;
+    SaveDialog2: TSaveDialog;
+    PopupMenu: TPopupMenu;
+    PopupMenu_Transparent: TMenuItem;
+    BarManager: TdxBarManager;
+    ToolBar: TdxBar;
+    BtnOpen: TdxBarButton;
+    BtnNew: TdxBarButton;
+    BtnImport: TdxBarButton;
+    BtnExport: TdxBarButton;
+    BtnImportMore: TdxBarButton;
+    BtnExportMore: TdxBarButton;
+    BtnDelete: TdxBarButton;
+    BtnOffset: TdxBarButton;
+    dxBarButton9: TdxBarButton;
+    dxDockSite1: TdxDockSite;
+    dxDockPanel1: TdxDockPanel;
+    dxDockPanel2: TdxDockPanel;
+    DrawGrid: TDrawGrid;
+    ScrollBox: TScrollBox;
+    Image: TImage;
+    plImgPos: TPanel;
+    dxLayoutDockSite1: TdxLayoutDockSite;
+    dxLayoutDockSite3: TdxLayoutDockSite;
+    DockingManager: TdxDockingManager;
+    BtnEncRes: TdxBarButton;
+    StatusBar: TdxStatusBar;
+    dxStatusBar1Container2: TdxStatusBarContainerControl;
+    ProgressBar: TcxProgressBar;
+    cxDarkBG: TcxBarEditItem;
+    BtnSave: TdxBarButton;
+    procedure DrawGridDrawCell(Sender: TObject; ACol, ARow: Integer;
+      Rect: TRect; State: TGridDrawState);
+    procedure DrawGridSelectCell(Sender: TObject; ACol, ARow: Integer;
+      var CanSelect: Boolean);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure RzSplitter1Resize(Sender: TObject);
+    procedure PopupMenu_TransparentClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure ScrollBoxResize(Sender: TObject);
+    procedure BtnOpenClick(Sender: TObject);
+    procedure BtnNewClick(Sender: TObject);
+    procedure BtnImportClick(Sender: TObject);
+    procedure BtnExportClick(Sender: TObject);
+    procedure BtnImportMoreClick(Sender: TObject);
+    procedure BtnExportMoreClick(Sender: TObject);
+    procedure BtnOffsetClick(Sender: TObject);
+    procedure BtnDeleteClick(Sender: TObject);
+    procedure dxBarButton9Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure ImageMouseMove(Sender: TObject; Shift: TShiftState;
+      X, Y: Integer);
+    procedure BtnEncResClick(Sender: TObject);
+    procedure cxDarkBGChange(Sender: TObject);
+    procedure BtnSaveClick(Sender: TObject);
+  private
+    { Private declarations }
+    FWorking: Boolean;
+    FImageFile: TWMImages;
+    FPngImageBG: TBitmap; // Png图片的背景透明
+    FPngImageBG_Dark: TBitmap;
+    procedure CreatePngBG();
+    procedure CheckButtonState;
+    procedure OnFileCheck(Sender: TWMImages; var Password: String);
+  public
+    { Public declarations }
+    procedure OnProgramException(Sender: TObject; E: Exception);
+  end;
+
+var
+  uImageViewer :TuImageViewer;
+  g_nACol, g_nARow, g_nIndex: Integer;
+
+implementation
+
+uses M2ImageInput, M2InPutManyDlgMain, M2CreateData, M2DelImages,
+  M2OutPutDlgMain,
+  M2DataEncFrm, M2XYEditor, Grobal2, Convert;
+
+{$R *.dfm}
+
+function WidthBytes(w: Integer): Integer;
+begin
+  Result := (((w * 8) + 31) div 32) * 4;
+end;
+
+procedure TuImageViewer.OnFileCheck(Sender: TWMImages; var Password: String);
+var
+  ATmp: String;
+begin
+  if GetDataPassword('当前文件已加密，请输入密码：', ATmp) then
+  begin
+    Password := ATmp;
+  end;
+end;
+
+procedure TuImageViewer.OnProgramException(Sender: TObject; E: Exception);
+begin
+end;
+
+procedure TuImageViewer.FormCreate(Sender: TObject);
+begin
+  Randomize;
+  Application.OnException := OnProgramException;
+  StatusBar.Panels[0].Text := APP_VERSION;
+  CreatePngBG();
+end;
+
+procedure TuImageViewer.FormDestroy(Sender: TObject);
+begin
+  if Assigned(FImageFile) then
+  begin
+    FImageFile.Free;
+  end;
+  if FPngImageBG <> nil then
+    FreeAndNil(FPngImageBG);
+  if FPngImageBG_Dark <> nil then
+    FreeAndNil(FPngImageBG_Dark);
+end;
+
+procedure TuImageViewer.ImageMouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  plImgPos.Caption := Format('  图片坐标位置:%d,%d', [X, Y]);
+end;
+
+{$O-}
+
+var
+  CCCC: Integer = 0;
+
+procedure StretchBlt(ABmp: TGraphic; Canvas: TCanvas; ARect: TRect);
+var
+  AScaleW, AScaleH: Double;
+begin
+  // if (ABmp <> nil) and (Canvas <> nil) then
+  if (ABmp.Width <= ARect.Right - ARect.Left) and
+    (ABmp.Height <= ARect.Bottom - ARect.Top) then
+  begin
+    Canvas.Draw(ARect.Left, ARect.Top, ABmp)
+  end
+  else
+  begin
+    AScaleW := (ARect.Right - ARect.Left) / ABmp.Width;
+    AScaleH := (ARect.Bottom - ARect.Top) / ABmp.Height;
+    if AScaleW > AScaleH then
+      AScaleW := AScaleH;
+    ARect.Right := ARect.Left + Round(ABmp.Width * AScaleW);
+    ARect.Bottom := ARect.Top + Round(ABmp.Height * AScaleW);
+    Canvas.StretchDraw(ARect, ABmp);
+  end;
+
+end;
+
+procedure TuImageViewer.CheckButtonState;
+begin
+  BtnImport.Enabled := (FImageFile <> nil) and FImageFile.Editing;
+  BtnExport.Enabled := FImageFile <> nil;
+  BtnImportMore.Enabled := (FImageFile <> nil) and FImageFile.Editing;
+  BtnExportMore.Enabled := FImageFile <> nil;
+  BtnDelete.Enabled := (FImageFile <> nil) and FImageFile.Editing;
+  BtnOffset.Enabled := (FImageFile <> nil) and FImageFile.Editing;
+  BtnEncRes.Enabled := (FImageFile <> nil) and FImageFile.Validated and
+    (FImageFile.ClassName = 'TWMPackageImages');
+end;
+
+procedure TuImageViewer.CreatePngBG;
+var
+  tilebmp: TBitmap;
+  i, j: Integer;
+begin
+  if FPngImageBG <> nil then
+    FreeAndNil(FPngImageBG);
+
+  FPngImageBG := TBitmap.Create;
+  FPngImageBG.PixelFormat := pf24bit;
+  FPngImageBG.Width := 1920;
+  FPngImageBG.Height := 1080;
+
+  tilebmp := TBitmap.Create;
+  tilebmp.PixelFormat := pf24bit;
+  tilebmp.Width := 16;
+  tilebmp.Height := 16;
+
+  // 使用浅色生成 tilebmp
+  tilebmp.Canvas.Brush.Color := RGB(204, 204, 204);
+  tilebmp.Canvas.FillRect(Rect(0, 0, 8, 8));
+  tilebmp.Canvas.FillRect(Rect(8, 8, 16, 16));
+  tilebmp.Canvas.Brush.Color := RGB(255, 255, 255);
+  tilebmp.Canvas.FillRect(Rect(8, 0, 16, 8));
+  tilebmp.Canvas.FillRect(Rect(0, 8, 8, 16));
+
+  // start clear
+  for i := 0 to (FPngImageBG.Height div 16) do
+    for j := 0 to (FPngImageBG.Width div 16) do
+      FPngImageBG.Canvas.Draw(16 * j, 16 * i, tilebmp);
+  // end clear
+
+  tilebmp.Free;
+
+
+  // 生成深色背景
+
+  if FPngImageBG_Dark <> nil then
+    FreeAndNil(FPngImageBG_Dark);
+
+  FPngImageBG_Dark := TBitmap.Create;
+  FPngImageBG_Dark.PixelFormat := pf24bit;
+  FPngImageBG_Dark.Width := 1920;
+  FPngImageBG_Dark.Height := 1080;
+
+  tilebmp := TBitmap.Create;
+  tilebmp.PixelFormat := pf24bit;
+  tilebmp.Width := 16;
+  tilebmp.Height := 16;
+
+  tilebmp.Canvas.Brush.Color := RGB(16, 16, 16);
+  tilebmp.Canvas.FillRect(Rect(0, 0, 8, 8));
+  tilebmp.Canvas.FillRect(Rect(8, 8, 16, 16));
+  tilebmp.Canvas.Brush.Color := RGB(33, 48, 66);
+  tilebmp.Canvas.FillRect(Rect(8, 0, 16, 8));
+  tilebmp.Canvas.FillRect(Rect(0, 8, 8, 16));
+
+  // start clear
+  for i := 0 to (FPngImageBG_Dark.Height div 16) do
+    for j := 0 to (FPngImageBG_Dark.Width div 16) do
+      FPngImageBG_Dark.Canvas.Draw(16 * j, 16 * i, tilebmp);
+  // end clear
+
+  tilebmp.Free;
+end;
+
+
+
+procedure TuImageViewer.DrawGridDrawCell(Sender: TObject; ACol, ARow: Integer;
+  Rect: TRect; State: TGridDrawState);
+var
+  Index: Integer;
+  Str: string;
+  nTextHeight: Integer;
+  // ABmp: TDIB;
+  AGraphic: TGraphic;
+begin
+  if not Assigned(FImageFile) or FWorking then
+    Exit;
+
+  Index := ARow * DrawGrid.ColCount + ACol;
+  if (Index >= 0) and (Index < FImageFile.ImageCount) then
+  begin
+    AGraphic := FImageFile.Graphics[Index];
+    Str := Format('%.5d', [Index]);
+
+    if AGraphic <> nil then
+      StretchBlt(AGraphic, DrawGrid.Canvas, Rect);
+
+    nTextHeight := DrawGrid.Canvas.TextHeight('A');
+    DrawGrid.Canvas.Brush.Style := bsclear;
+    DrawGrid.Canvas.Font.Color := clwhite;
+    DrawGrid.Canvas.TextOut(Rect.Left - 1, Rect.Bottom - nTextHeight, Str);
+    DrawGrid.Canvas.TextOut(Rect.Left + 1, Rect.Bottom - nTextHeight + 1, Str);
+    DrawGrid.Canvas.TextOut(Rect.Left, Rect.Bottom - nTextHeight - 1, Str);
+    DrawGrid.Canvas.TextOut(Rect.Left, Rect.Bottom - nTextHeight + 1, Str);
+    DrawGrid.Canvas.Font.Color := clblack;
+    DrawGrid.Canvas.TextOut(Rect.Left, Rect.Bottom - nTextHeight, Str);
+  end;
+end;
+
+procedure TuImageViewer.cxDarkBGChange(Sender: TObject);
+var
+B:Boolean;
+begin
+  DrawGridSelectCell(nil,g_nACol,g_nARow,B);
+end;
+
+procedure TuImageViewer.DrawGridSelectCell(Sender: TObject; ACol, ARow: Integer;
+  var CanSelect: Boolean);
+var
+  Index: Integer;
+  nImageWidth, nImageHeight, nPx, nPy: Integer;
+  Bitmap: TDIB;
+  Png: TPngImage;
+  G: TGraphic;
+begin
+  plImgPos.Caption := '';
+  Image.Picture.Bitmap.Assign(nil);
+  StatusBar.Panels[2].Text := '';
+  if not Assigned(FImageFile) then
+    Exit;
+
+  Index := ARow * DrawGrid.ColCount + ACol;
+  g_nACol := ACol;
+  g_nARow := ARow;
+  g_nIndex := Index;
+  if (Index >= 0) and (Index < FImageFile.ImageCount) then
+  begin
+    FImageFile.GetImgSize(Index, nImageWidth, nImageHeight, nPx, nPy);
+    case FImageFile.GraphicType[Index] of
+      gtRealPng:
+        begin
+          G := FImageFile.Graphics[Index];
+          if G <> nil then
+          begin
+
+            if G is TPngImage then
+            begin
+              Try
+                Png := TPngImage(G);
+
+                CanSelect := True;
+                Image.Picture.Bitmap.Handle := 0;
+                ScrollBox.HorzScrollBar.Position := 0;
+                ScrollBox.VertScrollBar.Position := 0;
+                Image.Width := nImageWidth;
+                Image.Height := nImageHeight;
+                Image.Picture.Bitmap.Width := nImageWidth;
+                Image.Picture.Bitmap.Height := nImageHeight;
+
+                if nImageWidth <= ScrollBox.Width then
+                begin
+                  Image.Left := (ScrollBox.Width - nImageWidth) div 2;
+                end
+                else
+                begin
+                  Image.Left := 0;
+                end;
+                if nImageHeight <= ScrollBox.Height then
+                begin
+                  Image.Top := (ScrollBox.Height - nImageHeight) div 2;
+                end
+                else
+                begin
+                  Image.Top := 0;
+                end;
+                Image.Transparent := PopupMenu_Transparent.Checked;
+                Image.Picture.Bitmap.Width := Png.Width;
+                Image.Picture.Bitmap.Height := Png.Height;
+                if cxDarkBG.EditValue = True then
+                  Image.Picture.Bitmap.Canvas.Draw(0, 0, FPngImageBG_Dark)
+                else
+                  Image.Picture.Bitmap.Canvas.Draw(0, 0, FPngImageBG);
+
+                Image.Picture.Bitmap.Canvas.Draw(0, 0, Png);
+                StatusBar.Panels[2].Text := Format('宽:%d 高:%d 偏移坐标:%d,%d [PNG]',
+                  [nImageWidth, nImageHeight, nPx, nPy]);
+              Finally
+               // G.Free;
+              End;
+            end;
+          end;
+
+        end
+        else
+        begin
+          Bitmap := FImageFile.Bitmaps[Index];
+          if Bitmap = nil then
+            Exit;
+          Try
+            CanSelect := True;
+            Image.Picture.Bitmap.Handle := 0;
+            ScrollBox.HorzScrollBar.Position := 0;
+            ScrollBox.VertScrollBar.Position := 0;
+            Image.Width := nImageWidth;
+            Image.Height := nImageHeight;
+            Image.Picture.Bitmap.Width := nImageWidth;
+            Image.Picture.Bitmap.Height := nImageHeight;
+
+            if nImageWidth <= ScrollBox.Width then
+            begin
+              Image.Left := (ScrollBox.Width - nImageWidth) div 2;
+            end
+            else
+            begin
+              Image.Left := 0;
+            end;
+            if nImageHeight <= ScrollBox.Height then
+            begin
+              Image.Top := (ScrollBox.Height - nImageHeight) div 2;
+            end
+            else
+            begin
+              Image.Top := 0;
+            end;
+            Image.Transparent := PopupMenu_Transparent.Checked;
+            Image.Picture.Bitmap.Width := Bitmap.Width;
+            Image.Picture.Bitmap.Height := Bitmap.Height;
+            Image.Picture.Bitmap.Canvas.Draw(0, 0, Bitmap);
+            StatusBar.Panels[2].Text := Format('宽:%d 高:%d 偏移坐标:%d,%d 位深度:%d位 [BMP]',
+              [nImageWidth, nImageHeight, nPx, nPy, Bitmap.BitCount]);
+          Finally
+           // Bitmap.Free;
+          End;
+        end;
+
+    end;
+
+  end;
+end;
+
+procedure TuImageViewer.BtnOpenClick(Sender: TObject);
+var
+  ShortName: string;
+  ImageType: TImageType;
+begin
+  if FWorking then
+    Exit;
+  FWorking := True;
+  try
+    if OpenDialog.Execute and (OpenDialog.FileName <> '') then
+    begin
+      if FImageFile <> nil then
+        FreeAndNil(FImageFile);
+      Caption := '传奇资源文件-' + OpenDialog.FileName;
+      FImageFile := CreateImages(OpenDialog.FileName, True);
+      if FImageFile <> nil then
+      begin
+        FImageFile.OnFileCheck := OnFileCheck;
+        plImgPos.Caption := '';
+        FImageFile.Initialize;
+        DrawGrid.RowCount := FImageFile.ImageCount div DrawGrid.ColCount + 1;
+        DrawGrid.Invalidate;
+        Image.Invalidate;
+        CheckButtonState;
+      end;
+    end;
+  except
+  end;
+  FWorking := False;
+end;
+
+procedure TuImageViewer.BtnSaveClick(Sender: TObject);
+begin
+  frmConvertDlg.Open;
+end;
+
+procedure TuImageViewer.BtnNewClick(Sender: TObject);
+var
+  FileType: Integer;
+begin
+  if GetFileType(FileType) then
+  begin
+    case FileType of
+      0:
+        begin
+          SaveDialog2.Filter := '传奇图片资源文件|*.Data';
+          SaveDialog2.DefaultExt := '.Data';
+        end;
+      1:
+        begin
+          SaveDialog2.Filter := '传奇图片资源文件|*.Wzl';
+          SaveDialog2.DefaultExt := '.Wzl';
+        end;
+    end;
+    if SaveDialog2.Execute then
+    begin
+      if FImageFile <> nil then
+        FImageFile.Free;
+      FImageFile := CreateImageFile(SaveDialog2.FileName);
+      if FImageFile <> nil then
+      begin
+        plImgPos.Caption := '';
+        FImageFile.Initialize;
+        DrawGrid.RowCount := FImageFile.ImageCount div DrawGrid.ColCount + 1;
+        DrawGrid.Invalidate;
+        Image.Invalidate;
+        CheckButtonState;
+      end
+      else
+        CheckButtonState;
+    end;
+  end;
+end;
+
+procedure TuImageViewer.BtnImportClick(Sender: TObject);
+var
+  X, Y, Index, _Type: Integer;
+  Source: TGraphic;
+  AGraphicType: TGraphicType;
+begin
+  if not Assigned(FImageFile) then
+    Exit;
+  if FWorking then
+    Exit;
+  FWorking := True;
+  try
+    X := 0;
+    Y := 0;
+    if OPD1.Execute and (OPD1.FileName <> '') then
+    begin
+      Source := LoadDIBFromFile(OPD1.FileName, AGraphicType);
+      if Source <> nil then
+      begin
+        if Source is TDIB then
+          TDIB(Source).Mirror(False, True);
+        if M2ImageInput.GetImageInput(X, Y, _Type) then
+        begin
+          case _Type of
+            0:
+              begin
+                Index := DrawGrid.Row * DrawGrid.ColCount + DrawGrid.Col;
+                if Index < FImageFile.ImageCount then
+                begin
+                  FImageFile.BeginUpdate;
+                  if FImageFile.Replace(Index, Source, X, Y, AGraphicType) then
+                  begin
+                    FImageFile.EndUpdate;
+                    Application.MessageBox('图片导入成功 ！！！', '提示信息',
+                      MB_ICONQUESTION);
+                  end
+                  else
+                    Application.MessageBox('图片导入失败 ！！！', '提示信息',
+                      MB_ICONQUESTION);
+                end;
+              end;
+            1:
+              begin // 插入图片
+                Index := DrawGrid.Row * DrawGrid.ColCount + DrawGrid.Col;
+                if Index < FImageFile.ImageCount then
+                begin
+                  FImageFile.BeginUpdate;
+                  if FImageFile.Insert(Index, Source, X, Y, AGraphicType) then
+                  begin
+                    FImageFile.EndUpdate;
+                    Application.MessageBox('图片导入成功 ！！！', '提示信息',
+                      MB_ICONQUESTION);
+                  end
+                  else
+                    Application.MessageBox('图片导入失败 ！！！', '提示信息',
+                      MB_ICONQUESTION);
+                end;
+              end;
+          else
+            begin
+              FImageFile.BeginUpdate;
+              if FImageFile.Add(Source, X, Y, AGraphicType) then
+              begin
+                FImageFile.EndUpdate;
+                DrawGrid.Invalidate;
+                Image.Invalidate;
+                Application.MessageBox('图片导入成功 ！！！', '提示信息', MB_ICONQUESTION);
+              end
+              else
+                Application.MessageBox('图片导入失败 ！！！', '提示信息', MB_ICONQUESTION);
+            end;
+          end;
+        end;
+        Source.Free;
+      end;
+    end;
+  finally
+    FWorking := False;
+  end;
+  DrawGrid.RowCount := FImageFile.ImageCount div DrawGrid.ColCount + 1;
+  DrawGrid.Invalidate;
+  Image.Invalidate;
+end;
+
+procedure TuImageViewer.BtnEncResClick(Sender: TObject);
+var
+  APass: String;
+begin
+  if FImageFile <> nil then
+  begin
+    if GetDataPassword('请输入新密码：', APass) then
+    begin
+      FImageFile.ChangePassword(APass);
+    end;
+  end;
+end;
+
+procedure TuImageViewer.BtnExportClick(Sender: TObject);
+var
+  sFilName: string;
+  Index: Integer;
+  Bitmap: TGraphic;
+  GT : TGraphicType;
+begin
+  if not Assigned(FImageFile) then
+    Exit;
+  if FWorking then
+    Exit;
+  FWorking := True;
+  try
+    Index := DrawGrid.Row * DrawGrid.ColCount + DrawGrid.Col;
+    if Index < FImageFile.ImageCount then
+    begin
+      GT := FImageFile.GraphicType[Index];
+      with SaveDialog1 do
+      begin
+        if GT = gtRealPng then
+        begin
+          Filter := 'PNG 文件|*.PNG';
+          Title := '保存为PNG 图片文件';
+        end else
+        begin
+          Filter := 'BMP 文件|*.BMP|';
+          Title := '保存为BMP 图片文件';
+        end;
+
+        if Execute and (FileName <> '') then
+        begin
+          Bitmap := FImageFile.Graphics[Index];
+          if Bitmap <> nil then
+          begin
+            if Bitmap is TDIB then
+            begin
+              try
+                 FileName := ExtractFilePath(FileName) + Format('%.5d', [Index])
+                  + '.BMP';
+                Bitmap.SaveToFile(FileName);
+                Application.MessageBox('图片导出成功 ！！！', '提示信息', MB_ICONQUESTION);
+              except
+                Application.MessageBox('图片导出失败 ！！！', '提示信息', MB_ICONQUESTION);
+              end;
+            end else if Bitmap is TPngImage then
+            begin
+              try
+                 FileName := ExtractFilePath(FileName) + Format('%.5d', [Index])
+                  + '.PNG';
+                Bitmap.SaveToFile(FileName);
+                Application.MessageBox('图片导出成功 ！！！', '提示信息', MB_ICONQUESTION);
+              except
+                Application.MessageBox('图片导出失败 ！！！', '提示信息', MB_ICONQUESTION);
+              end;
+            end;
+
+
+          end;
+        end;
+      end;
+    end;
+  finally
+    FWorking := False;
+    DrawGrid.Refresh;
+  end;
+end;
+
+procedure TuImageViewer.BtnImportMoreClick(Sender: TObject);
+begin
+  ImportResource(FImageFile, g_nIndex);
+  DrawGrid.RowCount := FImageFile.ImageCount div DrawGrid.ColCount + 1;
+  DrawGrid.Invalidate;
+  Image.Invalidate;
+end;
+
+procedure TuImageViewer.BtnExportMoreClick(Sender: TObject);
+var
+  nStart, nStop: Integer;
+begin
+  nStart := 0;//DrawGrid.Row * DrawGrid.ColCount + DrawGrid.Col;
+  nStop := FImageFile.ImageCount - 1;
+  ExportResource(FImageFile, nStart, nStop);
+end;
+
+procedure TuImageViewer.BtnDeleteClick(Sender: TObject);
+begin
+  M2DelImages.DeleteImages(FImageFile, g_nIndex, g_nIndex);
+  DrawGrid.RowCount := FImageFile.ImageCount div DrawGrid.ColCount + 1;
+  DrawGrid.Invalidate;
+  Image.Invalidate;
+end;
+
+procedure TuImageViewer.BtnOffsetClick(Sender: TObject);
+var
+  nW, nH, nX, nY, Index, nXX, nYY: Integer;
+  nImage: Integer;
+begin
+  if not Assigned(FImageFile) then
+    Exit;
+  if FWorking then
+    Exit;
+  FWorking := True;
+  try
+    Index := DrawGrid.Row * DrawGrid.ColCount + DrawGrid.Col;
+    if Index < FImageFile.ImageCount then
+    begin
+      if FImageFile.GetImgSize(Index, nW, nH, nX, nY) then
+      begin
+        with TuFrmXYEditor.Create(nil) do
+        begin
+          try
+            SetMaxImageIndex(FImageFile.ImageCount);
+            EditX.Text := IntToStr(nX);
+            EditY.Text := IntToStr(nY);
+            if ShowModal = mrOk then
+            begin
+              case rg_XYEditor.ItemIndex of
+                0:
+                  begin
+                    nX := StrToInt(EditX.Text);
+                    nY := StrToInt(EditY.Text);
+                    FImageFile.SetPos(Index, nX, nY);
+                    Application.MessageBox('图片坐标修改成功 ！！！', '提示信息',
+                      MB_ICONQUESTION);
+                  end;
+                1:
+                  begin
+                    nX := StrToInt(EditX.Text);
+                    nY := StrToInt(EditY.Text);
+                    for nImage := se_Start.Value to se_End.Value do
+                    begin
+                      FImageFile.SetPos(nImage, nX, nY);
+                    end;
+                    Application.MessageBox('图片坐标批量修改成功 ！！！', '提示信息',
+                      MB_ICONQUESTION);
+                  end;
+                2:
+                  begin
+                    nXX := StrToIntDef(EditX.Text,0);
+                    nYY := StrToIntDef(EditY.Text,0);
+                    for nImage := se_Start.Value to se_End.Value do
+                    begin
+                      if FImageFile.GetImgSize(nImage, nW, nH, nX, nY) then
+                      begin
+                        nX := nX + nXX;
+                        nY := nY + nYY;
+                        FImageFile.SetPos(nImage, nX, nY);
+                      end;
+                    end;
+                    Application.MessageBox('图片坐标批量修改成功 ！！！', '提示信息',
+                      MB_ICONQUESTION);
+                  end;
+              end;
+            end;
+          finally
+            Free;
+          end;
+        end;
+
+      end;
+    end;
+
+  finally
+    FWorking := False;
+    DrawGrid.Refresh;
+  end;
+end;
+
+procedure TuImageViewer.dxBarButton9Click(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TuImageViewer.RzSplitter1Resize(Sender: TObject);
+var
+  CanSelect: Boolean;
+begin
+  DrawGridSelectCell(DrawGrid, g_nACol, g_nARow, CanSelect);
+end;
+
+procedure TuImageViewer.ScrollBoxResize(Sender: TObject);
+begin
+  Image.Left := (ScrollBox.Width - Image.Width) div 2;
+  Image.Top := (ScrollBox.Height - Image.Height) div 2;
+end;
+
+procedure TuImageViewer.PopupMenu_TransparentClick(Sender: TObject);
+begin
+  PopupMenu_Transparent.Checked := not PopupMenu_Transparent.Checked;
+  RzSplitter1Resize(Self);
+end;
+
+procedure TuImageViewer.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+end;
+
+procedure TuImageViewer.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  CanClose := not FWorking;
+end;
+
+end.

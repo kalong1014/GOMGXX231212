@@ -1,0 +1,1248 @@
+unit Castle;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs,
+  ScktComp, syncobjs, MudUtil, HUtil32, Grobal2, Envir, EdCode, ObjBase,
+  M2Share, Guild, IniFiles, ObjMon2;
+
+const
+{$IFDEF KOREA}
+   CASTLEFILENAME = 'Sabuk.txt';
+   CASTLENAMEDEF  = 'É³°Í¿Ë';
+{$ELSE}
+   CASTLEFILENAME = 'Sabuk.txt';
+   CASTLENAMEDEF  = 'SabukWall';
+{$ENDIF}
+   CASTLEATTACERS = 'AttackSabukWall.txt';
+   CASTLEMAXGOLD = 100000000;
+   TODAYGOLD     = 5000000;
+   CASTLECOREMAP = '0150';
+   CASTLEBASEMAP = 'D701';
+   COREDOORX = 631;
+   COREDOORY = 274;
+   MAXARCHER = 12;
+   MAXGUARD = 4;
+
+type
+   TDefenseUnit = record
+      X: integer;
+      Y: integer;
+      UnitName: string;
+      BoDoorOpen: Boolean;  //TCastleDoor ÀÎ °æ¿ì
+      HP: integer;
+      UnitObj: TCreature;  //TWallStructure or TSolder
+   end;
+
+   TAttackerInfo = record
+      AttackDate: TDateTime;
+      GuildName: string;
+      Guild: TGuild;
+   end;
+   PTAttackerInfo = ^TAttackerInfo;
+
+   TUserCastle = class
+   private
+      procedure SaveToFile (flname: string);
+      procedure LoadFromFile (flname: string);
+      procedure SaveAttackerList;
+   public
+      CastlePEnvir: TEnvirnoment;
+      CorePEnvir: TEnvirnoment;  //³»¼º, ÀÌ ¸ÊÀ» Á¡·ÉÇÏ¸é ¼ºÀ» Á¡·ÉÇÑ °ÍÀ¸·Î ÇÑ´Ù.
+      BasementEnvir: TEnvirnoment;
+      CoreCastlePDoorCore: PTDoorCore;
+      CastleMapName: string;
+      CastleName: string;
+      OwnerGuildName: string;
+      OwnerGuild: TGuild;
+      CastleMap: string;
+      CastleStartX, CastleStartY: integer;
+
+      LatestOwnerChangeDateTime: TDateTime;  //¸¶Áö¸·À¸·Î ¼ºÀÇ ÁÖÀÎÀÌ ¹Ù²ï ½Ã°£
+      LatestWarDateTime: TDateTime;   //¸¶Áö¸·À¸·Î °ø¼ºÀüÀÌ ½ÃÀÛµÈ ½Ã°£
+      BoCastleWarChecked: Boolean;
+      BoCastleUnderAttack: Boolean;  //°ø¼ºÀü ÁßÀÎÁö
+      BoCastleWarTimeOut10min: Boolean;
+      BoCastleWarTimeOutRemainMinute: integer;
+      CastleAttackStarted: longword;
+      SaveCastleGoldTime: longword;
+
+      //°ø¼ºÀüÀÇ °ø°ÝÀÚ¿¡ °ü·Ã
+      AttackerList: TList;  //°ø°Ý¹®ÆÄ ¸®½ºÆ®
+      RushGuildList: TList;  //°ø¼ºÀüÀ» ÇÏ°í ÀÖ´Â ¹®ÆÄ
+
+      MainDoor: TDefenseUnit; //TCastleDoor;  //¼º¹®
+      LeftWall: TDefenseUnit; //TWallStructure;
+      CenterWall: TDefenseUnit; //TWallStructure;
+      RightWall: TDefenseUnit; //TWallStructure;
+      Guards: array[0..MAXGUARD-1] of TDefenseUnit;
+      Archers: array[0..MAXARCHER-1] of TDefenseUnit;
+
+      IncomeToday: TDateTime;  //¿À´Ã ¼¼±ÝÀ» °È±â ½ÃÀÛÇÑ ÀÏ
+      TotalGold: integer;  //ÀüÃ¼ ¼¼±ÝÀ¸·Î °ÈÈù µ·(¼ºÀÇ ÀÚ±Ý), 1000¸¸¿øÀÌ»ó µÑ ¼ö ¾ø´Ù.
+      TodayIncome: integer;  //±ÝÀÏ ¼¼±ÝÀ¸·Î °ÈÈù µ·, 10¸¸¿øÀ» ³ÑÀ» ¼ö ¾ø´Ù.
+
+      constructor Create;
+      destructor Destroy; override;
+      procedure Initialize;
+      procedure Run;  //10ÃÊ¿¡ ÇÑ¹ø
+
+      procedure SaveAll;
+      procedure LoadAttackerList;
+
+      function  GetCastleStartMap: string;
+      function  GetCastleStartX: integer;
+      function  GetCastleStartY: integer;
+      function  CanEnteranceCoreCastle (xx, yy: integer; hum: TUserHuman): Boolean;
+      function  IsOurCastle (g: TGuild): Boolean;
+      function  IsCastleMember (hum: TUserHuman): Boolean;
+      function  IsCastleAllyMember (hum: TUserHuman): Boolean;
+      procedure ActivateDefeseUnits (active: Boolean);
+      procedure ActivateMainDoor (active: Boolean);
+
+      procedure PayTax (goodsprice: integer);
+      function  GetBackCastleGold (hum: TUserHuman; howmuch: integer): integer;  //¹®ÁÖ°¡ ¼ºÀÇ µ·À» »«´Ù.
+      function  TakeInCastleGold (hum: TUserHuman; howmuch: integer): integer; //¹®ÁÖ°¡ ¼º¿¡ µ·À» ³ÖÀ½
+      function  RepairCastleDoor: Boolean;
+      function  RepairCoreCastleWall (wallnum: integer): integer;
+
+      //°ø¼ºÀü ½ÅÃ» °ü·Ã
+      function  IsAttackGuild (aguild: TGuild): Boolean;
+      function  ProposeCastleWar (aguild: TGuild): Boolean;
+      function  GetNextWarDateTimeStr: string;
+      function  GetListOfWars: string;
+      procedure StartCastleWar;
+
+      //°ø¼ºÀü Áß
+      function  IsCastleWarArea (penvir: TEnvirnoment; x, y: integer): Boolean;
+      function  IsRushCastleGuild (aguild: TGuild): Boolean;
+      function  IsRushAllyCastleGuild (aguild: TGuild): Boolean;
+      function  GetRushGuildCount: integer;
+      function  CheckCastleWarWinCondition (aguild: TGuild): Boolean;
+      procedure ChangeCastleOwner (guild: TGuild);
+      procedure FinishCastleWar;
+
+   end;
+
+
+implementation
+
+uses
+   svMain;
+
+
+//»çºÏ¼ºÀÇ ÀúÀåÀº »çºÏ¼ºÀÌ ÀÖ´Â ¼­¹ö¿¡¼­¸¸ ÀúÀåµÈ°í
+//´Ù¸¥ ¼­¹ö¿¡¼­´Â ÀÐ±â¸¸ ÇÑ´Ù.
+
+constructor TUserCastle.Create;
+begin
+   OwnerGuild := nil;
+   CastleMap := '3';
+   CastleStartX := 644;
+   CastleStartY := 290;
+   CastleName := CASTLENAMEDEF;
+   CastlePEnvir := nil;
+   CoreCastlePDoorCore := nil;
+
+   BoCastleWarChecked := FALSE;  //¸ÅÀÏ 20½Ã¿¡ Ã¼Å© ¿©ºÎ
+   BoCastleUnderAttack := FALSE;
+   BoCastleWarTimeOut10min := FALSE;
+   BoCastleWarTimeOutRemainMinute := 0;
+
+   AttackerList := TList.Create;
+   RushGuildList := TList.Create;
+
+   SaveCastleGoldTime := GetTickCount;
+end;
+
+destructor TUserCastle.Destroy;
+begin
+   AttackerList.Free;
+   RushGuildList.Free;
+   inherited Destroy;
+end;
+
+procedure TUserCastle.Initialize;
+var
+   i: integer;
+   pd: PTDoorInfo;
+begin
+   LoadFromFile (CASTLEFILENAME);
+   LoadAttackerList;
+
+   //°ø¼ºÀüÀÌ Àû¿ëµÇ´Â ¼­¹ö¿¡¸¸ Àû¿ë, (»çºÏ¼ºÀÇ ¼­¹ö¿¡¼­¸¸)
+   if ServerIndex <> GrobalEnvir.GetServer (CastleMapName) then
+      exit;
+
+   CorePEnvir := GrobalEnvir.GetEnvir (CASTLECOREMAP);
+   if CorePEnvir = nil then begin
+      {$IFDEF KOREA}
+      ShowMessage (CASTLECOREMAP + ' ¸ÊÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù. (°ø¼ºÀü ³»¼º¸Ê ¾øÀ½)');
+      {$ELSE}
+      ShowMessage (CASTLECOREMAP + ' No map found. ( No inner wall map of wall conquest war )');
+      {$ENDIF}
+   end;
+
+   BasementEnvir := GrobalEnvir.GetEnvir (CASTLEBASEMAP);
+   if CorePEnvir = nil then
+      ShowMessage (CASTLEBASEMAP + ' - map not found !!');
+
+//(*** °ø¼ºÀüÀÌ Àû¿ëµÇ¸é
+   CastlePEnvir := GrobalEnvir.GetEnvir (CastleMapName);
+   if CastlePEnvir <> nil then begin
+      with MainDoor do begin
+         UnitObj := UserEngine.AddCreatureSysop (
+                                    CastleMapName,
+                                    X,
+                                    Y,
+                                    UnitName);
+         if UnitObj <> nil then begin
+            UnitObj.WAbil.HP := HP;
+            TGuardUnit(UnitObj).Castle := self;
+            if BoDoorOpen then
+               TCastleDoor(MainDoor.UnitObj).OpenDoor;
+         end else
+            ShowMessage ('[Error] UserCastle.Initialize MainDoor.UnitObj = nil');
+      end;
+      with LeftWall do begin
+         UnitObj := UserEngine.AddCreatureSysop (
+                                    CastleMapName,
+                                    X,
+                                    Y,
+                                    UnitName);
+         if UnitObj <> nil then begin
+            UnitObj.WAbil.HP := HP;
+            TGuardUnit(UnitObj).Castle := self;
+         end else
+            ShowMessage ('[Error] UserCastle.Initialize LeftWall.UnitObj = nil');
+      end;
+      with CenterWall do begin
+         UnitObj := UserEngine.AddCreatureSysop (
+                                    CastleMapName,
+                                    X,
+                                    Y,
+                                    UnitName);
+         if UnitObj <> nil then begin
+            UnitObj.WAbil.HP := HP;
+            TGuardUnit(UnitObj).Castle := self;
+         end else
+            ShowMessage ('[Error] UserCastle.Initialize CenterWall.UnitObj = nil');
+      end;
+      with RightWall do begin
+         UnitObj := UserEngine.AddCreatureSysop (
+                                    CastleMapName,
+                                    X,
+                                    Y,
+                                    UnitName);
+         if UnitObj <> nil then begin
+            UnitObj.WAbil.HP := HP;
+            TGuardUnit(UnitObj).Castle := self;
+         end else
+            ShowMessage ('[Error] UserCastle.Initialize RightWall.UnitObj = nil');
+      end;
+
+      for i:=0 to MAXARCHER-1 do begin
+         with Archers[i] do begin
+            if HP > 0 then begin
+               UnitObj := UserEngine.AddCreatureSysop (
+                                          CastleMapName,
+                                          X,
+                                          Y,
+                                          UnitName);
+               if UnitObj <> nil then begin
+                  TGuardUnit(UnitObj).Castle := self;
+                  UnitObj.WAbil.HP := HP;
+                  TGuardUnit(UnitObj).OriginX := X;
+                  TGuardUnit(UnitObj).OriginY := Y;
+                  TGuardUnit(UnitObj).OriginDir := 3;
+               end else
+                  ShowMessage ('[Error] UserCastle.Initialize Archer -> UnitObj = nil');
+            end;
+         end;
+      end;
+
+      for i:=0 to MAXGUARD-1 do begin
+         with Guards[i] do begin
+            if HP > 0 then begin
+               UnitObj := UserEngine.AddCreatureSysop (
+                                          CastleMapName,
+                                          X,
+                                          Y,
+                                          UnitName);
+               if UnitObj <> nil then begin
+                  UnitObj.WAbil.HP := HP;
+                  //TGuardUnit(UnitObj).OriginX := X;
+                  //TGuardUnit(UnitObj).OriginY := Y;
+                  //TGuardUnit(UnitObj).OriginDir := 3;
+               end else
+                  ShowMessage ('[Error] UserCastle.Initialize Archer -> UnitObj = nil');
+            end;
+         end;
+      end;
+
+
+   end else
+      ShowMessage ('<Critical Error> UserCastle : [Defense]->CastleMap is invalid value');
+
+   //»çºÏ¼ºÀÇ ³»¼º¹®
+   with GrobalEnvir do begin
+      for i:=0 to CastlePEnvir.DoorList.Count-1 do begin
+         pd := PTDoorInfo(CastlePEnvir.DoorList[i]);
+         if (abs(pd.DoorX-COREDOORX) <= 3) and (abs(pd.DoorY-COREDOORY) <= 3) then begin
+            CoreCastlePDoorCore := pd.pCore;
+         end;
+      end;
+   end;
+
+
+//*)
+end;
+
+procedure TUserCastle.SaveAll;
+begin
+   SaveToFile (CASTLEFILENAME);  //°ø¼ºÀü ¼­¹ö¿¡¼­¸¸ ÀúÀåµÊ
+end;
+
+//AttackerList
+procedure TUserCastle.SaveAttackerList;
+var
+   i: integer;
+   strlist: TStringList;
+   flname: string;
+begin
+   flname := CastleDir + CASTLEATTACERS;
+   strlist := TStringList.Create;
+   for i:=0 to AttackerList.Count-1 do begin
+      strlist.Add (PTAttackerInfo (AttackerList[i]).GuildName +
+                   '       "' + DateToStr(PTAttackerInfo (AttackerList[i]).AttackDate) + '"'
+                  );
+   end;
+   try
+      strlist.SaveToFile (flname);
+   except
+      {$IFDEF KOREA}
+      MainOutMessage (flname + ' Saving error...');
+      {$ELSE}
+      MainOutMessage (flname + 'Saving error...');
+      {$ENDIF}
+   end;
+   strlist.Free;
+end;
+
+//AttackerList
+procedure TUserCastle.LoadAttackerList;
+var
+   i: integer;
+   strlist: TStringList;
+   pattack: PTAttackerInfo;
+   aguild: TGuild;
+   flname, gname, adate: string;
+begin
+   flname := CastleDir + CASTLEATTACERS;
+   if not FileExists (flname) then exit;
+   strlist := TStringList.Create;
+   try
+      strlist.LoadFromFile (flname);
+      for i:=0 to AttackerList.Count-1 do Dispose(PTAttackerInfo(AttackerList[i]));
+      AttackerList.Clear;
+      for i:=0 to strlist.Count-1 do begin
+         adate := GetValidStr3(strlist[i], gname, [' ', #9]);
+         aguild := GuildMan.GetGuild(gname);
+         if aguild <> nil then begin
+            new (pattack);
+            ArrestStringEx (adate, '"', '"', adate);
+            try
+               pattack.AttackDate := StrToDate (adate);
+            except
+               pattack.AttackDate := Date;
+            end;
+            pattack.GuildName := gname;
+            pattack.Guild := aguild;
+            AttackerList.Add (pattack);
+         end;
+      end;
+   except
+      {$IFDEF KOREA}
+      MainOutMessage (flname + ' Reading failed...');
+      {$ELSE}
+      MainOutMessage (flname + ' Reading failed...');
+      {$ENDIF}
+   end;
+   strlist.Free;
+end;
+
+procedure TUserCastle.SaveToFile (flname: string);
+var
+   i: integer;
+   ini: TIniFile;
+begin
+   //»çºÏ¼ºÀÌ ÀÖ´Â ¼­¹ö¿¡¼­¸¸ ÀúÀåÀ» ÇÑ´Ù.
+   if ServerIndex = GrobalEnvir.GetServer(CastleMapName) then begin
+      ini := TIniFile.Create (CastleDir + flname);
+      if ini <> nil then begin
+         ini.WriteString ('setup', 'CastleName', CastleName);
+         ini.WriteString ('setup', 'OwnGuild', OwnerGuildName);
+
+         ini.WriteDateTime ('setup', 'ChangeDate', LatestOwnerChangeDateTime);
+         ini.WriteDateTime ('setup', 'WarDate', LatestWarDateTime);
+
+         ini.WriteDateTime ('setup', 'IncomeToday', IncomeToday);
+         ini.WriteInteger ('setup', 'TotalGold', TotalGold);
+         ini.WriteInteger ('setup', 'TodayIncome', TodayIncome);
+
+         //¼º¹®, ¼ºº®...
+         if MainDoor.UnitObj <> nil then begin
+            ini.WriteBool ('defense', 'MainDoorOpen', TCastleDoor(MainDoor.UnitObj).BoOpenState);
+            ini.WriteInteger ('defense', 'MainDoorHP', TCastleDoor(MainDoor.UnitObj).WAbil.HP);
+         end;
+
+         if LeftWall.UnitObj <> nil then
+            ini.WriteInteger ('defense', 'LeftWallHP', TCastleDoor(LeftWall.UnitObj).WAbil.HP);
+         if CenterWall.UnitObj <> nil then
+            ini.WriteInteger ('defense', 'CenterWallHP', TCastleDoor(CenterWall.UnitObj).WAbil.HP);
+         if RightWall.UnitObj <> nil then
+            ini.WriteInteger ('defense', 'RightWallHP', TCastleDoor(RightWall.UnitObj).WAbil.HP);
+
+         for i:=0 to MAXARCHER-1 do begin
+            with Archers[i] do begin
+               ini.WriteInteger ('defense', 'Archer_' + IntToStr(i+1) + '_X', X);
+               ini.WriteInteger ('defense', 'Archer_' + IntToStr(i+1) + '_Y', Y);
+               if UnitObj <> nil then
+                  ini.WriteInteger ('defense', 'Archer_' + IntToStr(i+1) + '_HP', TArcherGuard(UnitObj).WAbil.HP)
+               else ini.WriteInteger ('defense', 'Archer_' + IntToStr(i+1) + '_HP', 0);
+            end;
+         end;
+
+         for i:=0 to MAXGUARD-1 do begin
+            with Guards[i] do begin
+               ini.WriteInteger ('defense', 'Guard_' + IntToStr(i+1) + '_X', X);
+               ini.WriteInteger ('defense', 'Guard_' + IntToStr(i+1) + '_Y', Y);
+               if UnitObj <> nil then
+                  ini.WriteInteger ('defense', 'Guard_' + IntToStr(i+1) + '_HP', TGuardUnit(UnitObj).WAbil.HP)
+               else ini.WriteInteger ('defense', 'Guard_' + IntToStr(i+1) + '_HP', HP);
+            end;
+         end;
+
+
+         ini.Free;
+      end;
+   end;
+end;
+
+procedure TUserCastle.LoadFromFile (flname: string);
+var
+   i: integer;
+   ini: TIniFile;
+begin
+   ini := TIniFile.Create (CastleDir + flname);
+   if ini <> nil then begin
+      CastleName := ini.ReadString ('setup', 'CastleName', CASTLENAMEDEF);
+      OwnerGuildName := ini.ReadString ('setup', 'OwnGuild', '');
+
+      LatestOwnerChangeDateTime := ini.ReadDateTime ('setup', 'ChangeDate', Now);
+      LatestWarDateTime := ini.ReadDateTime ('setup', 'WarDate', Now);
+
+      IncomeToday := ini.ReadDateTime ('setup', 'IncomeToday', Now);
+      TotalGold := ini.ReadInteger ('setup', 'TotalGold', 0);
+      TodayIncome := ini.ReadInteger ('setup', 'TodayIncome', 0);
+
+      CastleMapName := ini.ReadString ('defense', 'CastleMap', '3');
+
+      MainDoor.X := ini.ReadInteger ('defense', 'MainDoorX', 0);
+      MainDoor.Y := ini.ReadInteger ('defense', 'MainDoorY', 0);
+      MainDoor.UnitName := ini.ReadString ('defense', 'MainDoorName', '');
+      MainDoor.BoDoorOpen := ini.ReadBool ('defense', 'MainDoorOpen', TRUE);
+      MainDoor.HP := ini.ReadInteger ('defense', 'MainDoorHP', 2000);
+      MainDoor.UnitObj := nil;
+
+      LeftWall.X := ini.ReadInteger ('defense', 'LeftWallX', 0);
+      LeftWall.Y := ini.ReadInteger ('defense', 'LeftWallY', 0);
+      LeftWall.UnitName := ini.ReadString ('defense', 'LeftWallName', '');
+      LeftWall.HP := ini.ReadInteger ('defense', 'LeftWallHP', 2000);
+      LeftWall.UnitObj := nil;
+
+      CenterWall.X := ini.ReadInteger ('defense', 'CenterWallX', 0);
+      CenterWall.Y := ini.ReadInteger ('defense', 'CenterWallY', 0);
+      CenterWall.UnitName := ini.ReadString ('defense', 'CenterWallName', '');
+      CenterWall.HP := ini.ReadInteger ('defense', 'CenterWallHP', 2000);
+      CenterWall.UnitObj := nil;
+
+      RightWall.X := ini.ReadInteger ('defense', 'RightWallX', 0);
+      RightWall.Y := ini.ReadInteger ('defense', 'RightWallY', 0);
+      RightWall.UnitName := ini.ReadString ('defense', 'RightWallName', '');
+      RightWall.HP := ini.ReadInteger ('defense', 'RightWallHP', 2000);
+      RightWall.UnitObj := nil;
+
+      for i:=0 to MAXARCHER-1 do begin
+         with Archers[i] do begin
+            X  := ini.ReadInteger ('defense', 'Archer_' + IntToStr(i+1) + '_X', 0);
+            Y  := ini.ReadInteger ('defense', 'Archer_' + IntToStr(i+1) + '_Y', 0);
+            HP := ini.ReadInteger ('defense', 'Archer_' + IntToStr(i+1) + '_HP', 0);
+            {$IFDEF KOREA}
+            UnitName := '¹­¼ýÊÖ';
+            {$ELSE}
+            UnitName := 'Archer';
+            {$ENDIF}
+            UnitObj := nil;
+         end;
+      end;
+
+      for i:=0 to MAXGUARD-1 do begin
+         with Guards[i] do begin
+            X  := ini.ReadInteger ('defense', 'Guard_' + IntToStr(i+1) + '_X', 0);
+            Y  := ini.ReadInteger ('defense', 'Guard_' + IntToStr(i+1) + '_Y', 0);
+            HP := ini.ReadInteger ('defense', 'Guard_' + IntToStr(i+1) + '_HP', 0);
+            {$IFDEF KOREA}
+            UnitName := '¹­¼ýÊÖ';
+            {$ELSE}
+            UnitName := 'Guard';
+            {$ENDIF}
+            UnitObj := nil;
+         end;
+      end;
+
+      ini.Free;
+   end;
+
+   OwnerGuild := GuildMan.GetGuild (OwnerGuildName);
+
+end;
+
+
+//------------------------------------------------------------------------
+//UserCastle.run
+
+//10ÃÊ¿¡ ÇÑ¹ø¾¿ µ·´Ù
+procedure TUserCastle.Run;
+var
+   i: integer;
+   ahour, amin, asec, amsec: word;
+   ayear, amon, aday, ayear2, amon2, aday2: word;
+   str, strRemainMinutes: string;
+   RemainMinutes: longword;
+begin
+   if ServerIndex <> GrobalEnvir.GetServer (CastleMapName) then
+      exit;
+
+   DecodeDate (Date, ayear, amon, aday);
+   DecodeDate (IncomeToday, ayear2, amon2, aday2);
+
+   //´ÙÀ½³¯·Î ³Ñ¾î°¡¸é ¿À´ÃÀÇ ¼öÀÍÀº ÃÊ±âÈ­ ½ÃÅ´
+   if (ayear <> ayear2) or (amon <> amon2) or (aday <> aday2) then begin
+      TodayIncome := 0;
+      IncomeToday := Now;
+      BoCastleWarChecked := FALSE;
+   end;
+
+   //**Å×½ºÆ®
+   //DecodeTime (Time, ahour, amin, asec, amsec);
+   //if amin = 1 then BoCastleWarChecked := FALSE;
+
+   //¸ÅÀÏ ¿ÀÈÄ 8½Ã¸¶´Ù °ø¼ºÀü ½ÃÀÛÀ» È®ÀÎÇÑ´Ù.
+   if not BoCastleWarChecked and not BoCastleUnderAttack then begin
+      DecodeTime (Time, ahour, amin, asec, amsec);
+
+{$IFDEF DEBUG} //°ø¼ºÀü Å×½ºÆ® ********
+ahour := 20;
+amin := 1;
+asec := 1;
+{$ENDIF}
+
+      //if amin = 0 then begin  //¸Å ½Ã Á¤°¢¿¡
+      if ahour = 20 then begin //¿ÀÈÄ8½Ã
+         BoCastleWarChecked := TRUE;  //ÇÑ¹ø¸¸ °Ë»çÇÔ
+
+         RushGuildList.Clear;
+         //°ø°ÝÀÚ ¸®½ºÆ®¸¦ °Ë»ç
+         for i:=AttackerList.Count-1 downto 0 do begin
+            DecodeDate (PTAttackerInfo (AttackerList[i]).AttackDate, ayear2, amon2, aday2);
+            if (ayear=ayear2) and (amon=amon2) and (aday=aday2) then begin
+               //°ø¼ºÀü ½ÃÀÛ
+               BoCastleUnderAttack := TRUE;
+               BoCastleWarTimeOut10min := FALSE;
+               LatestWarDateTime := Now;
+               CastleAttackStarted := GetTickCount;
+               RushGuildList.Add (PTAttackerInfo (AttackerList[i]).Guild);
+               Dispose (PTAttackerInfo (AttackerList[i]));  //¸Þ¸ð¸®ÇØÁ¦
+               AttackerList.Delete (i);
+            end;
+         end;
+
+         //°ø¼ºÀüÀÇ ½ÃÀÛÀ» ¾Ë¸°´Ù.
+         if BoCastleUnderAttack then begin
+
+            RushGuildList.Add (OwnerGuild);  //¹æ¾î¹®µµ ÀÚµ¿À¸·Î °ø°Ý¹®À¸·Î µé¾î°¨
+
+            StartCastleWar;
+
+            SaveAttackerList;
+
+            UserEngine.SendInterMsg (ISM_RELOADCASTLEINFO, ServerIndex, '');
+
+            //Àü¼­¹öÀÇ ÀüÀ½À¸·Î °øÁö°¡ ³ª°£´Ù.
+            {$IFDEF KOREA}
+            str := '[É³°Í¿Ë¹¥³ÇÕ½ÒÑ¾­¿ªÊ¼]';
+            {$ELSE}
+            str := '[Sabuk wall conquest war started.]';
+            {$ENDIF}
+            UserEngine.SysMsgAll (str);
+            UserEngine.SendInterMsg (ISM_SYSOPMSG, ServerIndex, str);
+
+            ActivateMainDoor (TRUE);  //ÀÚµ¿À¸·Î ¼º¹®ÀÌ ´ÝÈû
+         end;
+
+      end;
+
+   end;
+
+   //Á×Àº °æºñ´Â »«´Ù.
+   for i:=0 to MAXGUARD-1 do
+      if Guards[i].UnitObj <> nil then
+         if Guards[i].UnitObj.BoGhost then Guards[i].UnitObj := nil;
+   for i:=0 to MAXARCHER-1 do
+      if Archers[i].UnitObj <> nil then
+         if Archers[i].UnitObj.BoGhost then Archers[i].UnitObj := nil;
+
+
+   //°ø¼ºÀü ÁßÀÎ °æ¿ì, °ø¼ºÀü ½ÃÀÛÈÄ 3½Ã°£ÀÌ Áö³ª¸é °ø¼ºÀüÀÌ Á¾·áµÈ´Ù.
+   if BoCastleUnderAttack then begin
+      LeftWall.UnitObj.BoStoneMode := FALSE;
+      CenterWall.UnitObj.BoStoneMode := FALSE;
+      RightWall.UnitObj.BoStoneMode := FALSE;
+
+      if not BoCastleWarTimeOut10min then begin
+         if GetTickCount - CastleAttackStarted > (2 * 60 * 60 * 1000 - (10 * 60 * 1000)) then begin
+            //10ºÐÀü
+            BoCastleWarTimeOut10min := TRUE;
+            BoCastleWarTimeOutRemainMinute := 10;
+            //Àü¼­¹öÀÇ ÀüÀ½À¸·Î °øÁö°¡ ³ª°£´Ù.
+            {$IFDEF KOREA}
+            str := '[É³°Í¿Ë¹¥³ÇÕ½½«ÔÚ10·ÖÖÓºó½áÊø]';
+            {$ELSE}
+            str := '[Sabuk War 10 Minutes remaining.]';
+            {$ENDIF}
+            UserEngine.SysMsgAll (str);
+            UserEngine.SendInterMsg (ISM_SYSOPMSG, ServerIndex, str);
+         end;
+      end else if BoCastleWarTimeOutRemainMinute > 0 then begin
+         strRemainMinutes := '';
+         RemainMinutes := ((2 * 60 * 60 * 1000) - (GetTickCount - CastleAttackStarted));
+
+         if (RemainMinutes > 9 * 60 * 1000 - 5 * 1000) and (RemainMinutes < 9 * 60 * 1000 + 5 * 1000) then begin
+            strRemainMinutes := '9';
+            BoCastleWarTimeOutRemainMinute := 9;
+         end else if (RemainMinutes > 8 * 60 * 1000 - 5 * 1000) and (RemainMinutes < 8 * 60 * 1000 + 5 * 1000) then begin
+            strRemainMinutes := '8';
+            BoCastleWarTimeOutRemainMinute := 8;
+         end else if (RemainMinutes > 7 * 60 * 1000 - 5 * 1000) and (RemainMinutes < 7 * 60 * 1000 + 5 * 1000) then begin
+            strRemainMinutes := '7';
+            BoCastleWarTimeOutRemainMinute := 7;
+         end else if (RemainMinutes > 6 * 60 * 1000 - 5 * 1000) and (RemainMinutes < 6 * 60 * 1000 + 5 * 1000) then begin
+            strRemainMinutes := '6';
+            BoCastleWarTimeOutRemainMinute := 6;
+         end else if (RemainMinutes > 5 * 60 * 1000 - 5 * 1000) and (RemainMinutes < 5 * 60 * 1000 + 5 * 1000) then begin
+            strRemainMinutes := '5';
+            BoCastleWarTimeOutRemainMinute := 5;
+         end else if (RemainMinutes > 4 * 60 * 1000 - 5 * 1000) and (RemainMinutes < 4 * 60 * 1000 + 5 * 1000) then begin
+            strRemainMinutes := '4';
+            BoCastleWarTimeOutRemainMinute := 4;
+         end else if (RemainMinutes > 3 * 60 * 1000 - 5 * 1000) and (RemainMinutes < 3 * 60 * 1000 + 5 * 1000) then begin
+            strRemainMinutes := '3';
+            BoCastleWarTimeOutRemainMinute := 3;
+         end else if (RemainMinutes > 2 * 60 * 1000 - 5 * 1000) and (RemainMinutes < 2 * 60 * 1000 + 5 * 1000) then begin
+            strRemainMinutes := '2';
+            BoCastleWarTimeOutRemainMinute := 2;
+         end else if (RemainMinutes > 1 * 60 * 1000 - 5 * 1000) and (RemainMinutes < 1 * 60 * 1000 + 5 * 1000) then begin
+            strRemainMinutes := '1';
+            BoCastleWarTimeOutRemainMinute := 1;
+         end else if RemainMinutes <= 1 * 60 * 1000 - 5 * 1000 then begin
+            strRemainMinutes := '';
+            BoCastleWarTimeOutRemainMinute := 0;
+         end else begin
+            strRemainMinutes := '';
+         end;
+
+         if strRemainMinutes <> '' then begin
+            {$IFDEF KOREA}
+            str := '[É³°Í¿Ë¹¥³ÇÕ½½«ÔÚ' + strRemainMinutes + '·ÖÖÓºó½áÊø]';
+            {$ELSE}
+            str := '[Sabuk War ' + strRemainMinutes + ' Minutes remaining.]';
+            {$ENDIF}
+            {debug code}MainOutMessage(str); //sonmg test
+            UserEngine.SysMsgAll (str);
+            UserEngine.SendInterMsg (ISM_SYSOPMSG, ServerIndex, str);
+         end;
+      end;
+      if GetTickCount - CastleAttackStarted > 2 * 60 * 60 * 1000 then begin
+         //Å¸ÀÓ¾Æ¿ôµÈ °æ¿ì, °ø¼ºÀüÀº ³¡³².
+         FinishCastleWar;
+      end;
+   end else begin
+      LeftWall.UnitObj.BoStoneMode := TRUE;
+      CenterWall.UnitObj.BoStoneMode := TRUE;
+      RightWall.UnitObj.BoStoneMode := TRUE;
+   end;
+
+
+end;
+
+
+function  TUserCastle.GetCastleStartMap: string;
+begin
+   Result := CastleMapName;
+end;
+
+function  TUserCastle.GetCastleStartX: integer;
+begin
+   Result := CastleStartX - 4 + Random(9);
+end;
+
+function  TUserCastle.GetCastleStartY: integer;
+begin
+   Result := CastleStartY - 4 + Random(9);
+end;
+
+function  TUserCastle.CanEnteranceCoreCastle (xx, yy: integer; hum: TUserHuman): Boolean;
+begin
+   Result := IsOurCastle (TGuild(hum.MyGuild));
+   if not Result then begin
+      with LeftWall do begin
+         if UnitObj <> nil then
+            if UnitObj.Death then
+               if (UnitObj.CX = xx) and (UnitObj.CY = yy) then
+                  Result := TRUE;
+      end;
+      with CenterWall do begin
+         if UnitObj <> nil then
+            if UnitObj.Death then
+               if (UnitObj.CX = xx) and (UnitObj.CY = yy) then
+                  Result := TRUE;
+      end;
+      with RightWall do begin
+         if UnitObj <> nil then
+            if UnitObj.Death then
+               if (UnitObj.CX = xx) and (UnitObj.CY = yy) then
+                  Result := TRUE;
+      end;
+   end;
+end;
+
+function  TUserCastle.IsOurCastle (g: TGuild): Boolean;
+begin
+   if g = nil then begin
+      Result := FALSE;
+      exit;
+   end;
+   Result := (UserCastle.OwnerGuild = g) and (UserCastle.OwnerGuild <> nil);
+end;
+
+function  TUserCastle.IsCastleMember (hum: TUserHuman): Boolean;
+begin
+   Result := IsOurCastle (TGuild(hum.MyGuild));
+end;
+
+function  TUserCastle.IsCastleAllyMember (hum: TUserHuman): Boolean;
+var
+   i: integer;
+begin
+   Result := FALSE;
+   if hum.MyGuild = nil then exit;
+   if IsOurCastle (TGuild(hum.MyGuild)) then begin
+      Result := TRUE;
+      exit;
+   end;
+   for i:=0 to TGuild(hum.MyGuild).AllyGuilds.Count-1 do begin
+      if IsOurCastle (TGuild(TGuild(hum.MyGuild).AllyGuilds.Objects[i])) then begin
+         Result := TRUE;
+         exit;
+      end;
+   end;
+end;
+
+procedure TUserCastle.ActivateDefeseUnits (active: Boolean);
+begin
+   if MainDoor.UnitObj <> nil then  MainDoor.UnitObj.HideMode := active;
+   if LeftWall.UnitObj <> nil then  LeftWall.UnitObj.HideMode := active;
+   if CenterWall.UnitObj <> nil then  CenterWall.UnitObj.HideMode := active;
+   if RightWall.UnitObj <> nil then  RightWall.UnitObj.HideMode := active;
+end;
+
+procedure TUserCastle.ActivateMainDoor (active: Boolean);
+begin
+   //MainDoor.UnitObj.HideMode := active;
+   if MainDoor.UnitObj <> nil then begin
+      if not MainDoor.UnitObj.Death then begin
+         if active then begin
+            if TCastleDoor(MainDoor.UnitObj).BoOpenState then
+               TCastleDoor(MainDoor.UnitObj).CloseDoor
+         end else begin
+            if not TCastleDoor(MainDoor.UnitObj).BoOpenState then
+               TCastleDoor(MainDoor.UnitObj).OpenDoor;
+         end;
+      end;
+   end;
+end;
+
+
+//»çºÏ¼º¾ÈÀÇ »óÁ¡¿¡¼­ ¹°°ÇÀ» »ç°í ÆÈ ¶§ ¸¶´Ù ¼¼±ÝÀÌ ºÙ´Â´Ù.
+procedure TUserCastle.PayTax (goodsprice: integer);
+var
+   tax: integer;
+begin
+   // 2003/07/15 »çºÏ ¼¼±Ý »óÇâ Á¶Àý 0.05 -> 0.10
+   tax := Round (goodsprice * 0.1);  //¼¼±ÝÀº 5%·Î Á¶Á¤   0.05
+   if TodayIncome + tax <= TODAYGOLD then begin
+      TodayIncome := TodayIncome + tax;
+   end else begin
+      if TodayIncome >= TODAYGOLD then begin
+         tax := 0;
+      end else begin
+         tax := TODAYGOLD - TodayIncome;
+         TodayIncome := TODAYGOLD;
+      end;
+   end;
+   if tax > 0 then begin
+      if int64(TotalGold) + tax <= CASTLEMAXGOLD then begin
+         TotalGold := TotalGold + tax;
+      end else
+         TotalGold := CASTLEMAXGOLD;
+   end;
+
+   if GetTickCount - SaveCastleGoldTime > 10 * 60 * 1000 then begin
+      SaveCastleGoldTime := GetTickCount;
+      AddUserLog ('23'#9 + //¼ºµ·³Ñ_
+                  '0'#9 +
+                  '0'#9 +
+                  '0'#9 +
+               {$IFDEF KOREA}
+                  'autosave'#9 +
+               {$ELSE}
+                  'Autosaving'#9 +
+               {$ENDIF}
+                  NAME_OF_GOLD{'±ÝÀü'} + ''#9 +
+                  IntToStr(TotalGold) + ''#9 +
+                  '0'#9 +
+                  '0');
+   end;
+end;
+
+//¹®ÁÖ°¡ ¼ºÀÇ µ·À» »«´Ù.
+//-1: ¹®ÁÖ°¡ ¾Æ´Ô
+//-2: ±×¸¸Å­ µ·ÀÌ ¾øÀ½
+//-3: Ã£´ÂÀÌ°¡ µ·À» ´õ ÀÌ»ó µé ¼ö ¾øÀ½
+//1 : ¼º°ø
+function  TUserCastle.GetBackCastleGold (hum: TUserHuman; howmuch: integer): integer;
+begin
+   Result := -1;
+   if (hum.MyGuild = UserCastle.OwnerGuild) and (hum.GuildRank = 1) then begin
+      if howmuch <= TotalGold then begin
+         if hum.Gold + howmuch <= hum.AvailableGold then begin
+            TotalGold := TotalGold - howmuch;
+            hum.IncGold (howmuch);
+
+            //·Î±×³²±è
+            AddUserLog ('22'#9 + //¼ºµ·»­_
+                        hum.MapName + ''#9 +
+                        IntToStr(hum.CX) + ''#9 +
+                        IntToStr(hum.CY) + ''#9 +
+                        hum.UserName + ''#9 +
+                        NAME_OF_GOLD{'±ÝÀü'} + ''#9 +
+                        IntToStr(howmuch) + ''#9 +
+                        '1'#9 +
+                        '0');
+            hum.GoldChanged;
+            Result := 1;
+         end else
+            Result := -3;
+      end else
+         Result := -2;
+   end;
+end;
+
+//¹®ÁÖ°¡ ¼º¿¡ µ·À» ³ÖÀ½
+//-1: ¹®ÁÖ°¡ ¾Æ´Ô
+//-2: ±×¸¸Å­ µ·ÀÌ ¾øÀ½
+//-3: Ã£´ÂÀÌ°¡ µ·À» ´õ ÀÌ»ó µé ¼ö ¾øÀ½
+function  TUserCastle.TakeInCastleGold (hum: TUserHuman; howmuch: integer): integer;
+begin
+   Result := -1;
+   if (hum.MyGuild = UserCastle.OwnerGuild) and (hum.GuildRank = 1) then begin
+      if howmuch <= hum.Gold then begin
+         if int64(howmuch) + TotalGold <= CASTLEMAXGOLD then begin
+            hum.DecGold (howmuch);
+            TotalGold := TotalGold + howmuch;
+
+            //·Î±×³²±è
+            AddUserLog ('23'#9 + //¼ºµ·³Ñ_
+                        hum.MapName + ''#9 +
+                        IntToStr(hum.CX) + ''#9 +
+                        IntToStr(hum.CY) + ''#9 +
+                        hum.UserName + ''#9 +
+                        NAME_OF_GOLD{'±ÝÀü'} + ''#9 +
+                        IntToStr(howmuch) + ''#9 +
+                        '0'#9 +
+                        '0');
+            hum.GoldChanged;
+            Result := 1;
+         end else
+            Result := -3;
+      end else
+         Result := -2;
+   end;
+end;
+
+//¼º¹®À» °íÄ£´Ù.
+function  TUserCastle.RepairCastleDoor: Boolean;
+begin
+   Result := FALSE;
+   with MainDoor do begin
+      if (UnitObj <> nil) and (not BoCastleUnderAttack) then begin
+         if UnitObj.WAbil.HP < UnitObj.WAbil.MaxHP then begin
+            if not UnitObj.Death then begin
+               //¸¶Áö¸·À» ¸ÂÀº 10ºÐÀÌ Áö³ª¸é °íÄ¥ ¼ö ÀÖ´Ù.
+               if GetTickCount - TCastleDoor(UnitObj).StruckTime > 1 * 60 * 1000 then begin
+                  UnitObj.WAbil.HP := UnitObj.WAbil.MaxHP;
+                  TCastleDoor(UnitObj).RepairStructure;  //»õ·Î¿î ¸ð½ÀÀ» º¸³½´Ù.
+                  Result := TRUE;
+               end;
+            end else begin
+               //¿ÏÆÄµÈ °æ¿ì¿¡´Â 1½Ã°£ ÈÄ¿¡ °íÄ¥ ¼ö ÀÖÀ½
+               if GetTickCount - TCastleDoor(UnitObj).BrokenTime > 1 * 60 * 1000 then begin
+                  UnitObj.WAbil.HP := UnitObj.WAbil.MaxHP;
+                  UnitObj.Death := FALSE;
+                  TCastleDoor(UnitObj).BoOpenState := FALSE;
+                  TCastleDoor(UnitObj).RepairStructure;  //»õ·Î¿î ¸ð½ÀÀ» º¸³½´Ù.
+                  Result := TRUE;
+               end;
+            end;
+         end;
+      end;
+   end;
+end;
+
+//¼ºº®À» °íÄ£´Ù.
+function  TUserCastle.RepairCoreCastleWall (wallnum: integer): integer;
+var
+   wall: TWallStructure;
+begin
+   Result := 0;
+   case wallnum of
+      1: wall := TWallStructure (LeftWall.UnitObj);
+      2: wall := TWallStructure (CenterWall.UnitObj);
+      3: wall := TWallStructure (RightWall.UnitObj);
+      else exit;
+   end;
+   if (wall <> nil) and (not BoCastleUnderAttack) then begin
+      if wall.WAbil.HP < wall.WAbil.MaxHP then begin
+         if not wall.Death then begin
+            //¸¶Áö¸·À» ¸ÂÀº 10ºÐÀÌ Áö³ª¸é °íÄ¥ ¼ö ÀÖ´Ù.
+            if GetTickCount - wall.StruckTime > 1 * 60 * 1000 then begin
+               wall.WAbil.HP := wall.WAbil.MaxHP;
+               wall.RepairStructure;  //»õ·Î¿î ¸ð½ÀÀ» º¸³½´Ù.
+               Result := 1;
+            end;
+         end else begin
+            //¿ÏÆÄµÈ °æ¿ì¿¡´Â 1½Ã°£ ÈÄ¿¡ °íÄ¥ ¼ö ÀÖÀ½
+            if GetTickCount - wall.BrokenTime > 1 * 60 * 1000 then begin
+               wall.WAbil.HP := wall.WAbil.MaxHP;
+               wall.Death := FALSE;
+               wall.RepairStructure;  //»õ·Î¿î ¸ð½ÀÀ» º¸³½´Ù.
+               Result := 1;
+            end;
+         end;
+      end;
+   end;
+end;
+
+
+//°ø¼ºÀü °ø°ÝÀÚ¿¡ °ü·Ã
+
+function  TUserCastle.IsAttackGuild (aguild: TGuild): Boolean;
+var
+   i: integer;
+begin
+   Result := FALSE;
+   for i:=0 to AttackerList.Count-1 do begin
+      if aguild = PTAttackerInfo (AttackerList[i]).Guild then begin
+         Result := TRUE;
+         break;
+      end;
+   end;
+end;
+
+//°ø¼ºÀüÀ» Áö±Ý ½ÅÃ»ÇÒ ¼ö ÀÖ´ÂÁö ¿©ºÎ..
+function  TUserCastle.ProposeCastleWar (aguild: TGuild): Boolean;
+var
+   pattack: PTAttackerInfo;
+begin
+   Result := FALSE;
+   if not IsAttackGuild (aguild) then begin         //Áßº¹½ÅÃ»Àº ¾ÈµÊ
+      new (pattack);
+
+
+      pattack.AttackDate := CalcDay (Date, 1+3);  //3ÀÏ ÈÄ
+
+
+      pattack.GuildName := aguild.GuildName;
+      pattack.Guild := aguild;
+      AttackerList.Add (pattack);
+
+      SaveAttackerList;
+      UserEngine.SendInterMsg (ISM_RELOADCASTLEINFO, ServerIndex, '');
+      Result := TRUE;
+   end;
+end;
+
+function  TUserCastle.GetNextWarDateTimeStr: string;
+var
+   ayear, amon, aday: word;
+begin
+   Result := '';
+   if AttackerList.Count > 0 then begin
+      if ENGLISHVERSION then begin  //¿Ü±¹¾î ¹öÀü
+         Result := DateToStr(PTAttackerInfo (AttackerList[0]).AttackDate);
+      end else if PHILIPPINEVERSION then begin  //ÇÊ¸®ÇÉ ¹öÀü
+         Result := DateToStr(PTAttackerInfo (AttackerList[0]).AttackDate);
+      end else begin
+         DecodeDate (PTAttackerInfo (AttackerList[0]).AttackDate, ayear, amon, aday);
+         // 2003/04/01 ¹ö±× ¼öÁ¤
+         {$IFDEF KOREA}
+         Result := IntToStr(ayear) + 'Äê' + IntToStr(amon) + 'ÔÂ' + IntToStr(aday) + 'ÈÕ';
+         {$ELSE}
+         Result := IntToStr(ayear) + 'Year' + IntToStr(amon) + 'Month' + IntToStr(aday) + 'Day';
+         {$ENDIF}
+      end;
+   end;
+
+end;
+
+function  TUserCastle.GetListOfWars: string;
+var
+   i, len: integer;
+   y, m, d, ayear, amon, aday: word;
+   str: string;
+begin
+   Result := '';
+   ayear := 0;  amon := 0;  aday := 0;
+   len := 0;
+   for i:=0 to AttackerList.Count-1 do begin
+      DecodeDate (PTAttackerInfo (AttackerList[i]).AttackDate, y, m, d);
+      if (y <> ayear) or (m <> amon) or (d <> aday) then begin
+         ayear := y;
+         amon := m;
+         aday := d;
+         if Result <> '' then Result := Result + '\';
+         if ENGLISHVERSION then begin  //¿Ü±¹¾î ¹öÀü
+            Result := Result + DateToStr(PTAttackerInfo (AttackerList[i]).AttackDate) + '\';
+         end else if PHILIPPINEVERSION then begin  //ÇÊ¸®ÇÉ ¹öÀü
+            Result := Result + DateToStr(PTAttackerInfo (AttackerList[i]).AttackDate) + '\';
+         end else begin
+            {$IFDEF KOREA}
+            Result := Result + IntToStr(ayear) + 'Äê' + IntToStr(amon) + 'ÔÂ' + IntToStr(aday) + 'ÈÕ\';
+            {$ELSE}
+            Result := Result + IntToStr(ayear) + 'Year' + IntToStr(amon) + 'Month' + IntToStr(aday) + 'Day\';
+            {$ENDIF}
+         end;
+         len := 0;
+      end;
+      if len > 40 then begin
+         Result := Result + '\';
+         len := 0;
+      end;
+      str := '"' + PTAttackerInfo (AttackerList[i]).GuildName + '" ';
+      len := len + Length(str);
+      Result := Result + str;
+
+   end;
+end;
+
+procedure TUserCastle.StartCastleWar;
+var
+   i: integer;
+   ulist: TList;
+   hum: TUserHuman;
+   str: string;
+begin
+   ulist := TList.Create;
+   UserEngine.GetAreaUsers (CastlePEnvir, CastleStartX, CastleStartY, 100, ulist);
+   for i:=0 to ulist.Count-1 do begin
+      hum := TUserHuman(ulist[i]);
+      hum.UserNameChanged; //ChangeNameColor;
+   end;
+   ulist.Free;
+   {$IFDEF KOREA}
+   str := '[É³°Í¿Ë¹¥³ÇÕ½ÒÑ¾­¿ªÊ¼]';
+   {$ELSE}
+   str := '[Sabuk wall conquest war ended.]';
+   {$ENDIF}
+   UserEngine.SysMsgAll (str);
+   UserEngine.SendInterMsg (ISM_SYSOPMSG, ServerIndex, str);
+end;
+
+
+
+//°ø¼ºÀü Áß¿¡ ÀÖÀ½..
+
+function  TUserCastle.IsCastleWarArea (penvir: TEnvirnoment; x, y: integer): Boolean;
+begin
+   Result := FALSE;
+   if penvir = CastlePEnvir then begin
+      if (abs(CastleStartX - x) < 100) and (abs(CastleStartY - y) < 100) then
+         Result := TRUE;
+   end;
+   if (penvir = CorePEnvir) or
+      (penvir = BasementEnvir)
+   then Result := TRUE;
+end;
+
+function  TUserCastle.IsRushCastleGuild (aguild: TGuild): Boolean;
+var
+   i: integer;
+begin
+   Result := FALSE;
+   if aguild = nil then exit;
+   for i:=0 to RushGuildList.Count-1 do begin
+      if RushGuildList[i] = aguild then begin
+         Result := TRUE;
+         break;
+      end;
+   end;
+end;
+
+function  TUserCastle.IsRushAllyCastleGuild (aguild: TGuild): Boolean;
+var
+   i, j: integer;
+begin
+   Result := FALSE;
+   if aguild = nil then exit;
+   for i:=0 to RushGuildList.Count-1 do begin
+      if RushGuildList[i] = aguild then begin
+         Result := TRUE;
+         break;
+      end;
+      for j:=0 to aguild.AllyGuilds.Count-1 do begin
+         if RushGuildList[i] = aguild.AllyGuilds.Objects[j] then begin
+            Result := TRUE;
+            exit;
+         end;
+      end;
+   end;
+end;
+
+function  TUserCastle.GetRushGuildCount: integer;
+begin
+   Result := RushGuildList.Count;
+end;
+
+//³»¼º¿¡¼­ ´Ù¸¥ ÀûÀ» ¸ðµÎ ³»ÂÑÀº °æ¿ì¿¡ ½Â¸® Á¶°ÇÀÌ µÈ´Ù.
+function  TUserCastle.CheckCastleWarWinCondition (aguild: TGuild): Boolean;
+var
+   i: integer;
+   ulist: TList;
+   flag: Boolean;
+begin
+   Result := FALSE;
+   flag := FALSE;
+   if GetTickCount - CastleAttackStarted > 10 * 60 * 1000 then begin  //°ø¼º ½ÃÀÛ 10ºÐÀÌ Áö³ª¾ß Á¡·ÉÀÌ °¡´É
+      ulist := TList.Create;
+      UserEngine.GetAreaUsers (CorePEnvir, 0, 0, 1000, ulist);
+      flag := TRUE;
+      for i:=0 to ulist.Count-1 do begin
+         if (not TCreature(ulist[i]).Death) and (TCreature(ulist[i]).MyGuild <> aguild) then begin
+            flag := FALSE;  //¿ì¸®¹®ÆÄ ÀÌ¿ÜÀÇ ¹®ÆÄ°¡ ³¢¾î ÀÖÀ½
+            break;
+         end;
+      end;
+      ulist.Free;
+   end;
+   Result := flag;
+end;
+
+procedure TUserCastle.ChangeCastleOwner (guild: TGuild);
+var
+   oldguild: TGuild;
+   str: string;
+begin
+   oldguild := OwnerGuild;
+   OwnerGuild := guild;
+   OwnerGuildName := TGuild(guild).GuildName;
+   LatestOwnerChangeDateTime := Now;  //
+   SaveToFile (CASTLEFILENAME);
+
+   if oldguild <> nil then
+      oldguild.MemberNameChanged;
+   if OwnerGuild <> nil then
+      OwnerGuild.MemberNameChanged;
+
+   {$IFDEF KOREA}
+   str := '(*)É³°Í¿ËÒÑ±» "' + OwnerGuildName + '" Õ¼Áì!!';
+   {$ELSE}
+   str := '(*) "' + OwnerGuildName + '" Occupying Sabuk wall !!';
+   {$ENDIF}
+
+   UserEngine.SysMsgAll (str);
+   UserEngine.SendInterMsg (ISM_SYSOPMSG, ServerIndex, str);
+   
+   {$IFDEF KOREA}
+   MainOutMessage ('[É³°Í¿ËÒÑ±»  ' + OwnerGuildName + ' Õ¼Áì]');
+   {$ELSE}
+   MainOutMessage ('[É³°Í¿ËÒÑ±»  ' + OwnerGuildName + ' Õ¼Áì]');
+   {$ENDIF}
+
+end;
+
+procedure TUserCastle.FinishCastleWar;
+var
+   i: integer;
+   ulist: TList;
+   hum: TUserHuman;
+   str: string;
+begin
+   BoCastleUnderAttack := FALSE;  //°ø¼ºÀüÀÌ ³¡³µÀ½.
+   RushGuildList.Clear;
+
+   //°ø¼ºÀü¿¡¼­ ½Â¸®ÇÑ ¹® ÀÌ¿Ü¿¡ ¸ðµç »ç¶÷Àº ´Ù¸¥ ¸ÊÀ¸·Î ³¯¾Æ°¨
+   ulist := TList.Create;
+   UserEngine.GetAreaUsers (CastlePEnvir, CastleStartX, CastleStartY, 100, ulist);
+   for i:=0 to ulist.Count-1 do begin
+      hum := TUserHuman(ulist[i]);
+      if hum <> nil then begin
+         hum.BoInFreePKArea := FALSE;  //°ø¼ºÀü ³¡
+         //hum.SendAreaState;
+         //hum.UserNameChanged; //ChangeNameColor;
+         if hum.MyGuild <> OwnerGuild then begin
+            //-----------------------
+            //¸í¼ºÄ¡ °¨¼Ò(°ø¼º½ÇÆÐ:-5000/-500)
+            if ENABLE_FAME_SYSTEM then begin
+               if hum.IsGuildMaster then hum.DecFamePoint( 5000 )
+               else hum.DecFamePoint( 500 );
+            end;
+            //-----------------------
+            hum.RandomSpaceMove (hum.HomeMap, 0);
+         end else begin
+            //-----------------------
+            //¸í¼ºÄ¡ È¹µæ(°ø¼º¼º°ø:+10000/+1000)
+            if ENABLE_FAME_SYSTEM then begin
+               if hum.IsGuildMaster then hum.IncFamePoint( 10000 )
+               else hum.IncFamePoint( 1000 );
+            end;
+            //-----------------------
+         end;
+      end;
+   end;
+   ulist.Free;
+
+   //Àü¼­¹öÀÇ ÀüÀ½À¸·Î °øÁö°¡ ³ª°£´Ù.
+   {$IFDEF KOREA}
+   str := '[É³°Í¿Ë¹¥³ÇÕ½ÒÑ¾­½áÊø]';
+   {$ELSE}
+   str := '[Sabuk wall conquest war ended.]';
+   {$ENDIF}
+   UserEngine.SysMsgAll (str);
+   UserEngine.SendInterMsg (ISM_SYSOPMSG, ServerIndex, str);
+end;
+
+
+
+end.

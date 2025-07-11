@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="DX9Types" platform="Win32">
+  <const name="dmUnknown" type="TDirect3D9Mode" file="DX9Types.pas" line="46">
+    <value>
+      dmUnknown
+    </value>
+  </const>
+  <const name="dmDirect3D9" type="TDirect3D9Mode" file="DX9Types.pas" line="46">
+    <value>
+      dmDirect3D9
+    </value>
+  </const>
+  <const name="dmDirect3D9Ex" type="TDirect3D9Mode" file="DX9Types.pas" line="46">
+    <value>
+      dmDirect3D9Ex
+    </value>
+  </const>
+  <enum name="TDirect3D9Mode" file="DX9Types.pas" line="46">
+    <element value="0" name="dmUnknown" file="DX9Types.pas" line="46" />
+    <element value="1" name="dmDirect3D9" file="DX9Types.pas" line="46" />
+    <element value="2" name="dmDirect3D9Ex" file="DX9Types.pas" line="46" />
+  </enum>
+  <variable name="D3D9Mode" type="TDirect3D9Mode" visibility="public" file="DX9Types.pas" line="54" />
+  <variable name="D3D9DisplayMode" type="D3DDISPLAYMODEEX" file="DX9Types.pas" line="57" />
+  <variable name="D3D9PresentParams" type="_D3DPRESENT_PARAMETERS_" file="DX9Types.pas" line="58" />
+  <variable name="D3D9Object" type="IDirect3D9" visibility="public" file="DX9Types.pas" line="61" />
+  <variable name="D3D9Device" type="IDirect3DDevice9" visibility="public" file="DX9Types.pas" line="62" />
+  <variable name="D3D9Caps" type="_D3DCAPS9" file="DX9Types.pas" line="65" />
+  <variable name="DX9ActiveDepthStencilLevel" type="Integer" visibility="public" file="DX9Types.pas" line="68" />
+  <function name="DX9FormatToAsphyre" visibility="public" file="DX9Types.pas" line="122">
+    <parameters>
+      <parameter name="Format" type="_D3DFORMAT" />
+      <retval type="TAsphyrePixelFormat" />
+    </parameters>
+  </function>
+  <function name="AsphyreToDX9Format" visibility="public" file="DX9Types.pas" line="158">
+    <parameters>
+      <parameter name="Format" type="TAsphyrePixelFormat" />
+      <retval type="_D3DFORMAT" />
+    </parameters>
+  </function>
+  <function name="DX9FindBackBufferFormat" visibility="public" file="DX9Types.pas" line="194">
+    <parameters>
+      <parameter name="Format" type="TAsphyrePixelFormat" />
+      <retval type="_D3DFORMAT" />
+    </parameters>
+  </function>
+  <function name="DX9FindDepthStencilFormat" visibility="public" file="DX9Types.pas" line="230">
+    <parameters>
+      <parameter name="StencilLevel" type="Integer" />
+      <retval type="_D3DFORMAT" />
+    </parameters>
+  </function>
+  <procedure name="DX9FindBestMultisampleType" visibility="public" file="DX9Types.pas" line="261">
+    <parameters>
+      <parameter name="BackBufferFormat" type="_D3DFORMAT" />
+      <parameter name="DepthFormat" type="_D3DFORMAT" />
+      <parameter name="Multisamples" type="Integer" />
+      <parameter name="SampleType" type="_D3DMULTISAMPLE_TYPE" paramflags="out" />
+      <parameter name="QualityLevel" type="Cardinal" paramflags="out" />
+    </parameters>
+  </procedure>
+  <function name="DX9FindTextureFormat" visibility="public" file="DX9Types.pas" line="296">
+    <parameters>
+      <parameter name="Format" type="TAsphyrePixelFormat" />
+      <parameter name="Usage" type="Cardinal" />
+      <retval type="TAsphyrePixelFormat" />
+    </parameters>
+  </function>
+  <function name="DX9FindTextureFormatEx" visibility="public" file="DX9Types.pas" line="327">
+    <parameters>
+      <parameter name="Format" type="TAsphyrePixelFormat" />
+      <parameter name="Usage1" type="Cardinal" />
+      <parameter name="Usage2" type="Cardinal" />
+      <retval type="TAsphyrePixelFormat" />
+    </parameters>
+  </function>
+  <procedure name="ClearD3D9DisplayMode" visibility="public" file="DX9Types.pas" line="363">
+  </procedure>
+  <procedure name="ClearD3D9PresentParams" visibility="public" file="DX9Types.pas" line="370">
+  </procedure>
+  <procedure name="ClearD3D9Caps" visibility="public" file="DX9Types.pas" line="376">
+  </procedure>
+</namespace>

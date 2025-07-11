@@ -1,0 +1,467 @@
+﻿unit uHomeSearch;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, IOUtils, FileCtrl, StdCtrls, Buttons, ExtCtrls, Types, ComObj,
+  ActiveX,
+  ShlObj, ShellAPI;
+
+type
+  TPathFoundedProc = reference to procedure(const APath: String);
+
+  TfrmDirChoose = class(TForm)
+    LabCaption: TLabel;
+    Bevel1: TBevel;
+    BtnOK: TBitBtn;
+    BtnCancel: TBitBtn;
+    ListClientDirs: TListBox;
+    BtnSearch: TBitBtn;
+    BtnChoose: TBitBtn;
+    LabSearch: TLabel;
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure BtnChooseClick(Sender: TObject);
+    procedure BtnSearchClick(Sender: TObject);
+    procedure BtnOKClick(Sender: TObject);
+  private
+    { Private declarations }
+    FInSearch, FSearchBreak: Boolean;
+    FRunNewPath: Boolean;
+    function CheckPath: Boolean;
+    procedure AddPath(const APath: String; Select: Boolean);
+    procedure DoSearchFile(const sRootDir: string;
+      Proc, InProc: TPathFoundedProc);
+  public
+    { Public declarations }
+  end;
+
+function CheckPathISRight: Boolean;
+procedure SetHomePath;
+function CopyFileToPath(const FileName, NewFileName: String;
+  DeleteSource: Boolean): Boolean;
+
+implementation
+
+uses Registry, uLogin;
+
+var
+  InternalFileName: TStringList;
+  sDefaultPath: string;
+{$R *.dfm}
+
+function CopyFileToPath(const FileName, NewFileName: String;
+  DeleteSource: Boolean): Boolean;
+begin
+  Result := False;
+  if (FileName <> NewFileName) and
+    (not FileExists(NewFileName) or DeleteFile(NewFileName)) then
+  begin
+    try
+      IOUtils.TFile.Copy(FileName, NewFileName);
+      Result := True;
+    except
+    end;
+  end;
+end;
+
+//------------------------检查客户端------------------------
+function CheckMirDir(DirName: string): Boolean;
+begin
+  if (not DirectoryExists(DirName + 'Data')) or
+    (not DirectoryExists(DirName + 'Map')) or
+    (not DirectoryExists(DirName + 'Wav'))
+    then
+      Result := False
+    else
+    begin
+      //没有找到这三个文件夹的一定不是客户端 但是找到了这三个文件的不一定是客户端
+      if FileExists(DirName + 'Data\Prguse.wil') or (FileExists(DirName + 'Data\Prguse.wzl')) then
+      begin
+        Result := True;
+      end else
+      begin
+        Result := False;
+      end;
+
+    end;
+
+end;
+
+function GetLogicDriveNoCDROM():TStringList;
+var
+  AStrArray: TStringDynArray;
+  I:Integer;
+begin
+  Result := TStringList.Create;
+  AStrArray := TDirectory.GetLogicalDrives;
+  //光驱不进行搜索 否则会报错。
+  for i := Low(AStrArray) to High(AStrArray) do
+  begin
+    if not (GetDriveType(PChar(AStrArray[i])) in [DRIVE_CDROM,DRIVE_UNKNOWN]) then
+      Result.Add(AStrArray[i]);
+  end;
+end;
+
+//根据内置路径 快速搜索传奇客户端
+function DoQuickSearch():TStringList;
+var
+  I,J : Integer;
+  LogicDriverPath : TStringList;
+  FilePath:String;
+begin
+  // 内置路径遍历
+  Result := TStringList.Create;
+  Try
+    LogicDriverPath := GetLogicDriveNoCDROM;
+    for I := 0 to (InternalFileName.Count - 1) do
+    begin
+      for J := LogicDriverPath.Count - 1 downto 0 do
+      begin
+        FilePath := ExtractFileDrive(LogicDriverPath[j]) + InternalFileName[I];
+        if DirectoryExists(FilePath) then
+        begin
+          if CheckMirDir(FilePath) then
+          begin
+           Result.Add(FilePath);
+          end;
+        end;
+
+      end;
+    end;
+  Finally
+    LogicDriverPath.Free;
+  End;
+end;
+
+function CheckPathISRight: Boolean;
+var
+  AReg: TRegistry;
+  APath: String;
+  QuickSearchFile : TStringList;
+  I,J : Integer;
+  LogicDriverPath : TStringList;
+  FilePath:String;
+  sec1, byt1, cl1, cl2, nDrive: longword;
+begin
+
+   if CheckMirDir(ExtractFilePath(Application.ExeName)) then
+   begin
+     Result    :=  True;
+     uHomePath :=  ExtractFilePath(Application.ExeName);
+     Exit;
+   end;
+   //如果当前目录既是传奇目录
+   if IOUtils.TDirectory.Exists('data\', False) and IOUtils.TDirectory.Exists('Map\') then
+   begin
+     Result    :=  True;
+     uHomePath :=  ExtractFilePath(Application.ExeName);
+     Exit;
+   end;
+
+   {$IFDEF DEBUG}
+   Result := True;
+   Exit;
+   {$ENDIF}
+
+  AReg := TRegistry.Create;
+  try
+    AReg.RootKey := HKEY_LOCAL_MACHINE;
+    if AReg.OpenKeyReadOnly('\SOFTWARE\snda\Legend of mir\') then
+      APath := AReg.ReadString('Path');
+    with TfrmDirChoose.Create(nil) do begin
+
+      // 内置路径遍历
+      nDrive := 0;
+      try
+        LogicDriverPath := GetLogicDriveNoCDROM;
+        for I := LogicDriverPath.Count - 1 downto 0 do
+        begin
+          GetDiskFreeSpaceA(PAnsiChar(AnsiString(LogicDriverPath[I])), sec1, byt1, cl1, cl2);
+          if nDrive < (cl1 * sec1 * byt1) then begin
+            nDrive := cl1 * sec1 * byt1;
+            FilePath := LogicDriverPath[I] + Application.Title+ '\';
+            sDefaultPath := FilePath;
+          end;
+        end;
+      finally
+        LogicDriverPath.Free;
+      end;
+      AddPath(IncludeTrailingPathDelimiter(FilePath), True);
+
+      try
+        AddPath(APath, False);
+        LabCaption.Caption := '以下是从您系统中查找到的传奇安装路径：';
+
+        QuickSearchFile := DoQuickSearch();
+        for i := 0 to QuickSearchFile.Count - 1 do
+        begin
+          AddPath(QuickSearchFile[i],False);
+        end;
+        ListClientDirs.ItemIndex := 0;
+        Result := ShowModal = ID_OK;
+      finally
+        Free;
+      end;
+    end;
+  finally
+    FreeAndNil(AReg);
+  end;
+end;
+
+procedure SetHomePath;
+begin
+  with TfrmDirChoose.Create(nil) do
+    try
+      // 如果找到曾经指定的目录
+      AddPath(uHomePath, False);
+      LabCaption.Caption := '以下是从您当前使用的传奇路径：';
+      ShowModal;
+    finally
+      Free;
+    end;
+end;
+
+procedure TfrmDirChoose.AddPath(const APath: String; Select: Boolean);
+begin
+  if (APath <> '') then
+  begin
+    if (ListClientDirs.Items.IndexOf(APath) = -1) then
+    begin
+      ListClientDirs.ItemIndex := ListClientDirs.Items.Add(APath);
+    end
+    else if Select then
+      ListClientDirs.ItemIndex := ListClientDirs.Items.IndexOf(APath);
+  end;
+end;
+
+procedure TfrmDirChoose.BtnChooseClick(Sender: TObject);
+var
+  APath: String;
+begin
+  if FileCtrl.SelectDirectory('请选择正确的传奇路径', '', APath) then
+    AddPath(IncludeTrailingPathDelimiter(APath), True);
+end;
+
+procedure TfrmDirChoose.BtnOKClick(Sender: TObject);
+begin
+  if not FileExists(sDefaultPath) then ForceDirectories(sDefaultPath);
+end;
+
+//procedure TfrmDirChoose.DoSearchFile(const sRootDir: string;
+//  Proc, InProc: TPathFoundedProc);
+//var
+//  Found: Integer;
+//  SearchRec: TSearchRec;
+//begin
+//  InProc(sRootDir);
+//  Found := FindFirst(sRootDir + '*.*', faAnyFile, SearchRec);
+//  while Found = 0 do
+//  begin
+//    if FSearchBreak then
+//      Break;
+//    if (SearchRec.Attr = faDirectory) and (SearchRec.Name <> '.') and
+//      (SearchRec.Name <> '..') then
+//    begin
+//      DoSearchFile(IncludeTrailingPathDelimiter(sRootDir + SearchRec.Name),
+//        Proc, InProc);
+//    end
+//    else if SameText('mir.exe', SearchRec.Name) then
+//      Proc(sRootDir);
+//    Found := FindNext(SearchRec);
+//  end;
+//  FindClose(SearchRec);
+//end;
+
+
+procedure TfrmDirChoose.DoSearchFile(const sRootDir: string;
+  Proc, InProc: TPathFoundedProc);
+var
+  Found: Integer;
+  SearchRec: TSearchRec;
+begin
+  InProc(sRootDir);
+  Found := FindFirst(sRootDir + '*.*', faDirectory, SearchRec);
+  while Found = 0 do
+  begin
+    if FSearchBreak then
+      Break;
+    if (SearchRec.Attr = faDirectory) and (SearchRec.Name <> '.') and
+      (SearchRec.Name <> '..') and (SearchRec.Name <> 'Windows') and (SearchRec.Name <> 'Users') then
+    begin
+      if CheckMirDir(sRootDir + SearchRec.Name + '\') then
+      begin
+        Proc(sRootDir + SearchRec.Name);
+      end;
+      DoSearchFile(IncludeTrailingPathDelimiter(sRootDir + SearchRec.Name),
+        Proc, InProc);
+//      if SearchRec.Name = '网络安全' then
+//      begin
+//        if FSearchBreak then
+//        Break;
+//      end;
+    end;
+    Found := FindNext(SearchRec);
+  end;
+  FindClose(SearchRec);
+end;
+
+procedure TfrmDirChoose.BtnSearchClick(Sender: TObject);
+var
+  I , J:Integer;
+  FilePath: string;
+  LogicDriverPath:TStringList;
+  QuickSearchFile:TStringList;
+begin
+  if FInSearch then
+  begin
+    FSearchBreak := True;
+    BtnSearch.Caption := '深度搜索...';
+  end
+  else
+  begin
+    FInSearch := True;
+    LabSearch.Caption := '正在搜索中...';
+
+    try
+      LogicDriverPath := GetLogicDriveNoCDROM();
+      BtnChoose.Enabled := False;
+      BtnOK.Enabled := False;
+      BtnCancel.Enabled := False;
+      FSearchBreak := False;
+      BtnSearch.Caption := '停止搜索';
+      LabCaption.Caption := '以下是从您系统中查找到的传奇路径：';
+      ListClientDirs.Clear;
+
+
+{$REGION '快速搜索内置路径'}
+      QuickSearchFile := DoQuickSearch();
+      for i := 0 to QuickSearchFile.Count - 1 do
+      begin
+        AddPath(QuickSearchFile[i],False);
+      end;
+{$ENDREGION}
+{$REGION '遍历搜索系统磁盘'}
+      // 跳过系统盘 先搜索系统盘除外的文件 最后要是没有再搜索系统盘
+      I := 1;
+
+      while True do
+      begin
+        if I <= (LogicDriverPath.Count - 1) then
+        begin
+          if FSearchBreak then
+            Break;
+          DoSearchFile(LogicDriverPath[i], procedure(const APath: String)
+          begin AddPath(APath, False); Application.ProcessMessages;
+          end, procedure(const APath: String)begin
+            LabSearch.Caption := APath;
+            Application.ProcessMessages; end);
+          Inc(I);
+        end else
+          Break;
+
+        if FSearchBreak then
+          Break;
+      end;
+
+      if not FSearchBreak then
+      begin
+        //搜索系统盘
+        DoSearchFile(LogicDriverPath[0], procedure(const APath: String)
+        begin AddPath(APath, False); Application.ProcessMessages;
+        end, procedure(const APath: String)begin
+          // LabSearch.Caption := APath;
+          Application.ProcessMessages; end);
+      end;
+{$ENDREGION}
+      LabSearch.Caption := '搜索完毕！';
+
+    finally
+      BtnSearch.Caption := '深度搜索...';
+      // LabSearch.Caption := '准备就绪...';
+      FInSearch := False;
+      BtnChoose.Enabled := True;
+      BtnOK.Enabled := True;
+      BtnCancel.Enabled := True;
+      LogicDriverPath.Free;
+      QuickSearchFile.Free;
+    end;
+  end;
+end;
+
+function TfrmDirChoose.CheckPath: Boolean;
+var
+  APath: String;
+begin
+  Result := False;
+  if ListClientDirs.ItemIndex <> -1 then
+  begin
+    APath := ListClientDirs.Items[ListClientDirs.ItemIndex];
+    if (APath <> '') and IOUtils.TDirectory.Exists(APath) then
+    begin
+      APath := IncludeTrailingPathDelimiter(APath);
+      if not IOUtils.TDirectory.Exists(APath + 'data\', False) then
+        IOUtils.TDirectory.CreateDirectory(APath + 'data\');
+      if not IOUtils.TDirectory.Exists(APath + 'Map\', False) then
+        IOUtils.TDirectory.CreateDirectory(APath + 'Map\');
+      if not IOUtils.TDirectory.Exists(APath + 'Wav\', False) then  //增加创建声音文件夹
+        IOUtils.TDirectory.CreateDirectory(APath + 'Wav\');
+      Result := True;
+      uHomePath := APath;
+      if CopyFileToPath(Application.ExeName,
+        IncludeTrailingPathDelimiter(uHomePath) +
+        ExtractFileName(Application.ExeName), False) then
+      begin
+        try
+          // 当前文件位置不是目标位置且当前位置不是传奇目录
+          if (Application.ExeName <> IncludeTrailingPathDelimiter(uHomePath) +
+            ExtractFileName(Application.ExeName)) and
+            not(TDirectory.Exists(IncludeTrailingPathDelimiter
+            (ExtractFileName(Application.ExeName)) + 'data\') and
+            TDirectory.Exists(IncludeTrailingPathDelimiter
+            (ExtractFileName(Application.ExeName)) + 'Map\')) then
+          begin
+            boNeedSuicide := True;
+          end;
+        except
+        end;
+      end;
+    end;
+  end;
+  if not Result then
+  begin
+    if uClientApp <> nil then
+      uClientApp.Print(mtError, '选择目录不是有效的传奇根目录');
+    Application.MessageBox(PChar('　　选择目录不是有效的传奇根目录，请选择列表中' + #13#10 +
+      '的传奇目录或者点击“深度搜索...”或“手工选择”' + #13#10 + '进行传奇目录查找'), '提示',
+      MB_ICONWARNING or MB_OK);
+  end;
+end;
+
+procedure TfrmDirChoose.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  CanClose := not FInSearch and ((ModalResult = IDCancel) or CheckPath);
+end;
+
+procedure InitInternalFileName();
+begin
+  // 这里省略盘符
+  InternalFileName := TStringList.Create;
+  InternalFileName.Add('\网络游戏\热血传奇\');
+  InternalFileName.Add('\Program Files (x86)\盛大游戏\热血传奇\');
+  InternalFileName.Add('\Program Files\盛大游戏\热血传奇\');
+  InternalFileName.Add('\游戏\盛大游戏\热血传奇\');
+  InternalFileName.Add('\热血传奇\');
+  InternalFileName.Add('\传奇\');
+
+end;
+
+
+initialization
+InitInternalFileName();
+
+finalization
+
+InternalFileName.Free;
+
+end.

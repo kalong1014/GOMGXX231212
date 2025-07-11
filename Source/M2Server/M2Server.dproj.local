@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2020/04/13 23:32:39.035.pas,L:\Source\M2Server\ObjRobot.pas=L:\Source\M2Server\Unit1.pas</Transaction>
+    <Transaction>2020/04/24 20:27:04.550.pas,L:\Source\M2Server\MasterSystem.pas=L:\Source\M2Server\Unit1.pas</Transaction>
+    <Transaction>2020/05/27 00:17:49.000.161,=L:\Source\Common\EDCode.pas</Transaction>
+    <Transaction>2020/08/04 21:44:15.000.726,=N:\Source\M2Server\LogManage.pas</Transaction>
+  </Transactions>
+	<ProjectSortOrder AutoSort="0" SortType="0">
+    <File Path="..\..\Source"/>
+    <File Path="..\Common"/>
+    <File Path="..\Common\EDCode.pas"/>
+    <File Path="..\Common\Grobal2.pas"/>
+    <File Path="..\Common\MfdbDef.pas"/>
+    <File Path="..\Common\mudutil.pas"/>
+    <File Path="..\Common\StallSystem.pas"/>
+    <File Path="Castle.pas"/>
+    <File Path="CmdMgr.pas"/>
+    <File Path="DBSQL.pas"/>
+    <File Path="DragonSystem.pas"/>
+    <File Path="Envir.pas"/>
+    <File Path="Event.pas"/>
+    <File Path="FriendSystem.pas"/>
+    <File Path="FrnEngn.pas"/>
+    <File Path="FSrvValue.pas"/>
+    <File Path="FSrvValue.dfm"/>
+    <File Path="Guild.pas"/>
+    <File Path="IdSrvClient.pas"/>
+    <File Path="IdSrvClient.dfm"/>
+    <File Path="InterMsgClient.pas"/>
+    <File Path="InterMsgClient.dfm"/>
+    <File Path="InterServerMsg.pas"/>
+    <File Path="InterServerMsg.dfm"/>
+    <File Path="itmunit.pas"/>
+    <File Path="LocalDB.pas"/>
+    <File Path="LocalDB.dfm"/>
+    <File Path="LogManage.pas"/>
+    <File Path="LogManage.dfm"/>
+    <File Path="M2Share.pas"/>
+    <File Path="Magic.pas"/>
+    <File Path="MaketSystem.pas"/>
+    <File Path="MasterSystem.pas"/>
+    <File Path="Mission.pas"/>
+    <File Path="NoticeM.pas"/>
+    <File Path="ObjAxeMon.pas"/>
+    <File Path="ObjBase.pas"/>
+    <File Path="ObjGuard.pas"/>
+    <File Path="ObjMon.pas"/>
+    <File Path="ObjMon2.pas"/>
+    <File Path="ObjMon3.pas"/>
+    <File Path="ObjNpc.pas"/>
+    <File Path="ObjRobot.pas"/>
+    <File Path="Relationship.pas"/>
+    <File Path="RunDB.pas"/>
+    <File Path="RunSock.pas"/>
+    <File Path="SqlEngn.pas"/>
+    <File Path="SQLLocalDB.pas"/>
+    <File Path="svMain.pas"/>
+    <File Path="svMain.dfm"/>
+    <File Path="TagSystem.pas"/>
+    <File Path="UserMgr.pas"/>
+    <File Path="UserMgrEngn.pas"/>
+    <File Path="UserSystem.pas"/>
+    <File Path="UsrEngn.pas"/>
+  </ProjectSortOrder>
+</BorlandProject>

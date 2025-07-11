@@ -1,0 +1,841 @@
+unit ClientSession;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, ClientThread, AcceptExWorkedThread, IOCPTypeDef, ThreadPool,
+  Protocol, SHSocket, SyncObj, utest, Dialogs, EdCode;
+
+type
+  TSessionObj = class(TSyncObj)  //会话对象类
+  public
+    m_pUserOBJ: PUserOBJ;
+    m_pOverlapRecv: PIOCPCommObj;
+    m_pOverlapSend: PIOCPCommObj;
+    m_tIOCPSender: TIOCPWriter;
+    m_tLastGameSvr: TClientThread;
+
+    m_fKickFlag: Boolean;
+    m_fHandleLogin: Byte;
+    m_dwSessionID: LongWord;
+    m_nSvrListIdx: Integer;
+    m_nSvrObject: Integer;
+    m_wRandKey: Word;
+
+    m_dwClientTimeOutTick: LongWord;
+
+    m_status: Integer;
+    constructor Create;
+    destructor Destroy; override;
+    procedure ProcessCltData(const Addr: Integer; const Len: Integer; var Succeed: BOOL; const fCDPacket: Boolean = False);
+    procedure ProcessSvrData(GS: TClientThread; const Addr: Integer; const Len: Integer);
+    procedure ReCreate;
+    procedure UserEnter;
+    procedure UserLeave;
+    procedure SendDefMessage(wIdent: Word; nRecog: Integer; nParam, nTag, nSeries: Word; sMsg: string);
+    procedure LoginGetNewUser(body: string);
+    procedure LoginChangePasswd(body: string);
+//    procedure SendQueryData;
+//    procedure SendGetTestCrc;
+  end;
+
+var
+  g_pFillUserObj: TSessionObj = nil;
+  g_UserList: array[0..USER_ARRAY_COUNT - 1] of TSessionObj; //会话对象列表
+var
+  lastqueryTick: DWORD;
+  starttick: DWORD;
+  enterCount: Integer;
+  mainhwnd: HWND;
+  gDeny: Boolean;
+  n4ErrCount: Integer;
+implementation
+
+uses
+  FuncForComm, SendQueue, LogManager, ConfigManager, Misc, HUtil32, Grobal2,
+  IPAddrFilter, IDFilter;
+
+constructor TSessionObj.Create;
+var
+  i, dwCurrentTick: DWORD;
+begin
+  inherited;
+  Randomize();
+  dwCurrentTick := GetTickCount();
+  m_fKickFlag := False;
+  m_nSvrObject := 0;
+  m_dwClientTimeOutTick := dwCurrentTick;
+  m_fHandleLogin := 0;
+  m_nSvrListIdx := 0;
+  m_status := 0;
+end;
+
+destructor TSessionObj.Destroy;
+begin
+  inherited;
+end;
+
+function RotateBits(C: AnsiChar; Bits: Integer): AnsiChar;
+var
+  SI: Word;
+begin
+  Bits := Bits mod 8;
+  if Bits < 0 then begin
+    SI := MakeWord(Byte(C), 0);
+    SI := SI shl Abs(Bits);
+  end
+  else begin
+    SI := MakeWord(0, Byte(C));
+    SI := SI shr Abs(Bits);
+  end;
+  SI := Swap(SI);
+  SI := Lo(SI) or Hi(SI);
+  Result := AnsiChar(SI);
+end;
+
+procedure TSessionObj.SendDefMessage(wIdent: Word; nRecog: Integer; nParam, nTag, nSeries: Word; sMsg: string);
+var
+  i, iLen: Integer;
+  Cmd: TDefaultMessage;
+  TempBuf, SendBuf: array[0..2048 - 1] of AnsiChar;
+  sSendMsg :string;
+begin
+  if (m_tLastGameSvr = nil) or not m_tLastGameSvr.Active then
+    Exit;
+
+//  Cmd.Recog := nRecog;
+//  Cmd.ident := wIdent;
+//  Cmd.param := nParam;
+//  Cmd.tag := nTag;
+//  Cmd.param := nSeries;
+
+  Cmd := MakeDefaultMsg (wIdent, nRecog, nParam, nTag, nSeries);
+
+//  SendBuf[0] := '#';
+//  Move(Cmd, TempBuf[1], SizeOf(TDefaultMessage)); //把Cmd的内容，复制到TempBuf中
+
+  if sMsg <> '' then
+    sSendMsg := '#' + EncodeMessage(Cmd) + string(PAnsiChar(AnsiString(EncodeString(sMsg)))) + '!'
+  else sSendMsg := '#' + EncodeMessage(Cmd) + '!';
+  m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(AnsiString(sSendMsg)), Length(AnsiString(sSendMsg)));
+
+
+  if sMsg <> '' then begin
+//    Move(sMsg[1], TempBuf[SizeOf(TDefaultMessage) + 1], Length(sMsg));
+    //加密编码TempBuf中的内容，保存到SendBuf中去
+//    iLen := EncodeBuf(Integer(@TempBuf[1]), SizeOf(TCmdPack) + Length(sMsg), Integer(@SendBuf[1]));
+  end else begin
+//    iLen := EncodeBuf(Integer(@TempBuf[1]), SizeOf(TCmdPack), Integer(@SendBuf[1]));
+  end;
+//  SendBuf[iLen + 1] := '!';
+//  m_tIOCPSender.SendData(m_pOverlapSend, @SendBuf[0], iLen + 2);
+end;
+
+//procedure TSessionObj.SendGetTestCrc;
+//var
+//  Cmd: TCmdPack;
+//  TempBuf, SendBuf: array[0..2048 - 1] of Char;
+//  nS: Word;
+//begin
+//  if (m_tLastGameSvr = nil) or not m_tLastGameSvr.Active then
+//    Exit;
+//  nS := 0;
+//  if n4ErrCount > 0 then
+//    nS := 1;
+//  SendDefMessage(SM_TESTCRC, Random(-1), Random(-1), Random(-1), ns, '');
+//  m_status := 2;
+//end;
+
+//procedure TSessionObj.SendQueryData;
+//var
+//  dwcur: DWORD;
+//
+//begin
+//
+////  OutputDebugString('SendQueryData');
+//      // 启动时间  网关登陆人数  时间间隔
+//  dwcur := GetTickCount;  //返回操作系统启动后的毫秒数
+//    // 40 分钟
+//
+//  if ((dwcur - starttick) > (1000 * 60 * 30)) and (enterCount > 100) then //30分钟间隔
+//  begin
+//    if ((dwcur - lastqueryTick) > 1000 * 60 * 10) then // 10分钟间隔
+//    begin
+//      SendDefMessage(SM_TEXTURL,
+//        0,
+//        0,
+//        0,
+//        g_testport,
+//        EncodeString((g_testurl)));
+//
+//      lastqueryTick := dwcur;
+//      m_status := 1;
+//    end;
+//
+//  end;
+//end;
+
+procedure TSessionObj.ProcessCltData(const Addr, Len: Integer; var Succeed: BOOL; const fCDPacket: Boolean);
+var
+  i, nBuffer: Integer;
+  nNewIDCode, nRand: Integer;
+  nDeCodeLen: Integer;
+  nEnCodeLen: Integer;
+  nABuf, nBBuf: PAnsiChar;
+//  Cmd: TCmdPack;
+  CltCmd: PTDefaultMessage;
+
+  pszBuf: array[0..1024 - 1] of AnsiChar;
+//  szSend, szRecv: string;
+  szAccount: string;
+//  szKey1, szKey2: string;
+
+  A, PwdChk, Direction: Integer;
+  ShiftVal, PasswordDigit: Integer;
+  pUserEntry: TUserEntryInfo;
+  sUserEntry: string;
+  nPacketSize: Integer;
+
+  log: string;
+  sData, sDefMsg, sDataMsg, sDataText: string;
+  DefMsg: TDefaultMessage;
+  Cmd: TDefaultMessage;
+  iSendLen: Integer;
+  Buffer: PAnsiChar;
+  nPacketIdx : Byte;
+label
+  labFailExit;
+begin
+//  g_pLogMgr.Add(Format('数据包: (%s),数据包长度(%d)',[PAnsiChar(addr), Len]));
+
+  if m_fKickFlag then begin //m_fKickFlag为真，表示连接进来的用户已被踢掉，直接反转m_fKickFlag标志，退出
+    m_fKickFlag := False;
+    Succeed := False;
+    Exit;
+  end;
+
+  if Len > g_pConfig.m_nNomClientPacketSize then begin
+    if g_pLogMgr.CheckLevel(4) then
+      g_pLogMgr.Add('数据包超长: ' + IntToStr(Len));
+    KickUser(m_pUserOBJ.nIPAddr);
+    Succeed := False;
+    Exit;
+  end;
+
+//  PByte(Addr + Len)^ := 0;
+
+  if (Len >= 5) and g_pConfig.m_fDefenceCCPacket then begin
+    if (StrPos(PAnsiChar(Addr), 'HTTP/') <> nil) then begin//StrPos返回第二个参数在第一个参数中第一次出现的位置指针
+      if g_pLogMgr.CheckLevel(6) then
+        g_pLogMgr.Add('CC Attack, Kick: ' + m_pUserOBJ.pszIPAddr);
+      KickUser(m_pUserOBJ.nIPAddr);//Kick即英文踢的意思
+      Succeed := False;
+      Exit;
+    end;
+  end;
+
+  if (Len >= 1) then begin
+    if (StrPos(PAnsiChar(Addr), '$') <> nil) then begin
+      if g_pLogMgr.CheckLevel(6) then
+        g_pLogMgr.Add('$ Attack, Kick: ' + m_pUserOBJ.pszIPAddr);
+      KickUser(m_pUserOBJ.nIPAddr);
+      Succeed := False;
+      Exit;
+    end;
+  end;
+
+  if gDeny then begin
+    KickUser(m_pUserOBJ.nIPAddr);
+    Succeed := False;
+    Exit;
+  end;
+
+  //到这里，m_pOverlapRecv.ABuffer和m_pOverlapRecv.BBuffer，应该已经被赋过值了
+//  nABuf := m_pOverlapRecv.ABuffer; //这时的nABuf是整数，作为内存地址来使用
+//  nBBuf := m_pOverlapRecv.BBuffer;
+
+//  nDeCodeLen := DecodeBuf(Addr, Len, nABuf);//把参数Addr的值，进行解密，数据的长度是Len，解密后存到nABuf中
+//  nDeCodeLen := NewDecode6BitBuf(sData, nABuf, Length(sData));
+  //nDeCodeLen是实际解密出的长度
+//  g_pLogMgr.Add('解密出的: ' + nABuf);
+//  g_pLogMgr.Add('解密出的长度: ' + IntToStr(nDeCodeLen));
+
+//  CltCmd := PTDefaultMessage(nABuf);//把nABuf地址位置中的内容，转换成PCmdPack
+
+//  log := StrPas(PAnsiChar(Addr));
+//      OutputDebugString(pchar(log));
+//  CM_QUERYDYNCODE: 3501
+
+(*  if (m_fHandleLogin = 0) and (CltCmd.Cmd = CM_QUERYDYNCODE) then begin
+    m_dwClientTimeOutTick := GetTickCount;
+    if (nDeCodeLen > SizeOf(TCmdPack)) then begin
+      szRecv := StrPas(PAnsiChar(nABuf + SizeOf(TCmdPack)));//把nABuf地址中的内容，路过一个TCmdPack的长度，转换成String
+
+      if Length(szRecv) > 4 then begin
+        g_DCP_mars.InitStr('');
+        szKey1 := g_DCP_mars.DecryptString(g_pszDecodeKey^);
+        g_DCP_mars.InitStr(szKey1);
+        szKey2 := g_DCP_mars.DecryptString(szRecv);
+
+        //ShowMessage(szKey1 + '  ' + szKey2 + '   ' + g_pszDecodeKey^ + '   ' + szRecv);
+
+        if (szKey1 = szKey2) and (g_nEndeBufLen > 0) then begin
+          m_fHandleLogin := 2;
+
+          Randomize();
+          nRand := Random(High(Word));//得到一个随机数
+          g_DCP_mars.InitStr(IntToStr(nRand));//把这个随机数作为加密的Key
+          g_DCP_mars.Reset;
+          szKey1 := EncodeString(g_DCP_mars.EncryptString(g_pszDecodeKey^));
+          m_wRandKey := Random(High(Word));//再次取得一个随机数
+
+          Cmd.ident := SM_QUERYDYNCODE;
+          Cmd.Recog := g_pLTCrc^;
+          Cmd.param := nRand;//这是用于加密和解密的Key，但是需要转成String
+          Cmd.tag := m_wRandKey;
+          Cmd.Series := Length(szKey1);
+
+          EncodeBuf(Integer(@Cmd), SizeOf(TCmdPack), Integer(@pszBuf[0]));//把Cmd加密，保存到pszBuf中
+          EncodeBuf(Integer(@g_pszEndeBuffer[0]), g_nEndeBufLen, nBBuf);
+          szSend := '#' + StrPas(@pszBuf[0]) + szKey1 + StrPas(PAnsiChar(nBBuf)) + '!';
+
+          //ShowMessage('待发送的数据是： ' + szSend);
+
+          m_tIOCPSender.SendData(m_pOverlapSend, @szSend[1], Length(szSend));
+
+
+//          if CltCmd.tag = 1 then // 登录器访问
+//          begin
+//            SendQueryData;
+//          end;
+
+        end;
+      end;
+    end;
+    Exit;
+  end;  *)
+
+  if m_fHandleLogin = 0 then begin
+
+    ArrestStringEx(string(PAnsiChar(addr)), '#', '!', sData);
+    nPacketIdx := Str_ToInt(sData[1], 99);
+    sData := Copy(sData, 2, Length(sData) - 1);
+    if Len = DEFBLOCKSIZE then begin
+      sDefMsg := sData;
+      sDataMsg := '';
+    end else begin
+      sDefMsg := Copy(sData, 1, DEFBLOCKSIZE);
+      sDataMsg := Copy(sData, DEFBLOCKSIZE + 1, Length(sData) - DEFBLOCKSIZE);
+    end;
+    DefMsg := DecodeMessage(sDefMsg);
+
+//    sDataText := '%A' + IntToStr(m_pUserOBJ._SendObj.Socket) + '/' + string(PAnsiChar(addr)) + '$';
+//    g_pLogMgr.Add('DefMsg.Recog: ' + IntToStr(DefMsg.Recog));
+//    g_pLogMgr.Add('DefMsg.Ident: ' + IntToStr(DefMsg.Ident));
+//    g_pLogMgr.Add('DefMsg.Param: ' + IntToStr(DefMsg.Param));
+//    g_pLogMgr.Add('DefMsg.Tag: ' + IntToStr(DefMsg.Tag));
+//    g_pLogMgr.Add('DefMsg.Series: ' + IntToStr(DefMsg.Series));
+//    g_pLogMgr.Add('DefMsg.Etc: ' + IntToStr(DefMsg.Etc));
+//    g_pLogMgr.Add('DefMsg.Etc2: ' + IntToStr(DefMsg.Etc2));
+
+//    if CltCmd.Cmd = CM_QUERYDYNCODE then begin
+//      //新客户端BUG
+//      Exit;
+//    end;
+
+//    if CltCmd.Cmd = CM_TESTCRC then begin
+//      if m_status = 2 then begin
+//        PostMessage(mainhwnd, WM_TESTREST, CltCmd.Direct, CltCmd.X);
+//        m_status := 0;
+//        if (1 = CltCmd.Direct) or (3 = CltCmd.Direct) then begin
+//          gDeny := True;
+//          m_tLastGameSvr.Active := False;
+//          m_tLastGameSvr.ServerPort := 0;
+//          g_pDecodeFunc := nil;
+//        end;
+//
+//        if (4 = CltCmd.Direct) then begin
+//          inc(n4ErrCount);
+//          if n4ErrCount > 3 then begin
+//            gDeny := True;
+//            m_tLastGameSvr.Active := False;
+//            m_tLastGameSvr.ServerPort := 0;
+//            g_pDecodeFunc := nil;
+//          end;
+//        end;
+//
+//        lastqueryTick := GetTickCount;
+//      end;
+//      Exit;
+//    end;
+
+    //客户端和登录器已经取消了这个加密方式，这个函数已经不再需要了，
+    //g_pDecodeFunc(PByte(nABuf), nDeCodeLen);
+
+    //log := Format('msgid2:%d', [CltCmd.Cmd]);
+    //OutputDebugString(pchar(log));
+//    m_tLastGameSvr.SendBuffer(PAnsiChar(sDataText), StrLen(PAnsiChar(sDataText)));
+
+    case DefMsg.Ident of
+//      CM_TESTCONNECT:
+//        begin
+//          if m_status = 1 then
+//          begin
+//            SendGetTestCrc();
+//          end;
+//          Exit;
+//        end;
+
+      CM_IDPASSWORD: begin
+          if (Len <= SizeOf(TDefaultMessage)) then begin
+            KickUser(m_pUserOBJ.nIPAddr);
+            Succeed := False;
+            Exit;
+          end;
+
+//          szRecv := StrPas(PAnsiChar(nABuf + SizeOf(TCmdPack)));
+
+//          szKey1 := IntToHex(m_wRandKey, 8);
+
+//          Direction := 1;
+//          PasswordDigit := 1;
+//          PwdChk := 0;
+//          for A := 1 to Length(szKey1) do
+//            Inc(PwdChk, Ord(szKey1[A]));
+//
+//          for A := 1 to Length(szRecv) do begin
+//            if Length(szKey1) = 0 then
+//              ShiftVal := A
+//            else
+//              ShiftVal := Ord(szKey1[PasswordDigit]);
+//            if Odd(A) then
+//              szRecv[A] := RotateBits(szRecv[A], -Direction * (ShiftVal + PwdChk))
+//            else
+//              szRecv[A] := RotateBits(szRecv[A], Direction * (ShiftVal + PwdChk));
+//            Inc(PasswordDigit);
+//            if PasswordDigit > Length(szKey1) then PasswordDigit := 1;
+//          end;
+//
+//          Move(szRecv[1], PAnsiChar(nABuf + SizeOf(TCmdPack))^, Length(szRecv));
+//          nEnCodeLen := EncodeBuf(Integer(nABuf), nDeCodeLen, Integer(nBBuf));
+
+          pszBuf[0] := '%';
+          StrFmt(@pszBuf[1], AnsiString('A%d/%s$'), [m_pUserOBJ._SendObj.Socket, PAnsiChar(addr)]);
+          m_tLastGameSvr.SendBuffer(@pszBuf[0], StrLen(pszBuf));
+        end;
+        CM_SELECTSERVER: begin
+          m_dwClientTimeOutTick := GetTickCount;
+          pszBuf[0] := '%';
+          StrFmt(@pszBuf[1], AnsiString('A%d/#%d%s!$'), [m_pUserOBJ._SendObj.Socket,nPacketIdx, sDefMsg + sDataMsg]);
+          m_tLastGameSvr.SendBuffer(@pszBuf[0], StrLen(pszBuf));
+        end;
+        CM_ADDNEWUSER: begin
+          m_dwClientTimeOutTick := GetTickCount;
+          if Len > SizeOf(TDefaultMessage) then begin
+            FillChar(pUserEntry, sizeof(TUserEntryInfo), #0);
+            nPacketSize := UpInt(SizeOf(TUserEntryInfo) * 4 / 3);
+            sUserEntry := Copy(sDataMsg, 1, nPacketSize);
+            
+            DecodeBuffer(sUserEntry, @pUserEntry, SizeOf(TUserEntryInfo));
+            szAccount := Trim(pUserEntry.LoginId);
+            nNewIDCode := 1;
+            
+            if (szAccount = '') or (Length(szAccount) < 2) then begin
+              nNewIDCode := -1;
+              goto labFailExit;
+            end;
+            if not CheckAccountName(szAccount) then begin
+              nNewIDCode := -1;
+              goto labFailExit;
+            end;
+            labFailExit:
+            if nNewIDCode <> 1 then begin
+              SendDefMessage(SM_NEWID_FAIL, nNewIDCode, 0, 0, 0, '');
+              Exit;
+            end;
+
+            if CheckNewIDOfIP(m_pUserOBJ.nIPAddr) then begin
+              KickUser(m_pUserOBJ.nIPAddr);
+              Succeed := False;
+              if g_pLogMgr.CheckLevel(4) then
+                g_pLogMgr.Add(Format('注册帐号超速: %s', [m_pUserOBJ.pszIPAddr]));
+              Exit;
+            end;
+            LoginGetNewUser(sDataMsg);
+          end;
+          Exit;
+        end;
+        CM_CHANGEPASSWORD:begin
+          m_dwClientTimeOutTick := GetTickCount;
+          LoginChangePasswd(sDataMsg);
+          Exit;
+        end;
+
+//      CM_PROTOCOL,
+//      CM_SELECTSERVER,
+//      CM_CHANGEPASSWORD,
+//      CM_UPDATEUSER,
+//      CM_GETBACKPASSWORD: begin
+//          m_dwClientTimeOutTick := GetTickCount;
+//
+//          nEnCodeLen := EncodeBuf(Integer(nABuf), nDeCodeLen, Integer(nBBuf));
+//
+//          pszBuf[0] := '%';
+//          StrFmt(@pszBuf[1], AnsiString('D%d/#1%s!$'), [m_pUserOBJ._SendObj.Socket, PAnsiChar(nBBuf)]);
+//          m_tLastGameSvr.SendBuffer(@pszBuf[0], StrLen(pszBuf));
+//        end;
+//
+//      CM_ADDNEWUSER: begin
+//          m_dwClientTimeOutTick := GetTickCount;
+//          if nDeCodeLen > SizeOf(TCmdPack) then begin
+//            pUserEntry := Pointer(nABuf + SizeOf(TCmdPack));
+//            szAccount := Trim(pUserEntry.sAccount);
+//            nNewIDCode := 1;
+//            if (szAccount = '') or (Length(szAccount) < 2) then begin
+//              nNewIDCode := -1;
+//              goto labFailExit;
+//            end;
+//            if not CheckAccountName(szAccount) then begin
+//              nNewIDCode := -1;
+//              goto labFailExit;
+//            end;
+//            labFailExit:
+//            if nNewIDCode <> 1 then begin
+//              SendDefMessage(SM_NEWID_FAIL, nNewIDCode, 0, 0, 0, '');
+//              Exit;
+//            end;
+//
+//            if CheckNewIDOfIP(m_pUserOBJ.nIPAddr) then begin
+//              KickUser(m_pUserOBJ.nIPAddr);
+//              Succeed := False;
+//              if g_pLogMgr.CheckLevel(4) then
+//                g_pLogMgr.Add(Format('注册帐号超速: %s', [m_pUserOBJ.pszIPAddr]));
+//              Exit;
+//            end;
+//
+//            nEnCodeLen := EncodeBuf(Integer(nABuf), nDeCodeLen, Integer(nBBuf));
+//
+//            pszBuf[0] := '%';
+//            StrFmt(@pszBuf[1], AnsiString('D%d/#1%s!$'), [m_pUserOBJ._SendObj.Socket, PAnsiChar(nBBuf)]);
+//            m_tLastGameSvr.SendBuffer(@pszBuf[0], StrLen(pszBuf));
+//          end else
+//            Exit;
+//        end;
+
+      else begin
+        if g_pLogMgr.CheckLevel(4) then
+          g_pLogMgr.Add(Format('错误的数据包索引: %d', [DefMsg.Ident]));
+        KickUser(m_pUserOBJ.nIPAddr);
+        Succeed := False;
+      end;
+    end;
+  end;
+end;
+
+procedure TSessionObj.LoginGetNewUser(body: string);
+var
+  ue: TUserEntryInfo;
+  ua: TUserEntryAddInfo;
+  size1, success: integer;
+  uestr, uastr: string;
+  msg: TDefaultMessage;
+  sUserID: string[15];
+  sUserPass: string[15];
+  sBirthday: string[11];
+  sQuiz: string[20];
+  sAnswer: string[20];
+  sQuiz2: string[20];
+  sAnswer2: string[20];
+  sUserEmail: string[20];
+  sMobilePhone: string[11];
+  sPhone: string[12];
+  sUserName: string[21];
+  sSendMsg: string;
+begin
+  success := -1;
+  FillChar(ue, sizeof(TUserEntryInfo), #0);
+  FillChar(ua, sizeof(TUserEntryAddInfo), #0);
+  size1 := UpInt(sizeof(TUserEntryInfo) * 4 / 3);
+  uestr := Copy(body, 1, size1);
+  uastr := Copy(body, size1 + 1, Length(body));
+
+  if (uestr <> '') and (uastr <> '') then begin
+    DecodeBuffer(uestr, @ue, sizeof(TUserEntryInfo));
+    DecodeBuffer(uastr, @ua, sizeof(TUserEntryAddInfo));
+
+//       g_pLogMgr.Add ('TUserEntryInfo.LoginId=' + ue.LoginId);
+//       g_pLogMgr.Add ('TUserEntryInfo.Password=' + ue.Password);
+//       g_pLogMgr.Add ('TUserEntryInfo.UserName=' + ue.UserName);
+//       g_pLogMgr.Add ('TUserEntryInfo.SSNo=' + ue.SSNo);
+//       g_pLogMgr.Add ('TUserEntryInfo.Phone=' + ue.Phone);
+//       g_pLogMgr.Add ('TUserEntryInfo.Quiz=' + ue.Quiz);
+//       g_pLogMgr.Add ('TUserEntryInfo.Answer=' + ue.Answer);
+//       g_pLogMgr.Add ('TUserEntryInfo.EMail=' + ue.EMail);
+//       g_pLogMgr.Add ('TUserEntryAddInfo.Quiz2=' + ua.Quiz2);
+//       g_pLogMgr.Add ('TUserEntryAddInfo.Answer2=' + ua.Answer2);
+//       g_pLogMgr.Add ('TUserEntryAddInfo.Birthday=' + ua.Birthday);
+//       g_pLogMgr.Add ('TUserEntryAddInfo.MobilePhone=' + ua.MobilePhone);
+//       g_pLogMgr.Add ('TUserEntryAddInfo.Memo1=' + ua.Memo1);
+//       g_pLogMgr.Add ('TUserEntryAddInfo.Memo2=' + ua.Memo2);
+
+    sUserID := ue.LoginId;
+    sUserPass := ue.Password;
+    sBirthday := ua.Birthday;
+    sQuiz := ue.Quiz;
+    sAnswer := ue.Answer;
+    sQuiz2 := ua.Quiz2;
+    sAnswer2 := ua.Answer2;
+    sUserEmail := ue.EMail;
+    sMobilePhone := ua.MobilePhone;
+    sPhone := ue.Phone;
+    sUserName := ue.UserName;
+    if (not g_pConfig.m_fEnableIDService) or (not g_pConfig.m_fRegisterUser) then
+    {//注册功能被管理员禁止} begin
+      success := -3;
+    end;
+    if CheckStr(sUserID) or CheckStr(sUserPass) or CheckStr(sQuiz) or
+      CheckStr(sAnswer) or CheckStr(sQuiz2) or CheckStr(sAnswer2) {or
+      CheckStr(sUserEmail)} then begin
+      success := -4; //包含非法字符
+    end;
+    if CheckBlank(sUserID) or CheckBlank(sUserPass) or CheckBlank(sQuiz) or
+      CheckBlank(sAnswer) or CheckBlank(sQuiz2) or CheckBlank(sAnswer2) or
+      CheckBlank(sUserEmail) then begin
+      success := -5; //包含空格
+    end;
+    if IsBlockID(sUserID) then
+      success := -2;
+
+    if success = -1 then begin
+      if g_pConfig.m_fNoThisSqlServer then
+        CheckSqlServerConn();
+      try
+        g_Rs.Open('Select FLD_LOGINID,FLD_PASSWORD From [TBL_ACCOUNT] Where FLD_LOGINID=''' + sUserID + '''', g_Conn, 1, 3);
+        if not g_Rs.Eof then begin
+          g_Rs.Close;
+          success := 0; //帐号已经存在
+        end
+        else begin
+          g_Rs.Addnew;
+          g_Rs.Fields['FLD_LOGINID'].value := sUserID;
+          g_Rs.Fields['FLD_PASSWORD'].value := sUserPass;
+          g_Rs.Update;
+          g_Rs.Close;
+          g_Rs.Open('select * from TBL_ACCOUNTADD', g_Conn, 1, 3);
+          g_Rs.Addnew;
+          g_Rs.Fields['FLD_LOGINID'].value := sUserID;
+          g_Rs.Fields['FLD_BIRTHDAY'].value := sBirthday;
+          g_Rs.Fields['FLD_PHONE'].value := sPhone;
+          g_Rs.Fields['FLD_MOBILEPHONE'].value := sMobilePhone;
+          g_Rs.Fields['FLD_EMAIL'].value := sUserEmail;
+          g_Rs.Fields['FLD_QUIZ1'].value := sQuiz;
+          g_Rs.Fields['FLD_ANSWER1'].value := sAnswer;
+          g_Rs.Fields['FLD_QUIZ2'].value := sQuiz2;
+          g_Rs.Fields['FLD_ANSWER2'].value := sAnswer2;
+          g_Rs.Fields['FLD_USERNAME'].value := sUserName;
+          g_Rs.Update;
+          g_Rs.Close;
+          success := 1;
+          if g_pLogMgr.CheckLevel(4) then
+          g_pLogMgr.Add(Format('账号注册成功: %s', [sUserID]));
+        end;
+      except
+        on E: Exception do begin
+          if g_pLogMgr.CheckLevel(4) then
+          g_pLogMgr.Add(Format('注册帐号异常: %s', [E.Message]));
+        end;
+      end;
+    end;
+  end;
+
+  if success = 1 then begin
+    msg := MakeDefaultMsg(SM_NEWID_SUCCESS, 0, 0, 0, 0);
+  end
+  else begin
+    msg := MakeDefaultMsg(SM_NEWID_FAIL, success, 0, 0, 0);
+  end;
+  sSendMsg := '#' + EncodeMessage(msg) + '!';
+  m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(AnsiString(sSendMsg)), Length(AnsiString(sSendMsg)));
+end;
+
+procedure TSessionObj.LoginChangePasswd(body: string);
+var
+  str, uid, passwd, newpass, sSendMsg: string;
+  success: integer;
+  ue: TUserEntryInfo;
+  ua: TUserEntryAddInfo;
+  msg: TDefaultMessage;
+begin
+  str := EdCode.DecodeString(body);
+  str := GetValidStr3(str, uid, [#9]);
+  newpass := GetValidStr3(str, passwd, [#9]);
+  success := 1;
+
+  if (not g_pConfig.m_fEnableIDService) or (not g_pConfig.m_fModifyPassword) then
+  {//修改密码功能被管理员禁止} begin
+    success := -3;
+  end;
+  //  if not BoSQLReady then                //数据库连接不成功
+  //  begin
+  //    success := 1;
+  //  end;
+  if CheckStr(passwd) or CheckStr(newpass) then begin
+    success := -4; //包含非法字符
+  end;
+  if CheckBlank(passwd) or CheckBlank(newpass) then begin
+    success := -4; //包含空格
+  end;
+
+  if success = 1 then begin
+    if g_pConfig.m_fNoThisSqlServer then
+      CheckSqlServerConn();
+    try
+      g_Rs.Open('Select FLD_LOGINID,FLD_PASSWORD From [TBL_ACCOUNT] Where FLD_LOGINID=''' + uid + '''', g_Conn, 1, 3);
+      if g_Rs.Eof then begin
+        g_Rs.Close;
+        success := -1; //用户不存在，老密码错误
+      end else if Trim(passwd) <> Trim(g_Rs.Fields['FLD_PASSWORD'].value) then begin
+        g_Rs.Close;
+        success := -1; //老密码错误
+      end else begin
+        g_Rs.Fields['FLD_PASSWORD'].value := newpass;
+        g_Rs.Update;
+        g_Rs.Close;
+        if g_pLogMgr.CheckLevel(4) then
+          g_pLogMgr.Add(Format('修改密码成功: %s', [uid]));
+      end;
+    except
+      on E: Exception do begin
+        if g_pLogMgr.CheckLevel(4) then
+          g_pLogMgr.Add(Format('%s修改密码异常: %s', [uid, E.Message]));
+        success := -1; //出现异常
+      end;
+    end;
+  end;
+  if success = 1 then begin
+    msg := MakeDefaultMsg(SM_CHGPASSWD_SUCCESS, 0, 0, 0, 0);
+    FillChar(ue, sizeof(TUserEntryInfo), #0);
+    FillChar(ua, sizeof(TUserEntryAddInfo), #0);
+    ue.LoginId := uid;
+    ue.Password := passwd;
+    ue.UserName := '-> "' + newpass + '"';
+  end else begin
+    msg := MakeDefaultMsg(SM_CHGPASSWD_FAIL, success, 0, 0, 0);
+  end;
+  sSendMsg := '#' + EncodeMessage(msg) + '!';
+  m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(AnsiString(sSendMsg)), Length(AnsiString(sSendMsg)));
+end;
+
+procedure TSessionObj.ProcessSvrData(GS: TClientThread; const Addr, Len: Integer);
+var
+  SendAddr: PAnsiChar;
+begin
+
+  if m_fKickFlag then begin
+    m_fKickFlag := False;
+    SHSocket.FreeSocket(m_pOverlapSend.Socket);
+    Exit;
+  end;
+//  SendAddr := PAnsiChar(Copy(string(PAnsiChar(Addr)), 0, Len));
+//  g_pLogMgr.Add(Format('服务端数据包:%s 长度: %d', [PAnsiChar(SendAddr),Len]));
+//  m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(SendAddr), Len);
+  m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(Addr), Len);
+end;
+
+procedure TSessionObj.UserEnter;
+var
+  szSenfBuf: string;
+begin
+  Inc(enterCount);
+  m_fHandleLogin := 0;
+  g_ProcMsgThread.AddSession(Self);
+//  szSenfBuf := '%' + Format('L%d/%s/%s$', [m_pUserOBJ._SendObj.Socket, m_pUserOBJ.pszIPAddr, m_pUserOBJ.pszLocalIPAddr]);
+  szSenfBuf := '%' + Format('O%d/%s$', [m_pUserOBJ._SendObj.Socket, m_pUserOBJ.pszIPAddr]);
+  m_tLastGameSvr.SendBuffer(PAnsiChar(AnsiString(szSenfBuf[1])), Length(AnsiString(szSenfBuf)));
+end;
+
+procedure TSessionObj.UserLeave;
+var
+  szSenfBuf: string;
+  i, nCode: Integer;
+  DynPacket: pTDynPacket;
+begin
+  nCode := 0;
+  try
+    nCode := 1;
+    m_fHandleLogin := 0;
+    szSenfBuf := '%' + Format('X%d$', [m_pUserOBJ._SendObj.Socket]);
+    m_tLastGameSvr.SendBuffer(PAnsiChar(AnsiString(szSenfBuf[1])), Length(AnsiString(szSenfBuf)));
+
+    nCode := 2;
+    DeleteConnectOfIP(Self.m_pUserOBJ.nIPAddr);
+
+    nCode := 3;
+    i := 0;
+    EnterCriticalSection(PSendQueueNode(m_pOverlapSend).QueueLock);
+    try
+      while True do begin
+        i := 1;
+        if PSendQueueNode(m_pOverlapSend).DynSendList.Count = 0 then
+          Break;
+        DynPacket := m_tIOCPSender.SendQueue.GetDynPacket(m_pOverlapSend);
+        if DynPacket = nil then
+          Break;
+        i := 2;
+        FreeMem(DynPacket.Buf);
+        Dispose(DynPacket);
+        PSendQueueNode(m_pOverlapSend).DynSendList.Delete(0);
+      end;
+    finally
+      LeaveCriticalSection(PSendQueueNode(m_pOverlapSend).QueueLock);
+    end;
+
+    nCode := 4;
+    if g_ProcMsgThread <> nil then
+      g_ProcMsgThread.DelSession(Self);
+  except
+    on M: Exception do
+      g_pLogMgr.Add(Format('TSessionObj.UserLeave: %d %s', [nCode, M.Message]));
+  end;
+end;
+
+procedure TSessionObj.ReCreate();
+begin
+  m_fKickFlag := False;
+  m_nSvrObject := 0;
+  m_fHandleLogin := 0;
+  m_dwClientTimeOutTick := GetTickCount;
+  m_status := 0;
+end;
+
+procedure FillUserList();
+var
+  i: Integer;
+begin
+  if g_pFillUserObj = nil then
+    g_pFillUserObj := TSessionObj.Create;
+  g_pFillUserObj.m_tLastGameSvr := nil;
+  for i := 0 to USER_ARRAY_COUNT - 1 do
+    g_UserList[i] := g_pFillUserObj;
+end;
+
+procedure CleanupUserList();
+begin
+  if g_pFillUserObj <> nil then
+    g_pFillUserObj.Free;
+end;
+
+initialization
+  FillUserList();
+  gDeny := False;
+
+  starttick := GetTickCount;
+  lastqueryTick := starttick;
+  enterCount := 0;
+  n4ErrCount := 0;
+
+finalization
+  CleanupUserList();
+
+end.
+

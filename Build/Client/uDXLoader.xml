@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="uDXLoader" platform="Win32">
+  <function name="LoadDirectX" visibility="public" file="uDXLoader.pas" line="13">
+    <parameters>
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <procedure name="PrintScreen" visibility="public" file="uDXLoader.pas" line="104">
+    <parameters>
+      <parameter name="Width" type="Integer" />
+      <parameter name="Height" type="Integer" />
+      <parameter name="AFileName" type="string" paramflags="var" />
+    </parameters>
+  </procedure>
+</namespace>

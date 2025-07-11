@@ -1,0 +1,952 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsMimeUtils" platform="Win32">
+  <const name="TMimeUtilsVersion" type="Integer" file="OverbyteIcsMimeUtils.pas" line="174">
+    <value>
+      $2D5
+    </value>
+  </const>
+  <variable name="CopyRight" type="string" visibility="public" file="OverbyteIcsMimeUtils.pas" line="175" />
+  <const name="SmtpDefaultLineLength" type="Integer" file="OverbyteIcsMimeUtils.pas" line="177">
+    <value>
+      $4C
+    </value>
+  </const>
+  <const name="SMTP_SND_BUF_SIZE" type="Integer" file="OverbyteIcsMimeUtils.pas" line="178">
+    <value>
+      $800
+    </value>
+  </const>
+  <const name="RegContentType" type="string" file="OverbyteIcsMimeUtils.pas" line="179">
+    <value>
+      MIME\Database\Content Type
+    </value>
+  </const>
+  <variable name="SpecialsRFC822" type="TSysCharSet" visibility="public" file="OverbyteIcsMimeUtils.pas" line="182" />
+  <variable name="CrLfSet" type="TSysCharSet" visibility="public" file="OverbyteIcsMimeUtils.pas" line="186" />
+  <variable name="QuotedCharSet" type="TSysCharSet" visibility="public" file="OverbyteIcsMimeUtils.pas" line="187" />
+  <variable name="BreakCharsSet" type="TSysCharSet" visibility="public" file="OverbyteIcsMimeUtils.pas" line="189" />
+  <variable name="HexTable" visibility="public" file="OverbyteIcsMimeUtils.pas" line="192" />
+  <variable name="HexTableA" visibility="public" file="OverbyteIcsMimeUtils.pas" line="194" />
+  <const name="MTypeList" type="TMimeTypeSrc" file="OverbyteIcsMimeUtils.pas" line="395">
+    <value>
+      MTypeList
+    </value>
+  </const>
+  <const name="MTypeOS" type="TMimeTypeSrc" file="OverbyteIcsMimeUtils.pas" line="395">
+    <value>
+      MTypeOS
+    </value>
+  </const>
+  <const name="MTypeMimeFile" type="TMimeTypeSrc" file="OverbyteIcsMimeUtils.pas" line="395">
+    <value>
+      MTypeMimeFile
+    </value>
+  </const>
+  <const name="MTypeKeyFile" type="TMimeTypeSrc" file="OverbyteIcsMimeUtils.pas" line="395">
+    <value>
+      MTypeKeyFile
+    </value>
+  </const>
+  <const name="MTypeRes" type="TMimeTypeSrc" file="OverbyteIcsMimeUtils.pas" line="395">
+    <value>
+      MTypeRes
+    </value>
+  </const>
+  <enum name="TMimeTypeSrc" file="OverbyteIcsMimeUtils.pas" line="395">
+    <element value="0" name="MTypeList" file="OverbyteIcsMimeUtils.pas" line="395" />
+    <element value="1" name="MTypeOS" file="OverbyteIcsMimeUtils.pas" line="395" />
+    <element value="2" name="MTypeMimeFile" file="OverbyteIcsMimeUtils.pas" line="395" />
+    <element value="3" name="MTypeKeyFile" file="OverbyteIcsMimeUtils.pas" line="395" />
+    <element value="4" name="MTypeRes" file="OverbyteIcsMimeUtils.pas" line="395" />
+  </enum>
+  <class name="TMimeTypesList" file="OverbyteIcsMimeUtils.pas" line="397">
+    <ancestor name="TComponent" namespace="System.Classes">
+      <interfaces>
+        <implements name="IInterfaceComponentReference" />
+        <implements name="IInterface" />
+      </interfaces>
+      <methodref name="GetComObject" visibility="private">
+      </methodref>
+      <methodref name="GetComponent" visibility="private">
+      </methodref>
+      <methodref name="GetComponentCount" visibility="private">
+      </methodref>
+      <methodref name="GetComponentIndex" visibility="private">
+      </methodref>
+      <methodref name="Insert" visibility="private">
+      </methodref>
+      <methodref name="ReadLeft" visibility="private">
+      </methodref>
+      <methodref name="ReadTop" visibility="private">
+      </methodref>
+      <methodref name="Remove" visibility="private">
+      </methodref>
+      <methodref name="RemoveNotification" visibility="private">
+      </methodref>
+      <methodref name="SetComponentIndex" visibility="private">
+      </methodref>
+      <methodref name="SetReference" visibility="private">
+      </methodref>
+      <methodref name="WriteLeft" visibility="private">
+      </methodref>
+      <methodref name="WriteTop" visibility="private">
+      </methodref>
+      <methodref name="IntfGetComponent" visibility="private">
+      </methodref>
+      <methodref name="DoGetDeltaStreams" visibility="private">
+      </methodref>
+      <methodref name="ReadDeltaStream" visibility="private">
+      </methodref>
+      <methodref name="ReadDeltaState" visibility="private">
+      </methodref>
+      <methodref name="FindSortedComponent" visibility="private">
+      </methodref>
+      <methodref name="AddSortedComponent" visibility="private">
+      </methodref>
+      <methodref name="RemoveSortedComponent" visibility="private" procflags="inline">
+      </methodref>
+      <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+      </methodref>
+      <methodref name="AsyncSchedule" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="ChangeName" visibility="protected">
+      </methodref>
+      <methodref name="DefineProperties" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="GetChildren" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="GetChildOwner" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="GetChildParent" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="GetOwner" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="Loaded" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Notification" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="GetDeltaStreams" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="PaletteCreated" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="ReadState" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="CanObserve" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="ObserverAdded" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="GetObservers" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="SetAncestor" visibility="protected">
+      </methodref>
+      <methodref name="SetDesigning" visibility="protected">
+      </methodref>
+      <methodref name="SetInline" visibility="protected">
+      </methodref>
+      <methodref name="SetDesignInstance" visibility="protected">
+      </methodref>
+      <methodref name="SetName" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="SetChildOrder" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="SetParentComponent" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="Updating" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="Updated" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="UpdateRegistry" visibility="protected" procflags="class virtual">
+      </methodref>
+      <methodref name="ValidateRename" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="ValidateContainer" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="ValidateInsert" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="WriteState" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="RemoveFreeNotifications" visibility="protected">
+      </methodref>
+      <methodref name="QueryInterface" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="_AddRef" visibility="protected">
+      </methodref>
+      <methodref name="_Release" visibility="protected">
+      </methodref>
+      <methodref name="GetTypeInfoCount" visibility="protected">
+      </methodref>
+      <methodref name="GetTypeInfo" visibility="protected">
+      </methodref>
+      <methodref name="GetIDsOfNames" visibility="protected">
+      </methodref>
+      <methodref name="Invoke" visibility="protected">
+      </methodref>
+      <eventref name="OnGetDeltaStreams" visibility="protected">
+      </eventref>
+      <methodref name="Create" visibility="public" procflags="constructor virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="EndInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="EndInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="EndFunctionInvoke" visibility="public">
+      </methodref>
+      <methodref name="DestroyComponents" visibility="public">
+      </methodref>
+      <methodref name="Destroying" visibility="public">
+      </methodref>
+      <methodref name="ExecuteAction" visibility="public" procflags="dynamic">
+      </methodref>
+      <methodref name="FindComponent" visibility="public">
+      </methodref>
+      <methodref name="FreeNotification" visibility="public">
+      </methodref>
+      <methodref name="RemoveFreeNotification" visibility="public">
+      </methodref>
+      <methodref name="FreeOnRelease" visibility="public">
+      </methodref>
+      <methodref name="GetEnumerator" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="GetParentComponent" visibility="public" procflags="dynamic">
+      </methodref>
+      <methodref name="GetNamePath" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="HasParent" visibility="public" procflags="dynamic">
+      </methodref>
+      <methodref name="InsertComponent" visibility="public">
+      </methodref>
+      <methodref name="RemoveComponent" visibility="public">
+      </methodref>
+      <methodref name="SetSubComponent" visibility="public">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="UpdateAction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="IsImplementorOf" visibility="public">
+      </methodref>
+      <methodref name="ReferenceInterface" visibility="public">
+      </methodref>
+      <propertyref name="ComObject" visibility="public">
+      </propertyref>
+      <propertyref name="Components" visibility="public">
+      </propertyref>
+      <propertyref name="ComponentCount" visibility="public">
+      </propertyref>
+      <propertyref name="ComponentIndex" visibility="public">
+      </propertyref>
+      <propertyref name="ComponentState" visibility="public">
+      </propertyref>
+      <propertyref name="ComponentStyle" visibility="public">
+      </propertyref>
+      <propertyref name="DesignInfo" visibility="public">
+      </propertyref>
+      <propertyref name="Owner" visibility="public">
+      </propertyref>
+      <propertyref name="VCLComObject" visibility="public">
+      </propertyref>
+      <propertyref name="Observers" visibility="public">
+      </propertyref>
+      <propertyref name="Name" visibility="published">
+      </propertyref>
+      <propertyref name="Tag" visibility="published">
+      </propertyref>
+      <ancestor name="TPersistent" namespace="System.Classes">
+        <methodref name="AssignError" visibility="private">
+        </methodref>
+        <methodref name="AssignTo" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="DefineProperties" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="GetOwner" visibility="protected" procflags="dynamic">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor override">
+        </methodref>
+        <methodref name="Assign" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetNamePath" visibility="public" procflags="dynamic">
+        </methodref>
+        <ancestor name="TObject" namespace="System">
+          <methodref name="Create" visibility="public" procflags="constructor">
+          </methodref>
+          <methodref name="Free" visibility="public">
+          </methodref>
+          <methodref name="DisposeOf" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="InitInstance" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="CleanupInstance" visibility="public">
+          </methodref>
+          <methodref name="ClassType" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="ClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassNameIs" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassParent" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassInfo" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InstanceSize" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InheritsFrom" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="QualifiedClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="GetInterface" visibility="public">
+          </methodref>
+          <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="UnitName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="UnitScope" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="Equals" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="GetHashCode" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="ToString" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="SafeCallException" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Dispatch" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="NewInstance" visibility="public" procflags="class virtual">
+          </methodref>
+          <methodref name="FreeInstance" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+          </methodref>
+          <methodref name="GetDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <propertyref name="Disposed" visibility="protected">
+          </propertyref>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FContentList" type="THashedStringList" visibility="private" size="4" offset="64" file="OverbyteIcsMimeUtils.pas" line="399" />
+      <field name="FExtensionList" type="THashedStringList" visibility="private" size="4" offset="68" file="OverbyteIcsMimeUtils.pas" line="400" />
+      <field name="FDefaultTypes" type="TStringList" visibility="private" size="4" offset="72" file="OverbyteIcsMimeUtils.pas" line="401" />
+      <field name="FUnknownType" type="string" visibility="private" size="4" offset="76" file="OverbyteIcsMimeUtils.pas" line="402" />
+      <field name="FMimeTypesFile" type="string" visibility="private" size="4" offset="80" file="OverbyteIcsMimeUtils.pas" line="403" />
+      <field name="FLoadOSonDemand" type="Boolean" visibility="private" size="1" offset="84" file="OverbyteIcsMimeUtils.pas" line="404" />
+      <field name="FLoaded" type="Boolean" visibility="private" size="1" offset="85" file="OverbyteIcsMimeUtils.pas" line="405" />
+      <field name="FMimeTypeSrc" type="TMimeTypeSrc" visibility="private" size="1" offset="86" file="OverbyteIcsMimeUtils.pas" line="406" />
+      <procedure name="SetDefaultTypes" visibility="private" file="OverbyteIcsMimeUtils.pas" line="407">
+        <parameters>
+          <parameter name="Value" type="TStringList" />
+        </parameters>
+      </procedure>
+      <constructor name="Create" visibility="public" file="OverbyteIcsMimeUtils.pas" line="409">
+        <parameters>
+          <parameter name="AOwner" type="TComponent" />
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="OverbyteIcsMimeUtils.pas" line="410">
+        <parameters>
+        </parameters>
+      </destructor>
+      <function name="LoadTypeList" visibility="public" file="OverbyteIcsMimeUtils.pas" line="412">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="Clear" visibility="public" file="OverbyteIcsMimeUtils.pas" line="414">
+      </procedure>
+      <function name="CountExtn" visibility="public" file="OverbyteIcsMimeUtils.pas" line="416">
+        <parameters>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="CountContent" visibility="public" file="OverbyteIcsMimeUtils.pas" line="418">
+        <parameters>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="AddContentType" visibility="public" file="OverbyteIcsMimeUtils.pas" line="423">
+        <parameters>
+          <parameter name="AExtn" type="string" paramflags="const" />
+          <parameter name="AContent" type="string" paramflags="const" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="LoadWinReg" visibility="public" file="OverbyteIcsMimeUtils.pas" line="426">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="LoadFromOS" visibility="public" file="OverbyteIcsMimeUtils.pas" line="429">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="LoadFromList" visibility="public" file="OverbyteIcsMimeUtils.pas" line="431">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="LoadMimeFile" visibility="public" file="OverbyteIcsMimeUtils.pas" line="434">
+        <parameters>
+          <parameter name="AFileName" type="string" paramflags="const" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="LoadFromResource" visibility="public" file="OverbyteIcsMimeUtils.pas" line="436">
+        <parameters>
+          <parameter name="AResName" type="string" paramflags="const" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="LoadFromFile" visibility="public" file="OverbyteIcsMimeUtils.pas" line="438">
+        <parameters>
+          <parameter name="AFileName" type="string" paramflags="const" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="SaveToFile" visibility="public" file="OverbyteIcsMimeUtils.pas" line="440">
+        <parameters>
+          <parameter name="AFileName" type="string" paramflags="const" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="LoadContentTypes" visibility="public" file="OverbyteIcsMimeUtils.pas" line="442">
+        <parameters>
+          <parameter name="AList" type="TStrings" />
+        </parameters>
+      </procedure>
+      <procedure name="AddContentTypes" visibility="public" file="OverbyteIcsMimeUtils.pas" line="447">
+        <parameters>
+          <parameter name="AList" type="TStrings" />
+        </parameters>
+      </procedure>
+      <procedure name="GetContentTypes" visibility="public" file="OverbyteIcsMimeUtils.pas" line="449">
+        <parameters>
+          <parameter name="AList" type="TStrings" />
+        </parameters>
+      </procedure>
+      <function name="TypeFromExtn" visibility="public" file="OverbyteIcsMimeUtils.pas" line="451">
+        <parameters>
+          <parameter name="AExtn" type="string" paramflags="const" />
+          <retval type="string" />
+        </parameters>
+      </function>
+      <function name="TypeFromFile" visibility="public" file="OverbyteIcsMimeUtils.pas" line="453">
+        <parameters>
+          <parameter name="AFileName" type="string" paramflags="const" />
+          <retval type="string" />
+        </parameters>
+      </function>
+      <function name="TypeGetExtn" visibility="public" file="OverbyteIcsMimeUtils.pas" line="456">
+        <parameters>
+          <parameter name="AContent" type="string" paramflags="const" />
+          <retval type="string" />
+        </parameters>
+      </function>
+      <property name="LoadOSonDemand" visibility="published" read="FLoadOSonDemand" write="FLoadOSonDemand" type="Boolean" file="OverbyteIcsMimeUtils.pas" line="460" />
+      <property name="MimeTypesFile" visibility="published" read="FMimeTypesFile" write="FMimeTypesFile" type="string" default="0" file="OverbyteIcsMimeUtils.pas" line="462" />
+      <property name="DefaultTypes" visibility="published" read="FDefaultTypes" write="SetDefaultTypes" type="TStringList" file="OverbyteIcsMimeUtils.pas" line="464" />
+      <property name="MimeTypeSrc" visibility="published" read="FMimeTypeSrc" write="FMimeTypeSrc" type="TMimeTypeSrc" file="OverbyteIcsMimeUtils.pas" line="466" />
+      <property name="UnknownType" visibility="published" read="FUnknownType" write="FUnknownType" type="string" default="0" file="OverbyteIcsMimeUtils.pas" line="469" />
+    </members>
+  </class>
+  <function name="EncodeQuotedPrintable" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="489">
+    <parameters>
+      <parameter name="S" type="RawByteString" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="EncodeQuotedPrintable" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="529">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="EncodeQuotedPrintable" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="536">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="DecodeQuotedPrintable" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="549">
+    <parameters>
+      <parameter name="S" type="RawByteString" paramflags="const" />
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="DecodeQuotedPrintable" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="575">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="DecodeQuotedPrintable" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="600">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="SplitQuotedPrintableString" visibility="public" file="OverbyteIcsMimeUtils.pas" line="607">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <procedure name="DotEscape" visibility="public" file="OverbyteIcsMimeUtils.pas" line="636">
+    <parameters>
+      <parameter name="S" type="string" paramflags="var" />
+      <parameter name="OnlyAfterCrLf" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+    </parameters>
+  </procedure>
+  <function name="FilenameToContentType" visibility="public" file="OverbyteIcsMimeUtils.pas" line="660">
+    <parameters>
+      <parameter name="FileName" type="string" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="InitFileEncBase64" visibility="public" file="OverbyteIcsMimeUtils.pas" line="686">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <parameter name="ShareMode" type="Word" />
+      <retval type="TStream" />
+    </parameters>
+  </function>
+  <function name="DoFileLoadNoEncoding" visibility="public" file="OverbyteIcsMimeUtils.pas" line="728">
+    <parameters>
+      <parameter name="Stream" type="TStream" paramflags="var" />
+      <parameter name="More" type="Boolean" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="DoTextFileReadNoEncoding" visibility="public" file="OverbyteIcsMimeUtils.pas" line="761">
+    <parameters>
+      <parameter name="Stream" type="TStream" paramflags="var" />
+      <parameter name="More" type="Boolean" paramflags="var" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="DoFileEncQuotedPrintable" visibility="public" file="OverbyteIcsMimeUtils.pas" line="803">
+    <parameters>
+      <parameter name="Stream" type="TStream" paramflags="var" />
+      <parameter name="More" type="Boolean" paramflags="var" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="DoFileEncBase64" visibility="public" file="OverbyteIcsMimeUtils.pas" line="925">
+    <parameters>
+      <parameter name="Stream" type="TStream" paramflags="var" />
+      <parameter name="More" type="Boolean" paramflags="var" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <procedure name="EndFileEncBase64" visibility="public" file="OverbyteIcsMimeUtils.pas" line="1018">
+    <parameters>
+      <parameter name="Stream" type="TStream" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="Base64Encode" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1029">
+    <parameters>
+      <parameter name="Input" type="PAnsiChar" paramflags="const" />
+      <parameter name="Len" type="Integer" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="Base64Encode" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1077">
+    <parameters>
+      <parameter name="Input" type="AnsiString" paramflags="const" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="Base64Encode" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1131">
+    <parameters>
+      <parameter name="Input" type="string" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="Base64Encode" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1140">
+    <parameters>
+      <parameter name="Input" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="Base64Decode" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1184">
+    <parameters>
+      <parameter name="Input" type="AnsiString" paramflags="const" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="Base64Decode" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1230">
+    <parameters>
+      <parameter name="Input" type="string" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="Base64Decode" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1275">
+    <parameters>
+      <parameter name="Input" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="Base64EncodeEx" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1367">
+    <parameters>
+      <parameter name="Input" type="RawByteString" paramflags="const" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="cPos" type="Integer" paramflags="var" />
+      <parameter name="CodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <parameter name="IsMultiByteCP" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="Base64EncodeEx" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1436">
+    <parameters>
+      <parameter name="Input" type="string" paramflags="const" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="cPos" type="Integer" paramflags="var" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="Base64EncodeEx" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1445">
+    <parameters>
+      <parameter name="Input" type="string" paramflags="const" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="cPos" type="Integer" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsWrapTextEx" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1466">
+    <parameters>
+      <parameter name="Line" type="RawByteString" paramflags="const" />
+      <parameter name="BreakStr" type="RawByteString" paramflags="const" />
+      <parameter name="BreakingChars" type="TSysCharSet" paramflags="const" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="QuoteChars" type="TSysCharSet" />
+      <parameter name="cPos" type="Integer" paramflags="var" />
+      <parameter name="ForceBreak" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <parameter name="ACodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <parameter name="IsMultiByteCP" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="IcsWrapTextEx" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1573">
+    <parameters>
+      <parameter name="Line" type="string" paramflags="const" />
+      <parameter name="BreakStr" type="string" paramflags="const" />
+      <parameter name="BreakingChars" type="TSysCharSet" paramflags="const" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="QuoteChars" type="TSysCharSet" />
+      <parameter name="cPos" type="Integer" paramflags="var" />
+      <parameter name="ForceBreak" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="UnFoldHdrLine" visibility="public" file="OverbyteIcsMimeUtils.pas" line="1672">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="NeedsEncoding" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1700">
+    <parameters>
+      <parameter name="S" type="AnsiString" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="NeedsEncoding" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1719">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="NeedsEncodingPChar" visibility="public" file="OverbyteIcsMimeUtils.pas" line="1739">
+    <parameters>
+      <parameter name="S" type="PWideChar" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="HdrEncodeInLine" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1763">
+    <parameters>
+      <parameter name="Input" type="RawByteString" paramflags="const" />
+      <parameter name="Specials" type="TSysCharSet" />
+      <parameter name="EncType" type="AnsiChar" />
+      <parameter name="CharSet" type="AnsiString" paramflags="const" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="DoFold" type="Boolean" />
+      <parameter name="CodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <parameter name="IsMultiByteCP" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="HdrEncodeInLine" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1906">
+    <parameters>
+      <parameter name="Input" type="string" paramflags="const" />
+      <parameter name="Specials" type="TSysCharSet" />
+      <parameter name="EncType" type="Char" />
+      <parameter name="CharSet" type="string" paramflags="const" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="DoFold" type="Boolean" />
+      <parameter name="Codepage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <parameter name="IsMultiByteCP" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="HdrEncodeInLineEx" visibility="public" file="OverbyteIcsMimeUtils.pas" line="1922">
+    <parameters>
+      <parameter name="Input" type="string" paramflags="const" />
+      <parameter name="Specials" type="TSysCharSet" />
+      <parameter name="EncType" type="Char" />
+      <parameter name="CodePage" type="Cardinal" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="DoFold" type="Boolean" />
+      <parameter name="IsMultiByteCP" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="StrEncodeQP" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="1942">
+    <parameters>
+      <parameter name="Input" type="RawByteString" paramflags="const" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="Specials" type="TSysCharSet" />
+      <parameter name="CodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <parameter name="IsMultibyteCP" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="StrEncodeQP" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="2018">
+    <parameters>
+      <parameter name="Input" type="string" paramflags="const" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="Specials" type="TSysCharSet" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <parameter name="IsMultibyteCP" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="StrEncodeQPEx" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="2035">
+    <parameters>
+      <parameter name="Buf" type="RawByteString" paramflags="const" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="Specials" type="TSysCharSet" />
+      <parameter name="ShortSpace" type="Boolean" />
+      <parameter name="cPos" type="Integer" paramflags="var" />
+      <parameter name="DoFold" type="Boolean" />
+      <parameter name="CodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <parameter name="IsMultibyteCP" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="StrEncodeQPEx" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="2107">
+    <parameters>
+      <parameter name="Buf" type="string" paramflags="const" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="Specials" type="TSysCharSet" />
+      <parameter name="ShortSpace" type="Boolean" />
+      <parameter name="cPos" type="Integer" paramflags="var" />
+      <parameter name="DoFold" type="Boolean" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <procedure name="FoldHdrLine" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="2126">
+    <parameters>
+      <parameter name="HdrLines" type="TStrings" />
+      <parameter name="HdrLine" type="string" paramflags="const" />
+    </parameters>
+  </procedure>
+  <procedure name="FoldHdrLine" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="2146">
+    <parameters>
+      <parameter name="HdrLines" type="TStrings" />
+      <parameter name="HdrLine" type="RawByteString" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <parameter name="IsMultiByteCP" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+    </parameters>
+  </procedure>
+  <function name="FoldString" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="2166">
+    <parameters>
+      <parameter name="Input" type="RawByteString" paramflags="const" />
+      <parameter name="BreakCharsSet" type="TSysCharSet" />
+      <parameter name="MaxCol" type="Integer" />
+      <parameter name="ACodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <parameter name="IsMultiByteCP" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="FoldString" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="2187">
+    <parameters>
+      <parameter name="Input" type="string" paramflags="const" />
+      <parameter name="BreakCharsSet" type="TSysCharSet" />
+      <parameter name="MaxCol" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="CalcBase64AttachmentGrow" visibility="public" file="OverbyteIcsMimeUtils.pas" line="2204">
+    <parameters>
+      <parameter name="FileSize" type="Int64" />
+      <retval type="Int64" />
+    </parameters>
+  </function>
+  <function name="EncodeMbcsInline" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="2233">
+    <parameters>
+      <parameter name="CodePage" type="Cardinal" />
+      <parameter name="Charset" type="string" paramflags="const" />
+      <parameter name="EncType" type="Char" />
+      <parameter name="Body" type="PWideChar" />
+      <parameter name="Len" type="Integer" />
+      <parameter name="DoFold" type="Boolean" />
+      <parameter name="MaxLen" type="Integer" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="EncodeMbcsInline" visibility="public" procflags="overload" file="OverbyteIcsMimeUtils.pas" line="2440">
+    <parameters>
+      <parameter name="CodePage" type="Cardinal" />
+      <parameter name="Charset" type="string" paramflags="const" />
+      <parameter name="EncType" type="Char" />
+      <parameter name="Body" type="PAnsiChar" />
+      <parameter name="Len" type="Integer" />
+      <parameter name="DoFold" type="Boolean" />
+      <parameter name="MaxLen" type="Integer" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="ContentTypeGetExtn" visibility="public" file="OverbyteIcsMimeUtils.pas" line="2462">
+    <parameters>
+      <parameter name="Content" type="string" paramflags="const" />
+      <parameter name="CLSID" type="string" paramflags="var" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="ContentTypeFromExtn" visibility="public" file="OverbyteIcsMimeUtils.pas" line="2481">
+    <parameters>
+      <parameter name="Extension" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+</namespace>

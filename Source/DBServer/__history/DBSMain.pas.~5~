@@ -1,0 +1,459 @@
+unit DBSMain;
+
+interface
+
+uses
+  Windows, SysUtils, Classes, Controls, Forms, Dialogs, Messages, Graphics,
+  ExtCtrls, StdCtrls, Grobal2, Edcode, HUtil32, GList, DBShare, Db, MfdbDef,
+  IniFiles, Buttons, FileCtrl, D7ScktComp, ADODB, FDBSQL, Grids, RzButton, RzPanel,
+  ImgList, ComCtrls, RzListVw, RzStatus, Menus, System.ImageList;
+
+const
+   BoKoreaVersion = FALSE;
+
+type
+  TFrmDBSrv = class(TForm)
+    Timer1: TTimer;
+    AniTimer: TTimer;
+    StartTimer: TTimer;
+    Panel1: TPanel;
+    Label1: TLabel;
+    LabelAni: TLabel;
+    LbTransCount: TLabel;
+    Label2: TLabel;
+    Label6: TLabel;
+    LbUserCount: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    Label10: TLabel;
+    Label11: TLabel;
+    StatusBar: TRzStatusBar;
+    StatusPane1: TRzStatusPane;
+    imlMain: TImageList;
+    PopupMenu: TPopupMenu;
+    POPUPMENU_COPY: TMenuItem;
+    POPUPMENU_SELALL: TMenuItem;
+    POPUPMENU_SAVE: TMenuItem;
+    MainMenu1: TMainMenu;
+    MENU_CONTROL: TMenuItem;
+    MENU_START: TMenuItem;
+    MENU_STOP: TMenuItem;
+    MENU_CONTROL_EXIT: TMenuItem;
+    MENU_OPTION: TMenuItem;
+    MENU_CONFIG: TMenuItem;
+    N3: TMenuItem;
+    MENU_CLEAELOG: TMenuItem;
+    ListViewLog: TRzListView;
+    RzToolbar1: TRzToolbar;
+    ButtonStart: TRzToolButton;
+    ButtonStop: TRzToolButton;
+    MENU_RELOADSET: TMenuItem;
+    N1: TMenuItem;
+    N2: TMenuItem;
+    MENU_VIEWHACKMSG: TMenuItem;
+    LabelErrorCount: TLabel;
+    Image1: TImage;
+    procedure Timer1Timer(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure AniTimerTimer(Sender: TObject);
+    procedure StartTimerTimer(Sender: TObject);
+    procedure ListViewLogCustomDrawItem(Sender: TCustomListView;
+      Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
+    procedure POPUPMENU_COPYClick(Sender: TObject);
+    procedure POPUPMENU_SELALLClick(Sender: TObject);
+    procedure POPUPMENU_SAVEClick(Sender: TObject);
+    procedure ButtonStartClick(Sender: TObject);
+    procedure MENU_CLEAELOGClick(Sender: TObject);
+    procedure MENU_CONTROL_EXITClick(Sender: TObject);
+    procedure MENU_RELOADSETClick(Sender: TObject);
+    procedure MENU_VIEWHACKMSGClick(Sender: TObject);
+    procedure MENU_CONFIGClick(Sender: TObject);
+  private
+    AniCount: integer;
+    procedure StartService;
+    procedure StopService;
+  public
+  end;
+
+var
+  FrmDBSrv: TFrmDBSrv;
+
+implementation
+
+uses
+  NetSelChrGate, NetLoginServer, NetGameServer, GeneralConfig, Clipbrd;
+
+{$R *.DFM}
+
+procedure TFrmDBSrv.FormCreate(Sender: TObject);
+begin
+  CSelChrGate := TCSelChrGate.Create();
+  CGameServer := TCGameServer.Create();
+  CLoginServer := TCLoginServer.Create();
+
+  SQLLoading := TRUE;
+  InitializeCriticalSection(CSLocalDB);
+
+  AniCount := 0;
+  MainLogMsgList := TGStringList.Create;
+
+  CINFO := RGB(0, 0, 255);
+  CERR := RGB(255, 0, 0);
+  CNORMAL := RGB(0, 0, 0);
+  CDBG := RGB(255, 128, 64);
+  CSEND := RGB(64, 64, 128);
+  CRECV := RGB(32, 128, 64);
+  StatusPane1.Caption := 'Ready..';
+  Timer1.Enabled := TRUE;
+  StartTimer.Enabled := TRUE;
+end;
+
+procedure TFrmDBSrv.FormDestroy(Sender: TObject);
+var I: Integer;
+begin
+  CSelChrGate.Free;
+  CGameServer.Free;
+  CLoginServer.Free;
+
+  if g_FDBSQL <> nil then g_FDBSQL.Free;
+  if MainLogMsgList<> nil then begin
+    for I := 0 to MainLogMsgList.Count - 1 do begin
+      Dispose(pTMsgLog(MainLogMsgList.Objects[I]));
+    end;
+    MainLogMsgList.Free;
+  end;
+end;
+
+procedure TFrmDBSrv.FormResize(Sender: TObject);
+begin
+  with ListViewLog do begin
+    Columns[1].Width := Width - Columns[0].Width - GetSystemMetrics(SM_CXVSCROLL) - 5;
+  end;
+end;
+
+procedure TFrmDBSrv.StartService;
+var
+  buffer: string;
+begin
+  try
+    LoadConfig;
+    // check configuration
+    if (g_Config.ServerName = '') or (g_Config.ODBC_DSN = '') or (g_Config.LS_ADDR = '') then
+      exit;
+    //Caption := 'Legend Of Mir 2 - DB Server ' + ServerName;
+    Self.Caption := APPCAPTION + '[' + g_Config.ServerName + ']';
+
+    AddLog('Startup DB Server');
+    AddTransLog('Start Transaction Log');
+
+
+    buffer := Format('HDD FREE SPACE C:%f GByte', [GetFreeDiskSpace('C:')]);
+    MainOutMessage(CINFO, buffer);
+	  buffer := Format('HDD FREE SPACE D:%f GByte', [GetFreeDiskSpace('D:')]);
+    MainOutMessage(CINFO, buffer);
+		//增加数据包大小显示
+    buffer := Format('Hum FDBRecord: %d Byte', [sizeof(FDBRecord)]);
+    MainOutMessage(CINFO, buffer);
+
+    // initialize SQL
+    SQLLoading := TRUE;
+    g_FDBSQL := TFDBSql.Create;
+    SQLLoading := FALSE;
+    Application.ProcessMessages;
+    if not g_FDBSQL.Connect('(Local)', g_Config.ODBC_ID, g_Config.ODBC_PW) then exit;
+
+   // initialize message filter (abuse filter)
+//   if ( not m_msgFilter.Init( "Badid.txt" ) ) then begin
+//	  	GetApp()->SetErr( GetLastError() );
+//	  	Exit;
+//	 end;
+
+    LabelErrorCount.Caption := '';
+
+    // initialize server infomation
+    if not CSelChrGate.LoadAddrTables then exit;
+
+    // connect & listen with local servers
+    CGameServer.ServerSocket.Active := FALSE;
+    CSelChrGate.UserSocket.Active := FALSE;
+    CLoginServer.IDSocket.Active := FALSE;
+
+    CGameServer.ServerSocket.Port := g_Config.GS_BPORT;
+    CSelChrGate.UserSocket.Port := g_Config.RG_BPORT;
+    CLoginServer.IDSocket.Address := g_Config.LS_ADDR;
+    CLoginServer.IDSocket.Port := g_Config.LS_CPORT;
+    try
+      CGameServer.ServerSocket.Active := TRUE;
+      CSelChrGate.UserSocket.Active := TRUE;
+      CLoginServer.IDSocket.Active := TRUE;
+    except
+      MainOutMessage(RGB(255, 0, 0), '[Win32 Error] ' + Exception(ExceptObject).Message);
+      Exit;
+    end;
+
+    AniTimer.Enabled := TRUE;
+    CSelChrGate.OutTimer.Enabled := TRUE;
+    CSelChrGate.LogTimer.Enabled := TRUE;
+
+    g_Config.boStarted := True;
+    ButtonStart.Enabled := False;
+    ButtonStop.Enabled := True;
+    MENU_START.Enabled := False;
+    MENU_STOP.Enabled := True;
+    // success!!
+    MainOutMessage(CINFO, 'DB Server initialized.');
+{$IFDEF DEBUG}
+    MainOutMessage(CDBG, 'DB Server is running in Debug Mode. This will puts all input/output packets.');
+{$ENDIF}
+    StatusPane1.Caption := 'Running..';
+    if g_Config.boMinimize then begin
+      Application.Minimize;
+    end;
+  except
+    on E: Exception do begin
+      ButtonStart.Enabled := True;
+      ButtonStop.Enabled := False;
+      MENU_START.Enabled := True;
+      MENU_STOP.Enabled := False;
+      MainOutMessage(CERR, '[Win32 Error] ' + E.Message);
+    end;
+  end;
+end;
+
+procedure TFrmDBSrv.StopService;
+begin
+  LabelErrorCount.Caption := '';
+  // free timer
+  AniTimer.Enabled := FALSE;
+  // CSelChrGate
+  CSelChrGate.OutTimer.Enabled := FALSE;
+  CSelChrGate.LogTimer.Enabled := FALSE;
+
+  // release network objects and linked resources
+  CSelChrGate.UserSocket.Close;
+  CLoginServer.IDSocket.Close;
+  CGameServer.ServerSocket.Close;
+
+  //CLoginServer
+  CLoginServer.KeepAliveTimer.Enabled := FALSE;
+  CLoginServer.ConnLoginServerTimer.Enabled := FALSE;
+
+  //ClearList
+  CLoginServer.ClearList;
+  CSelChrGate.ClearList;
+  CGameServer.ClearList;
+
+  // release ODBC resources
+  g_FDBSQL.DisConnect;
+
+  g_Config.boStarted := FALSE;
+  ButtonStart.Enabled := TRUE;
+  ButtonStop.Enabled := FALSE;
+  MENU_START.Enabled := TRUE;
+  MENU_STOP.Enabled := False;
+   // success!!
+  MainOutMessage(CINFO, 'DB Server finalized.');
+  StatusPane1.Caption := 'Ready..';
+  AddLog('Cleanup DB Server');
+end;
+
+procedure TFrmDBSrv.StartTimerTimer(Sender: TObject);
+begin
+  StartTimer.Enabled := FALSE;
+  if not g_Config.boStarted then begin
+    StartService;
+  end
+  else begin
+    StopService;
+  end;
+end;
+
+procedure TFrmDBSrv.Timer1Timer(Sender: TObject);
+var
+  I: Integer;
+  ListItem: TListItem;
+  MsgLog: pTMsgLog;
+begin
+  LbTransCount.Caption := 'TransCount ' + IntToStr(transcount);
+  transcount := 0;
+
+  if m_listGameServer.Count > 0 then Label1.Caption := 'Connected...'
+  else Label1.Caption := 'Disconnected !!';
+
+  Label2.Caption := 'Connections ' + IntToStr(m_listGameServer.Count);
+  LbUserCount.Caption := IntToStr(CSelChrGate.UserCount);
+
+  Label8.Caption  := 'H-QyChr=' + IntToStr(HackCountQueryChr);
+  Label9.Caption  := 'H-NwChr=' + IntToStr(HackCountNewChr);
+  Label10.Caption := 'H-DlChr=' + IntToStr(HackCountDelChr);
+  Label11.Caption := 'Dubb-Sl=' + IntToStr(HackCountSelChr);
+
+  if GetTickCount - g_dwUpdateListViewTick > 1000 then begin
+    g_dwUpdateListViewTick := GetTickCount;
+    MainLogMsgList.Lock;
+    try
+      try
+        for I := 0 to MainLogMsgList.Count - 1 do begin
+          MsgLog := pTMsgLog(MainLogMsgList.Objects[I]);
+          if MsgLog.boAdd then begin
+            MsgLog.boAdd := False;
+            ListViewLog.Items.BeginUpdate;
+            try
+              ListItem := ListViewLog.Items.Add;
+              ListItem.Data := Pointer(MsgLog);
+              ListItem.Caption := DateTimeToStr(MsgLog.dAddTime);
+              ListItem.SubItems.Add(MainLogMsgList.Strings[I]);
+            finally
+              ListViewLog.Items.Item[ListViewLog.Items.Count - 1].MakeVisible(False);
+              ListViewLog.Items.EndUpdate;
+            end;
+          end;
+        end;
+      except
+      end;
+    finally
+      MainLogMsgList.UnLock;
+    end;
+    if ListViewLog.Items.Count >= 200 then
+    ListViewLog.Items.Clear;
+  end;
+end;
+
+procedure TFrmDBSrv.MENU_CLEAELOGClick(Sender: TObject);
+begin
+  ListViewLog.Items.Clear;
+end;
+
+procedure TFrmDBSrv.MENU_CONFIGClick(Sender: TObject);
+begin
+  frmGeneralConfig := TfrmGeneralConfig.Create(Owner);
+  frmGeneralConfig.Top := Self.Top + 28;
+  frmGeneralConfig.Left := Self.Left;
+  frmGeneralConfig.Open();
+  frmGeneralConfig.Free;
+end;
+
+procedure TFrmDBSrv.MENU_CONTROL_EXITClick(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TFrmDBSrv.MENU_RELOADSETClick(Sender: TObject);
+begin
+  CSelChrGate.LoadAddrTables;
+end;
+
+procedure TFrmDBSrv.ListViewLogCustomDrawItem(Sender: TCustomListView;
+  Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
+begin
+  if Item.Data <> nil then begin
+    ListViewLog.Canvas.Font.Color := pTMsgLog(Item.Data).nFColor;
+  end;
+end;
+
+procedure TFrmDBSrv.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  if Sender <> nil then begin
+    if mrYes = MessageDlg('Would terminate mir DB server ?', mtWarning, mbYesNoCancel, 0) then begin
+      CanClose := TRUE;
+      CGameServer.ServerSocket.Active := FALSE;
+      AddLog('Server closed...');
+    end else
+      CanClose := FALSE;
+  end;
+end;
+
+procedure TFrmDBSrv.AniTimerTimer(Sender: TObject);
+begin
+  if AniCount > 7 then AniCount := 0
+  else Inc (AniCount);
+  case AniCount of
+    0: LabelAni.Caption := ' |';
+    1: LabelAni.Caption := '/';
+    2: LabelAni.Caption := '--';
+    3: LabelAni.Caption := '\';
+    4: LabelAni.Caption := ' |';
+    5: LabelAni.Caption := '/';
+    6: LabelAni.Caption := '--';
+    7: LabelAni.Caption := '\';
+  end;
+end;
+
+procedure TFrmDBSrv.ButtonStartClick(Sender: TObject);
+begin
+  StartTimer.Enabled := True;
+end;
+
+procedure TFrmDBSrv.POPUPMENU_COPYClick(Sender: TObject);
+var
+  I: Integer;
+  ListItem: TListItem;
+  SaveList: TStringList;
+  Clipboard: TClipboard;
+begin
+  SaveList := TStringList.Create;
+  ListViewLog.Items.BeginUpdate;
+  try
+    for I := 0 to ListViewLog.Items.Count - 1 do begin
+      ListItem := ListViewLog.Items.Item[I];
+      if ListItem.Selected then begin
+        if ListItem.SubItems.Count >= 2 then begin
+          SaveList.Add(ListItem.Caption + #9 + ListItem.SubItems.Strings[0] + #9
+            + ListItem.SubItems.Strings[1]);
+        end
+        else begin
+          SaveList.Add(ListItem.Caption + #9 + ListItem.SubItems.Strings[0]);
+        end;
+      end;
+    end;
+  finally
+    ListViewLog.Items.EndUpdate;
+  end;
+  Clipboard := TClipboard.Create();
+  Clipboard.AsText := SaveList.Text;
+  Clipboard.Free();
+  SaveList.Free;
+end;
+
+procedure TFrmDBSrv.POPUPMENU_SAVEClick(Sender: TObject);
+var
+  I: Integer;
+  SaveList: TStringList;
+  MsgLog: pTMsgLog;
+begin
+  SaveList := TStringList.Create;
+  MainLogMsgList.Lock;
+  try
+    for I := 0 to MainLogMsgList.Count - 1 do begin
+      MsgLog := pTMsgLog(MainLogMsgList.Objects[I]);
+      SaveList.Add(DateTimeToStr(MsgLog.dAddTime) + #9 + MainLogMsgList.Strings[I]);
+    end;
+  finally
+    MainLogMsgList.UnLock;
+  end;
+  SaveList.SaveToFile('.\Log.txt');
+  SaveList.Free;
+end;
+
+procedure TFrmDBSrv.POPUPMENU_SELALLClick(Sender: TObject);
+begin
+  ListViewLog.SelectAll;
+end;
+
+procedure TFrmDBSrv.MENU_VIEWHACKMSGClick(Sender: TObject);
+var
+  ini: TIniFile;
+begin
+  ViewHackMsg := not ViewHackMsg;
+  MENU_VIEWHACKMSG.Checked := ViewHackMsg;
+  ini := TIniFile.Create('.\Config.ini');
+  if ini <> nil then begin
+    ini.WriteBool('Config', 'ViewHackMsg', ViewHackMsg);
+    ini.Free;
+  end;
+end;
+
+end.

@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="AsphyreD3DTypes" platform="Win32">
+  <const name="_DXSDK_PRODUCT_MAJOR" type="Integer" file="AsphyreD3DTypes.pas" line="62">
+    <value>
+      $9
+    </value>
+  </const>
+  <const name="_DXSDK_PRODUCT_MINOR" type="Integer" file="AsphyreD3DTypes.pas" line="64">
+    <value>
+      $F
+    </value>
+  </const>
+  <const name="_DXSDK_BUILD_MAJOR" type="Integer" file="AsphyreD3DTypes.pas" line="66">
+    <value>
+      $30B
+    </value>
+  </const>
+  <const name="_DXSDK_BUILD_MINOR" type="Integer" file="AsphyreD3DTypes.pas" line="68">
+    <value>
+      $0
+    </value>
+  </const>
+  <type name="D3DVALUE" type="Float" file="System.pas" line="12" />
+  <type name="TD3DValue" type="Float" file="System.pas" line="12" />
+  <pointer name="PD3DValue" type="Single" indircnt="1" file="AsphyreD3DTypes.pas" line="82" />
+  <type name="D3DCOLOR" type="cardinal" loBound="0" hiBound="-1" file="AsphyreD3DTypes.pas" line="85" />
+  <type name="TD3DColor" type="cardinal" loBound="0" hiBound="-1" file="AsphyreD3DTypes.pas" line="85" />
+  <pointer name="PD3DColor" type="D3DCOLOR" indircnt="1" file="AsphyreD3DTypes.pas" line="89" />
+  <struct name="_D3DVECTOR" size="12" packed="true" file="AsphyreD3DTypes.pas" line="92">
+    <field name="x" type="Single" visibility="public" size="4" offset="0" file="AsphyreD3DTypes.pas" line="93" />
+    <field name="y" type="Single" visibility="public" size="4" offset="4" file="AsphyreD3DTypes.pas" line="94" />
+    <field name="z" type="Single" visibility="public" size="4" offset="8" file="AsphyreD3DTypes.pas" line="95" />
+  </struct>
+  <struct name="D3DVECTOR" alias="AsphyreD3DTypes._D3DVECTOR" size="12" packed="true" file="AsphyreD3DTypes.pas" line="98">
+    <field name="x" type="Single" visibility="public" size="4" offset="0" file="AsphyreD3DTypes.pas" line="93" />
+    <field name="y" type="Single" visibility="public" size="4" offset="4" file="AsphyreD3DTypes.pas" line="94" />
+    <field name="z" type="Single" visibility="public" size="4" offset="8" file="AsphyreD3DTypes.pas" line="95" />
+  </struct>
+  <struct name="TD3DVector" alias="AsphyreD3DTypes._D3DVECTOR" size="12" packed="true" file="AsphyreD3DTypes.pas" line="100">
+    <field name="x" type="Single" visibility="public" size="4" offset="0" file="AsphyreD3DTypes.pas" line="93" />
+    <field name="y" type="Single" visibility="public" size="4" offset="4" file="AsphyreD3DTypes.pas" line="94" />
+    <field name="z" type="Single" visibility="public" size="4" offset="8" file="AsphyreD3DTypes.pas" line="95" />
+  </struct>
+  <pointer name="PD3DVector" type="_D3DVECTOR" indircnt="1" file="AsphyreD3DTypes.pas" line="102" />
+  <type name="REFERENCE_TIME" type="Int64" file="System.pas" line="12" />
+  <type name="TReferenceTime" type="Int64" file="System.pas" line="12" />
+  <pointer name="PReferenceTime" type="Int64" indircnt="1" file="AsphyreD3DTypes.pas" line="109" />
+  <type name="UInt64" type="Int64" file="System.pas" line="12" />
+  <type name="INT_PTR" type="integer" loBound="-2147483648" hiBound="2147483647" file="System.pas" line="12" />
+  <type name="UINT_PTR" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <type name="LONG_PTR" type="integer" loBound="-2147483648" hiBound="2147483647" file="System.pas" line="12" />
+  <type name="ULONG_PTR" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <type name="DWORD_PTR" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <pointer name="PINT_PTR" type="Integer" indircnt="1" file="AsphyreD3DTypes.pas" line="143" />
+  <pointer name="PUINT_PTR" type="Cardinal" indircnt="1" file="AsphyreD3DTypes.pas" line="144" />
+  <pointer name="PLONG_PTR" type="Integer" indircnt="1" file="AsphyreD3DTypes.pas" line="145" />
+  <pointer name="PULONG_PTR" type="Cardinal" indircnt="1" file="AsphyreD3DTypes.pas" line="146" />
+  <type name="PtrInt" type="integer" loBound="-2147483648" hiBound="2147483647" file="System.pas" line="12" />
+  <type name="PtrUInt" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <pointer name="PPtrInt" type="Integer" indircnt="1" file="AsphyreD3DTypes.pas" line="155" />
+  <pointer name="PPtrUInt" type="Cardinal" indircnt="1" file="AsphyreD3DTypes.pas" line="156" />
+  <type name="SIZE_T" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <type name="SSIZE_T" type="integer" loBound="-2147483648" hiBound="2147483647" file="System.pas" line="12" />
+  <pointer name="PSIZE_T" type="Cardinal" indircnt="1" file="AsphyreD3DTypes.pas" line="166" />
+  <pointer name="PSSIZE_T" type="Integer" indircnt="1" file="AsphyreD3DTypes.pas" line="167" />
+  <type name="SizeInt" type="integer" loBound="-2147483648" hiBound="2147483647" file="System.pas" line="12" />
+  <type name="SizeUInt" type="cardinal" loBound="0" hiBound="-1" file="System.pas" line="12" />
+  <pointer name="PSizeInt" alias="AsphyreD3DTypes.PSSIZE_T" type="Integer" indircnt="1" file="AsphyreD3DTypes.pas" line="167" />
+  <pointer name="PSizeUInt" alias="AsphyreD3DTypes.PSIZE_T" type="Cardinal" indircnt="1" file="AsphyreD3DTypes.pas" line="166" />
+</namespace>

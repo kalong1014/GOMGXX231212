@@ -1,0 +1,413 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="uSMBIOS" platform="Win32">
+  <const name="BIOSInformation" type="SMBiosTables" file="uSMBIOS.pas" line="10">
+    <value>
+      BIOSInformation
+    </value>
+  </const>
+  <const name="SystemInformation" type="SMBiosTables" file="uSMBIOS.pas" line="11">
+    <value>
+      SystemInformation
+    </value>
+  </const>
+  <const name="BaseBoardInformation" type="SMBiosTables" file="uSMBIOS.pas" line="12">
+    <value>
+      BaseBoardInformation
+    </value>
+  </const>
+  <const name="EnclosureInformation" type="SMBiosTables" file="uSMBIOS.pas" line="13">
+    <value>
+      EnclosureInformation
+    </value>
+  </const>
+  <const name="ProcessorInformation" type="SMBiosTables" file="uSMBIOS.pas" line="14">
+    <value>
+      ProcessorInformation
+    </value>
+  </const>
+  <const name="MemoryControllerInformation" type="SMBiosTables" file="uSMBIOS.pas" line="15">
+    <value>
+      MemoryControllerInformation
+    </value>
+  </const>
+  <const name="MemoryModuleInformation" type="SMBiosTables" file="uSMBIOS.pas" line="16">
+    <value>
+      MemoryModuleInformation
+    </value>
+  </const>
+  <const name="CacheInformation" type="SMBiosTables" file="uSMBIOS.pas" line="17">
+    <value>
+      CacheInformation
+    </value>
+  </const>
+  <const name="PortConnectorInformation" type="SMBiosTables" file="uSMBIOS.pas" line="18">
+    <value>
+      PortConnectorInformation
+    </value>
+  </const>
+  <const name="SystemSlotsInformation" type="SMBiosTables" file="uSMBIOS.pas" line="19">
+    <value>
+      SystemSlotsInformation
+    </value>
+  </const>
+  <const name="OnBoardDevicesInformation" type="SMBiosTables" file="uSMBIOS.pas" line="20">
+    <value>
+      OnBoardDevicesInformation
+    </value>
+  </const>
+  <const name="OEMStrings" type="SMBiosTables" file="uSMBIOS.pas" line="21">
+    <value>
+      OEMStrings
+    </value>
+  </const>
+  <const name="SystemConfigurationOptions" type="SMBiosTables" file="uSMBIOS.pas" line="22">
+    <value>
+      SystemConfigurationOptions
+    </value>
+  </const>
+  <const name="BIOSLanguageInformation" type="SMBiosTables" file="uSMBIOS.pas" line="23">
+    <value>
+      BIOSLanguageInformation
+    </value>
+  </const>
+  <const name="GroupAssociations" type="SMBiosTables" file="uSMBIOS.pas" line="24">
+    <value>
+      GroupAssociations
+    </value>
+  </const>
+  <const name="SystemEventLog" type="SMBiosTables" file="uSMBIOS.pas" line="25">
+    <value>
+      SystemEventLog
+    </value>
+  </const>
+  <const name="PhysicalMemoryArray" type="SMBiosTables" file="uSMBIOS.pas" line="26">
+    <value>
+      PhysicalMemoryArray
+    </value>
+  </const>
+  <const name="MemoryDevice" type="SMBiosTables" file="uSMBIOS.pas" line="27">
+    <value>
+      MemoryDevice
+    </value>
+  </const>
+  <const name="MemoryErrorInformation" type="SMBiosTables" file="uSMBIOS.pas" line="28">
+    <value>
+      MemoryErrorInformation
+    </value>
+  </const>
+  <const name="MemoryArrayMappedAddress" type="SMBiosTables" file="uSMBIOS.pas" line="29">
+    <value>
+      MemoryArrayMappedAddress
+    </value>
+  </const>
+  <const name="MemoryDeviceMappedAddress" type="SMBiosTables" file="uSMBIOS.pas" line="30">
+    <value>
+      MemoryDeviceMappedAddress
+    </value>
+  </const>
+  <const name="EndofTable" type="SMBiosTables" file="uSMBIOS.pas" line="31">
+    <value>
+      EndofTable
+    </value>
+  </const>
+  <enum name="SMBiosTables" file="uSMBIOS.pas" line="9">
+    <element value="0" name="BIOSInformation" file="uSMBIOS.pas" line="10" />
+    <element value="1" name="SystemInformation" file="uSMBIOS.pas" line="11" />
+    <element value="2" name="BaseBoardInformation" file="uSMBIOS.pas" line="12" />
+    <element value="3" name="EnclosureInformation" file="uSMBIOS.pas" line="13" />
+    <element value="4" name="ProcessorInformation" file="uSMBIOS.pas" line="14" />
+    <element value="5" name="MemoryControllerInformation" file="uSMBIOS.pas" line="15" />
+    <element value="6" name="MemoryModuleInformation" file="uSMBIOS.pas" line="16" />
+    <element value="7" name="CacheInformation" file="uSMBIOS.pas" line="17" />
+    <element value="8" name="PortConnectorInformation" file="uSMBIOS.pas" line="18" />
+    <element value="9" name="SystemSlotsInformation" file="uSMBIOS.pas" line="19" />
+    <element value="10" name="OnBoardDevicesInformation" file="uSMBIOS.pas" line="20" />
+    <element value="11" name="OEMStrings" file="uSMBIOS.pas" line="21" />
+    <element value="12" name="SystemConfigurationOptions" file="uSMBIOS.pas" line="22" />
+    <element value="13" name="BIOSLanguageInformation" file="uSMBIOS.pas" line="23" />
+    <element value="14" name="GroupAssociations" file="uSMBIOS.pas" line="24" />
+    <element value="15" name="SystemEventLog" file="uSMBIOS.pas" line="25" />
+    <element value="16" name="PhysicalMemoryArray" file="uSMBIOS.pas" line="26" />
+    <element value="17" name="MemoryDevice" file="uSMBIOS.pas" line="27" />
+    <element value="18" name="MemoryErrorInformation" file="uSMBIOS.pas" line="28" />
+    <element value="19" name="MemoryArrayMappedAddress" file="uSMBIOS.pas" line="29" />
+    <element value="20" name="MemoryDeviceMappedAddress" file="uSMBIOS.pas" line="30" />
+    <element value="127" name="EndofTable" file="uSMBIOS.pas" line="31" />
+  </enum>
+  <struct name="TSmBiosTableHeader" size="4" packed="true" file="uSMBIOS.pas" line="33">
+    <field name="TableType" type="Byte" visibility="public" size="1" offset="0" file="uSMBIOS.pas" line="34" />
+    <field name="Length" type="Byte" visibility="public" size="1" offset="1" file="uSMBIOS.pas" line="35" />
+    <field name="Handle" type="Word" visibility="public" size="2" offset="2" file="uSMBIOS.pas" line="36" />
+  </struct>
+  <struct name="TBiosInfo" size="20" packed="true" file="uSMBIOS.pas" line="39">
+    <field name="Header" type="TSmBiosTableHeader" visibility="public" size="4" offset="0" file="uSMBIOS.pas" line="40" />
+    <field name="Vendor" type="Byte" visibility="public" size="1" offset="4" file="uSMBIOS.pas" line="41" />
+    <field name="Version" type="Byte" visibility="public" size="1" offset="5" file="uSMBIOS.pas" line="42" />
+    <field name="StartingSegment" type="Word" visibility="public" size="2" offset="6" file="uSMBIOS.pas" line="43" />
+    <field name="ReleaseDate" type="Byte" visibility="public" size="1" offset="8" file="uSMBIOS.pas" line="44" />
+    <field name="BiosRomSize" type="Byte" visibility="public" size="1" offset="9" file="uSMBIOS.pas" line="45" />
+    <field name="Characteristics" type="Int64" visibility="public" size="8" offset="10" file="uSMBIOS.pas" line="46" />
+    <field name="ExtensionBytes" visibility="public" size="2" offset="18" file="uSMBIOS.pas" line="47">
+      <array name="ExtensionBytes" visibility="public" low="0" high="1">
+        <element type="Byte" />
+      </array>
+    </field>
+  </struct>
+  <struct name="TSysInfo" size="25" packed="true" file="uSMBIOS.pas" line="50">
+    <field name="Header" type="TSmBiosTableHeader" visibility="public" size="4" offset="0" file="uSMBIOS.pas" line="51" />
+    <field name="Manufacturer" type="Byte" visibility="public" size="1" offset="4" file="uSMBIOS.pas" line="52" />
+    <field name="ProductName" type="Byte" visibility="public" size="1" offset="5" file="uSMBIOS.pas" line="53" />
+    <field name="Version" type="Byte" visibility="public" size="1" offset="6" file="uSMBIOS.pas" line="54" />
+    <field name="SerialNumber" type="Byte" visibility="public" size="1" offset="7" file="uSMBIOS.pas" line="55" />
+    <field name="UUID" visibility="public" size="16" offset="8" file="uSMBIOS.pas" line="56">
+      <array name="UUID" visibility="public" low="0" high="15">
+        <element type="Byte" />
+      </array>
+    </field>
+    <field name="WakeUpType" type="Byte" visibility="public" size="1" offset="24" file="uSMBIOS.pas" line="57" />
+  </struct>
+  <struct name="TBaseBoardInfo" size="8" packed="true" file="uSMBIOS.pas" line="60">
+    <field name="Header" type="TSmBiosTableHeader" visibility="public" size="4" offset="0" file="uSMBIOS.pas" line="61" />
+    <field name="Manufacturer" type="Byte" visibility="public" size="1" offset="4" file="uSMBIOS.pas" line="62" />
+    <field name="Product" type="Byte" visibility="public" size="1" offset="5" file="uSMBIOS.pas" line="63" />
+    <field name="Version" type="Byte" visibility="public" size="1" offset="6" file="uSMBIOS.pas" line="64" />
+    <field name="SerialNumber" type="Byte" visibility="public" size="1" offset="7" file="uSMBIOS.pas" line="65" />
+  </struct>
+  <struct name="TEnclosureInfo" size="17" packed="true" file="uSMBIOS.pas" line="68">
+    <field name="Header" type="TSmBiosTableHeader" visibility="public" size="4" offset="0" file="uSMBIOS.pas" line="69" />
+    <field name="Manufacturer" type="Byte" visibility="public" size="1" offset="4" file="uSMBIOS.pas" line="70" />
+    <field name="Type" type="Byte" visibility="public" size="1" offset="5" file="uSMBIOS.pas" line="71" />
+    <field name="Version" type="Byte" visibility="public" size="1" offset="6" file="uSMBIOS.pas" line="72" />
+    <field name="SerialNumber" type="Byte" visibility="public" size="1" offset="7" file="uSMBIOS.pas" line="73" />
+    <field name="AssetTagNumber" type="Byte" visibility="public" size="1" offset="8" file="uSMBIOS.pas" line="74" />
+    <field name="BootUpState" type="Byte" visibility="public" size="1" offset="9" file="uSMBIOS.pas" line="75" />
+    <field name="PowerSupplyState" type="Byte" visibility="public" size="1" offset="10" file="uSMBIOS.pas" line="76" />
+    <field name="ThermalState" type="Byte" visibility="public" size="1" offset="11" file="uSMBIOS.pas" line="77" />
+    <field name="SecurityStatus" type="Byte" visibility="public" size="1" offset="12" file="uSMBIOS.pas" line="78" />
+    <field name="OEM_Defined" type="Cardinal" visibility="public" size="4" offset="13" file="uSMBIOS.pas" line="79" />
+  </struct>
+  <struct name="TProcessorInfo" size="35" packed="true" file="uSMBIOS.pas" line="82">
+    <field name="Header" type="TSmBiosTableHeader" visibility="public" size="4" offset="0" file="uSMBIOS.pas" line="83" />
+    <field name="SocketDesignation" type="Byte" visibility="public" size="1" offset="4" file="uSMBIOS.pas" line="84" />
+    <field name="ProcessorType" type="Byte" visibility="public" size="1" offset="5" file="uSMBIOS.pas" line="85" />
+    <field name="ProcessorFamily" type="Byte" visibility="public" size="1" offset="6" file="uSMBIOS.pas" line="86" />
+    <field name="ProcessorManufacturer" type="Byte" visibility="public" size="1" offset="7" file="uSMBIOS.pas" line="87" />
+    <field name="ProcessorID" type="Int64" visibility="public" size="8" offset="8" file="uSMBIOS.pas" line="88" />
+    <field name="ProcessorVersion" type="Byte" visibility="public" size="1" offset="16" file="uSMBIOS.pas" line="89" />
+    <field name="Voltaje" type="Byte" visibility="public" size="1" offset="17" file="uSMBIOS.pas" line="90" />
+    <field name="ExternalClock" type="Word" visibility="public" size="2" offset="18" file="uSMBIOS.pas" line="91" />
+    <field name="MaxSpeed" type="Word" visibility="public" size="2" offset="20" file="uSMBIOS.pas" line="92" />
+    <field name="CurrentSpeed" type="Word" visibility="public" size="2" offset="22" file="uSMBIOS.pas" line="93" />
+    <field name="Status" type="Byte" visibility="public" size="1" offset="24" file="uSMBIOS.pas" line="94" />
+    <field name="ProcessorUpgrade" type="Byte" visibility="public" size="1" offset="25" file="uSMBIOS.pas" line="95" />
+    <field name="L1CacheHandler" type="Word" visibility="public" size="2" offset="26" file="uSMBIOS.pas" line="96" />
+    <field name="L2CacheHandler" type="Word" visibility="public" size="2" offset="28" file="uSMBIOS.pas" line="97" />
+    <field name="L3CacheHandler" type="Word" visibility="public" size="2" offset="30" file="uSMBIOS.pas" line="98" />
+    <field name="SerialNumber" type="Byte" visibility="public" size="1" offset="32" file="uSMBIOS.pas" line="99" />
+    <field name="AssetTag" type="Byte" visibility="public" size="1" offset="33" file="uSMBIOS.pas" line="100" />
+    <field name="PartNumber" type="Byte" visibility="public" size="1" offset="34" file="uSMBIOS.pas" line="101" />
+  </struct>
+  <struct name="TCacheInfo" size="21" packed="true" file="uSMBIOS.pas" line="104">
+    <field name="Header" type="TSmBiosTableHeader" visibility="public" size="4" offset="0" file="uSMBIOS.pas" line="105" />
+    <field name="SocketDesignation" type="Byte" visibility="public" size="1" offset="4" file="uSMBIOS.pas" line="106" />
+    <field name="CacheConfiguration" type="Cardinal" visibility="public" size="4" offset="5" file="uSMBIOS.pas" line="107" />
+    <field name="MaximumCacheSize" type="Word" visibility="public" size="2" offset="9" file="uSMBIOS.pas" line="108" />
+    <field name="InstalledSize" type="Word" visibility="public" size="2" offset="11" file="uSMBIOS.pas" line="109" />
+    <field name="SupportedSRAMType" type="Word" visibility="public" size="2" offset="13" file="uSMBIOS.pas" line="110" />
+    <field name="CurrentSRAMType" type="Word" visibility="public" size="2" offset="15" file="uSMBIOS.pas" line="111" />
+    <field name="CacheSpeed" type="Byte" visibility="public" size="1" offset="17" file="uSMBIOS.pas" line="112" />
+    <field name="ErrorCorrectionType" type="Byte" visibility="public" size="1" offset="18" file="uSMBIOS.pas" line="113" />
+    <field name="SystemCacheType" type="Byte" visibility="public" size="1" offset="19" file="uSMBIOS.pas" line="114" />
+    <field name="Associativity" type="Byte" visibility="public" size="1" offset="20" file="uSMBIOS.pas" line="115" />
+  </struct>
+  <struct name="TSMBiosTableEntry" size="8" file="uSMBIOS.pas" line="118">
+    <field name="Header" type="TSmBiosTableHeader" visibility="public" size="4" offset="0" file="uSMBIOS.pas" line="119" />
+    <field name="Index" type="Integer" visibility="public" size="4" offset="4" file="uSMBIOS.pas" line="120" />
+  </struct>
+  <array name="TSMBiosTablesList">
+    <element type="TSMBiosTableEntry" />
+  </array>
+  <class name="TSMBios" file="uSMBIOS.pas" line="124">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FSize" type="Integer" visibility="private" size="4" offset="4" file="uSMBIOS.pas" line="126" />
+      <field name="FBuffer" type="PByteArray" visibility="private" size="4" offset="8" file="uSMBIOS.pas" line="127" />
+      <field name="FBiosInfo" type="TBiosInfo" visibility="private" size="20" offset="12" file="uSMBIOS.pas" line="129" />
+      <field name="FSysInfo" type="TSysInfo" visibility="private" size="25" offset="32" file="uSMBIOS.pas" line="130" />
+      <field name="FBaseBoardInfo" type="TBaseBoardInfo" visibility="private" size="8" offset="57" file="uSMBIOS.pas" line="131" />
+      <field name="FEnclosureInfo" type="TEnclosureInfo" visibility="private" size="17" offset="65" file="uSMBIOS.pas" line="132" />
+      <field name="FProcessorInfo" type="TProcessorInfo" visibility="private" size="35" offset="82" file="uSMBIOS.pas" line="133" />
+      <field name="FBiosInfoIndex" type="Integer" visibility="private" size="4" offset="120" file="uSMBIOS.pas" line="134" />
+      <field name="FSysInfoIndex" type="Integer" visibility="private" size="4" offset="124" file="uSMBIOS.pas" line="135" />
+      <field name="FBaseBoardInfoIndex" type="Integer" visibility="private" size="4" offset="128" file="uSMBIOS.pas" line="136" />
+      <field name="FEnclosureInfoIndex" type="Integer" visibility="private" size="4" offset="132" file="uSMBIOS.pas" line="137" />
+      <field name="FProcessorInfoIndex" type="Integer" visibility="private" size="4" offset="136" file="uSMBIOS.pas" line="138" />
+      <field name="FDmiRevision" type="Integer" visibility="private" size="4" offset="140" file="uSMBIOS.pas" line="139" />
+      <field name="FSmbiosMajorVersion" type="Integer" visibility="private" size="4" offset="144" file="uSMBIOS.pas" line="140" />
+      <field name="FSmbiosMinorVersion" type="Integer" visibility="private" size="4" offset="148" file="uSMBIOS.pas" line="141" />
+      <field name="FSMBiosTablesList" type="TSMBiosTablesList" visibility="private" size="4" offset="152" file="uSMBIOS.pas" line="142" />
+      <procedure name="LoadSMBIOS" visibility="private" file="uSMBIOS.pas" line="143">
+      </procedure>
+      <procedure name="ReadSMBiosTables" visibility="private" file="uSMBIOS.pas" line="144">
+      </procedure>
+      <function name="GetHasBiosInfo" visibility="private" file="uSMBIOS.pas" line="145">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="GetHasSysInfo" visibility="private" file="uSMBIOS.pas" line="146">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="GetHasBaseBoardInfo" visibility="private" file="uSMBIOS.pas" line="147">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="GetHasEnclosureInfo" visibility="private" file="uSMBIOS.pas" line="148">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="GetHasProcessorInfo" visibility="private" file="uSMBIOS.pas" line="149">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <function name="GetSMBiosTablesList" visibility="private" file="uSMBIOS.pas" line="150">
+        <parameters>
+          <retval type="TSMBiosTablesList" />
+        </parameters>
+      </function>
+      <constructor name="Create" visibility="public" file="uSMBIOS.pas" line="152">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="uSMBIOS.pas" line="153">
+        <parameters>
+        </parameters>
+      </destructor>
+      <function name="SearchSMBiosTable" visibility="public" file="uSMBIOS.pas" line="155">
+        <parameters>
+          <parameter name="TableType" type="SMBiosTables" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetSMBiosTableIndex" visibility="public" file="uSMBIOS.pas" line="156">
+        <parameters>
+          <parameter name="TableType" type="SMBiosTables" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetSMBiosString" visibility="public" file="uSMBIOS.pas" line="157">
+        <parameters>
+          <parameter name="Entry" type="Integer" />
+          <parameter name="Index" type="Integer" />
+          <retval type="AnsiString" />
+        </parameters>
+      </function>
+      <property name="Size" visibility="public" read="FSize" type="Integer" file="uSMBIOS.pas" line="159" />
+      <property name="Buffer" visibility="public" read="FBuffer" type="PByteArray" file="uSMBIOS.pas" line="160" />
+      <property name="DmiRevision" visibility="public" read="FDmiRevision" type="Integer" file="uSMBIOS.pas" line="162" />
+      <property name="SmbiosMajorVersion" visibility="public" read="FSmbiosMajorVersion" type="Integer" file="uSMBIOS.pas" line="163" />
+      <property name="SmbiosMinorVersion" visibility="public" read="FSmbiosMinorVersion" type="Integer" file="uSMBIOS.pas" line="164" />
+      <property name="SMBiosTablesList" visibility="public" read="FSMBiosTablesList" type="TSMBiosTablesList" file="uSMBIOS.pas" line="165" />
+      <property name="BiosInfo" visibility="public" read="FBiosInfo" write="FBiosInfo" type="TBiosInfo" file="uSMBIOS.pas" line="167" />
+      <property name="BiosInfoIndex" visibility="public" read="FBiosInfoIndex" write="FBiosInfoIndex" type="Integer" file="uSMBIOS.pas" line="168" />
+      <property name="HasBiosInfo" visibility="public" read="GetHasBiosInfo" type="Boolean" file="uSMBIOS.pas" line="169" />
+      <property name="SysInfo" visibility="public" read="FSysInfo" write="FSysInfo" type="TSysInfo" file="uSMBIOS.pas" line="170" />
+      <property name="SysInfoIndex" visibility="public" read="FSysInfoIndex" write="FSysInfoIndex" type="Integer" file="uSMBIOS.pas" line="171" />
+      <property name="HasSysInfo" visibility="public" read="GetHasSysInfo" type="Boolean" file="uSMBIOS.pas" line="172" />
+      <property name="BaseBoardInfo" visibility="public" read="FBaseBoardInfo" write="FBaseBoardInfo" type="TBaseBoardInfo" file="uSMBIOS.pas" line="173" />
+      <property name="BaseBoardInfoIndex" visibility="public" read="FBaseBoardInfoIndex" write="FBaseBoardInfoIndex" type="Integer" file="uSMBIOS.pas" line="174" />
+      <property name="HasBaseBoardInfo" visibility="public" read="GetHasBaseBoardInfo" type="Boolean" file="uSMBIOS.pas" line="175" />
+      <property name="EnclosureInfo" visibility="public" read="FEnclosureInfo" write="FEnclosureInfo" type="TEnclosureInfo" file="uSMBIOS.pas" line="176" />
+      <property name="EnclosureInfoIndex" visibility="public" read="FEnclosureInfoIndex" write="FEnclosureInfoIndex" type="Integer" file="uSMBIOS.pas" line="177" />
+      <property name="HasEnclosureInfo" visibility="public" read="GetHasEnclosureInfo" type="Boolean" file="uSMBIOS.pas" line="178" />
+      <property name="ProcessorInfo" visibility="public" read="FProcessorInfo" write="FProcessorInfo" type="TProcessorInfo" file="uSMBIOS.pas" line="179" />
+      <property name="ProcessorInfoIndex" visibility="public" read="FProcessorInfoIndex" write="FProcessorInfoIndex" type="Integer" file="uSMBIOS.pas" line="180" />
+      <property name="HasProcessorInfo" visibility="public" read="GetHasProcessorInfo" type="Boolean" file="uSMBIOS.pas" line="181" />
+    </members>
+  </class>
+  <function name="GetHWID" visibility="public" file="uSMBIOS.pas" line="468">
+    <parameters>
+      <retval type="string" />
+    </parameters>
+  </function>
+</namespace>

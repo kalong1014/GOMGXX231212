@@ -1,0 +1,50 @@
+FastMM 定位内存泄露的代码位置
+开源的FastMM，使用很简单，在工程的第一行引用FastMM4即可(注意，一定要在第一个Uses的位置)，可以在调试程序时提示内存泄露情况，还可以生成报告。
+在Delphi2007以后版本中，使用更加简单，只需要在工程开始的位置加上语句：
+ReportMemoryLeaksOnShutdown := True;就可以了，并且在运行时不会出现提示。如果想要生成文件报告，还需要FastMM4，Delphi中没有别的设置可以生成文件报告。
+可以修改FastMM4Options.inc中的参数开关来修改内存管理的相关设置。
+使用说明如下：
+1.打开FastMM4的调试功能
+首先在自己的project里把FastMM4放在最前面，例如：  
+FastMM4,  
+Main   in   ‘Main.pas’   {MainForm},  
+再修改FastMM4Options.inc，打开全调试模式。例：  
+{$define   FullDebugMode}  
+也可以在project中定义编译常量：FullDebugMode。
+同时把FastMM_FullDebugMode.dll拷贝到编译后生成的可执行程序所在目录。
+再要打开内存泄漏报告：EnableMemoryLeakReporting。一般情况下是缺省打开的。  这样就打开了全调试模式，如果发生内存泄漏将会生成报告文件，如果在IDE运行的时候还会弹出一个对话框显示。报告文件类似：XXX_MemoryManager_EventLog.txt  
+2.报告文件由两部分组成，并且是每次运行append。  
+第一部分是泄漏的详细内容，将每个没释放的内存块详细信息显示出来。例：  
+A   memory   block   has   been   leaked.   The   size   is:   28      
+{一个28字节的内存块在程序结束后没有被释放}
+{这个内存块在分配的时候的调用堆栈，也就是Call   Stack，可以清楚看出调用函数的次序。如果是系统dll则还有相应的函数名。}
+Stack   trace   of   when   this   block   was   allocated   (return   addresses):   
+4028E7
+4030EC
+406649
+412365
+41236E
+411DD3
+426B45
+427236
+42888C
+{这个内存类型，如果是字符串string或TObject继承的对象则会显示名称及行号。}
+The   block   is   currently   used   for   an   object   of   class:   Unknown  
+{将内存块头256个字符显示出现，作为内容提示。}
+Current   memory   dump   of   256   bytes   starting   at   pointer   address   107BDD8:
+第二部分是总结性内容，例：
+{这个小型内存块泄漏的报告，如果有大型内存块泄漏则会加一行专门提示大型内存块泄漏。}This   application   has   leaked   memory.   The   small   block   leaks   are   (excluding   expected   leaks   registered   by   pointer):  
+{21-28字节的内存块泄漏，未知类型一个}
+21   -   28   bytes:   Unknown   x   1
+Note:   Memory   leak   detail   is   logged   to   a   text   file   in   the   same   folder   as   this   application.   To   disable   this   memory   leak   check,   undefine   “EnableMemoryLeakReporting”.  
+有了这份报告只不过了解到内存泄漏存在，但是哪里没释放就还需要更进一步地调查。
+调查的目标有：
+1.    内存块分配在哪个函数里哪段代码。
+这个在报告里可以结合内容和调用堆栈来看。前256个字节可以进行分析，推测分配者，调用堆栈就直接指出了分配函数，不过是一些地址，不能直接知道函数名和代码段。这时候就需要在delphi   ide环境下查看二进制内存映像了，就是View   CPU功能。在设定断点并停下后，可以View   CPU，在菜单View=>Debug   Window=>CPU ，快捷键：Ctrl+Alt+C，View CPU窗口正中就是内存映像，而且源码也相应地标注好了，左边列的地址就是内存报告中的Call   Stack中的地址，翻页找到所对应的代码就知道哪里分配内存了。
+2.检查释放内存的地方是否被调用
+可以用日志或断点来调试，如果压根就没有释放内存那就补上代码，如果有却没有执行则检查一下执行条件是否正确，如果断点没起作用很可能是因为代码永远不会被执行（死代码）。这要靠经验和调试，基本上借助IDE和内存报告就可以很好地防止内存泄漏。同时要加强测试用例，争取在测试用例中能遍历到所有的代码和大部分关键功能，这样内存泄漏报告就会更准确一点。
+fastmm每次在程序关闭后就会根据情况生成内存泄漏报告，如果没有弹出内存泄漏警告则恭喜你，内存管得很好。
+另外：  
+  1).内存管理不是GC自动回收内存，而是检查是否有泄漏。   
+  2).windows系统的内存泄漏是无法检查的，仅限于应用程序内部，不过检查出系统泄漏也没办法，只能等更新了。       
+  3).检查泄漏后要自己去检查代码补齐内存释放，报告并不能做这事

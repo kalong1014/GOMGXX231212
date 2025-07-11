@@ -1,0 +1,614 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="AsphyreTextureFonts" platform="Win32">
+  <class name="TAsphyreFontTexture" file="AsphyreTextureFonts.pas" line="9">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FTexture" type="TAsphyreLockableTexture" visibility="private" size="4" offset="4" file="AsphyreTextureFonts.pas" line="11" />
+      <field name="FText" type="string" visibility="private" size="4" offset="8" file="AsphyreTextureFonts.pas" line="12" />
+      <field name="FOutTimeTick" type="Cardinal" visibility="private" size="4" offset="12" file="AsphyreTextureFonts.pas" line="13" />
+      <field name="FOutTimeTime" type="Cardinal" visibility="private" size="4" offset="16" file="AsphyreTextureFonts.pas" line="14" />
+      <constructor name="Create" visibility="public" file="AsphyreTextureFonts.pas" line="16">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="AsphyreTextureFonts.pas" line="17">
+        <parameters>
+        </parameters>
+      </destructor>
+      <property name="Texture" visibility="public" read="FTexture" write="FTexture" type="TAsphyreLockableTexture" file="AsphyreTextureFonts.pas" line="18" />
+      <property name="Text" visibility="public" read="FText" write="FText" type="string" default="0" file="AsphyreTextureFonts.pas" line="19" />
+      <property name="OutTimeTick" visibility="public" read="FOutTimeTick" write="FOutTimeTick" type="Cardinal" file="AsphyreTextureFonts.pas" line="20" />
+      <property name="OutTimeTime" visibility="public" read="FOutTimeTime" write="FOutTimeTime" type="Cardinal" file="AsphyreTextureFonts.pas" line="21" />
+    </members>
+  </class>
+  <class name="TAsphyreFontTextures" file="AsphyreTextureFonts.pas" line="24">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FList" type="TList" visibility="private" size="4" offset="4" file="AsphyreTextureFonts.pas" line="26" />
+      <field name="FOutTimeTick" type="Cardinal" visibility="private" size="4" offset="8" file="AsphyreTextureFonts.pas" line="27" />
+      <field name="FOutTimeTime" type="Cardinal" visibility="private" size="4" offset="12" file="AsphyreTextureFonts.pas" line="28" />
+      <function name="GetTexture" visibility="private" file="AsphyreTextureFonts.pas" line="29">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <retval type="TAsphyreFontTexture" />
+        </parameters>
+      </function>
+      <function name="GetTextureCount" visibility="private" file="AsphyreTextureFonts.pas" line="30">
+        <parameters>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <constructor name="Create" visibility="public" file="AsphyreTextureFonts.pas" line="32">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="AsphyreTextureFonts.pas" line="33">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="FreeIdleMemory" visibility="public" file="AsphyreTextureFonts.pas" line="34">
+      </procedure>
+      <procedure name="Clear" visibility="public" file="AsphyreTextureFonts.pas" line="35">
+      </procedure>
+      <procedure name="Add" visibility="public" file="AsphyreTextureFonts.pas" line="36">
+        <parameters>
+          <parameter name="Texture" type="TAsphyreFontTexture" />
+        </parameters>
+      </procedure>
+      <property name="Textures[Index]" visibility="public" read="GetTexture" type="TAsphyreFontTexture" file="AsphyreTextureFonts.pas" line="37" />
+      <property name="TextureCount" visibility="public" read="GetTextureCount" type="Integer" file="AsphyreTextureFonts.pas" line="38" />
+      <property name="OutTimeTick" visibility="public" read="FOutTimeTick" write="FOutTimeTick" type="Cardinal" file="AsphyreTextureFonts.pas" line="39" />
+      <property name="OutTimeTime" visibility="public" read="FOutTimeTime" write="FOutTimeTime" type="Cardinal" file="AsphyreTextureFonts.pas" line="40" />
+    </members>
+  </class>
+  <class name="TAsphyreTextureFont" file="AsphyreTextureFonts.pas" line="45">
+    <ancestor name="TFont" namespace="Vcl.Graphics">
+      <methodref name="GetData" visibility="private">
+      </methodref>
+      <methodref name="SetData" visibility="private">
+      </methodref>
+      <methodref name="Changed" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="GetHandle" visibility="protected">
+      </methodref>
+      <methodref name="GetHeight" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="GetName" visibility="protected">
+      </methodref>
+      <methodref name="GetOrientation" visibility="protected">
+      </methodref>
+      <methodref name="GetPitch" visibility="protected">
+      </methodref>
+      <methodref name="GetSize" visibility="protected">
+      </methodref>
+      <methodref name="GetStyle" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="GetCharset" visibility="protected">
+      </methodref>
+      <methodref name="GetQuality" visibility="protected">
+      </methodref>
+      <methodref name="SetColor" visibility="protected">
+      </methodref>
+      <methodref name="SetHandle" visibility="protected">
+      </methodref>
+      <methodref name="SetHeight" visibility="protected">
+      </methodref>
+      <methodref name="SetOrientation" visibility="protected">
+      </methodref>
+      <methodref name="SetName" visibility="protected">
+      </methodref>
+      <methodref name="SetPitch" visibility="protected">
+      </methodref>
+      <methodref name="SetSize" visibility="protected">
+      </methodref>
+      <methodref name="SetStyle" visibility="protected">
+      </methodref>
+      <methodref name="SetCharset" visibility="protected">
+      </methodref>
+      <methodref name="SetQuality" visibility="protected">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="Assign" visibility="public" procflags="override">
+      </methodref>
+      <propertyref name="FontAdapter" visibility="public">
+      </propertyref>
+      <propertyref name="Handle" visibility="public">
+      </propertyref>
+      <propertyref name="PixelsPerInch" visibility="public">
+      </propertyref>
+      <propertyref name="Charset" visibility="published">
+      </propertyref>
+      <propertyref name="Color" visibility="published">
+      </propertyref>
+      <propertyref name="Height" visibility="published">
+      </propertyref>
+      <propertyref name="Name" visibility="published">
+      </propertyref>
+      <propertyref name="Orientation" visibility="published">
+      </propertyref>
+      <propertyref name="Pitch" visibility="published">
+      </propertyref>
+      <propertyref name="Size" visibility="published">
+      </propertyref>
+      <propertyref name="Style" visibility="published">
+      </propertyref>
+      <propertyref name="Quality" visibility="published">
+      </propertyref>
+      <ancestor name="TGraphicsObject" namespace="Vcl.Graphics">
+        <methodref name="Changed" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="Lock" visibility="protected">
+        </methodref>
+        <methodref name="Unlock" visibility="protected">
+        </methodref>
+        <methodref name="HandleAllocated" visibility="public">
+        </methodref>
+        <propertyref name="OwnerCriticalSection" visibility="public">
+        </propertyref>
+        <eventref name="OnChange" visibility="public">
+        </eventref>
+        <ancestor name="TPersistent" namespace="System.Classes">
+          <methodref name="AssignError" visibility="private">
+          </methodref>
+          <methodref name="AssignTo" visibility="protected" procflags="virtual">
+          </methodref>
+          <methodref name="DefineProperties" visibility="protected" procflags="virtual">
+          </methodref>
+          <methodref name="GetOwner" visibility="protected" procflags="dynamic">
+          </methodref>
+          <methodref name="Destroy" visibility="public" procflags="destructor override">
+          </methodref>
+          <methodref name="Assign" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="GetNamePath" visibility="public" procflags="dynamic">
+          </methodref>
+          <ancestor name="TObject" namespace="System">
+            <methodref name="Create" visibility="public" procflags="constructor">
+            </methodref>
+            <methodref name="Free" visibility="public">
+            </methodref>
+            <methodref name="DisposeOf" visibility="public" procflags="inline">
+            </methodref>
+            <methodref name="InitInstance" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="CleanupInstance" visibility="public">
+            </methodref>
+            <methodref name="ClassType" visibility="public" procflags="inline">
+            </methodref>
+            <methodref name="ClassName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="ClassNameIs" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="ClassParent" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="ClassInfo" visibility="public" procflags="class inline">
+            </methodref>
+            <methodref name="InstanceSize" visibility="public" procflags="class inline">
+            </methodref>
+            <methodref name="InheritsFrom" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="MethodAddress" visibility="public" procflags="class overload">
+            </methodref>
+            <methodref name="MethodAddress" visibility="public" procflags="class overload">
+            </methodref>
+            <methodref name="MethodName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="QualifiedClassName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="FieldAddress" visibility="public" procflags="overload">
+            </methodref>
+            <methodref name="FieldAddress" visibility="public" procflags="overload">
+            </methodref>
+            <methodref name="GetInterface" visibility="public">
+            </methodref>
+            <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+            </methodref>
+            <methodref name="UnitName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="UnitScope" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="Equals" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="GetHashCode" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="ToString" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="SafeCallException" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="Dispatch" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="NewInstance" visibility="public" procflags="class virtual">
+            </methodref>
+            <methodref name="FreeInstance" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+            </methodref>
+            <methodref name="GetDisposed" visibility="protected" procflags="inline">
+            </methodref>
+            <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+            </methodref>
+            <propertyref name="Disposed" visibility="protected">
+            </propertyref>
+          </ancestor>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FManager" type="TFontManager" visibility="private" size="4" offset="40" file="AsphyreTextureFonts.pas" line="47" />
+      <field name="FFontTextures" type="TAsphyreFontTextures" visibility="private" size="4" offset="44" file="AsphyreTextureFonts.pas" line="48" />
+      <field name="FName" type="string" visibility="private" size="4" offset="48" file="AsphyreTextureFonts.pas" line="49" />
+      <field name="FAlias" type="string" visibility="private" size="4" offset="52" file="AsphyreTextureFonts.pas" line="50" />
+      <procedure name="NewBitmapFile" visibility="private" file="AsphyreTextureFonts.pas" line="51">
+        <parameters>
+          <parameter name="AWidth" type="Integer" paramflags="const" />
+          <parameter name="AHeight" type="Integer" paramflags="const" />
+          <parameter name="ABitCount" type="Integer" paramflags="const" />
+          <parameter name="FileData" type="Pointer" paramflags="var" />
+          <parameter name="FileSize" type="Integer" paramflags="var" />
+        </parameters>
+      </procedure>
+      <function name="GetFontTexture" visibility="private" file="AsphyreTextureFonts.pas" line="52">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <retval type="TAsphyreLockableTexture" />
+        </parameters>
+      </function>
+      <constructor name="Create" visibility="public" file="AsphyreTextureFonts.pas" line="54">
+        <parameters>
+          <parameter name="AOwner" type="TFontManager" />
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="AsphyreTextureFonts.pas" line="55">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="FreeIdleMemory" visibility="public" file="AsphyreTextureFonts.pas" line="56">
+      </procedure>
+      <procedure name="Initialize" visibility="public" file="AsphyreTextureFonts.pas" line="57">
+      </procedure>
+      <procedure name="Finalize" visibility="public" file="AsphyreTextureFonts.pas" line="58">
+      </procedure>
+      <function name="GetTextTexture" visibility="public" file="AsphyreTextureFonts.pas" line="59">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <retval type="TAsphyreLockableTexture" />
+        </parameters>
+      </function>
+      <function name="TextHeight" visibility="public" file="AsphyreTextureFonts.pas" line="60">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="TextWidth" visibility="public" file="AsphyreTextureFonts.pas" line="61">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="TextExtent" visibility="public" file="AsphyreTextureFonts.pas" line="62">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <retval type="TSize" />
+        </parameters>
+      </function>
+      <function name="TextOut" visibility="public" procflags="inline" file="AsphyreTextureFonts.pas" line="63">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <retval type="TAsphyreLockableTexture" />
+        </parameters>
+      </function>
+      <property name="_Name" visibility="public" read="FName" write="FName" type="string" default="0" file="AsphyreTextureFonts.pas" line="64" />
+      <property name="Alias" visibility="public" read="FAlias" write="FAlias" type="string" default="0" file="AsphyreTextureFonts.pas" line="65" />
+    </members>
+  </class>
+  <class name="TFontManager" file="AsphyreTextureFonts.pas" line="69">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="Fonts" type="TList" visibility="private" size="4" offset="4" file="AsphyreTextureFonts.pas" line="71" />
+      <field name="FActiveFont" type="TAsphyreTextureFont" visibility="private" size="4" offset="8" file="AsphyreTextureFonts.pas" line="72" />
+      <field name="FDefault" type="TAsphyreTextureFont" visibility="private" size="4" offset="12" file="AsphyreTextureFonts.pas" line="73" />
+      <field name="FGetTextExtent" type="TOnGetTextExtentSize" visibility="private" size="8" offset="16" file="AsphyreTextureFonts.pas" line="74" />
+      <procedure name="DoGetTextHeight" visibility="private" file="AsphyreTextureFonts.pas" line="75">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="Font" type="TFont" />
+          <parameter name="Value" type="Integer" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="DoGetTextWidth" visibility="private" file="AsphyreTextureFonts.pas" line="76">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="Font" type="TFont" />
+          <parameter name="Value" type="Integer" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="DoGetTextExtent" visibility="private" file="AsphyreTextureFonts.pas" line="77">
+        <parameters>
+          <parameter name="Text" type="string" paramflags="const" />
+          <parameter name="Font" type="TFont" />
+          <parameter name="Value" type="TSize" paramflags="var" />
+        </parameters>
+      </procedure>
+      <constructor name="Create" visibility="public" file="AsphyreTextureFonts.pas" line="79">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="AsphyreTextureFonts.pas" line="80">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="FreeIdleMemory" visibility="public" file="AsphyreTextureFonts.pas" line="81">
+      </procedure>
+      <procedure name="Initialize" visibility="public" file="AsphyreTextureFonts.pas" line="82">
+      </procedure>
+      <procedure name="Finalize" visibility="public" file="AsphyreTextureFonts.pas" line="83">
+      </procedure>
+      <procedure name="RemoveAll" visibility="public" file="AsphyreTextureFonts.pas" line="84">
+      </procedure>
+      <function name="Add" visibility="public" file="AsphyreTextureFonts.pas" line="85">
+        <parameters>
+          <parameter name="AName" type="string" paramflags="const" />
+          <parameter name="FontName" type="TFontName" paramflags="const" />
+          <parameter name="FontSize" type="Integer" />
+          <parameter name="FontStyles" type="TFontStyles" />
+          <parameter name="ADefault" type="Boolean" />
+          <retval type="TAsphyreTextureFont" />
+        </parameters>
+      </function>
+      <function name="FindByAlias" visibility="public" file="AsphyreTextureFonts.pas" line="86">
+        <parameters>
+          <parameter name="AAlias" type="string" paramflags="const" />
+          <retval type="TAsphyreTextureFont" />
+        </parameters>
+      </function>
+      <function name="GetFont" visibility="public" file="AsphyreTextureFonts.pas" line="87">
+        <parameters>
+          <parameter name="AFontName" type="string" paramflags="const" />
+          <parameter name="FontSize" type="Integer" />
+          <parameter name="FontStyles" type="TFontStyles" />
+          <retval type="TAsphyreTextureFont" />
+        </parameters>
+      </function>
+      <property name="Default" visibility="public" read="FDefault" type="TAsphyreTextureFont" file="AsphyreTextureFonts.pas" line="89" />
+      <event name="OnGetTextExtent" visibility="public" read="FGetTextExtent" write="FGetTextExtent" type="TOnGetTextExtentSize" file="AsphyreTextureFonts.pas" line="90" />
+    </members>
+  </class>
+  <variable name="FontManager" type="TFontManager" visibility="public" file="AsphyreTextureFonts.pas" line="94" />
+</namespace>

@@ -1,0 +1,355 @@
+unit DBShare;
+
+interface
+
+uses
+  Windows, Messages, Classes, SysUtils, GList, FDBSQL, D7ScktComp, SyncObjs,
+  Grobal2, HUtil32, ADODB;
+
+const
+  MAXPLAYSERVER = 20;
+  LogBaseDir: string = 'Log\';
+  TransLogBaseDir: string = 'Trans_Log\';
+  APPCAPTION = 'DB Server';  //多区需要改的
+
+type
+  TMsgLog = record
+    boAdd: Boolean;
+    dAddTime: TDateTime;
+    nFColor: Integer;
+  end;
+  pTMsgLog = ^TMsgLog;
+
+  TDBUserInfo = record
+    SHandle: integer;
+    SocData: string;
+    Connected: Boolean;
+    ReceiveFinish: Boolean;
+    USocket: TCustomWinSocket;
+  end;
+  PTDBUserInfo = ^TDBUserInfo;
+
+  TUserIdInfo = record
+    UsrId: string[12];
+    ChrName: string[12];
+    Certification: integer;   // 牢刘 锅龋
+    ServerSocket: TCustomWinSocket;
+    RunConnect: Boolean;      // RunServer俊 角青吝
+    ServerIndex: integer;     // 辑滚 锅龋
+    Connecting: Boolean;      // RunServer俊 立加吝
+    OnUseCount: byte;
+    OpenTime: integer;    // 立加 矫累 矫埃     time out 30 sec
+    DeathStart: integer;
+    DoDeath: Boolean;
+  end;
+  PTUserIDInfo = ^TUserIDInfo;
+
+  TGateInfo = record
+    GateSocket: TCustomWinSocket;
+    RemoteAddr: string;
+    SocData: string;
+    listUser: TList;             // list of PTUserInfo
+    ConnCheckTime: integer;      // 楷搬惑怕 盲农 矫埃
+  end;
+  PTGateInfo = ^TGateInfo;
+
+  TUserInfo = record
+    UserId: string[21];          //10 -> 21
+    UserAddr: string[20];        //
+    UserHandle: string;
+    Certification: integer;
+    CSocket: TCustomWinSocket;
+    UserSocData: string;
+    SelChrFinished: Boolean;
+    QueryChrFinished: Boolean;
+    ConnectTime: longword;        // 贸澜 立加茄 矫埃,
+    LatestCmdTime: longword;
+  end;
+  PTUserInfo = ^TUserInfo;
+
+  TServerConnInfo = record
+    Remote: string[15];
+    Addr: array[0..7] of string[15];
+    Port: array[0..7] of integer;
+  end;
+
+  TAdmission = record
+    usrid: string[21];  // 14 -> 20
+    ipaddr: string[15];
+    Certification: integer;
+    PayMode: integer; //0:眉氰 1:沥惑
+    Selected: Boolean;
+  end;
+  PTAdmission = ^TAdmission;
+
+  TConfig = record
+    SERVERNAME: string;
+    ODBC_DSN: string;
+    ODBC_ID: string;
+    ODBC_PW: string;
+    ODBC_DSN2: string;
+    ODBC_ID2: string;
+    ODBC_PW2: string;
+    LS_ADDR: string;
+    LS_CPORT: Integer;
+    GS_BPORT: Integer;
+    RG_BPORT: Integer;
+    MF_FILEPATH: string;
+    boViewHackMsg: Boolean;
+    boMinimize: Boolean;
+    boStarted: Boolean;
+  end;
+
+function GetFreeDiskSpace(szDirectoryName: PChar): Extended;
+procedure WriteLog (str: string);
+procedure WriteTransLog(str: string);
+procedure AddLog (str: string);
+procedure AddTransLog (str: string);
+procedure ClearMessage;
+procedure MainOutMessage (ncolor: Integer; msgstr: string); //rainee
+procedure LoadConfig;
+
+var
+  CSLocalDB: TRTLCriticalSection;
+  ReceiveCount, DecodeCount, SendCount: integer;
+  ErrorCount: integer;
+  FailCount: integer;
+
+  HackCountQueryChr: integer;
+  HackCountNewChr: integer;
+  HackCountDelChr: integer;
+  HackCountSelChr: integer;
+  HackCountErrorPacket1: integer;
+  HackCountErrorPacket2: integer;
+  HackCountErrorPacket3: integer;
+  HackCountErrorPacket4: integer;
+  HackCountErrorPacket5: integer;
+  HackCountHeavyPacket: integer;
+
+  ViewHackMsg: Boolean;
+  MainLogMsgList: TGStringList;
+  g_dwUpdateListViewTick: LongWord;
+
+  CINFO, CERR, CNORMAL, CDBG, CSEND, CRECV: Integer; //日志颜色
+
+  GateClass: string = 'Config';
+  g_Config: TConfig = (
+    SERVERNAME: 'DRAGON';
+    ODBC_DSN: 'Game';     //多区需要改的
+    ODBC_ID: 'sa';
+    ODBC_PW: 'sa';
+    ODBC_DSN2: 'Account';  //多区需要改的
+    ODBC_ID2: 'sa';
+    ODBC_PW2: 'sa';
+    LS_ADDR:'127.0.0.1';
+    LS_CPORT: 5601;
+    GS_BPORT: 6001;
+    RG_BPORT: 5100;
+    MF_FILEPATH : '..\M2Server\Envir';
+    boViewHackMsg: False;
+    boMinimize: False;
+    boStarted: False;
+    );
+
+  Def: TDefaultMessage;
+  transcount: integer;
+  CurCertify: string;
+
+  SQLLoading: Boolean;
+  m_listGameServer: TList;
+  UserIdList: TList;
+
+  sLock: TCriticalSection;
+  m_listRunGate: TList;    // list of PTGateInfo
+  m_ServerConnInfo: array[0..MAXPLAYSERVER - 1] of TServerConnInfo;
+  WorkGate: PTGateInfo;
+  m_listMapServerInfo: TStringList;
+  MapFile: string;
+  ErrorSum: integer;
+
+implementation
+
+uses DBSMain, IniFiles;
+
+function GetFreeDiskSpace(szDirectoryName: PChar): Extended;
+var
+  d1, d2, d3, d4: DWORD;
+  nFreeDisk: Extended;
+begin
+  Result := 0;
+  GetDiskFreeSpace(szDirectoryName, d1, d2, d3, d4);
+  nFreeDisk := d3 / 1024 / 1024 / 1024 * d2 * d1;
+  if nFreeDisk > 0 then Result := nFreeDisk;
+end;
+
+procedure WriteLog(str: string);
+var
+  ayear, amon, aday: word;
+  flname: string;
+  dir256: array[0..255] of char;
+  f: TextFile;
+begin
+  if str = '' then exit;
+
+  try
+    DecodeDate(Date, ayear, amon, aday);
+    if not DirectoryExists(LogBaseDir) then begin
+      StrPCopy(dir256, LogBaseDir);
+      CreateDirectory(@dir256, nil);
+    end;
+    flname := LogBaseDir + Format('\DBS_%d%.2d%.2d.log', [ayear, amon, aday]);
+
+    AssignFile(f, flname);
+    if not FileExists(flname) then
+      Rewrite(f)
+    else
+      Append(f);
+
+    WriteLn(f, str);
+
+    CloseFile(f);
+  except
+  end;
+end;
+
+procedure WriteTransLog(str: string);
+var
+  ayear, amon, aday: word;
+  flname: string;
+  dir256: array[0..255] of char;
+  f: TextFile;
+begin
+  if str = '' then exit;
+
+  try
+    DecodeDate(Date, ayear, amon, aday);
+    if not DirectoryExists(TransLogBaseDir) then begin
+      StrPCopy(dir256, TransLogBaseDir);
+      CreateDirectory(@dir256, nil);
+    end;
+    flname := TransLogBaseDir + Format('\TRANS_%d%.2d%.2d.log', [ayear, amon, aday]);
+
+    AssignFile(f, flname);
+    if not FileExists(flname) then
+      Rewrite(f)
+    else
+      Append(f);
+
+    WriteLn(f, str);
+    CloseFile(f);
+  except
+  end;
+end;
+
+procedure AddLog(str: string);
+begin
+  str := FormatDateTime('hh:mm:ss', now) + ' ' + str;
+  WriteLog(str);
+end;
+
+procedure AddTransLog(str: string);
+begin
+  str := FormatDateTime('hh:mm:ss', now) + ' ' + str;
+  WriteTransLog (str);
+end;
+
+procedure ClearMessage;
+var
+  I: Integer;
+begin
+  MainLogMsgList.Lock;
+  try
+    for I := 0 to MainLogMsgList.Count - 1 do begin
+      Dispose(pTMsgLog(MainLogMsgList.Objects[I]));
+    end;
+    MainLogMsgList.Clear;
+  finally
+    MainLogMsgList.UnLock;
+  end;
+end;
+
+procedure MainOutMessage (ncolor:Integer; msgstr: string);
+var
+  MsgLog: pTMsgLog;
+begin
+  MainLogMsgList.Lock;
+  try
+    if MainLogMsgList.Count >= 200 then ClearMessage;
+  finally
+    MainLogMsgList.UnLock;
+  end;
+
+  MainLogMsgList.Lock;
+  try
+    New(MsgLog);
+    MsgLog.boAdd := True;
+    MsgLog.dAddTime := Now;
+    MsgLog.nFColor := ncolor;
+    MainLogMsgList.AddObject(msgstr, TObject(MsgLog));
+  finally
+    MainLogMsgList.UnLock;
+  end;
+end;
+
+procedure LoadConfig;
+var
+  Conf: TIniFile;
+  sConfigFileName: string;
+  nInteger: Integer;
+  sString: string;
+begin
+  sConfigFileName := '.\Config.ini';
+  Conf := TIniFile.Create(sConfigFileName);
+  sString := Conf.ReadString(GateClass, 'NAME', '');
+  if sString = '' then Conf.WriteString(GateClass, 'NAME', g_Config.SERVERNAME);
+  sString := Conf.ReadString(GateClass, 'ODBC_DSN', '');
+  if sString = '' then Conf.WriteString(GateClass, 'ODBC_DSN', g_Config.ODBC_DSN);
+  sString := Conf.ReadString(GateClass, 'ODBC_ID', '');
+  if sString = '' then Conf.WriteString(GateClass, 'ODBC_ID', g_Config.ODBC_ID);
+  sString := Conf.ReadString(GateClass, 'ODBC_PW', '');
+  if sString = '' then Conf.WriteString(GateClass, 'ODBC_PW', g_Config.ODBC_PW);
+
+  sString := Conf.ReadString(GateClass, 'ODBC_DSN2', '');
+  if sString = '' then Conf.WriteString(GateClass, 'ODBC_DSN2', g_Config.ODBC_DSN2);
+  sString := Conf.ReadString(GateClass, 'ODBC_ID2', '');
+  if sString = '' then Conf.WriteString(GateClass, 'ODBC_ID2', g_Config.ODBC_ID2);
+  sString := Conf.ReadString(GateClass, 'ODBC_PW2', '');
+  if sString = '' then Conf.WriteString(GateClass, 'ODBC_PW2', g_Config.ODBC_PW2);
+
+  sString := Conf.ReadString(GateClass, 'LS_ADDR', '');
+  if sString = '' then Conf.WriteString(GateClass, 'LS_ADDR', g_Config.LS_ADDR);
+
+  nInteger := Conf.ReadInteger(GateClass, 'LS_CPORT', -1);
+  if nInteger = -1 then Conf.WriteInteger(GateClass, 'LS_CPORT', g_Config.LS_CPORT);
+  nInteger := Conf.ReadInteger(GateClass, 'GS_BPORT', -1);
+  if nInteger = -1 then Conf.WriteInteger(GateClass, 'GS_BPORT', g_Config.GS_BPORT);
+  nInteger := Conf.ReadInteger(GateClass, 'LG_BPORT', -1);
+  if nInteger = -1 then Conf.WriteInteger(GateClass, 'RG_BPORT', g_Config.RG_BPORT);
+
+  sString := Conf.ReadString(GateClass, 'MF_FILEPATH', '');
+  if sString = '' then Conf.WriteString(GateClass, 'MF_FILEPATH', g_Config.MF_FILEPATH);
+
+  nInteger := Conf.ReadInteger(GateClass, 'Minimize', -1);
+  if nInteger = -1 then Conf.WriteBool(GateClass, 'Minimize', g_Config.boMinimize);
+
+  g_Config.SERVERNAME := Conf.ReadString(GateClass, 'NAME', g_Config.SERVERNAME);
+  g_Config.ODBC_DSN := Conf.ReadString(GateClass, 'ODBC_DSN', g_Config.ODBC_DSN);
+  g_Config.ODBC_ID := Conf.ReadString(GateClass, 'ODBC_ID', g_Config.ODBC_ID);
+  g_Config.ODBC_PW := Conf.ReadString(GateClass, 'ODBC_PW', g_Config.ODBC_PW);
+  g_Config.ODBC_DSN2 := Conf.ReadString(GateClass, 'ODBC_DSN2', g_Config.ODBC_DSN2);
+  g_Config.ODBC_ID2 := Conf.ReadString(GateClass, 'ODBC_ID2', g_Config.ODBC_ID2);
+  g_Config.ODBC_PW2 := Conf.ReadString(GateClass, 'ODBC_PW2', g_Config.ODBC_PW2);
+  g_Config.LS_ADDR := Conf.ReadString(GateClass, 'LS_ADDR', g_Config.LS_ADDR);
+  g_Config.LS_CPORT := Conf.ReadInteger(GateClass, 'LS_CPORT', g_Config.LS_CPORT);
+  g_Config.GS_BPORT := Conf.ReadInteger(GateClass, 'GS_BPORT', g_Config.GS_BPORT);
+  g_Config.RG_BPORT := Conf.ReadInteger(GateClass, 'RG_BPORT', g_Config.RG_BPORT);
+  g_Config.MF_FILEPATH := Conf.ReadString(GateClass, 'MF_FILEPATH', g_Config.MF_FILEPATH);
+  g_Config.boMinimize := Conf.ReadBool(GateClass, 'Minimize', g_Config.boMinimize);
+  Conf.Free;
+end;
+
+//initialization
+
+//finalization
+
+end.

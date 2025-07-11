@@ -1,0 +1,231 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="uCommon" platform="Win32">
+  <const name="DefaultFontName" type="string" file="uCommon.pas" line="10">
+    <value>
+      宋体
+    </value>
+  </const>
+  <const name="DefaultFontSize" type="Integer" file="uCommon.pas" line="11">
+    <value>
+      $9
+    </value>
+  </const>
+  <const name="DefaultFontStyle" type="Set" file="uCommon.pas" line="12">
+    <value>
+      []
+    </value>
+  </const>
+  <const name="CL_CLIENTOPEN" type="Integer" file="uCommon.pas" line="15">
+    <value>
+      $2710
+    </value>
+  </const>
+  <const name="CL_CLIENTCLOSE" type="Integer" file="uCommon.pas" line="16">
+    <value>
+      $2711
+    </value>
+  </const>
+  <const name="CL_RES_REQUST" type="Integer" file="uCommon.pas" line="17">
+    <value>
+      $2712
+    </value>
+  </const>
+  <const name="CL_RES_NEWFILE" type="Integer" file="uCommon.pas" line="18">
+    <value>
+      $2713
+    </value>
+  </const>
+  <const name="CL_RES_IMGDOWNLOADED" type="Integer" file="uCommon.pas" line="19">
+    <value>
+      $2714
+    </value>
+  </const>
+  <const name="CL_RES_FILEDOWNLOADED" type="Integer" file="uCommon.pas" line="20">
+    <value>
+      $2715
+    </value>
+  </const>
+  <const name="CL_RES_UPDATEFILE" type="Integer" file="uCommon.pas" line="21">
+    <value>
+      $2716
+    </value>
+  </const>
+  <const name="gtDIB" type="TGraphicType" file="uCommon.pas" line="24">
+    <value>
+      gtDIB
+    </value>
+  </const>
+  <const name="gtPng" type="TGraphicType" file="uCommon.pas" line="24">
+    <value>
+      gtPng
+    </value>
+  </const>
+  <const name="gtRealPng" type="TGraphicType" file="uCommon.pas" line="24">
+    <value>
+      gtRealPng
+    </value>
+  </const>
+  <const name="gtNone" type="TGraphicType" file="uCommon.pas" line="24">
+    <value>
+      gtNone
+    </value>
+  </const>
+  <enum name="TGraphicType" file="uCommon.pas" line="24">
+    <element value="0" name="gtDIB" file="uCommon.pas" line="24" />
+    <element value="1" name="gtPng" file="uCommon.pas" line="24" />
+    <element value="2" name="gtRealPng" file="uCommon.pas" line="24" />
+    <element value="3" name="gtNone" file="uCommon.pas" line="24" />
+  </enum>
+  <anonMethod name="TMaskCharAddProc" file="uCommon.pas" line="25">
+    <procedure name="Invoke" visibility="public" procflags="abstract virtual" file="uCommon.pas" line="25">
+      <parameters>
+        <parameter name="Mask" type="string" paramflags="const" />
+        <parameter name="Value" type="string" paramflags="const" />
+      </parameters>
+    </procedure>
+  </anonMethod>
+  <variable name="Bit8MainPalette" type="TRGBQuads" file="uCommon.pas" line="51" />
+  <variable name="ColorTable_565" file="uCommon.pas" line="52" />
+  <variable name="ColorTable_R5G6B5_32" file="uCommon.pas" line="53" />
+  <variable name="ColorTable_A1R5G5B5" file="uCommon.pas" line="54" />
+  <variable name="DateTimeFormatSettings" type="TFormatSettings" file="uCommon.pas" line="55" />
+  <variable name="ColorPalette" file="uCommon.pas" line="56" />
+  <function name="M2StrToColor" visibility="public" file="uCommon.pas" line="129">
+    <parameters>
+      <parameter name="Value" type="string" paramflags="const" />
+      <parameter name="Def" type="TColor">
+        <value>
+          $1FFFFFFF
+        </value>
+      </parameter>
+      <retval type="TColor" />
+    </parameters>
+  </function>
+  <function name="CheckIsIpAddr" visibility="public" file="uCommon.pas" line="148">
+    <parameters>
+      <parameter name="Name" type="string" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="TickInterval" visibility="public" procflags="inline" file="uCommon.pas" line="173">
+    <parameters>
+      <parameter name="EndTick" type="Cardinal" paramflags="const" />
+      <parameter name="StartTick" type="Cardinal" paramflags="const" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="GetRGB" visibility="public" procflags="inline" file="uCommon.pas" line="181">
+    <parameters>
+      <parameter name="c256" type="Byte" />
+      <retval type="TColor" />
+    </parameters>
+  </function>
+  <function name="ISVlidateMaketName" visibility="public" file="uCommon.pas" line="186">
+    <parameters>
+      <parameter name="Name" type="string" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="ConvertMaskChar" visibility="public" procflags="inline" file="uCommon.pas" line="191">
+    <parameters>
+      <parameter name="C" type="Char" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="ConvertMaskString" visibility="public" procflags="inline" file="uCommon.pas" line="215">
+    <parameters>
+      <parameter name="Source" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="MakeMaskString" visibility="public" procflags="inline" file="uCommon.pas" line="235">
+    <parameters>
+      <parameter name="Source" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <procedure name="AddMaskChars" visibility="public" file="uCommon.pas" line="255">
+    <parameters>
+      <parameter name="AddProc" type="TMaskCharAddProc" />
+    </parameters>
+  </procedure>
+  <function name="SaveStreamToString" visibility="public" file="uCommon.pas" line="275">
+    <parameters>
+      <parameter name="Source" type="TStream" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <procedure name="LoadStreamFromString" visibility="public" file="uCommon.pas" line="290">
+    <parameters>
+      <parameter name="Source" type="AnsiString" paramflags="const" />
+      <parameter name="Dest" type="TStream" />
+    </parameters>
+  </procedure>
+  <function name="MakeNewGUID38" visibility="public" file="uCommon.pas" line="308">
+    <parameters>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="MakeNewGUID36" visibility="public" file="uCommon.pas" line="316">
+    <parameters>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="MakeNewGUID32" visibility="public" file="uCommon.pas" line="321">
+    <parameters>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="MakeNewGUID16" visibility="public" file="uCommon.pas" line="326">
+    <parameters>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="WidthBytes" visibility="public" procflags="inline" file="uCommon.pas" line="339">
+    <parameters>
+      <parameter name="Width" type="Integer" />
+      <parameter name="BitCount" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <procedure name="CompressBufZ" visibility="public" file="uCommon.pas" line="362">
+    <parameters>
+      <parameter name="InBuf" type="PAnsiChar" paramflags="const" />
+      <parameter name="InBytes" type="Integer" />
+      <parameter name="OutBuf" type="PAnsiChar" paramflags="out" />
+      <parameter name="OutBytes" type="Integer" paramflags="out" />
+    </parameters>
+  </procedure>
+  <procedure name="DecompressBufZ" visibility="public" file="uCommon.pas" line="402">
+    <parameters>
+      <parameter name="inBuffer" type="PAnsiChar" paramflags="const" />
+      <parameter name="inSize" type="Integer" />
+      <parameter name="outEstimate" type="Integer" />
+      <parameter name="outBuffer" type="PAnsiChar" paramflags="out" />
+      <parameter name="outSize" type="Integer" paramflags="out" />
+    </parameters>
+  </procedure>
+  <procedure name="FreeAndNilEx" visibility="public" file="uCommon.pas" line="437">
+    <parameters>
+      <parameter name="Obj" paramflags="var" />
+    </parameters>
+  </procedure>
+  <procedure name="FreeAndNilSafe" visibility="public" file="uCommon.pas" line="449">
+    <parameters>
+      <parameter name="Obj" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="XStrToDateTimeDef" visibility="public" file="uCommon.pas" line="464">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <parameter name="Default" type="TDateTime" paramflags="const" />
+      <retval type="TDateTime" />
+    </parameters>
+  </function>
+  <function name="XDateTimeToStr" visibility="public" file="uCommon.pas" line="469">
+    <parameters>
+      <parameter name="Default" type="TDateTime" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+</namespace>

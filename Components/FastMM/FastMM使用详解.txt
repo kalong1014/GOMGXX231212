@@ -1,0 +1,231 @@
+FastMM使用详解
+一、引言
+      FastMM 是适用于delphi的第三方内存管理器，在国外已经是大名鼎鼎，在国内也有许多人在使用或者希望使用，就连 Borland 也在delphi2007抛弃了自己原有的饱受指责的内存管理器，改用FastMM.
+      但是，内存管理的复杂性以及缺乏 FastMM 中文文档导致国内许多人在使用时遇到了许多问题，一些人因此而放弃了使用，我在最近的一个项目中使用了FastMM，也因此遇到了许多问题，经过摸索和研究，终于解决了这些问题。
+二、为什么要用FastMM
+第一个原因是FastMM的性能接近与delphi缺省内存管理器的两倍，可以做一个简单的测试，运行下面的代码：
+var
+I: Integer;
+Tic: Cardinal;
+S: string;
+begin
+tic := GetTickCount;
+try
+    for I := 0 to 100000 do
+    begin
+      SetLength(S, I + 100);
+      edt1.Text := S;
+    end;
+finally
+    SetLength(S, 0);
+    tic := GetTickCount - Tic;
+    MessageDlg('Tic = ' + IntToStr(Tic), mtInformation, [mbOK], 0);
+end;
+end;
+在我的IBM T23笔记本上，使用FastMM4（FastMM的最新版本）用时约为3300ms，而使用缺省的内存管理器，用时约为6200ms，FastMM4的性能提高达88%.
+第二个原因FastMM的共享内存管理器功能使用简单可靠。当一个应用程序有多个模块（exe和dll）组成时，模块之间的动态内存变量如string的传递就是一个很大的问题，缺省情况下，各个模块都由自己的内存管理器，由一个内存管理器分配的内存也必须在这个内存管理器才能安全释放，否则就会出现内存错误，这样如果在一个模块分配的内存在另外一个模块释放就会出现内存错误。解决这个问题就需要使用到共享内存管理器，让各个模块都使用同一个内存管理器。Delphi缺省的共享内存管理器是BORLNDMM.DLL，这个内存管理器并不可靠，也常常出现问题，并且，在程序发布的时候必须连同这个DLL一起发布。而FastMM的共享内存管理器功能不需要DLL支持，并且更加可靠。
+第三个原因是FastMM还拥有一些帮助程序开发的辅助功能，如内存泄漏检测功能，可以检测程序是否存在未正确释放的内存等。
+ 
+三、出现什么问题
+如果我们开发的应用程序，只有一个exe模块，那么，使用FastMM是一件非常简单的事情，只需要把FastMM.pas（最新版是FastMM4.pas）作为工程文件的第一个uses单元即可，如：
+
+program Test;
+uses
+    FastMM4,
+    …
+但是，通常情况下，我们的应用程序都是由一个exe模块加上多个dll组成的，这样，当我们跨模块传递动态内存变量如string变量时，就会出问题，比如，下面的测试程序由一个exe和一个dll组成：
+
+library test;   // test.dll
+uses
+    FastMM4, …;
+procedure GetStr(var S: string; const Len: Integer); stdcall;
+begin
+    SetLength(S, Len); // 分配内存
+    FillChar(S[1], Len, ‘A’);   
+end;
+exports
+    GetStr;
+-------------------------------------
+program TestPrj;
+uses
+    FastMM4, …;
+//------------------
+unit mMain; // 测试界面
+…
+procedure TForm1.btnDoClick(Sender: TObject);
+var
+I: Integer;
+S: string;
+Begin
+try 
+for I := 1 to 10000 do
+begin
+    GetStr(S, I + 1);
+    edt1.Text := S;
+    Application.ProcessMessages;
+end;
+finally
+    SetLength(S, 0);
+end;
+end;
+
+当第二次执行btnDoClick过程时，就会出现内存错误，为什么这样？delphi的字符串是带引用计数的，跟接口变量一样，一旦这个引用计数为0，则会自动释放内存。在btnDoClick过程中，调用GetStr过程，用SetLength给S分配了一段内存，此时这个字符串的引用计数为1，然后执行edt1.Text := S语句，字符串的引用计数为2，循环再调用GetStr给S重新分配内存，这样原来的字符串的引用计数减1，再执行edt1.Text := S，原来的字符串引用计数为0，这时，就会被释放（注意，是在TestPrj.exe释放，而不是在Test.dll释放），但这时没有出错，当循环执行完毕之后，还有一个字符串的引用计数为2，但是执行SetLength(S, 0)之后，该字符串被edt1.Text引用，的引用计数为1，第二次执行btnDoClick时，执行edt1.Text := S时，上次的引用计数为1的字符串引用计数减一变为0，就会被释放，此时，会出现内存错误。
+由此，可以看到，在另一个模块释放别的模块分配的内存，并不一定马上出现内存错误，但是，如果频繁执行，则会出现内存错误，这种不确定的错误带有很大的隐蔽性，常常在调试时不出现，但实际应用时出现，不仔细分析很难找到原因。
+要解决这个问题，就要从根源找起，这个根源就是内存管理。
+Delphi的内存管理,Delphi应用程序可以使用的有三种内存区：全局内存区、堆、栈，全局内存区存储全局变量、栈用来传递参数以及返回值，以及函数内的临时变量，这两种都是由编译器自动管理，而如字符串、对象、动态数组等都是从堆中分配的，内存管理就是指对堆内存管理，即从堆中分配内存和释放从堆中分配的内存（以下称内存的分配和释放）。
+我们知道，一个进程只有一个栈，因此，也很容易误以为一个进程也只有一个堆，但实际上，一个进程除了拥有一个系统分配的默认堆（默认大小1MB），还可以创建多个用户堆，每个堆都有自己的句柄，delphi的内存管理所管理的正是自行创建的堆，delphi还把一个堆以链表的形式分成多个大小不等的块，实际的内存操作都是在这些块上。
+delphi把内存管理定义为内存的分配（Get）、释放（Free）和重新分配（Realloc）。内存管理器也就是这三种实现的一个组合，delphi在system单元中定义了这个内存管理器TMemoryManager：
+
+PMemoryManager = ^TMemoryManager;
+TMemoryManager = record
+    GetMem: function (Size: Integer): Pointer;
+    FreeMem: function (P: Pointer): Integer;
+    ReallocMem: function (P: Pointer; Size: Integer): Pointer;
+end;
+由此知道，delphi的内存管理器就是一个 TMemoryManager 记录对象，该记录有三个域，分别指向内存的分配、释放和重新分配例程。
+System单元还定义了一个变量 MemoryManager ：
+MemoryManager: TMemoryManager = (
+    GetMem: SysGetMem;
+    FreeMem: SysFreeMem;
+    ReallocMem: SysReallocMem);
+该变量是delphi程序的内存管理器，缺省情况下，这个内存管理器的三个域分别指向GETMEM.INC中实现的SysGetMem、SysFreeMem、SysReallocMem。这个内存管理器变量只在system.pas中可见，但是system单元提供了三个可以访问该变量的例程：
+
+// 读取内存管理器，也即读取MemoryManager
+procedure GetMemoryManager (var MemMgr: TMemoryManager);
+// 安装内存管理器（即用新的内存管理器替换缺省的内存管理器）
+procedure SetMemoryManager (const MemMgr: TMemoryManager);
+// 是否已经安装了内存管理器（即缺省的内存管理器是否已经被替换）
+function IsMemoryManagerSet: Boolean;
+四、共享内存管理器
+什么是共享内存管理器？
+所谓共享内存管理器，就是一个应用程序的所有的模块，不管是exe还是dll，都使用同一个内存管理器来管理内存，这样，内存的分配和释放都是同一个内存管理器完成的，就不会出现内存错误的问题。
+那么如何共享内存管理器呢？
+由上分析，我们可以知道，既然要使用同一个内存管理器，那么干脆就创建一个独立的内存管理器模块（dll），其他的所有模块都使用这个模块的内存管理器来分配和释放内存。Delphi7默认就是采取这种方法，当我们使用向导创建一个dll工程时，工程文件会有这样一段话：
+{Important note about DLL memory management: ShareMem must be the
+first unit in your library's USES clause AND your project's (select
+Project-View Source) USES clause if your DLL exports any procedures or
+functions that pass strings as parameters or function results. This
+applies to all strings passed to and from your DLL--even those that
+are nested in records and classes. ShareMem is the interface unit to
+the BORLNDMM.DLL shared memory manager, which must be deployed along
+with your DLL. To avoid using BORLNDMM.DLL, pass string information
+using PChar or ShortString parameters. }
+这段话提示我们，ShareMem 是 BORLNDMM.DLL 共享内存管理器的接口单元，我们来看看这个ShareMem，这个单元文件很简短，其中有这样的声明：
+
+const
+DelphiMM = 'borlndmm.dll';
+function SysGetMem (Size: Integer): Pointer;
+external DelphiMM name '@Borlndmm@SysGetMem$qqri';
+function SysFreeMem(P: Pointer): Integer; 
+external DelphiMM name '@Borlndmm@SysFreeMem$qqrpv';
+function SysReallocMem(P: Pointer; Size: Integer): Pointer; 
+external DelphiMM name '@Borlndmm@SysReallocMem$qqrpvi';
+这些声明保证了BORLNDMM.DLL将被静态加载。
+在ShareMem的Initialization是这样的代码：
+if not IsMemoryManagerSet then
+    InitMemoryManager;
+首先判断内存管理器是否已经被安装（也即是否默认的内存管理器被替换掉），如果没有，则初始化内存管理器，InitMemoryManager也非常简单（把无用的代码去掉了）：
+
+procedure InitMemoryManager;
+var
+SharedMemoryManager: TMemoryManager;
+MM: Integer;
+begin
+// force a static reference to borlndmm.dll, so we don't have to LoadLibrary
+SharedMemoryManager.GetMem:= SysGetMem;
+MM: = GetModuleHandle (DelphiMM);
+SharedMemoryManager.GetMem:= GetProcAddress (MM,'@Borlndmm@SysGetMem$qqri');
+SharedMemoryManager.FreeMem:= GetProcAddress (MM,'@Borlndmm@SysFreeMem$qqrpv');
+SharedMemoryManager.ReallocMem:= GetProcAddress (MM, '@Borlndmm@SysReallocMem$qqrpvi');
+SetMemoryManager (SharedMemoryManager);
+end;
+这个函数定义了一个内存管理器对象，并设置域指向Borlndmm.dll的三个函数实现，然后调用SetMemoryManager来替换默认的内存管理器。
+这样，不管那个模块，因为都要将ShareMem作为工程的第一个uses单元，因此，每个模块的ShareMem的Initialization都是最先被执行的，也就是说，每个模块的内存管理器对象虽然不相同，但是，内存管理器的三个函数指针都是指向Borlndmm.dll的函数实现，因此，所有模块的内存分配和释放都是在Borlndmm.dll内部完成的，这样就不会出现跨模块释放内存导致错误的问题。
+那么，FastMM又是如何实现共享内存管理器呢？
+FastMM采取了一个原理上很简单的办法，就是创建一个内存管理器，然后将这个内存管理器的地址放到一个进程内所有模块都能读取到的位置，这样，其他模块在创建内存管理器之前，先查查是否有别的模块已经把内存管理器放到这个位置，如果是则使用这个内存管理器，否则才创建一个新的内存管理器，并将地址放到这个位置，这样，这个进程的所有模块都使用一个内存管理器，实现了内存管理器的共享。
+而且，这个内存管理器并不确定是哪个模块创建的，所有的模块，只要将FastMM作为其工程文件的第一个uses单元，就有可能是这个内存管理器的创建者，关键是看其在应用程序的加载顺序，第一个被加载的模块将成为内存管理器的创建者。
+那么，FastMM具体是如何实现的呢？
+打开 FastMM4.pas（FastMM的最新版本），还是看看其Initialization部分：
+
+{Initialize all the lookup tables, etc. for the memory manager}
+InitializeMemoryManager;
+{Has another MM been set, or has the Borland MM been used? If so, this file
+   is not the first unit in the uses clause of the project's .dpr file.}
+if CheckCanInstallMemoryManager then
+begin
+    InstallMemoryManager;
+end;
+InitializeMemoryManager 是初始化一些变量，完成之后就调用CheckCanInstallMemoryManager检测FastMM是否是作为工程的第一个uses单元，如果返回True，则调用InstallMemoryManager安装FastMM自己的内存管理器，我们按顺序摘取该函数的关键性代码进行分析：
+{Build a string identifying the current process}
+LCurrentProcessID: = GetCurrentProcessId;
+for i := 0 to 7 do
+UniqueProcessIDString [8 - i]:= HexTable [((LCurrentProcessID shr (i * 4)) and $F)];
+MMWindow: = FindWindow ('STATIC', PChar (@UniqueProcessIDString [1]));
+首先，获取该进程的ID，并转换为十六进制字符串，然后查找以该字符串为窗口名称的窗口。
+如果进程中还没有该窗口，则MMWindow 将返回0，那就，就创建该窗口：
+MMWindow: = CreateWindow ('STATIC', PChar (@UniqueProcessIDString [1]),
+          WS_POPUP, 0, 0, 0, 0, 0, 0, hInstance, nil);
+创建这个窗口有什么用呢，继续看下面的代码：
+
+if MMWindow <> 0 then
+SetWindowLong (MMWindow, GWL_USERDATA, Integer (@NewMemoryManager));
+NewMemoryManager.Getmem: = FastGetMem;
+NewMemoryManager.FreeMem: = FastFreeMem;
+NewMemoryManager.ReallocMem: = FastReallocMem;
+查阅MSDN可以知道，每个窗口都有一个可供创建它的应用程序使用的32位的值，该值可以通过以GWL_USERDATA为参数调用SetWindowLong来进行设置，也可以通过以GWL_USERDATA为参数调用GetWindowLong来读取。由此，我们就很清楚地知道，原来FastMM把要共享的内存管理器的地址保存到这个值上，这样其他模块就可以通过GetWindowLong来获读取到这个值，从而得到共享的内存管理器：
+
+NewMemoryManager: = PMemoryManager (GetWindowLong (MMWindow, GWL_USERDATA)) ^;
+通过上面的分析，可以看出，FastMM 在实现共享内存管理器上要比borland巧妙得多，borland的实现方法使得应用程序必须将BORLNDMM.DLL一起发布，而FastMM的实现方法不需要任何dll的支持。
+但是，上面的摘录代码把一些编译选项判断忽略掉了，实际上，要使用FastMM的共享内存管理器功能，需要在各个模块编译的时候在FastMM4.pas单元上打开一些编译选项：
+{$define ShareMM} //是打开共享内存管理器功能，是其他两个编译选项生效的前提
+{$define ShareMMIfLibrary} //是允许一个dll共享其内存管理器，如果没有定义这个选项，则一个应用程序中，只有exe模块才能够创建和共享其内存管理器，由于静态加载的dll总是比exe更早被加载，因此，如果一个dll会被静态加载，则必须打开该选项，否则可能会出错
+{$define AttemptToUseSharedMM} //是允许一个模块使用别的模块共享的内存管理器
+这些编译选项在FastMM4.pas所在目录的FastMM4Options.inc文件中都有定义和说明，只不过这些定义都被注释掉了，因此，可以取消注释来打开这些编译选项，或者可以在你的工程目录下创建一个.inc文件（如FastShareMM.inc），把这些编译选项写入这个文件中，然后，在FastMM4.pas开头的“{$Include FastMM4Options.inc}”之前加入“{$include FastShareMM.inc}”即可，这样，不同的工程可以使用不同的FastShareMM.inc文件。
+五、多线程下的内存管理
+多线程环境下，内存管理是安全的吗？显然，如果不采取一定的措施，那么肯定是不安全的，borland已经考虑到这种情况，因此，在delphi的system.pas中定义了一个系统变量IsMultiThread，这个系统变量指示当前是否为多线程环境，那么，它是如何工作的？打开TThread.Create函数的代码可以看到它调用了BeginThread来创建一个线程，而BeginThread把IsMultiThread设置为了True.
+再来看看GETMEM.INC的SysGetMem、SysFreeMem、SysReallocMem的实现，可以看到，在开始都由这样的语句：
+if IsMultiThread then EnterCriticalSection(heapLock);
+也就是说，在多线程环境下，内存的分配和释放都要用临界区进行同步以保证安全。
+而FastMM则使用了一条CUP指令lock来实现同步，该指令作为其他指令的前缀，可以在在一条指令的执行过程中将总线锁住，当然，也是在IsMultiThread为True的情况下才会进行同步。
+而IsMultiThread是定义在system.pas的系统变量，每个模块（exe或者dll）都有自己的IsMultiThread变量，并且，默认为Fasle，只有该模块中创建了用户线程，才会把这个变量设置为True，因此，我们在exe中创建线程，只会把exe中的IsMultiThread设置为True，并不会把其他的dll模块中的IsMultiThread设置为True，但是，前面已经说过，如果我们使用了静态加载的dll，这些dll将会比exe更早被系统加载，这时，第一个被加载的dll就会创建一个内存管理器并共享出来，其他模块都会使用这个内存管理器，也就是说，exe的IsMultiThread变量没有影响到应用程序的内存管理器，内存管理器还是认为当前不是多线程环境，因此，没有进行同步，这样就会出现内存错误的情况。
+解决这个问题就是要想办法当处于多线程环境时，让所有的模块的IsMultiThread都设置为True，以保证不管哪个模块实际创建了内存管理器，该内存管理器都知道当前是多线程环境，需要进行同步处理。
+还好，windows提供了一个机制，可以让我们的dll知道应用程序创建了线程。DllMain函数是dll动态链接库的入口函数，delphi把这个入口函数封装起来，提供了一个TDllProc的函数类型和一个该类型的变量DllProc：
+
+TDLLProc = procedure (Reason: Integer); // 定义在system.pas
+// 定义在sysinit.pas:
+var 
+    DllProc: TDllProc;
+
+当系统调用dll的DllMain时，delphi最后会调用DllProc进行处理，DllProc可以被指向我们自己的TDllProc实现。而当进程创建了一个新线程时，操作系统会以Reason=DLL_THREAD_ATTACH为参数调用DllMain，那么delphi最后会以该参数调用DllProc，因此我们只要实现一个新的TDllProc实现ThisDllProc，并将DllProc指向ThisDllProc，而在ThisDllProc中，当收到DLL_THREAD_ATTACH时把IsMultiThread设置为True即可。实现代码如下：
+
+library xxx;
+var
+OldDllProc: TDLLProc;
+procedure ThisDllProc(Reason: Integer);
+begin
+if Reason = DLL_THREAD_ATTACH then
+    IsMultiThread := True;
+if Assigned(OldDllProc) then
+    OldDllProc(Reason);
+end;
+begin
+OldDllProc := DllProc;
+DllProc := ThisDllProc;
+ThisDllProc(DLL_PROCESS_ATTACH);
+六、总结
+本文主要讨论了下面几个问题：
+    1、为什么要使用FastMM
+    2、跨模块传递动态内存变量会出现什么问题，原因是什么
+    3、delphi的内存管理和内存管理器是怎么回事
+     4、为什么要共享内存管理器，delphi和FastMM分别是如何实现内存管理器共享的
+     5、多线程环境下，内存管理器如何实现同步
+     6、多线程环境下，如何跨模块设置IsMultiThread变量以保证内存管理器会进行同步
+
+要正确使用FastMM，在模块开发的时候需要完成以下工作：
+    1、打开编译选项{$define ShareMM}、{$define ShareMMIfLibrary}、{$define AttemptToUseSharedMM}
+    2、将FastMM(4).pas作为每个工程文件的第一个uses单元 
+    3、如果是dll，需要处理以DLL_THREAD_ATTACH为参数的DllMain调用，设置IsMultiThread为True
+
+七、参考文献
+《Windows 程序设计第五版》[美]Charles Petzold著，北京大学出版社
+《Delphi源代码分析》 周爱民 著，电子工业出版社

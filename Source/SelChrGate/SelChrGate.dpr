@@ -1,0 +1,41 @@
+program SelChrGate;
+
+uses
+  Forms,
+  AppMain in 'AppMain.pas' {FormMain},
+  GeneralConfig in 'GeneralConfig.pas' {frmGeneralConfig},
+  PacketRuleConfig in 'PacketRuleConfig.pas' {frmPacketRule},
+  Protocol in 'Protocol.pas',
+  Misc in 'Misc.pas',
+  SyncObj in 'SyncObj.pas',
+  LogManager in 'LogManager.pas',
+  IPAddrFilter in 'IPAddrFilter.pas',
+  ConfigManager in 'ConfigManager.pas',
+  FuncForComm in 'FuncForComm.pas',
+  ClientSession in 'ClientSession.pas',
+  Grobal2 in '..\Common\Grobal2.pas',
+  HUtil32 in '..\Common\HUtil32.pas',
+  MD5 in '..\Common\MD5.pas',
+  EDcode in '..\Common\EDcode.pas',
+  AcceptExWorkedThread in 'Socket\AcceptExWorkedThread.pas',
+  ClientThread in 'Socket\ClientThread.pas',
+  FixedMemoryPool in 'Socket\FixedMemoryPool.pas',
+  IOCPManager in 'Socket\IOCPManager.pas',
+  IOCPTypeDef in 'Socket\IOCPTypeDef.pas',
+  MemPool in 'Socket\MemPool.pas',
+  SendQueue in 'Socket\SendQueue.pas',
+  SHSocket in 'Socket\SHSocket.pas',
+  SimpleClass in 'Socket\SimpleClass.pas',
+  ThreadPool in 'Socket\ThreadPool.pas',
+  WinSock2 in 'Socket\WinSock2.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  //Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TFormMain, FormMain);
+  Application.CreateForm(TfrmGeneralConfig, frmGeneralConfig);
+  Application.CreateForm(TfrmPacketRule, frmPacketRule);
+  Application.Run;
+end.

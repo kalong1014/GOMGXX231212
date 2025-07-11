@@ -1,0 +1,1819 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsUtils" platform="Win32">
+  <set name="TIcsDbcsLeadBytes" alias="System.SysUtils.TSysCharSet" type="AnsiChar" />
+  <variable name="ICS_LEAD_BYTES_932" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="201" />
+  <variable name="ICS_LEAD_BYTES_936_949_950" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="202" />
+  <variable name="ICS_LEAD_BYTES_1361" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="205" />
+  <variable name="ICS_LEAD_BYTES_10001" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="206" />
+  <variable name="ICS_LEAD_BYTES_10002" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="207" />
+  <variable name="ICS_LEAD_BYTES_10003" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="208" />
+  <variable name="ICS_LEAD_BYTES_10008" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="209" />
+  <variable name="ICS_LEAD_BYTES_20000" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="210" />
+  <variable name="ICS_LEAD_BYTES_20001" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="211" />
+  <variable name="ICS_LEAD_BYTES_20002" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="212" />
+  <variable name="ICS_LEAD_BYTES_20003" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="213" />
+  <variable name="ICS_LEAD_BYTES_20004" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="214" />
+  <variable name="ICS_LEAD_BYTES_20005" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="215" />
+  <variable name="ICS_LEAD_BYTES_20261" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="216" />
+  <variable name="ICS_LEAD_BYTES_20932" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="217" />
+  <variable name="ICS_LEAD_BYTES_20936" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="218" />
+  <variable name="ICS_LEAD_BYTES_51949" type="TSysCharSet" visibility="public" file="OverbyteIcsUtils.pas" line="219" />
+  <const name="CP_UTF16" type="Integer" file="OverbyteIcsUtils.pas" line="242">
+    <value>
+      $4B0
+    </value>
+  </const>
+  <const name="CP_UTF16Be" type="Integer" file="OverbyteIcsUtils.pas" line="243">
+    <value>
+      $4B1
+    </value>
+  </const>
+  <const name="CP_UTF32" type="Integer" file="OverbyteIcsUtils.pas" line="244">
+    <value>
+      $2EE0
+    </value>
+  </const>
+  <const name="CP_UTF32Be" type="Integer" file="OverbyteIcsUtils.pas" line="245">
+    <value>
+      $2EE1
+    </value>
+  </const>
+  <const name="cdrAscii" type="TCharsetDetectResult" file="OverbyteIcsUtils.pas" line="249">
+    <value>
+      cdrAscii
+    </value>
+  </const>
+  <const name="cdrUtf8" type="TCharsetDetectResult" file="OverbyteIcsUtils.pas" line="249">
+    <value>
+      cdrUtf8
+    </value>
+  </const>
+  <const name="cdrUnknown" type="TCharsetDetectResult" file="OverbyteIcsUtils.pas" line="249">
+    <value>
+      cdrUnknown
+    </value>
+  </const>
+  <const name="icsNormalizationOther" type="TIcsNormForm" file="OverbyteIcsUtils.pas" line="252">
+    <value>
+      icsNormalizationOther
+    </value>
+  </const>
+  <const name="icsNormalizationC" type="TIcsNormForm" file="OverbyteIcsUtils.pas" line="253">
+    <value>
+      icsNormalizationC
+    </value>
+  </const>
+  <const name="icsNormalizationD" type="TIcsNormForm" file="OverbyteIcsUtils.pas" line="254">
+    <value>
+      icsNormalizationD
+    </value>
+  </const>
+  <const name="icsNormalizationKC" type="TIcsNormForm" file="OverbyteIcsUtils.pas" line="255">
+    <value>
+      icsNormalizationKC
+    </value>
+  </const>
+  <const name="icsNormalizationKD" type="TIcsNormForm" file="OverbyteIcsUtils.pas" line="256">
+    <value>
+      icsNormalizationKD
+    </value>
+  </const>
+  <class name="EIcsStringConvertError" file="OverbyteIcsUtils.pas" line="248">
+    <ancestor name="Exception" namespace="System.SysUtils">
+      <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+      </methodref>
+      <methodref name="Destroy@" visibility="class private" procflags="class destructor noself">
+      </methodref>
+      <methodref name="SetInnerException" visibility="protected">
+      </methodref>
+      <methodref name="SetStackInfo" visibility="protected">
+      </methodref>
+      <methodref name="GetStackTrace" visibility="protected">
+      </methodref>
+      <methodref name="RaisingException" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmt" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmtHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="GetBaseException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="override">
+      </methodref>
+      <propertyref name="BaseException" visibility="public">
+      </propertyref>
+      <propertyref name="HelpContext" visibility="public">
+      </propertyref>
+      <propertyref name="InnerException" visibility="public">
+      </propertyref>
+      <propertyref name="Message" visibility="public">
+      </propertyref>
+      <propertyref name="StackTrace" visibility="public">
+      </propertyref>
+      <propertyref name="StackInfo" visibility="public">
+      </propertyref>
+      <methodref name="RaiseOuterException" visibility="public" procflags="static">
+      </methodref>
+      <methodref name="ThrowOuterException" visibility="public" procflags="static">
+      </methodref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+  </class>
+  <enum name="TCharsetDetectResult" file="OverbyteIcsUtils.pas" line="249">
+    <element value="0" name="cdrAscii" file="OverbyteIcsUtils.pas" line="249" />
+    <element value="1" name="cdrUtf8" file="OverbyteIcsUtils.pas" line="249" />
+    <element value="2" name="cdrUnknown" file="OverbyteIcsUtils.pas" line="249" />
+  </enum>
+  <enum name="TIcsNormForm" file="OverbyteIcsUtils.pas" line="251">
+    <element value="0" name="icsNormalizationOther" file="OverbyteIcsUtils.pas" line="252" />
+    <element value="1" name="icsNormalizationC" file="OverbyteIcsUtils.pas" line="253" />
+    <element value="2" name="icsNormalizationD" file="OverbyteIcsUtils.pas" line="254" />
+    <element value="5" name="icsNormalizationKC" file="OverbyteIcsUtils.pas" line="255" />
+    <element value="6" name="icsNormalizationKD" file="OverbyteIcsUtils.pas" line="256" />
+  </enum>
+  <struct name="TIcsSearchRecW" alias="System.SysUtils.TSearchRec" size="624" file="OverbyteIcsUtils.pas" line="259">
+    <function name="GetTimeStamp" visibility="private" file="System.SysUtils.pas" line="202">
+      <parameters>
+        <retval type="TDateTime" />
+      </parameters>
+    </function>
+    <field name="Time" type="Integer" visibility="public" size="4" offset="0" file="System.SysUtils.pas" line="205" symflags="deprecated platform">
+    </field>
+    <field name="Size" type="Int64" visibility="public" size="8" offset="8" file="System.SysUtils.pas" line="210">
+    </field>
+    <field name="Attr" type="Integer" visibility="public" size="4" offset="16" file="System.SysUtils.pas" line="211">
+    </field>
+    <field name="Name" type="TFileName" visibility="public" size="4" offset="20" file="System.SysUtils.pas" line="212">
+    </field>
+    <field name="ExcludeAttr" type="Integer" visibility="public" size="4" offset="24" file="System.SysUtils.pas" line="213">
+    </field>
+    <field name="FindHandle" type="NativeUInt" visibility="public" size="4" offset="28" file="System.SysUtils.pas" line="215" symflags="platform">
+    </field>
+    <field name="FindData" type="_WIN32_FIND_DATAW" visibility="public" size="592" offset="32" file="System.SysUtils.pas" line="216" symflags="platform">
+    </field>
+    <property name="TimeStamp" visibility="public" read="GetTimeStamp" type="TDateTime" default="0" file="System.SysUtils.pas" line="224">
+    </property>
+  </struct>
+  <struct name="TUnicode_String" size="8" file="OverbyteIcsUtils.pas" line="273">
+    <field name="Length" type="Word" visibility="public" size="2" offset="0" file="OverbyteIcsUtils.pas" line="274" />
+    <field name="MaximumLength" type="Word" visibility="public" size="2" offset="2" file="OverbyteIcsUtils.pas" line="275" />
+    <field name="Buffer" type="PWideChar" visibility="public" size="4" offset="4" file="OverbyteIcsUtils.pas" line="276" />
+  </struct>
+  <pointer name="PUnicode_String" type="TUnicode_String" indircnt="1" file="OverbyteIcsUtils.pas" line="278" />
+  <class name="TIcsFileStreamW" file="OverbyteIcsUtils.pas" line="286">
+    <ancestor name="TFileStream" namespace="System.Classes">
+      <methodref name="Create" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <propertyref name="FileName" visibility="public">
+      </propertyref>
+      <ancestor name="THandleStream" namespace="System.Classes">
+        <methodref name="SetSize" visibility="protected" procflags="overload override">
+        </methodref>
+        <methodref name="SetSize" visibility="protected" procflags="overload override">
+        </methodref>
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Read" visibility="public" procflags="overload override">
+        </methodref>
+        <methodref name="Write" visibility="public" procflags="overload override">
+        </methodref>
+        <methodref name="Read" visibility="public" procflags="overload override">
+        </methodref>
+        <methodref name="Write" visibility="public" procflags="overload override">
+        </methodref>
+        <methodref name="Seek" visibility="public" procflags="overload override">
+        </methodref>
+        <propertyref name="Handle" visibility="public">
+        </propertyref>
+        <ancestor name="TStream" namespace="System.Classes">
+          <methodref name="GetPosition" visibility="private">
+          </methodref>
+          <methodref name="SetPosition" visibility="private">
+          </methodref>
+          <methodref name="SetSize64" visibility="private">
+          </methodref>
+          <methodref name="Skip" visibility="private">
+          </methodref>
+          <methodref name="GetSize" visibility="protected" procflags="virtual">
+          </methodref>
+          <methodref name="SetSize" visibility="protected" procflags="overload virtual" symflags="deprecated">
+          </methodref>
+          <methodref name="SetSize" visibility="protected" procflags="overload virtual">
+          </methodref>
+          <methodref name="Read" visibility="public" procflags="overload virtual">
+          </methodref>
+          <methodref name="Write" visibility="public" procflags="overload virtual">
+          </methodref>
+          <methodref name="Read" visibility="public" procflags="overload virtual">
+          </methodref>
+          <methodref name="Write" visibility="public" procflags="overload virtual">
+          </methodref>
+          <methodref name="Read" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="Write" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="Read64" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Write64" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="Seek32" visibility="public" procflags="overload inline">
+          </methodref>
+          <methodref name="Seek" visibility="public" procflags="overload virtual">
+          </methodref>
+          <methodref name="Seek" visibility="public" procflags="overload virtual">
+          </methodref>
+          <methodref name="ReadBuffer" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBuffer" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBuffer" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="ReadBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteBuffer" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteBuffer" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteBuffer" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="WriteBufferData" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="CopyFrom" visibility="public">
+          </methodref>
+          <methodref name="ReadComponent" visibility="public">
+          </methodref>
+          <methodref name="ReadComponentRes" visibility="public">
+          </methodref>
+          <methodref name="WriteComponent" visibility="public">
+          </methodref>
+          <methodref name="WriteComponentRes" visibility="public">
+          </methodref>
+          <methodref name="WriteDescendent" visibility="public">
+          </methodref>
+          <methodref name="WriteDescendentRes" visibility="public">
+          </methodref>
+          <methodref name="WriteResourceHeader" visibility="public">
+          </methodref>
+          <methodref name="FixupResourceHeader" visibility="public">
+          </methodref>
+          <methodref name="ReadResHeader" visibility="public">
+          </methodref>
+          <propertyref name="Position" visibility="public">
+          </propertyref>
+          <propertyref name="Size" visibility="public">
+          </propertyref>
+          <ancestor name="TObject" namespace="System">
+            <methodref name="Create" visibility="public" procflags="constructor">
+            </methodref>
+            <methodref name="Free" visibility="public">
+            </methodref>
+            <methodref name="DisposeOf" visibility="public" procflags="inline">
+            </methodref>
+            <methodref name="InitInstance" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="CleanupInstance" visibility="public">
+            </methodref>
+            <methodref name="ClassType" visibility="public" procflags="inline">
+            </methodref>
+            <methodref name="ClassName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="ClassNameIs" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="ClassParent" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="ClassInfo" visibility="public" procflags="class inline">
+            </methodref>
+            <methodref name="InstanceSize" visibility="public" procflags="class inline">
+            </methodref>
+            <methodref name="InheritsFrom" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="MethodAddress" visibility="public" procflags="class overload">
+            </methodref>
+            <methodref name="MethodAddress" visibility="public" procflags="class overload">
+            </methodref>
+            <methodref name="MethodName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="QualifiedClassName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="FieldAddress" visibility="public" procflags="overload">
+            </methodref>
+            <methodref name="FieldAddress" visibility="public" procflags="overload">
+            </methodref>
+            <methodref name="GetInterface" visibility="public">
+            </methodref>
+            <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+            </methodref>
+            <methodref name="UnitName" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="UnitScope" visibility="public" procflags="class">
+            </methodref>
+            <methodref name="Equals" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="GetHashCode" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="ToString" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="SafeCallException" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="Dispatch" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="NewInstance" visibility="public" procflags="class virtual">
+            </methodref>
+            <methodref name="FreeInstance" visibility="public" procflags="virtual">
+            </methodref>
+            <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+            </methodref>
+            <methodref name="GetDisposed" visibility="protected" procflags="inline">
+            </methodref>
+            <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+            </methodref>
+            <propertyref name="Disposed" visibility="protected">
+            </propertyref>
+          </ancestor>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FFileName" type="string" visibility="private" size="4" offset="12" file="OverbyteIcsUtils.pas" line="289" />
+      <constructor name="Create" visibility="public" file="OverbyteIcsUtils.pas" line="291">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsUtils.pas" line="292">
+        <parameters>
+          <parameter name="FileName" type="string" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="Rights" type="Cardinal" />
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsUtils.pas" line="293">
+        <parameters>
+          <parameter name="Utf8FileName" type="UTF8String" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+        </parameters>
+      </constructor>
+      <constructor name="Create" visibility="public" file="OverbyteIcsUtils.pas" line="294">
+        <parameters>
+          <parameter name="Utf8FileName" type="UTF8String" paramflags="const" />
+          <parameter name="Mode" type="Word" />
+          <parameter name="Rights" type="Cardinal" />
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="OverbyteIcsUtils.pas" line="295">
+        <parameters>
+        </parameters>
+      </destructor>
+      <property name="FileName" visibility="public" read="FFileName" type="string" file="OverbyteIcsUtils.pas" line="296" />
+    </members>
+  </class>
+  <class name="TIcsIntegerList" file="OverbyteIcsUtils.pas" line="488">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FList" type="TList" visibility="private" size="4" offset="4" file="OverbyteIcsUtils.pas" line="490" />
+      <function name="GetCount" visibility="private" file="OverbyteIcsUtils.pas" line="491">
+        <parameters>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetFirst" visibility="private" file="OverbyteIcsUtils.pas" line="492">
+        <parameters>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetLast" visibility="private" file="OverbyteIcsUtils.pas" line="493">
+        <parameters>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="GetItem" visibility="private" file="OverbyteIcsUtils.pas" line="494">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <procedure name="SetItem" visibility="private" file="OverbyteIcsUtils.pas" line="495">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+          <parameter name="Value" type="Integer" paramflags="const" />
+        </parameters>
+      </procedure>
+      <constructor name="Create" visibility="public" file="OverbyteIcsUtils.pas" line="497">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="OverbyteIcsUtils.pas" line="498">
+        <parameters>
+        </parameters>
+      </destructor>
+      <function name="IndexOf" visibility="public" file="OverbyteIcsUtils.pas" line="499">
+        <parameters>
+          <parameter name="Item" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <function name="Add" visibility="public" procflags="virtual" file="OverbyteIcsUtils.pas" line="500">
+        <parameters>
+          <parameter name="Item" type="Integer" />
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <procedure name="Assign" visibility="public" procflags="virtual" file="OverbyteIcsUtils.pas" line="501">
+        <parameters>
+          <parameter name="Source" type="TIcsIntegerList" />
+        </parameters>
+      </procedure>
+      <procedure name="Clear" visibility="public" procflags="virtual" file="OverbyteIcsUtils.pas" line="502">
+      </procedure>
+      <procedure name="Delete" visibility="public" procflags="virtual" file="OverbyteIcsUtils.pas" line="503">
+        <parameters>
+          <parameter name="Index" type="Integer" />
+        </parameters>
+      </procedure>
+      <property name="Count" visibility="public" read="GetCount" type="Integer" file="OverbyteIcsUtils.pas" line="504" />
+      <property name="First" visibility="public" read="GetFirst" type="Integer" file="OverbyteIcsUtils.pas" line="505" />
+      <property name="Last" visibility="public" read="GetLast" type="Integer" file="OverbyteIcsUtils.pas" line="506" />
+      <property name="Items[Index]" visibility="public" read="GetItem" write="SetItem" type="Integer" file="OverbyteIcsUtils.pas" line="507" />
+    </members>
+  </class>
+  <function name="IcsGetDefaultWindowsUnicodeChar" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="639">
+    <parameters>
+      <parameter name="CodePage" type="Cardinal" />
+      <retval type="Char" />
+    </parameters>
+  </function>
+  <function name="IcsGetDefaultWindowsAnsiChar" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="658">
+    <parameters>
+      <parameter name="CodePage" type="Cardinal" />
+      <retval type="AnsiChar" />
+    </parameters>
+  </function>
+  <function name="IcsWcToMb" visibility="public" file="OverbyteIcsUtils.pas" line="676">
+    <parameters>
+      <parameter name="CodePage" type="Cardinal" />
+      <parameter name="Flags" type="Cardinal" />
+      <parameter name="WStr" type="PWideChar" />
+      <parameter name="WStrLen" type="Integer" />
+      <parameter name="MbStr" type="PAnsiChar" />
+      <parameter name="MbStrLen" type="Integer" />
+      <parameter name="DefaultChar" type="PAnsiChar" />
+      <parameter name="UsedDefaultChar" type="PLongBool" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsMbToWc" visibility="public" file="OverbyteIcsUtils.pas" line="685">
+    <parameters>
+      <parameter name="CodePage" type="Cardinal" />
+      <parameter name="Flags" type="Cardinal" />
+      <parameter name="MbStr" type="PAnsiChar" />
+      <parameter name="MbStrLen" type="Integer" />
+      <parameter name="WStr" type="PWideChar" />
+      <parameter name="WStrLen" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <procedure name="IcsGetAcp" visibility="public" file="OverbyteIcsUtils.pas" line="962">
+    <parameters>
+      <parameter name="CodePage" type="Cardinal" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="IcsIsDBCSCodePage" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="975">
+    <parameters>
+      <parameter name="CodePage" type="Cardinal" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsIsDBCSLeadByte" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="1012">
+    <parameters>
+      <parameter name="Ch" type="AnsiChar" />
+      <parameter name="CodePage" type="Cardinal" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsIsMBCSCodePage" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="1041">
+    <parameters>
+      <parameter name="CodePage" type="Cardinal" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsIsSBCSCodePage" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="1082">
+    <parameters>
+      <parameter name="CodePage" type="Cardinal" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsUsAscii" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="1214">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsUsAscii" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="1228">
+    <parameters>
+      <parameter name="Str" type="string" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="UnicodeToUsAscii" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="1245">
+    <parameters>
+      <parameter name="Str" type="string" paramflags="const" />
+      <parameter name="FailCh" type="AnsiChar" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="UnicodeToUsAscii" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="1262">
+    <parameters>
+      <parameter name="Str" type="string" paramflags="const" />
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="UnicodeToAnsi" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="1270">
+    <parameters>
+      <parameter name="Str" type="string" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <parameter name="SetCodePage" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="UnicodeToAnsi" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="1296">
+    <parameters>
+      <parameter name="Str" type="string" paramflags="const" />
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="AnsiToUnicode" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="1303">
+    <parameters>
+      <parameter name="Str" type="PAnsiChar" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="UnicodeToAnsi" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="1331">
+    <parameters>
+      <parameter name="Str" type="PWideChar" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <parameter name="SetCodePage" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="AnsiToUnicode" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="1363">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="AnsiToUnicode" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="1386">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="UsAsciiToUnicode" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="1393">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <parameter name="FailCh" type="AnsiChar" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="UsAsciiToUnicode" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="1411">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsSwap16" visibility="public" file="OverbyteIcsUtils.pas" line="1418">
+    <parameters>
+      <parameter name="Value" type="Word" />
+      <retval type="Word" />
+    </parameters>
+  </function>
+  <procedure name="IcsSwap16Buf" visibility="public" file="OverbyteIcsUtils.pas" line="1433">
+    <parameters>
+      <parameter name="Src" type="PWORD" />
+      <parameter name="Dst" type="PWORD" />
+      <parameter name="WordCount" type="Integer" />
+    </parameters>
+  </procedure>
+  <function name="IcsSwap32" visibility="public" file="OverbyteIcsUtils.pas" line="1536">
+    <parameters>
+      <parameter name="Value" type="Cardinal" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <procedure name="IcsSwap32Buf" visibility="public" file="OverbyteIcsUtils.pas" line="1552">
+    <parameters>
+      <parameter name="Src" type="PLongWord" />
+      <parameter name="Dst" type="PLongWord" />
+      <parameter name="LongWordCount" type="Integer" />
+    </parameters>
+  </procedure>
+  <function name="IcsSwap64" visibility="public" file="OverbyteIcsUtils.pas" line="1627">
+    <parameters>
+      <parameter name="Value" type="Int64" />
+      <retval type="Int64" />
+    </parameters>
+  </function>
+  <procedure name="IcsSwap64Buf" visibility="public" file="OverbyteIcsUtils.pas" line="1655">
+    <parameters>
+      <parameter name="Src" type="PInt64" />
+      <parameter name="Dst" type="PInt64" />
+      <parameter name="QuadWordCount" type="Integer" />
+    </parameters>
+  </procedure>
+  <function name="IcsGetWideCharCount" visibility="public" file="OverbyteIcsUtils.pas" line="1736">
+    <parameters>
+      <parameter name="Buffer" paramflags="const" />
+      <parameter name="BufferSize" type="Integer" />
+      <parameter name="BufferCodePage" type="Cardinal" />
+      <parameter name="InvalidEndByteCount" type="Integer" paramflags="out" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsGetWideChars" visibility="public" file="OverbyteIcsUtils.pas" line="1853">
+    <parameters>
+      <parameter name="Buffer" paramflags="const" />
+      <parameter name="BufferSize" type="Integer" />
+      <parameter name="BufferCodePage" type="Cardinal" />
+      <parameter name="Chars" type="PWideChar" />
+      <parameter name="CharCount" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsBufferToUnicode" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="1918">
+    <parameters>
+      <parameter name="Buffer" paramflags="const" />
+      <parameter name="BufferSize" type="Integer" />
+      <parameter name="BufferCodePage" type="Cardinal" />
+      <parameter name="FailedByteCount" type="Integer" paramflags="out" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsBufferToUnicode" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="1939">
+    <parameters>
+      <parameter name="Buffer" paramflags="const" />
+      <parameter name="BufferSize" type="Integer" />
+      <parameter name="BufferCodePage" type="Cardinal" />
+      <parameter name="RaiseFailedBytes" type="Boolean">
+        <value>
+          False
+        </value>
+      </parameter>
+      <retval type="string" />
+    </parameters>
+  </function>
+  <procedure name="IcsAppendStr" visibility="public" file="OverbyteIcsUtils.pas" line="1953">
+    <parameters>
+      <parameter name="Dest" type="RawByteString" paramflags="var" />
+      <parameter name="Src" type="RawByteString" paramflags="const" />
+    </parameters>
+  </procedure>
+  <function name="IcsGetBomBytes" visibility="public" file="OverbyteIcsUtils.pas" line="1965">
+    <parameters>
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="TBytes" />
+    </parameters>
+  </function>
+  <function name="IcsGetBufferCodepage" visibility="public" file="OverbyteIcsUtils.pas" line="2011">
+    <parameters>
+      <parameter name="Buf" type="PAnsiChar" />
+      <parameter name="ByteCount" type="Integer" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="StreamWriteString" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2035">
+    <parameters>
+      <parameter name="AStream" type="TStream" />
+      <parameter name="Str" type="PWideChar" />
+      <parameter name="cLen" type="Integer" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <parameter name="WriteBOM" type="Boolean" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="StreamWriteString" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2134">
+    <parameters>
+      <parameter name="AStream" type="TStream" />
+      <parameter name="Str" type="PWideChar" />
+      <parameter name="cLen" type="Integer" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="StreamWriteString" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2142">
+    <parameters>
+      <parameter name="AStream" type="TStream" />
+      <parameter name="Str" type="string" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <parameter name="WriteBOM" type="Boolean" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="StreamWriteString" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2150">
+    <parameters>
+      <parameter name="AStream" type="TStream" />
+      <parameter name="Str" type="string" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="StreamWriteString" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2159">
+    <parameters>
+      <parameter name="AStream" type="TStream" />
+      <parameter name="Str" type="string" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="atoi" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2184">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="atoi" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2223">
+    <parameters>
+      <parameter name="Str" type="string" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="atoi64" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2263">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <retval type="Int64" />
+    </parameters>
+  </function>
+  <function name="atoi64" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2302">
+    <parameters>
+      <parameter name="Str" type="string" paramflags="const" />
+      <retval type="Int64" />
+    </parameters>
+  </function>
+  <function name="IcsCalcTickDiff" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="2324">
+    <parameters>
+      <parameter name="StartTick" type="Cardinal" paramflags="const" />
+      <parameter name="EndTick" type="Cardinal" paramflags="const" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="StringToUtf8" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2334">
+    <parameters>
+      <parameter name="Str" type="string" paramflags="const" />
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="ConvertCodepage" visibility="public" file="OverbyteIcsUtils.pas" line="2342">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <parameter name="SrcCodePage" type="Cardinal" />
+      <parameter name="DstCodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="StringToUtf8" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2394">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="Utf8ToStringW" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="2401">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="Utf8ToStringA" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="2408">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <retval type="AnsiString" />
+    </parameters>
+  </function>
+  <function name="CheckUnicodeToAnsi" visibility="public" file="OverbyteIcsUtils.pas" line="2415">
+    <parameters>
+      <parameter name="Str" type="string" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsUtf8Size" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="2440">
+    <parameters>
+      <parameter name="LeadByte" type="Byte" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IsUtf8LeadByte" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="2454">
+    <parameters>
+      <parameter name="B" type="Byte" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsUtf8TrailByte" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="2461">
+    <parameters>
+      <parameter name="B" type="Byte" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="CharsetDetect" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2477">
+    <parameters>
+      <parameter name="Buf" type="Pointer" paramflags="const" />
+      <parameter name="Len" type="Integer" />
+      <retval type="TCharsetDetectResult" />
+    </parameters>
+  </function>
+  <function name="CharsetDetect" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2564">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <retval type="TCharsetDetectResult" />
+    </parameters>
+  </function>
+  <function name="IsUtf8Valid" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2571">
+    <parameters>
+      <parameter name="Str" type="RawByteString" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsUtf8Valid" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2578">
+    <parameters>
+      <parameter name="Buf" type="Pointer" paramflags="const" />
+      <parameter name="Len" type="Integer" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsCharPrevUtf8" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="2588">
+    <parameters>
+      <parameter name="Start" type="PAnsiChar" paramflags="const" />
+      <parameter name="Current" type="PAnsiChar" paramflags="const" />
+      <retval type="PAnsiChar" />
+    </parameters>
+  </function>
+  <function name="IcsCharNextUtf8" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="2605">
+    <parameters>
+      <parameter name="Str" type="PAnsiChar" paramflags="const" />
+      <retval type="PAnsiChar" />
+    </parameters>
+  </function>
+  <function name="IcsStrNextChar" visibility="public" file="OverbyteIcsUtils.pas" line="2625">
+    <parameters>
+      <parameter name="Str" type="PAnsiChar" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <retval type="PAnsiChar" />
+    </parameters>
+  </function>
+  <function name="IcsStrPrevChar" visibility="public" file="OverbyteIcsUtils.pas" line="2661">
+    <parameters>
+      <parameter name="Start" type="PAnsiChar" paramflags="const" />
+      <parameter name="Current" type="PAnsiChar" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <retval type="PAnsiChar" />
+    </parameters>
+  </function>
+  <function name="IcsStrCharLength" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2682">
+    <parameters>
+      <parameter name="Str" type="PAnsiChar" paramflags="const" />
+      <parameter name="ACodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsNextCharIndex" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2690">
+    <parameters>
+      <parameter name="S" type="RawByteString" paramflags="const" />
+      <parameter name="Index" type="Integer" />
+      <parameter name="ACodePage" type="Cardinal">
+        <value>
+          $0
+        </value>
+      </parameter>
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="XDigit" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2701">
+    <parameters>
+      <parameter name="Ch" type="Char" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="XDigit" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2712">
+    <parameters>
+      <parameter name="Ch" type="AnsiChar" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="XDigit2" visibility="public" procflags="inline" file="OverbyteIcsUtils.pas" line="2723">
+    <parameters>
+      <parameter name="S" type="PWideChar" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IsXDigit" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2730">
+    <parameters>
+      <parameter name="Ch" type="Char" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsXDigit" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2739">
+    <parameters>
+      <parameter name="Ch" type="AnsiChar" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="htoin" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2748">
+    <parameters>
+      <parameter name="Value" type="PWideChar" />
+      <parameter name="Len" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="htoin" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2764">
+    <parameters>
+      <parameter name="Value" type="PAnsiChar" />
+      <parameter name="Len" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="htoi2" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2780">
+    <parameters>
+      <parameter name="value" type="PWideChar" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="htoi2" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2787">
+    <parameters>
+      <parameter name="value" type="PAnsiChar" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsBufferToHex" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2798">
+    <parameters>
+      <parameter name="Buf" paramflags="const" />
+      <parameter name="Size" type="Integer" />
+      <parameter name="Separator" type="Char" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsBufferToHex" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2823">
+    <parameters>
+      <parameter name="Buf" paramflags="const" />
+      <parameter name="Size" type="Integer" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IsCharInSysCharSet" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2846">
+    <parameters>
+      <parameter name="Ch" type="Char" />
+      <parameter name="ASet" type="TSysCharSet" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsCharInSysCharSet" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2853">
+    <parameters>
+      <parameter name="Ch" type="AnsiChar" />
+      <parameter name="ASet" type="TSysCharSet" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsDigit" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2860">
+    <parameters>
+      <parameter name="Ch" type="Char" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsDigit" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2867">
+    <parameters>
+      <parameter name="Ch" type="AnsiChar" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsSpace" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2874">
+    <parameters>
+      <parameter name="Ch" type="Char" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsSpace" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2881">
+    <parameters>
+      <parameter name="Ch" type="AnsiChar" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsCRLF" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2888">
+    <parameters>
+      <parameter name="Ch" type="Char" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsCRLF" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2895">
+    <parameters>
+      <parameter name="Ch" type="AnsiChar" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsSpaceOrCRLF" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2902">
+    <parameters>
+      <parameter name="Ch" type="Char" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IsSpaceOrCRLF" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="2909">
+    <parameters>
+      <parameter name="Ch" type="AnsiChar" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="stpblk" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2917">
+    <parameters>
+      <parameter name="PValue" type="PWideChar" />
+      <retval type="PWideChar" />
+    </parameters>
+  </function>
+  <function name="stpblk" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="2926">
+    <parameters>
+      <parameter name="PValue" type="PAnsiChar" />
+      <retval type="PAnsiChar" />
+    </parameters>
+  </function>
+  <procedure name="IcsNameThreadForDebugging" visibility="public" file="OverbyteIcsUtils.pas" line="2935">
+    <parameters>
+      <parameter name="AThreadName" type="AnsiString" />
+      <parameter name="AThreadID" type="Cardinal">
+        <value>
+          $FFFFFFFF
+        </value>
+      </parameter>
+    </parameters>
+  </procedure>
+  <function name="IcsNormalizeString" visibility="public" file="OverbyteIcsUtils.pas" line="2968">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <parameter name="NormForm" type="TIcsNormForm" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsCryptGenRandom" visibility="public" file="OverbyteIcsUtils.pas" line="3068">
+    <parameters>
+      <parameter name="Buf" paramflags="var" />
+      <parameter name="BufSize" type="Integer" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsRandomInt" visibility="public" file="OverbyteIcsUtils.pas" line="3156">
+    <parameters>
+      <parameter name="ARange" type="Integer" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsFileUtcModified" visibility="public" file="OverbyteIcsUtils.pas" line="3173">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="TDateTime" />
+    </parameters>
+  </function>
+  <procedure name="IcsFindCloseW" visibility="public" file="OverbyteIcsUtils.pas" line="3197">
+    <parameters>
+      <parameter name="F" type="TSearchRec" paramflags="var" />
+    </parameters>
+  </procedure>
+  <function name="IcsFindNextW" visibility="public" file="OverbyteIcsUtils.pas" line="3236">
+    <parameters>
+      <parameter name="F" type="TSearchRec" paramflags="var" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsFindFirstW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3251">
+    <parameters>
+      <parameter name="Path" type="string" paramflags="const" />
+      <parameter name="Attr" type="Integer" />
+      <parameter name="F" type="TSearchRec" paramflags="var" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsFindFirstW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3273">
+    <parameters>
+      <parameter name="Utf8Path" type="UTF8String" paramflags="const" />
+      <parameter name="Attr" type="Integer" />
+      <parameter name="F" type="TSearchRec" paramflags="var" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsCreateDirW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3280">
+    <parameters>
+      <parameter name="Dir" type="string" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsCreateDirW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3291">
+    <parameters>
+      <parameter name="Utf8Dir" type="UTF8String" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsForceDirectoriesW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3302">
+    <parameters>
+      <parameter name="Dir" type="string" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsForceDirectoriesW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3326">
+    <parameters>
+      <parameter name="Utf8Dir" type="UTF8String" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsDirExistsW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3337">
+    <parameters>
+      <parameter name="FileName" type="PWideChar" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsDirExistsW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3353">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsDirExistsW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3364">
+    <parameters>
+      <parameter name="Utf8FileName" type="UTF8String" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="RtlCompareUnicodeString" visibility="public" callconv="stdcall" file="OverbyteIcsUtils.pas" line="3377">
+    <parameters>
+      <parameter name="String1" type="PUnicode_String" />
+      <parameter name="String2" type="PUnicode_String" />
+      <parameter name="CaseInsensitive" type="Boolean" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsStrCompOrdinalW" visibility="public" file="OverbyteIcsUtils.pas" line="3400">
+    <parameters>
+      <parameter name="Str1" type="PWideChar" />
+      <parameter name="Str1Length" type="Integer" />
+      <parameter name="Str2" type="PWideChar" />
+      <parameter name="Str2Length" type="Integer" />
+      <parameter name="IgnoreCase" type="Boolean" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsAnsiCompareFileNameW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3437">
+    <parameters>
+      <parameter name="S1" type="string" paramflags="const" />
+      <parameter name="S2" type="string" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsAnsiCompareFileNameW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3449">
+    <parameters>
+      <parameter name="Utf8S1" type="UTF8String" paramflags="const" />
+      <parameter name="Utf8S2" type="UTF8String" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsStrAllocW" visibility="public" file="OverbyteIcsUtils.pas" line="3457">
+    <parameters>
+      <parameter name="Len" type="Cardinal" />
+      <retval type="PWideChar" />
+    </parameters>
+  </function>
+  <function name="IcsStrScanW" visibility="public" file="OverbyteIcsUtils.pas" line="3468">
+    <parameters>
+      <parameter name="Str" type="PWideChar" paramflags="const" />
+      <parameter name="Ch" type="Char" />
+      <retval type="PWideChar" />
+    </parameters>
+  </function>
+  <function name="IcsExtractFilePathW" visibility="public" file="OverbyteIcsUtils.pas" line="3509">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsExtractFileDirW" visibility="public" file="OverbyteIcsUtils.pas" line="3524">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsExtractFileDriveW" visibility="public" file="OverbyteIcsUtils.pas" line="3542">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsExtractFileNameW" visibility="public" file="OverbyteIcsUtils.pas" line="3577">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsExtractFileExtW" visibility="public" file="OverbyteIcsUtils.pas" line="3592">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsExtractNameOnlyW" visibility="public" file="OverbyteIcsUtils.pas" line="3612">
+    <parameters>
+      <parameter name="FileName" type="string" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsChangeFileExtW" visibility="public" file="OverbyteIcsUtils.pas" line="3632">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <parameter name="Extension" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsStrLenW" visibility="public" file="OverbyteIcsUtils.pas" line="3650">
+    <parameters>
+      <parameter name="Str" type="PWideChar" />
+      <retval type="Cardinal" />
+    </parameters>
+  </function>
+  <function name="IcsExpandFileNameW" visibility="public" file="OverbyteIcsUtils.pas" line="3666">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsIncludeTrailingPathDelimiterW" visibility="public" file="OverbyteIcsUtils.pas" line="3687">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsExcludeTrailingPathDelimiterW" visibility="public" file="OverbyteIcsUtils.pas" line="3701">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsDeleteFileW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3714">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsExtractLastDir" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3724">
+    <parameters>
+      <parameter name="Path" type="RawByteString" paramflags="const" />
+      <retval type="RawByteString" />
+    </parameters>
+  </function>
+  <function name="IcsExtractLastDir" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3741">
+    <parameters>
+      <parameter name="Path" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsDeleteFileW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3758">
+    <parameters>
+      <parameter name="Utf8FileName" type="UTF8String" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsFileGetAttrW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3770">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsFileGetAttrW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3781">
+    <parameters>
+      <parameter name="Utf8FileName" type="UTF8String" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsFileSetAttrW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3792">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <parameter name="Attr" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsFileSetAttrW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3805">
+    <parameters>
+      <parameter name="Utf8FileName" type="UTF8String" paramflags="const" />
+      <parameter name="Attr" type="Integer" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsFileCreateW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3820">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="NativeUInt" />
+    </parameters>
+  </function>
+  <function name="IcsFileCreateW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3834">
+    <parameters>
+      <parameter name="Utf8FileName" type="UTF8String" paramflags="const" />
+      <retval type="NativeUInt" />
+    </parameters>
+  </function>
+  <function name="IcsFileCreateW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3846">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <parameter name="Rights" type="Cardinal" />
+      <retval type="NativeUInt" />
+    </parameters>
+  </function>
+  <function name="IcsFileCreateW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3858">
+    <parameters>
+      <parameter name="Utf8FileName" type="UTF8String" paramflags="const" />
+      <parameter name="Rights" type="Cardinal" />
+      <retval type="NativeUInt" />
+    </parameters>
+  </function>
+  <function name="IcsFileOpenW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3870">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <parameter name="Mode" type="Cardinal" />
+      <retval type="NativeUInt" />
+    </parameters>
+  </function>
+  <function name="IcsFileOpenW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3901">
+    <parameters>
+      <parameter name="Utf8FileName" type="UTF8String" paramflags="const" />
+      <parameter name="Mode" type="Cardinal" />
+      <retval type="NativeUInt" />
+    </parameters>
+  </function>
+  <function name="IcsRemoveDirW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3912">
+    <parameters>
+      <parameter name="Dir" type="string" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsRemoveDirW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3923">
+    <parameters>
+      <parameter name="Utf8Dir" type="UTF8String" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsRenameFileW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3934">
+    <parameters>
+      <parameter name="OldName" type="string" paramflags="const" />
+      <parameter name="NewName" type="string" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsRenameFileW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3945">
+    <parameters>
+      <parameter name="Utf8OldName" type="UTF8String" paramflags="const" />
+      <parameter name="Utf8NewName" type="UTF8String" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsFileAgeW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3957">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsFileAgeW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="3984">
+    <parameters>
+      <parameter name="Utf8FileName" type="UTF8String" paramflags="const" />
+      <retval type="Integer" />
+    </parameters>
+  </function>
+  <function name="IcsFileExistsW" visibility="public" procflags="overload" file="OverbyteIcsUtils.pas" line="3995">
+    <parameters>
+      <parameter name="FileName" type="string" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsFileExistsW" visibility="public" procflags="overload inline" file="OverbyteIcsUtils.pas" line="4006">
+    <parameters>
+      <parameter name="Utf8FileName" type="UTF8String" paramflags="const" />
+      <retval type="Boolean" />
+    </parameters>
+  </function>
+  <function name="IcsAnsiLowerCaseW" visibility="public" file="OverbyteIcsUtils.pas" line="4017">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="IcsAnsiUpperCaseW" visibility="public" file="OverbyteIcsUtils.pas" line="4033">
+    <parameters>
+      <parameter name="S" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+</namespace>

@@ -1,0 +1,79 @@
+unit IDFilter;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, WinSock;
+
+var
+  g_BlockIDList             : TStringList;
+
+
+procedure LoadBlockIDList();
+procedure SaveBlockIDList();
+function IsBlockID(const sID: string): Boolean;
+
+implementation
+
+uses
+  ConfigManager, HUtil32, Misc, Protocol, LogManager;
+
+procedure LoadBlockIDList();
+var
+  i, nIP                    : Integer;
+  sList                     : TStringList;
+begin
+  sList := TStringList.Create;
+  if not FileExists(_STR_BLOCK_ID_FILE) then
+    sList.SaveToFile(_STR_BLOCK_ID_FILE);
+
+  g_BlockIDList.Clear;
+  sList.LoadFromFile(_STR_BLOCK_ID_FILE);
+  for i := 0 to sList.Count - 1 do begin
+    if sList[i] = '' then
+      Continue;
+    nIP := inet_addr(PChar(sList[i]));
+    if nIP = INADDR_NONE then  Continue;
+    g_BlockIDList.Add(sList[i]);
+  end;
+  sList.Free;
+end;
+
+procedure SaveBlockIDList();
+var
+  i                         : Integer;
+  sList                     : TStringList;
+begin
+  sList := TStringList.Create;
+  for i := 0 to g_BlockIDList.Count - 1 do begin
+    if g_BlockIDList[i] = '' then
+      Continue;
+    sList.Add(g_BlockIDList[i]);
+  end;
+  sList.SaveToFile(_STR_BLOCK_ID_FILE);
+  sList.Free;
+end;
+
+function IsBlockID(const sID: string): Boolean;
+var
+  i                         : Integer;
+begin
+  Result := False;
+  if g_BlockIDList.Count > 0 then begin
+    for i := 0 to g_BlockIDList.Count - 1 do begin
+      if CompareText(g_BlockIDList[i], sID) = 0 then begin
+        Result := True;
+        Exit;
+      end;
+    end;
+  end;
+end;
+
+initialization
+  g_BlockIDList := TStringList.Create;
+
+
+finalization
+  g_BlockIDList.Free;
+
+end.

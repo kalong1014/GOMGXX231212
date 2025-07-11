@@ -1,0 +1,1507 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsWndControl" platform="Win32">
+  <const name="TIcsWndControlVersion" type="Integer" file="OverbyteIcsWndControl.pas" line="141">
+    <value>
+      $75
+    </value>
+  </const>
+  <variable name="CopyRight" type="string" visibility="public" file="OverbyteIcsWndControl.pas" line="142" />
+  <const name="IcsWndControlWindowClassName" type="string" file="OverbyteIcsWndControl.pas" line="144">
+    <value>
+      IcsWndControlWindowClass
+    </value>
+  </const>
+  <const name="fehNone" type="TIcsFinalBgExceptionHandling" file="OverbyteIcsWndControl.pas" line="153">
+    <value>
+      fehNone
+    </value>
+  </const>
+  <const name="fehAppHandleException" type="TIcsFinalBgExceptionHandling" file="OverbyteIcsWndControl.pas" line="153">
+    <value>
+      fehAppHandleException
+    </value>
+  </const>
+  <const name="fehShowException" type="TIcsFinalBgExceptionHandling" file="OverbyteIcsWndControl.pas" line="154">
+    <value>
+      fehShowException
+    </value>
+  </const>
+  <enum name="TIcsFinalBgExceptionHandling" file="OverbyteIcsWndControl.pas" line="153">
+    <element value="0" name="fehNone" file="OverbyteIcsWndControl.pas" line="153" />
+    <element value="1" name="fehAppHandleException" file="OverbyteIcsWndControl.pas" line="153" />
+    <element value="2" name="fehShowException" file="OverbyteIcsWndControl.pas" line="154" />
+  </enum>
+  <class name="EIcsException" file="OverbyteIcsWndControl.pas" line="157">
+    <ancestor name="Exception" namespace="System.SysUtils">
+      <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+      </methodref>
+      <methodref name="Destroy@" visibility="class private" procflags="class destructor noself">
+      </methodref>
+      <methodref name="SetInnerException" visibility="protected">
+      </methodref>
+      <methodref name="SetStackInfo" visibility="protected">
+      </methodref>
+      <methodref name="GetStackTrace" visibility="protected">
+      </methodref>
+      <methodref name="RaisingException" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmt" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmtHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="GetBaseException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="override">
+      </methodref>
+      <propertyref name="BaseException" visibility="public">
+      </propertyref>
+      <propertyref name="HelpContext" visibility="public">
+      </propertyref>
+      <propertyref name="InnerException" visibility="public">
+      </propertyref>
+      <propertyref name="Message" visibility="public">
+      </propertyref>
+      <propertyref name="StackTrace" visibility="public">
+      </propertyref>
+      <propertyref name="StackInfo" visibility="public">
+      </propertyref>
+      <methodref name="RaiseOuterException" visibility="public" procflags="static">
+      </methodref>
+      <methodref name="ThrowOuterException" visibility="public" procflags="static">
+      </methodref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+  </class>
+  <class name="EIcsTimerException" file="OverbyteIcsWndControl.pas" line="162">
+    <ancestor name="Exception" namespace="System.SysUtils">
+      <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+      </methodref>
+      <methodref name="Destroy@" visibility="class private" procflags="class destructor noself">
+      </methodref>
+      <methodref name="SetInnerException" visibility="protected">
+      </methodref>
+      <methodref name="SetStackInfo" visibility="protected">
+      </methodref>
+      <methodref name="GetStackTrace" visibility="protected">
+      </methodref>
+      <methodref name="RaisingException" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmt" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateRes" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmt" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateFmtHelp" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="CreateResFmtHelp" visibility="public" procflags="constructor overload">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="GetBaseException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="override">
+      </methodref>
+      <propertyref name="BaseException" visibility="public">
+      </propertyref>
+      <propertyref name="HelpContext" visibility="public">
+      </propertyref>
+      <propertyref name="InnerException" visibility="public">
+      </propertyref>
+      <propertyref name="Message" visibility="public">
+      </propertyref>
+      <propertyref name="StackTrace" visibility="public">
+      </propertyref>
+      <propertyref name="StackInfo" visibility="public">
+      </propertyref>
+      <methodref name="RaiseOuterException" visibility="public" procflags="static">
+      </methodref>
+      <methodref name="ThrowOuterException" visibility="public" procflags="static">
+      </methodref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+  </class>
+  <class name="TIcsTimer" file="OverbyteIcsWndControl.pas" line="163">
+    <ancestor name="TComponent" namespace="System.Classes">
+      <interfaces>
+        <implements name="IInterfaceComponentReference" />
+        <implements name="IInterface" />
+      </interfaces>
+      <methodref name="GetComObject" visibility="private">
+      </methodref>
+      <methodref name="GetComponent" visibility="private">
+      </methodref>
+      <methodref name="GetComponentCount" visibility="private">
+      </methodref>
+      <methodref name="GetComponentIndex" visibility="private">
+      </methodref>
+      <methodref name="Insert" visibility="private">
+      </methodref>
+      <methodref name="ReadLeft" visibility="private">
+      </methodref>
+      <methodref name="ReadTop" visibility="private">
+      </methodref>
+      <methodref name="Remove" visibility="private">
+      </methodref>
+      <methodref name="RemoveNotification" visibility="private">
+      </methodref>
+      <methodref name="SetComponentIndex" visibility="private">
+      </methodref>
+      <methodref name="SetReference" visibility="private">
+      </methodref>
+      <methodref name="WriteLeft" visibility="private">
+      </methodref>
+      <methodref name="WriteTop" visibility="private">
+      </methodref>
+      <methodref name="IntfGetComponent" visibility="private">
+      </methodref>
+      <methodref name="DoGetDeltaStreams" visibility="private">
+      </methodref>
+      <methodref name="ReadDeltaStream" visibility="private">
+      </methodref>
+      <methodref name="ReadDeltaState" visibility="private">
+      </methodref>
+      <methodref name="FindSortedComponent" visibility="private">
+      </methodref>
+      <methodref name="AddSortedComponent" visibility="private">
+      </methodref>
+      <methodref name="RemoveSortedComponent" visibility="private" procflags="inline">
+      </methodref>
+      <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+      </methodref>
+      <methodref name="AsyncSchedule" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="ChangeName" visibility="protected">
+      </methodref>
+      <methodref name="DefineProperties" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="GetChildren" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="GetChildOwner" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="GetChildParent" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="GetOwner" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="Loaded" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Notification" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="GetDeltaStreams" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="PaletteCreated" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="ReadState" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="CanObserve" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="ObserverAdded" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="GetObservers" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="SetAncestor" visibility="protected">
+      </methodref>
+      <methodref name="SetDesigning" visibility="protected">
+      </methodref>
+      <methodref name="SetInline" visibility="protected">
+      </methodref>
+      <methodref name="SetDesignInstance" visibility="protected">
+      </methodref>
+      <methodref name="SetName" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="SetChildOrder" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="SetParentComponent" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="Updating" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="Updated" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="UpdateRegistry" visibility="protected" procflags="class virtual">
+      </methodref>
+      <methodref name="ValidateRename" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="ValidateContainer" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="ValidateInsert" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="WriteState" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="RemoveFreeNotifications" visibility="protected">
+      </methodref>
+      <methodref name="QueryInterface" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="_AddRef" visibility="protected">
+      </methodref>
+      <methodref name="_Release" visibility="protected">
+      </methodref>
+      <methodref name="GetTypeInfoCount" visibility="protected">
+      </methodref>
+      <methodref name="GetTypeInfo" visibility="protected">
+      </methodref>
+      <methodref name="GetIDsOfNames" visibility="protected">
+      </methodref>
+      <methodref name="Invoke" visibility="protected">
+      </methodref>
+      <eventref name="OnGetDeltaStreams" visibility="protected">
+      </eventref>
+      <methodref name="Create" visibility="public" procflags="constructor virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="EndInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="EndInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="EndFunctionInvoke" visibility="public">
+      </methodref>
+      <methodref name="DestroyComponents" visibility="public">
+      </methodref>
+      <methodref name="Destroying" visibility="public">
+      </methodref>
+      <methodref name="ExecuteAction" visibility="public" procflags="dynamic">
+      </methodref>
+      <methodref name="FindComponent" visibility="public">
+      </methodref>
+      <methodref name="FreeNotification" visibility="public">
+      </methodref>
+      <methodref name="RemoveFreeNotification" visibility="public">
+      </methodref>
+      <methodref name="FreeOnRelease" visibility="public">
+      </methodref>
+      <methodref name="GetEnumerator" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="GetParentComponent" visibility="public" procflags="dynamic">
+      </methodref>
+      <methodref name="GetNamePath" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="HasParent" visibility="public" procflags="dynamic">
+      </methodref>
+      <methodref name="InsertComponent" visibility="public">
+      </methodref>
+      <methodref name="RemoveComponent" visibility="public">
+      </methodref>
+      <methodref name="SetSubComponent" visibility="public">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="UpdateAction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="IsImplementorOf" visibility="public">
+      </methodref>
+      <methodref name="ReferenceInterface" visibility="public">
+      </methodref>
+      <propertyref name="ComObject" visibility="public">
+      </propertyref>
+      <propertyref name="Components" visibility="public">
+      </propertyref>
+      <propertyref name="ComponentCount" visibility="public">
+      </propertyref>
+      <propertyref name="ComponentIndex" visibility="public">
+      </propertyref>
+      <propertyref name="ComponentState" visibility="public">
+      </propertyref>
+      <propertyref name="ComponentStyle" visibility="public">
+      </propertyref>
+      <propertyref name="DesignInfo" visibility="public">
+      </propertyref>
+      <propertyref name="Owner" visibility="public">
+      </propertyref>
+      <propertyref name="VCLComObject" visibility="public">
+      </propertyref>
+      <propertyref name="Observers" visibility="public">
+      </propertyref>
+      <propertyref name="Name" visibility="published">
+      </propertyref>
+      <propertyref name="Tag" visibility="published">
+      </propertyref>
+      <ancestor name="TPersistent" namespace="System.Classes">
+        <methodref name="AssignError" visibility="private">
+        </methodref>
+        <methodref name="AssignTo" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="DefineProperties" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="GetOwner" visibility="protected" procflags="dynamic">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor override">
+        </methodref>
+        <methodref name="Assign" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetNamePath" visibility="public" procflags="dynamic">
+        </methodref>
+        <ancestor name="TObject" namespace="System">
+          <methodref name="Create" visibility="public" procflags="constructor">
+          </methodref>
+          <methodref name="Free" visibility="public">
+          </methodref>
+          <methodref name="DisposeOf" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="InitInstance" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="CleanupInstance" visibility="public">
+          </methodref>
+          <methodref name="ClassType" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="ClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassNameIs" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassParent" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassInfo" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InstanceSize" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InheritsFrom" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="QualifiedClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="GetInterface" visibility="public">
+          </methodref>
+          <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="UnitName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="UnitScope" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="Equals" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="GetHashCode" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="ToString" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="SafeCallException" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Dispatch" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="NewInstance" visibility="public" procflags="class virtual">
+          </methodref>
+          <methodref name="FreeInstance" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+          </methodref>
+          <methodref name="GetDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <propertyref name="Disposed" visibility="protected">
+          </propertyref>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="FUID" type="NativeInt" visibility="protected" size="4" offset="64" file="OverbyteIcsWndControl.pas" line="165" />
+      <field name="FInterval" type="Cardinal" visibility="protected" size="4" offset="68" file="OverbyteIcsWndControl.pas" line="166" />
+      <field name="FEnabled" type="Boolean" visibility="protected" size="1" offset="72" file="OverbyteIcsWndControl.pas" line="167" />
+      <field name="FOnTimer" type="TNotifyEvent" visibility="protected" size="8" offset="80" file="OverbyteIcsWndControl.pas" line="168" />
+      <field name="FLastEvent" type="Cardinal" visibility="protected" size="4" offset="88" file="OverbyteIcsWndControl.pas" line="169" />
+      <field name="FIcsWndControl" type="TIcsWndControl" visibility="protected" size="4" offset="92" file="OverbyteIcsWndControl.pas" line="170" />
+      <procedure name="UpdateTimer" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="175">
+      </procedure>
+      <procedure name="SetInterval" visibility="protected" file="OverbyteIcsWndControl.pas" line="176">
+        <parameters>
+          <parameter name="Value" type="Cardinal" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="SetOnTimer" visibility="protected" file="OverbyteIcsWndControl.pas" line="177">
+        <parameters>
+          <parameter name="Value" type="TNotifyEvent" />
+        </parameters>
+      </procedure>
+      <procedure name="SetEnabled" visibility="protected" file="OverbyteIcsWndControl.pas" line="178">
+        <parameters>
+          <parameter name="Value" type="Boolean" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="CheckWindowAvailable" visibility="protected" file="OverbyteIcsWndControl.pas" line="179">
+      </procedure>
+      <procedure name="WMTimer" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="180">
+        <parameters>
+          <parameter name="msg" type="TMessage" paramflags="var" />
+        </parameters>
+      </procedure>
+      <constructor name="Create" visibility="public" file="OverbyteIcsWndControl.pas" line="182">
+        <parameters>
+          <parameter name="AOwner" type="TIcsWndControl" />
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="OverbyteIcsWndControl.pas" line="183">
+        <parameters>
+        </parameters>
+      </destructor>
+      <property name="IcsWndControl" visibility="public" read="FIcsWndControl" type="TIcsWndControl" file="OverbyteIcsWndControl.pas" line="184" />
+      <property name="Enabled" visibility="published" read="FEnabled" write="SetEnabled" type="Boolean" default="1" file="OverbyteIcsWndControl.pas" line="186" />
+      <property name="Interval" visibility="published" read="FInterval" write="SetInterval" type="Cardinal" default="1000" file="OverbyteIcsWndControl.pas" line="187" />
+      <event name="OnTimer" visibility="published" read="FOnTimer" write="SetOnTimer" type="TNotifyEvent" file="OverbyteIcsWndControl.pas" line="188" />
+    </members>
+  </class>
+  <class name="TIcsWndControl" file="OverbyteIcsWndControl.pas" line="205">
+    <ancestor name="TComponent" namespace="System.Classes">
+      <interfaces>
+        <implements name="IInterfaceComponentReference" />
+        <implements name="IInterface" />
+      </interfaces>
+      <methodref name="GetComObject" visibility="private">
+      </methodref>
+      <methodref name="GetComponent" visibility="private">
+      </methodref>
+      <methodref name="GetComponentCount" visibility="private">
+      </methodref>
+      <methodref name="GetComponentIndex" visibility="private">
+      </methodref>
+      <methodref name="Insert" visibility="private">
+      </methodref>
+      <methodref name="ReadLeft" visibility="private">
+      </methodref>
+      <methodref name="ReadTop" visibility="private">
+      </methodref>
+      <methodref name="Remove" visibility="private">
+      </methodref>
+      <methodref name="RemoveNotification" visibility="private">
+      </methodref>
+      <methodref name="SetComponentIndex" visibility="private">
+      </methodref>
+      <methodref name="SetReference" visibility="private">
+      </methodref>
+      <methodref name="WriteLeft" visibility="private">
+      </methodref>
+      <methodref name="WriteTop" visibility="private">
+      </methodref>
+      <methodref name="IntfGetComponent" visibility="private">
+      </methodref>
+      <methodref name="DoGetDeltaStreams" visibility="private">
+      </methodref>
+      <methodref name="ReadDeltaStream" visibility="private">
+      </methodref>
+      <methodref name="ReadDeltaState" visibility="private">
+      </methodref>
+      <methodref name="FindSortedComponent" visibility="private">
+      </methodref>
+      <methodref name="AddSortedComponent" visibility="private">
+      </methodref>
+      <methodref name="RemoveSortedComponent" visibility="private" procflags="inline">
+      </methodref>
+      <methodref name="Create@" visibility="class private" procflags="class constructor noself">
+      </methodref>
+      <methodref name="AsyncSchedule" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="ChangeName" visibility="protected">
+      </methodref>
+      <methodref name="DefineProperties" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="GetChildren" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="GetChildOwner" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="GetChildParent" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="GetOwner" visibility="protected" procflags="override">
+      </methodref>
+      <methodref name="Loaded" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Notification" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="GetDeltaStreams" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="PaletteCreated" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="ReadState" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="CanObserve" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="ObserverAdded" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="GetObservers" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="SetAncestor" visibility="protected">
+      </methodref>
+      <methodref name="SetDesigning" visibility="protected">
+      </methodref>
+      <methodref name="SetInline" visibility="protected">
+      </methodref>
+      <methodref name="SetDesignInstance" visibility="protected">
+      </methodref>
+      <methodref name="SetName" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="SetChildOrder" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="SetParentComponent" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="Updating" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="Updated" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="UpdateRegistry" visibility="protected" procflags="class virtual">
+      </methodref>
+      <methodref name="ValidateRename" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="ValidateContainer" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="ValidateInsert" visibility="protected" procflags="dynamic">
+      </methodref>
+      <methodref name="WriteState" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="RemoveFreeNotifications" visibility="protected">
+      </methodref>
+      <methodref name="QueryInterface" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="_AddRef" visibility="protected">
+      </methodref>
+      <methodref name="_Release" visibility="protected">
+      </methodref>
+      <methodref name="GetTypeInfoCount" visibility="protected">
+      </methodref>
+      <methodref name="GetTypeInfo" visibility="protected">
+      </methodref>
+      <methodref name="GetIDsOfNames" visibility="protected">
+      </methodref>
+      <methodref name="Invoke" visibility="protected">
+      </methodref>
+      <eventref name="OnGetDeltaStreams" visibility="protected">
+      </eventref>
+      <methodref name="Create" visibility="public" procflags="constructor virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="BeginInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="EndInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="EndInvoke" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="EndFunctionInvoke" visibility="public">
+      </methodref>
+      <methodref name="DestroyComponents" visibility="public">
+      </methodref>
+      <methodref name="Destroying" visibility="public">
+      </methodref>
+      <methodref name="ExecuteAction" visibility="public" procflags="dynamic">
+      </methodref>
+      <methodref name="FindComponent" visibility="public">
+      </methodref>
+      <methodref name="FreeNotification" visibility="public">
+      </methodref>
+      <methodref name="RemoveFreeNotification" visibility="public">
+      </methodref>
+      <methodref name="FreeOnRelease" visibility="public">
+      </methodref>
+      <methodref name="GetEnumerator" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="GetParentComponent" visibility="public" procflags="dynamic">
+      </methodref>
+      <methodref name="GetNamePath" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="HasParent" visibility="public" procflags="dynamic">
+      </methodref>
+      <methodref name="InsertComponent" visibility="public">
+      </methodref>
+      <methodref name="RemoveComponent" visibility="public">
+      </methodref>
+      <methodref name="SetSubComponent" visibility="public">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="override">
+      </methodref>
+      <methodref name="UpdateAction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="IsImplementorOf" visibility="public">
+      </methodref>
+      <methodref name="ReferenceInterface" visibility="public">
+      </methodref>
+      <propertyref name="ComObject" visibility="public">
+      </propertyref>
+      <propertyref name="Components" visibility="public">
+      </propertyref>
+      <propertyref name="ComponentCount" visibility="public">
+      </propertyref>
+      <propertyref name="ComponentIndex" visibility="public">
+      </propertyref>
+      <propertyref name="ComponentState" visibility="public">
+      </propertyref>
+      <propertyref name="ComponentStyle" visibility="public">
+      </propertyref>
+      <propertyref name="DesignInfo" visibility="public">
+      </propertyref>
+      <propertyref name="Owner" visibility="public">
+      </propertyref>
+      <propertyref name="VCLComObject" visibility="public">
+      </propertyref>
+      <propertyref name="Observers" visibility="public">
+      </propertyref>
+      <propertyref name="Name" visibility="published">
+      </propertyref>
+      <propertyref name="Tag" visibility="published">
+      </propertyref>
+      <ancestor name="TPersistent" namespace="System.Classes">
+        <methodref name="AssignError" visibility="private">
+        </methodref>
+        <methodref name="AssignTo" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="DefineProperties" visibility="protected" procflags="virtual">
+        </methodref>
+        <methodref name="GetOwner" visibility="protected" procflags="dynamic">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor override">
+        </methodref>
+        <methodref name="Assign" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetNamePath" visibility="public" procflags="dynamic">
+        </methodref>
+        <ancestor name="TObject" namespace="System">
+          <methodref name="Create" visibility="public" procflags="constructor">
+          </methodref>
+          <methodref name="Free" visibility="public">
+          </methodref>
+          <methodref name="DisposeOf" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="InitInstance" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="CleanupInstance" visibility="public">
+          </methodref>
+          <methodref name="ClassType" visibility="public" procflags="inline">
+          </methodref>
+          <methodref name="ClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassNameIs" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassParent" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="ClassInfo" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InstanceSize" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="InheritsFrom" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodAddress" visibility="public" procflags="class overload">
+          </methodref>
+          <methodref name="MethodName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="QualifiedClassName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="FieldAddress" visibility="public" procflags="overload">
+          </methodref>
+          <methodref name="GetInterface" visibility="public">
+          </methodref>
+          <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+          </methodref>
+          <methodref name="UnitName" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="UnitScope" visibility="public" procflags="class">
+          </methodref>
+          <methodref name="Equals" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="GetHashCode" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="ToString" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="SafeCallException" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Dispatch" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="NewInstance" visibility="public" procflags="class virtual">
+          </methodref>
+          <methodref name="FreeInstance" visibility="public" procflags="virtual">
+          </methodref>
+          <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+          </methodref>
+          <methodref name="GetDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+          </methodref>
+          <propertyref name="Disposed" visibility="protected">
+          </propertyref>
+        </ancestor>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="Disposed" type="Boolean" visibility="private" size="1" offset="64" file="OverbyteIcsWndControl.pas" line="208" />
+      <procedure name="Dispose" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="214">
+        <parameters>
+          <parameter name="Disposing" type="Boolean" />
+        </parameters>
+      </procedure>
+      <field name="FHandle" type="HWND" visibility="protected" size="4" offset="68" file="OverbyteIcsWndControl.pas" line="217" />
+      <field name="FThreadId" type="Cardinal" visibility="protected" size="4" offset="72" file="OverbyteIcsWndControl.pas" line="218" />
+      <field name="FTerminated" type="Boolean" visibility="protected" size="1" offset="76" file="OverbyteIcsWndControl.pas" line="219" />
+      <field name="FMultiThreaded" type="Boolean" visibility="protected" size="1" offset="77" file="OverbyteIcsWndControl.pas" line="220" />
+      <field name="FWndHandler" type="TIcsWndHandler" visibility="protected" size="4" offset="80" file="OverbyteIcsWndControl.pas" line="221" />
+      <field name="FMsgRelease" type="Cardinal" visibility="protected" size="4" offset="84" file="OverbyteIcsWndControl.pas" line="222" />
+      <field name="FOnBgException" type="TIcsBgExceptionEvent" visibility="protected" size="8" offset="88" file="OverbyteIcsWndControl.pas" line="223" />
+      <field name="FOnMessagePump" type="TNotifyEvent" visibility="protected" size="8" offset="96" file="OverbyteIcsWndControl.pas" line="224" />
+      <field name="FExceptAbortProc" type="TIcsExceptAbortProc" visibility="protected" size="8" offset="104" file="OverbyteIcsWndControl.pas" line="225" />
+      <procedure name="SetMultiThreaded" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="226">
+        <parameters>
+          <parameter name="Value" type="Boolean" paramflags="const" />
+        </parameters>
+      </procedure>
+      <function name="GetTerminated" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="227">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="SetTerminated" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="228">
+        <parameters>
+          <parameter name="Value" type="Boolean" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="SetOnMessagePump" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="229">
+        <parameters>
+          <parameter name="Value" type="TNotifyEvent" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="SetOnBgException" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="230">
+        <parameters>
+          <parameter name="Value" type="TIcsBgExceptionEvent" paramflags="const" />
+        </parameters>
+      </procedure>
+      <procedure name="WndProc" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="231">
+        <parameters>
+          <parameter name="MsgRec" type="TMessage" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="HandleBackGroundException" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="232">
+        <parameters>
+          <parameter name="E" type="Exception" />
+        </parameters>
+      </procedure>
+      <procedure name="TriggerBgException" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="233">
+        <parameters>
+          <parameter name="E" type="Exception" />
+          <parameter name="CanClose" type="Boolean" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="WMRelease" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="235">
+        <parameters>
+          <parameter name="msg" type="TMessage" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="AllocateHWnd" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="236">
+      </procedure>
+      <procedure name="DeallocateHWnd" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="237">
+      </procedure>
+      <function name="GetHandle" visibility="protected" file="OverbyteIcsWndControl.pas" line="238">
+        <parameters>
+          <retval type="HWND" />
+        </parameters>
+      </function>
+      <function name="MsgHandlersCount" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="239">
+        <parameters>
+          <retval type="Integer" />
+        </parameters>
+      </function>
+      <procedure name="AllocateMsgHandlers" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="240">
+      </procedure>
+      <procedure name="FreeMsgHandlers" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="241">
+      </procedure>
+      <procedure name="AbortComponent" visibility="protected" procflags="virtual" file="OverbyteIcsWndControl.pas" line="242">
+      </procedure>
+      <constructor name="Create" visibility="public" file="OverbyteIcsWndControl.pas" line="244">
+        <parameters>
+          <parameter name="AOwner" type="TComponent" />
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="OverbyteIcsWndControl.pas" line="245">
+        <parameters>
+        </parameters>
+      </destructor>
+      <procedure name="Release" visibility="public" procflags="virtual" file="OverbyteIcsWndControl.pas" line="246">
+      </procedure>
+      <procedure name="ThreadAttach" visibility="public" procflags="virtual" file="OverbyteIcsWndControl.pas" line="247">
+      </procedure>
+      <procedure name="ThreadDetach" visibility="public" procflags="virtual" file="OverbyteIcsWndControl.pas" line="248">
+      </procedure>
+      <procedure name="MessageLoop" visibility="public" procflags="virtual" file="OverbyteIcsWndControl.pas" line="249">
+      </procedure>
+      <function name="ProcessMessage" visibility="public" procflags="virtual" file="OverbyteIcsWndControl.pas" line="250">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="ProcessMessages" visibility="public" procflags="virtual" file="OverbyteIcsWndControl.pas" line="251">
+      </procedure>
+      <procedure name="MessagePump" visibility="public" procflags="virtual" file="OverbyteIcsWndControl.pas" line="252">
+      </procedure>
+      <function name="PostQuitMessage" visibility="public" file="OverbyteIcsWndControl.pas" line="253">
+        <parameters>
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <property name="MultiThreaded" visibility="public" read="FMultiThreaded" write="SetMultiThreaded" type="Boolean" file="OverbyteIcsWndControl.pas" line="254" />
+      <property name="Terminated" visibility="public" read="GetTerminated" write="SetTerminated" type="Boolean" file="OverbyteIcsWndControl.pas" line="256" />
+      <event name="OnMessagePump" visibility="public" read="FOnMessagePump" write="SetOnMessagePump" type="TNotifyEvent" file="OverbyteIcsWndControl.pas" line="258" />
+      <property name="Handle" visibility="public" read="GetHandle" type="HWND" file="OverbyteIcsWndControl.pas" line="260" />
+      <property name="WndHandler" visibility="public" read="FWndHandler" write="FWndHandler" type="TIcsWndHandler" file="OverbyteIcsWndControl.pas" line="261" />
+      <property name="ThreadID" visibility="public" read="FThreadId" type="Cardinal" file="OverbyteIcsWndControl.pas" line="263" />
+      <event name="OnBgException" visibility="public" read="FOnBgException" write="SetOnBgException" type="TIcsBgExceptionEvent" file="OverbyteIcsWndControl.pas" line="264" />
+      <event name="ExceptAbortProc" visibility="public" read="FExceptAbortProc" write="FExceptAbortProc" type="TIcsExceptAbortProc" file="OverbyteIcsWndControl.pas" line="266" />
+    </members>
+  </class>
+  <array name="TIcsMsgMap">
+    <element type="TIcsWndControl" />
+  </array>
+  <class name="TIcsWndHandler" file="OverbyteIcsWndControl.pas" line="272">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FHandle" type="HWND" visibility="protected" size="4" offset="4" file="OverbyteIcsWndControl.pas" line="274" />
+      <field name="FMsgMap" type="TIcsMsgMap" visibility="protected" size="4" offset="8" file="OverbyteIcsWndControl.pas" line="278" />
+      <field name="FMsgLow" type="Cardinal" visibility="protected" size="4" offset="12" file="OverbyteIcsWndControl.pas" line="279" />
+      <field name="FMsgCnt" type="Integer" visibility="protected" size="4" offset="16" file="OverbyteIcsWndControl.pas" line="280" />
+      <field name="FOwnerList" type="TIcsWndHandlerList" visibility="protected" size="4" offset="20" file="OverbyteIcsWndControl.pas" line="281" />
+      <field name="FOnBgException" type="TIcsBgExceptionEvent" visibility="protected" size="8" offset="24" file="OverbyteIcsWndControl.pas" line="282" />
+      <field name="FOnMessage" type="TIcsMessageEvent" visibility="protected" size="8" offset="32" file="OverbyteIcsWndControl.pas" line="283" />
+      <function name="TriggerMessage" visibility="protected" file="OverbyteIcsWndControl.pas" line="284">
+        <parameters>
+          <parameter name="MsgRec" type="TMessage" paramflags="var" />
+          <retval type="Boolean" />
+        </parameters>
+      </function>
+      <procedure name="WndProc" visibility="protected" file="OverbyteIcsWndControl.pas" line="285">
+        <parameters>
+          <parameter name="MsgRec" type="TMessage" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="AllocateHWnd" visibility="protected" file="OverbyteIcsWndControl.pas" line="286">
+      </procedure>
+      <procedure name="DeallocateHWnd" visibility="protected" file="OverbyteIcsWndControl.pas" line="287">
+      </procedure>
+      <procedure name="TriggerBgException" visibility="protected" file="OverbyteIcsWndControl.pas" line="288">
+        <parameters>
+          <parameter name="E" type="Exception" />
+          <parameter name="CanClose" type="Boolean" paramflags="var" />
+        </parameters>
+      </procedure>
+      <function name="GetMsgLeft" visibility="protected" file="OverbyteIcsWndControl.pas" line="289">
+        <parameters>
+          <retval type="Cardinal" />
+        </parameters>
+      </function>
+      <constructor name="Create" visibility="public" file="OverbyteIcsWndControl.pas" line="291">
+        <parameters>
+        </parameters>
+      </constructor>
+      <procedure name="RegisterMessage" visibility="public" file="OverbyteIcsWndControl.pas" line="292">
+        <parameters>
+          <parameter name="Msg" type="Cardinal" />
+          <parameter name="Obj" type="TIcsWndControl" />
+        </parameters>
+      </procedure>
+      <procedure name="UnregisterMessage" visibility="public" file="OverbyteIcsWndControl.pas" line="293">
+        <parameters>
+          <parameter name="Msg" type="Cardinal" paramflags="var" />
+        </parameters>
+      </procedure>
+      <function name="AllocateMsgHandler" visibility="public" file="OverbyteIcsWndControl.pas" line="294">
+        <parameters>
+          <parameter name="Obj" type="TIcsWndControl" />
+          <retval type="Cardinal" />
+        </parameters>
+      </function>
+      <property name="Handle" visibility="public" read="FHandle" type="HWND" file="OverbyteIcsWndControl.pas" line="295" />
+      <property name="MsgLow" visibility="public" read="FMsgLow" write="FMsgLow" type="Cardinal" file="OverbyteIcsWndControl.pas" line="296" />
+      <property name="MsgLeft" visibility="public" read="GetMsgLeft" type="Cardinal" file="OverbyteIcsWndControl.pas" line="297" />
+      <event name="OnMessage" visibility="public" read="FOnMessage" write="FOnMessage" type="TIcsMessageEvent" file="OverbyteIcsWndControl.pas" line="298" />
+    </members>
+  </class>
+  <class name="TIcsWndHandlerList" file="OverbyteIcsWndControl.pas" line="305">
+    <ancestor name="TList" namespace="System.Classes">
+      <methodref name="Get" visibility="protected">
+      </methodref>
+      <methodref name="Grow" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="Put" visibility="protected">
+      </methodref>
+      <methodref name="Notify" visibility="protected" procflags="virtual">
+      </methodref>
+      <methodref name="SetCapacity" visibility="protected">
+      </methodref>
+      <methodref name="SetCount" visibility="protected">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor override">
+      </methodref>
+      <methodref name="Add" visibility="public">
+      </methodref>
+      <methodref name="Clear" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Delete" visibility="public">
+      </methodref>
+      <methodref name="Error" visibility="public" procflags="class overload virtual">
+      </methodref>
+      <methodref name="Error" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="Exchange" visibility="public">
+      </methodref>
+      <methodref name="Expand" visibility="public">
+      </methodref>
+      <methodref name="Extract" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ExtractItem" visibility="public">
+      </methodref>
+      <methodref name="First" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="GetEnumerator" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="IndexOf" visibility="public">
+      </methodref>
+      <methodref name="IndexOfItem" visibility="public">
+      </methodref>
+      <methodref name="Insert" visibility="public">
+      </methodref>
+      <methodref name="Last" visibility="public">
+      </methodref>
+      <methodref name="Move" visibility="public">
+      </methodref>
+      <methodref name="Remove" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="RemoveItem" visibility="public">
+      </methodref>
+      <methodref name="Pack" visibility="public">
+      </methodref>
+      <methodref name="Sort" visibility="public">
+      </methodref>
+      <methodref name="SortList" visibility="public">
+      </methodref>
+      <methodref name="Assign" visibility="public">
+      </methodref>
+      <propertyref name="Capacity" visibility="public">
+      </propertyref>
+      <propertyref name="Count" visibility="public">
+      </propertyref>
+      <propertyref name="Items" visibility="public">
+      </propertyref>
+      <propertyref name="List" visibility="public">
+      </propertyref>
+      <ancestor name="TObject" namespace="System">
+        <methodref name="Create" visibility="public" procflags="constructor">
+        </methodref>
+        <methodref name="Free" visibility="public">
+        </methodref>
+        <methodref name="DisposeOf" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="InitInstance" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="CleanupInstance" visibility="public">
+        </methodref>
+        <methodref name="ClassType" visibility="public" procflags="inline">
+        </methodref>
+        <methodref name="ClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassNameIs" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassParent" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="ClassInfo" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InstanceSize" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="InheritsFrom" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodAddress" visibility="public" procflags="class overload">
+        </methodref>
+        <methodref name="MethodName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="QualifiedClassName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="FieldAddress" visibility="public" procflags="overload">
+        </methodref>
+        <methodref name="GetInterface" visibility="public">
+        </methodref>
+        <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+        </methodref>
+        <methodref name="UnitName" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="UnitScope" visibility="public" procflags="class">
+        </methodref>
+        <methodref name="Equals" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="GetHashCode" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="ToString" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="SafeCallException" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Dispatch" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="NewInstance" visibility="public" procflags="class virtual">
+        </methodref>
+        <methodref name="FreeInstance" visibility="public" procflags="virtual">
+        </methodref>
+        <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+        </methodref>
+        <methodref name="GetDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+        </methodref>
+        <propertyref name="Disposed" visibility="protected">
+        </propertyref>
+      </ancestor>
+    </ancestor>
+    <members>
+      <field name="ThreadID" type="Cardinal" visibility="protected" size="4" offset="16" file="OverbyteIcsWndControl.pas" line="307" />
+    </members>
+  </class>
+  <type name="TWhMaxMsgIDs" type="word" loBound="50" hiBound="1000" file="OverbyteIcsWndControl.pas" line="310" />
+  <class name="TIcsWndHandlerPool" file="OverbyteIcsWndControl.pas" line="312">
+    <ancestor name="TObject" namespace="System">
+      <methodref name="Create" visibility="public" procflags="constructor">
+      </methodref>
+      <methodref name="Free" visibility="public">
+      </methodref>
+      <methodref name="DisposeOf" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="InitInstance" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="CleanupInstance" visibility="public">
+      </methodref>
+      <methodref name="ClassType" visibility="public" procflags="inline">
+      </methodref>
+      <methodref name="ClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassNameIs" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassParent" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="ClassInfo" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InstanceSize" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="InheritsFrom" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodAddress" visibility="public" procflags="class overload">
+      </methodref>
+      <methodref name="MethodName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="QualifiedClassName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="FieldAddress" visibility="public" procflags="overload">
+      </methodref>
+      <methodref name="GetInterface" visibility="public">
+      </methodref>
+      <methodref name="GetInterfaceEntry" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="GetInterfaceTable" visibility="public" procflags="class inline">
+      </methodref>
+      <methodref name="UnitName" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="UnitScope" visibility="public" procflags="class">
+      </methodref>
+      <methodref name="Equals" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="GetHashCode" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="ToString" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="SafeCallException" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="AfterConstruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="BeforeDestruction" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Dispatch" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="DefaultHandler" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="NewInstance" visibility="public" procflags="class virtual">
+      </methodref>
+      <methodref name="FreeInstance" visibility="public" procflags="virtual">
+      </methodref>
+      <methodref name="Destroy" visibility="public" procflags="destructor virtual">
+      </methodref>
+      <methodref name="GetDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <methodref name="CheckDisposed" visibility="protected" procflags="inline">
+      </methodref>
+      <propertyref name="Disposed" visibility="protected">
+      </propertyref>
+    </ancestor>
+    <members>
+      <field name="FList" type="TIcsWndHandlerList" visibility="private" size="4" offset="4" file="OverbyteIcsWndControl.pas" line="314" />
+      <field name="FCritSect" type="_RTL_CRITICAL_SECTION" visibility="private" size="24" offset="8" file="OverbyteIcsWndControl.pas" line="315" />
+      <constructor name="Create" visibility="public" file="OverbyteIcsWndControl.pas" line="317">
+        <parameters>
+        </parameters>
+      </constructor>
+      <destructor name="Destroy" visibility="public" file="OverbyteIcsWndControl.pas" line="318">
+        <parameters>
+        </parameters>
+      </destructor>
+      <function name="GetWndHandler" visibility="public" file="OverbyteIcsWndControl.pas" line="319">
+        <parameters>
+          <parameter name="HandlerCount" type="Cardinal" />
+          <parameter name="ThreadID" type="Cardinal" />
+          <retval type="TIcsWndHandler" />
+        </parameters>
+      </function>
+      <procedure name="FreeWndHandler" visibility="public" file="OverbyteIcsWndControl.pas" line="321">
+        <parameters>
+          <parameter name="WndHandler" type="TIcsWndHandler" paramflags="var" />
+        </parameters>
+      </procedure>
+      <procedure name="Lock" visibility="public" file="OverbyteIcsWndControl.pas" line="322">
+      </procedure>
+      <procedure name="UnLock" visibility="public" file="OverbyteIcsWndControl.pas" line="323">
+      </procedure>
+      <procedure name="SetWndHandlerMaxMsgIDs" visibility="public" file="OverbyteIcsWndControl.pas" line="324">
+        <parameters>
+          <parameter name="Value" type="TWhMaxMsgIDs" paramflags="const" />
+        </parameters>
+      </procedure>
+    </members>
+  </class>
+  <pointer name="TOutputDebugStringType" alias="System.PWideChar" type="Char" indircnt="1" file="System.pas" line="12" />
+  <variable name="GWndHandlerPool" type="TIcsWndHandlerPool" file="OverbyteIcsWndControl.pas" line="345" />
+  <variable name="GWndHandleCount" type="Integer" file="OverbyteIcsWndControl.pas" line="346" />
+  <variable name="GWndHandlerCritSect" type="_RTL_CRITICAL_SECTION" file="OverbyteIcsWndControl.pas" line="347" />
+  <variable name="GWndHandlerMsgLow" type="Integer" file="OverbyteIcsWndControl.pas" line="357" />
+  <variable name="GUnitFinalized" type="Boolean" file="OverbyteIcsWndControl.pas" line="361" />
+  <procedure name="SetIcsThreadLocalFinalBgExceptionHandling" visibility="public" file="OverbyteIcsWndControl.pas" line="378">
+    <parameters>
+      <parameter name="Value" type="TIcsFinalBgExceptionHandling" paramflags="const" />
+    </parameters>
+  </procedure>
+  <function name="GetIcsThreadLocalFinalBgExceptionHandling" visibility="public" file="OverbyteIcsWndControl.pas" line="385">
+    <parameters>
+      <retval type="TIcsFinalBgExceptionHandling" />
+    </parameters>
+  </function>
+</namespace>

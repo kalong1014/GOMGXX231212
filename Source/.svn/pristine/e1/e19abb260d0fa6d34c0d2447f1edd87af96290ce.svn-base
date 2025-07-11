@@ -1,0 +1,102 @@
+<html>
+<head>
+<META HTTP-EQUIV="Content-Type" content="text/html; charset=gb2312">
+</head>
+<body>
+<pre>
+<table width=100% bgcolor=#CFCFE5><tr> <td> <font face=宋体 size=+3>
+生成日志
+</font></table><table width=* cellspacing=0 cellpadding=0><tr><td width=0 bgcolor=#EDEDF5>&nbsp;</td><td width=0 bgcolor=#FFFFFF>&nbsp;</td><td width=*><pre>
+<h3>------- 已启动生成: 项目: _Oranze Library，配置: Release|Win32 -------
+</h3>
+</pre></table><table width=100%% bgcolor=#DFDFE5><tr><td><font face=arial size=+2>
+命令行
+</font></table><table width=* cellspacing=0 cellpadding=0><tr><td width=0 bgcolor=#EDEDF5>&nbsp;</td><td width=0 bgcolor=#FFFFFF>&nbsp;</td><td width=*><pre>正在创建临时文件“e:\虎卫传说开发项目\Source\Mir2DBServer\_Oranze Library\_Obj_Release\RSP000004.rsp”，其内容为
+[
+/O2 /I "e:\虎卫传说开发项目\Source\Mir2DBServer\_Oranze Library\\" /D "WIN32" /D "NDEBUG" /D "_LIB" /D "_MBCS" /FD /EHsc /MT /YX"stdafx.h" /Fp".\_Obj_Release/_Oranze Library.pch" /Fo".\_Obj_Release/" /Fd".\_Obj_Release/" /W3 /c /TP
+".\uucp.cpp"
+".\util.cpp"
+".\url.cpp"
+".\syncobj.cpp"
+".\stringex.cpp"
+".\script.cpp"
+".\registry.cpp"
+".\quotedpr.cpp"
+".\prime.cpp"
+".\pop3.cpp"
+".\netudp.cpp"
+".\nettcp.cpp"
+".\netiocp.cpp"
+".\netbase.cpp"
+".\mime.cpp"
+".\mail.cpp"
+".\imsgfmt.cpp"
+".\http.cpp"
+".\file.cpp"
+".\error.cpp"
+".\datelog.cpp"
+".\database.cpp"
+".\base64.cpp"
+]
+正在创建命令行“cl.exe @"e:\虎卫传说开发项目\Source\Mir2DBServer\_Oranze Library\_Obj_Release\RSP000004.rsp" /nologo”
+正在创建临时文件“e:\虎卫传说开发项目\Source\Mir2DBServer\_Oranze Library\_Obj_Release\RSP000005.rsp”，其内容为
+[
+/OUT:".\_Bin\_Oranze Library.lib" /NOLOGO
+".\_obj_release\base64.obj"
+".\_obj_release\database.obj"
+".\_obj_release\datelog.obj"
+".\_obj_release\error.obj"
+".\_obj_release\file.obj"
+".\_obj_release\http.obj"
+".\_obj_release\imsgfmt.obj"
+".\_obj_release\mail.obj"
+".\_obj_release\mime.obj"
+".\_obj_release\netbase.obj"
+".\_obj_release\netiocp.obj"
+".\_obj_release\nettcp.obj"
+".\_obj_release\netudp.obj"
+".\_obj_release\pop3.obj"
+".\_obj_release\prime.obj"
+".\_obj_release\quotedpr.obj"
+".\_obj_release\registry.obj"
+".\_obj_release\script.obj"
+".\_obj_release\stringex.obj"
+".\_obj_release\syncobj.obj"
+".\_obj_release\url.obj"
+".\_obj_release\util.obj"
+".\_obj_release\uucp.obj"
+]
+正在创建命令行“lib.exe @"e:\虎卫传说开发项目\Source\Mir2DBServer\_Oranze Library\_Obj_Release\RSP000005.rsp"”
+</pre></table><table width=100%% bgcolor=#DFDFE5><tr><td><font face=arial size=+2>
+输出窗口
+</font></table><table width=* cellspacing=0 cellpadding=0><tr><td width=0 bgcolor=#EDEDF5>&nbsp;</td><td width=0 bgcolor=#FFFFFF>&nbsp;</td><td width=*><pre>正在编译...
+uucp.cpp
+util.cpp
+url.cpp
+syncobj.cpp
+stringex.cpp
+script.cpp
+registry.cpp
+quotedpr.cpp
+prime.cpp
+pop3.cpp
+netudp.cpp
+nettcp.cpp
+netiocp.cpp
+netbase.cpp
+mime.cpp
+mail.cpp
+imsgfmt.cpp
+http.cpp
+file.cpp
+error.cpp
+datelog.cpp
+database.cpp
+base64.cpp
+正在创建库...
+</pre></table><table width=100%% bgcolor=#DFDFE5><tr><td><font face=arial size=+2>
+结果
+</font></table><table width=* cellspacing=0 cellpadding=0><tr><td width=0 bgcolor=#EDEDF5>&nbsp;</td><td width=0 bgcolor=#FFFFFF>&nbsp;</td><td width=*><pre>
+生成日志保存在“file://e:\虎卫传说开发项目\Source\Mir2DBServer\_Oranze Library\_Obj_Release\BuildLog.htm”中
+_Oranze Library - 0 错误，0 警告</pre></table><table   width=100% height=20 bgcolor=#CFCFE5><tr><td><font face=宋体 size=+2>
+</font></table></body></html>

@@ -1,0 +1,303 @@
+unit ClientSession;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, ClientThread, AcceptExWorkedThread, IOCPTypeDef, ThreadPool,
+  Protocol, SHSocket, SyncObj, StrUtils, Dialogs,EDcode;
+
+type
+  TSessionObj = class(TSyncObj)  //会话对象类
+  public
+    m_pUserOBJ: PUserOBJ;
+    m_pOverlapRecv: PIOCPCommObj;
+    m_pOverlapSend: PIOCPCommObj;
+    m_tIOCPSender: TIOCPWriter;
+    m_tLastGameSvr: TClientThread;
+
+    m_fKickFlag: Boolean;
+    m_fHandleLogin: Byte;
+    m_dwSessionID: LongWord;
+    m_nSvrListIdx: Integer;
+    m_nSvrObject: Integer;
+//    m_wRandKey: Word;
+
+    m_dwClientTimeOutTick: LongWord;
+
+    m_status: Integer;
+    constructor Create;
+    destructor Destroy; override;
+    procedure ProcessCltData(const Addr: Integer; const Len: Integer; var Succeed: BOOL; const fCDPacket: Boolean = False);
+    procedure ProcessSvrData(GS: TClientThread; const Addr: Integer; const Len: Integer);
+    procedure ReCreate;
+    procedure UserEnter;
+    procedure UserLeave;
+    procedure SendDefMessage(wIdent: Word; nRecog: Integer; nParam, nTag, nSeries: Word; sMsg: string);
+  end;
+
+var
+  g_pFillUserObj: TSessionObj = nil;
+  g_UserList: array[0..USER_ARRAY_COUNT - 1] of TSessionObj; //会话对象列表
+var
+  enterCount: Integer;
+  gDeny: Boolean;
+implementation
+
+uses
+  FuncForComm, SendQueue, LogManager, ConfigManager, Misc, HUtil32, Grobal2,
+  IPAddrFilter;
+
+constructor TSessionObj.Create;
+var
+  i, dwCurrentTick: DWORD;
+begin
+  inherited;
+  Randomize();
+  dwCurrentTick := GetTickCount();
+  m_fKickFlag := False;
+  m_nSvrObject := 0;
+  m_dwClientTimeOutTick := dwCurrentTick;
+  m_fHandleLogin := 0;
+  m_nSvrListIdx := 0;
+  m_status := 0;
+end;
+
+destructor TSessionObj.Destroy;
+begin
+  inherited;
+end;
+
+
+
+procedure TSessionObj.SendDefMessage(wIdent: Word; nRecog: Integer; nParam, nTag, nSeries: Word; sMsg: string);
+var
+  DefMsg: TDefaultMessage;
+  sSendMsg: string;
+begin
+  if (m_tLastGameSvr = nil) or not m_tLastGameSvr.Active then Exit;
+  DefMsg := MakeDefaultMsg (wIdent, nRecog, nParam, nTag, nSeries);
+  sSendMsg := '#' + EncodeMessage(DefMsg) + string(PAnsiChar(EncodeString(sMsg))) + '!';
+  m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(sSendMsg), Length(sSendMsg));
+end;
+
+
+procedure TSessionObj.ProcessCltData(const Addr, Len: Integer; var Succeed: BOOL; const fCDPacket: Boolean);
+var
+  pszBuf: array[0..1024 - 1] of AnsiChar;
+  sData, sDefMsg, sDataMsg, sDataText: string;
+  sText: string;
+  DefMsg: TDefaultMessage;
+  Cmd: TDefaultMessage;
+  iSendLen: Integer;
+  Buffer: PAnsiChar;
+  nPacketIdx : Byte;
+  sMsgFilter                : string;
+  sNewChar, sUid, sUname, sHair, sJob, sSex: string;
+  sUname2                   : WideString;
+    I                         : Integer;
+begin
+  if m_fKickFlag then begin //m_fKickFlag为真，表示连接进来的用户已被踢掉，直接反转m_fKickFlag标志，退出
+    m_fKickFlag := False;
+    Succeed := False;
+    Exit;
+  end;
+  if Len > g_pConfig.m_nNomClientPacketSize then begin
+    if g_pLogMgr.CheckLevel(4) then
+      g_pLogMgr.Add('数据包超长: ' + IntToStr(Len));
+    KickUser(m_pUserOBJ.nIPAddr);
+    Succeed := False;
+    Exit;
+  end;
+  if (Len >= 5) and g_pConfig.m_fDefenceCCPacket then begin
+    if (StrPos(PAnsiChar(Addr), 'HTTP/') <> nil) then begin//StrPos返回第二个参数在第一个参数中第一次出现的位置指针
+      if g_pLogMgr.CheckLevel(6) then
+        g_pLogMgr.Add('CC Attack, Kick: ' + m_pUserOBJ.pszIPAddr);
+      KickUser(m_pUserOBJ.nIPAddr);//Kick即英文踢的意思
+      Succeed := False;
+      Exit;
+    end;
+  end;
+
+  if (Len >= 1) then begin
+    if (StrPos(PAnsiChar(Addr), '$') <> nil) then begin
+      if g_pLogMgr.CheckLevel(6) then
+        g_pLogMgr.Add('$ Attack, Kick: ' + m_pUserOBJ.pszIPAddr);
+      KickUser(m_pUserOBJ.nIPAddr);
+      Succeed := False;
+      Exit;
+    end;
+  end;
+
+  if gDeny then begin
+    KickUser(m_pUserOBJ.nIPAddr);
+    Succeed := False;
+    Exit;
+  end;
+
+
+  if m_fHandleLogin = 0 then begin
+    ArrestStringEx(string(PAnsiChar(addr)), '#', '!', sData);
+    nPacketIdx := Str_ToInt(sData[1], 99);
+    sData := Copy(sData, 2, Length(sData) - 1);
+    if Len = DEFBLOCKSIZE then begin
+      sDefMsg := sData;
+      sDataMsg := '';
+    end else begin
+      sDefMsg := Copy(sData, 1, DEFBLOCKSIZE);
+      sDataMsg := Copy(sData, DEFBLOCKSIZE + 1, Length(sData) - DEFBLOCKSIZE);
+    end;
+    DefMsg := DecodeMessage(sDefMsg);
+
+//    sDataText := '%A' + IntToStr(m_pUserOBJ._SendObj.Socket) + '/' + string(PChar(addr)) + '$';
+//    g_pLogMgr.Add('DefMsg.Recog: ' + IntToStr(DefMsg.Recog));
+//    g_pLogMgr.Add('DefMsg.Ident: ' + IntToStr(DefMsg.Ident));
+//    g_pLogMgr.Add('DefMsg.Param: ' + IntToStr(DefMsg.Param));
+//    g_pLogMgr.Add('DefMsg.Tag: ' + IntToStr(DefMsg.Tag));
+//    g_pLogMgr.Add('DefMsg.Series: ' + IntToStr(DefMsg.Series));
+
+    case DefMsg.Ident of
+      CM_QUERYCHR:
+        begin
+          if (Len <= SizeOf(TDefaultMessage)) then begin
+            KickUser(m_pUserOBJ.nIPAddr);
+            Succeed := False;
+            Exit;
+          end;
+          pszBuf[0] := '%';
+          StrFmt(@pszBuf[1], 'A%d/%s$', [m_pUserOBJ._SendObj.Socket, PChar(Addr)]);
+          m_tLastGameSvr.SendBuffer(@pszBuf[0], StrLen(pszBuf));
+        end;
+      CM_NEWCHR:
+        begin
+          sDataText := '#' + IntToStr(nPacketIdx) + sDefMsg + sDataMsg + '!';
+          pszBuf[0] := '%';
+          StrFmt(@pszBuf[1], 'A%d/%s$', [m_pUserOBJ._SendObj.Socket, sDataText]);
+          m_tLastGameSvr.SendBuffer(@pszBuf[0], StrLen(pszBuf));
+        end;
+      CM_DELCHR:
+        begin
+          sDataText := '#' + IntToStr(nPacketIdx) + sDefMsg + sDataMsg + '!';
+          pszBuf[0] := '%';
+          StrFmt(@pszBuf[1], 'A%d/%s$', [m_pUserOBJ._SendObj.Socket, sDataText]);
+          m_tLastGameSvr.SendBuffer(@pszBuf[0], StrLen(pszBuf));
+        end;
+      CM_SELCHR:
+        begin
+          sDataText := '#' + IntToStr(nPacketIdx) + sDefMsg + sDataMsg + '!';
+          pszBuf[0] := '%';
+          StrFmt(@pszBuf[1], 'A%d/%s$', [m_pUserOBJ._SendObj.Socket, sDataText]);
+          m_tLastGameSvr.SendBuffer(@pszBuf[0], StrLen(pszBuf));
+        end;
+    else begin
+        if g_pLogMgr.CheckLevel(4) then
+          g_pLogMgr.Add(Format('错误的数据包索引: %d', [DefMsg.Ident]));
+        KickUser(m_pUserOBJ.nIPAddr);
+        Succeed := False;
+      end;
+    end;
+  end;
+end;
+
+procedure TSessionObj.ProcessSvrData(GS: TClientThread; const Addr, Len: Integer);
+begin
+  if m_fKickFlag then begin
+    m_fKickFlag := False;
+    SHSocket.FreeSocket(m_pOverlapSend.Socket);
+    Exit;
+  end;
+
+  m_tIOCPSender.SendData(m_pOverlapSend, PAnsiChar(Addr), Len);
+end;
+
+procedure TSessionObj.UserEnter;
+var
+  szSenfBuf: string;
+begin
+  Inc(enterCount);
+  m_fHandleLogin := 0;
+  g_ProcMsgThread.AddSession(Self);
+  szSenfBuf := '%' + Format('O%d/%s$', [m_pUserOBJ._SendObj.Socket, m_pUserOBJ.pszIPAddr]);
+  m_tLastGameSvr.SendBuffer(@szSenfBuf[1], Length(szSenfBuf));
+end;
+
+procedure TSessionObj.UserLeave;
+var
+  szSenfBuf: string;
+  i, nCode: Integer;
+  DynPacket: pTDynPacket;
+begin
+  nCode := 0;
+  try
+    nCode := 1;
+    m_fHandleLogin := 0;
+    szSenfBuf := '%' + Format('X%d$', [m_pUserOBJ._SendObj.Socket]);
+    m_tLastGameSvr.SendBuffer(@szSenfBuf[1], Length(szSenfBuf));
+
+    nCode := 2;
+    DeleteConnectOfIP(Self.m_pUserOBJ.nIPAddr);
+
+    nCode := 3;
+    i := 0;
+    EnterCriticalSection(PSendQueueNode(m_pOverlapSend).QueueLock);
+    try
+      while True do begin
+        i := 1;
+        if PSendQueueNode(m_pOverlapSend).DynSendList.Count = 0 then
+          Break;
+        DynPacket := m_tIOCPSender.SendQueue.GetDynPacket(m_pOverlapSend);
+        if DynPacket = nil then
+          Break;
+        i := 2;
+        FreeMem(DynPacket.Buf);
+        Dispose(DynPacket);
+        PSendQueueNode(m_pOverlapSend).DynSendList.Delete(0);
+      end;
+    finally
+      LeaveCriticalSection(PSendQueueNode(m_pOverlapSend).QueueLock);
+    end;
+
+    nCode := 4;
+    if g_ProcMsgThread <> nil then
+      g_ProcMsgThread.DelSession(Self);
+  except
+    on M: Exception do
+      g_pLogMgr.Add(Format('TSessionObj.UserLeave: %d %s', [nCode, M.Message]));
+  end;
+end;
+
+procedure TSessionObj.ReCreate();
+begin
+  m_fKickFlag := False;
+  m_nSvrObject := 0;
+  m_fHandleLogin := 0;
+  m_dwClientTimeOutTick := GetTickCount;
+  m_status := 0;
+end;
+
+procedure FillUserList();
+var
+  i: Integer;
+begin
+  if g_pFillUserObj = nil then
+    g_pFillUserObj := TSessionObj.Create;
+  g_pFillUserObj.m_tLastGameSvr := nil;
+  for i := 0 to USER_ARRAY_COUNT - 1 do
+    g_UserList[i] := g_pFillUserObj;
+end;
+
+procedure CleanupUserList();
+begin
+  if g_pFillUserObj <> nil then
+    g_pFillUserObj.Free;
+end;
+
+initialization
+  FillUserList();
+  gDeny := False;
+  enterCount := 0;
+
+finalization
+  CleanupUserList();
+
+end.
+

@@ -1,0 +1,1411 @@
+unit NetLoginGate;
+
+interface
+
+uses
+  Windows, SysUtils, Classes, ExtCtrls, DateUtils, ScktComp, Grobal2, LSShare;
+
+type
+  TCLoginGate = class
+    procedure Connect(Sender: TObject; Socket: TCustomWinSocket);
+    procedure Disconnect(Sender: TObject; Socket: TCustomWinSocket);
+    procedure Error(Sender: TObject; Socket: TCustomWinSocket; ErrorEvent: TErrorEvent; var ErrorCode: Integer);
+    procedure Read(Sender: TObject; Socket: TCustomWinSocket);
+  private
+    { Private declarations }
+    procedure DecodeTimerTimer(Sender: TObject);
+    procedure DecodeGateData(ginfo: PTLoginGate);
+    procedure DecodeUserData(pu: PTUserInfo);
+    procedure ReceiveCheckCode(asocket: TCustomWinSocket);
+    procedure ReceiveOpenUser(uhandle, usraddr: string; ginfo: PTLoginGate);
+    procedure ReceiveCloseUser(uhandle: string; ginfo: PTLoginGate);
+    procedure ReceiveSendData(uhandle: string; ginfo: PTLoginGate; data: string);
+    function DecodeMessages(data: string; pu: PTUserInfo): Boolean;
+    procedure AddCertUser(pUser: PTUserInfo);
+//    procedure ModifyCertify(cert: integer; svname: string; freemode: Boolean);
+    procedure DelCertUser(cert: integer);
+    function IsValidCertification(cert: integer): Boolean;
+    function GetDoubbleConnection(uid: string): PTCertUser;
+
+    procedure LoginGetIdPasswd(pUser: PTUserInfo; body: string; msg: TDefaultMessage);
+    function SendPasswordSuccess(svname: string; pc: PTUserInfo): Boolean;
+    procedure LoginGetSelectServer(pu: PTUserInfo; body: string);
+    procedure LoginGetNewUser(pu: PTUserInfo; body: string);
+    procedure LoginGetUpdateUser(pu: PTUserInfo; body: string);
+    procedure LoginChangePasswd(pu: PTUserInfo; body: string);
+  public
+    { Public declarations }
+    LoginGateSocket: TServerSocket;
+    DecodeTimer: TTimer;
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+var
+  CLoginGate: TCLoginGate;
+
+implementation
+
+uses
+   LoginSvrWnd, mudutil, HUtil32, EDcode, SQLIDDB, ADODB, NetGameServer;
+
+function GetCertification: integer;
+begin
+  Inc(FCertification);
+  if FCertification >= $7FFFFFFF then
+    FCertification := 2;
+  Result := FCertification;
+end;
+
+constructor TCLoginGate.Create;
+begin
+  LoginGateSocket:= TServerSocket.Create(nil);
+  LoginGateSocket.OnClientConnect := Connect;
+  LoginGateSocket.OnClientDisconnect := Disconnect;
+  LoginGateSocket.OnClientError := Error;
+  LoginGateSocket.OnClientRead := Read;
+  DecodeTimer := TTimer.Create(nil);
+  DecodeTimer.OnTimer := DecodeTimerTimer;
+  DecodeTimer.Interval := 1;
+end;
+
+destructor TCLoginGate.Destroy;
+begin
+  LoginGateSocket.Free;
+  DecodeTimer.Free;
+  inherited;
+end;
+
+procedure TCLoginGate.Connect(Sender: TObject; Socket: TCustomWinSocket);
+var
+  ginfo: PTLoginGate;
+begin
+  if not DecodeTimer.Enabled then begin
+    Socket.Close;
+    exit;
+  end;
+  if IsValidGateAddr(Socket.RemoteAddress) then begin
+    new(ginfo);
+    with ginfo^ do begin
+      GateSocket := Socket;
+      dbInfo := GetPublicAddr(Socket.RemoteAddress);
+      SocData := '';
+      UserList := TList.Create;
+      ConnCheckTime := GetCurrentTime;
+    end;
+    try
+      sLock.Enter;
+      m_listLoginGate.Add(ginfo);
+    finally
+      sLock.Leave;
+    end;
+    MainOutMessage(0, Format('[LoginGate/Conn] LoginGate connected.(%s):(%d)',
+                  [Socket.RemoteAddress, Socket.RemotePort]));
+  end
+  else begin
+      //Memo1.Lines.Add ('not authorized connection tryed..');
+    MainOutMessage(CERR, Format('Unindentified LoginGate has tried connection. (%s):(%d)',
+      [Socket.RemoteAddress, Socket.RemotePort]));
+    Socket.Close;
+  end;
+end;
+
+procedure TCLoginGate.Disconnect(Sender: TObject; Socket: TCustomWinSocket);
+var
+  i, j: integer;
+  ginfo: PTLoginGate;
+begin
+  try
+    sLock.Enter;
+    for i := m_listLoginGate.Count - 1 downto 0 do begin
+      if PTLoginGate(m_listLoginGate[i]).GateSocket = Socket then begin
+        ginfo := PTLoginGate(m_listLoginGate[i]);
+        for j := ginfo.UserList.Count - 1 downto 0 do begin
+//          if CbViewLog.Checked then
+//            SetLog(0, 'Close : ' + PTUserInfo(ginfo.UserList[j]).UserAddr);
+          Dispose(PTUserInfo(ginfo.UserList[j]));
+        end;
+        MainOutMessage(CERR, Format('LoginGate disconnected.[%s:%d]',
+                       [Socket.RemoteAddress, Socket.RemotePort]));
+        Dispose(ginfo);
+        m_listLoginGate.Delete(i);
+        break;
+      end;
+    end;
+  finally
+    sLock.Leave;
+  end;
+end;
+
+procedure TCLoginGate.Error(Sender: TObject; Socket: TCustomWinSocket;
+  ErrorEvent: TErrorEvent; var ErrorCode: Integer);
+begin
+  ErrorCode := 0;
+  Socket.Close;
+end;
+
+procedure TCLoginGate.Read(Sender: TObject; Socket: TCustomWinSocket);
+var
+  i: integer;
+begin
+  try
+    sLock.Enter;
+    for i := 0 to m_listLoginGate.Count - 1 do begin
+      if PTLoginGate(m_listLoginGate[i]).GateSocket = Socket then begin
+        PTLoginGate(m_listLoginGate[i]).SocData := PTLoginGate(m_listLoginGate[i]).SocData + Socket.ReceiveText;
+        MainOutMessage(0, Format('[%s] [%s] ', [PTLoginGate(m_listLoginGate[i]).SocData, Socket.ReceiveText]));
+        break;
+      end;
+    end;
+  finally
+    sLock.Leave;
+  end;
+end;
+
+procedure TCLoginGate.DecodeTimerTimer(Sender: TObject);
+var
+  i, n: integer;
+  str, data: string;
+  ginfo: PTLoginGate;
+  puinfo: PTUserInfo;
+const
+  busy: Boolean = FALSE;
+begin
+  if busy then
+    exit;
+  try
+    try
+      DecodeTime := GetCurrentTime;
+      busy := TRUE;
+      n := 0;
+      while TRUE do begin
+        if n >= m_listLoginGate.Count then
+          break;
+        ginfo := PTLoginGate(m_listLoginGate[n]);
+        if ginfo.SocData <> '' then begin
+          DecodeGateData(ginfo);
+          CurrentRemotePublicAddr := ginfo.dbInfo.szIP;
+          i := 0;
+          while TRUE do begin
+            if i >= ginfo.UserList.Count then
+              break;
+            puinfo := PTUserInfo(ginfo.UserList[i]);
+            if puinfo.SocData <> '' then begin
+              DecodeUserData(puinfo);
+            end;
+            Inc(i);
+          end;
+        end;
+        Inc(n);
+      end;
+      if DecodeRunTime < DecodeTime then
+        DecodeRunTime := GetCurrentTime - DecodeTime;
+      if DecodeRunTime > 100 then
+        Dec(DecodeRunTime, 100);
+    except
+      MainOutMessage(CERR, 'Exception !!!!!!!!!!!!!');
+    end;
+  finally
+    busy := FALSE;
+  end;
+end;
+
+procedure TCLoginGate.DecodeGateData(ginfo: PTLoginGate);
+var
+  tag: Char;
+  errcount: integer;
+  msg, str, data, shandle, addr: string;
+begin
+  try
+    errcount := 0;
+    while TRUE do begin
+      if CharCount(ginfo.SocData, '$') <= 0 then
+        break;
+
+      ginfo.SocData := ArrestStringEx(ginfo.SocData, '%', '$', msg);
+      if msg <> '' then begin
+        tag := msg[1];
+        msg := Copy(msg, 2, Length(msg) - 1);
+        case tag of
+          '-':
+            begin
+              ReceiveCheckCode(ginfo.GateSocket);
+              ginfo.ConnCheckTime := GetCurrentTime;
+            end;
+          'O':
+            begin
+              data := GetValidStr3(msg, str, ['/']);
+                     //str : user handle
+                     //data : user remote address
+              shandle := str;
+              addr := data;
+              ReceiveOpenUser(shandle, addr, ginfo);
+            end;
+          'X':
+            begin
+              shandle := msg;
+              ReceiveCloseUser(shandle, ginfo);
+            end;
+          'A':
+            begin
+              data := GetValidStr3(msg, shandle, ['/']);
+              ReceiveSendData(shandle, ginfo, data);
+            end;
+        end;
+      end
+      else begin
+        if errcount >= 1 then ginfo.SocData := '';
+        Inc(errcount);
+        //break;
+      end;
+    end;
+  except
+    MainOutMessage(CERR, 'Exception DecodeGateData !!!!!!!!!!!!!');
+  end;
+end;
+
+procedure TCLoginGate.DecodeUserData(pu: PTUserInfo);
+var
+  errcount: integer;
+  msg: string;
+begin
+  try
+    errcount := 0;
+    while pu.SocData <> '' do begin  // #FDSAFDJSAFDSA!
+      if CharCount(pu.SocData, '!') <= 0 then
+        break;
+      pu.SocData := ArrestStringEx(pu.SocData, '#', '!', msg);
+      if msg <> '' then begin
+        if Length(msg) >= DEFBLOCKSIZE + 1 then begin
+          msg := Copy(msg, 2, Length(msg) - 1);
+          DecodeMessages(msg, pu);
+          //break;
+        end;
+      end
+      else begin
+        if errcount >= 1 then pu.SocData := '';
+        Inc(errcount);
+        //break;
+      end;
+    end;
+  except
+    MainOutMessage(CERR, 'Exception DecodeUserData !!!!!!!!!!!!!');
+  end;
+end;
+
+procedure TCLoginGate.ReceiveCheckCode(asocket: TCustomWinSocket);
+begin
+  if asocket.Connected then begin
+    asocket.SendText('%++$');
+  end;
+end;
+
+procedure TCLoginGate.ReceiveOpenUser(uhandle, usraddr: string; ginfo: PTLoginGate);
+var
+  i: integer;
+  puinfo: PTUserInfo;
+  msg: TDefaultMessage;
+begin
+  for i := 0 to ginfo.UserList.Count - 1 do begin
+    puinfo := PTUserInfo(ginfo.UserList[i]);
+    if puinfo.szUserHandle = uhandle then begin
+      puinfo.szAddr := usraddr;
+      puinfo.szID := '';
+      puinfo.nCertification := 0;
+      puinfo.SocData := '';
+//      puinfo.ConnectTime := GetTickCount;
+      puinfo.dwLatestCmdTime := GetTickCount;
+      exit;
+    end;
+  end;
+  new(puinfo);
+  with puinfo^ do begin
+    szID := '';
+    szAddr := usraddr;
+    szUserHandle := uhandle;
+    nClientVersion := 0;
+    bVersionAccept := FALSE;
+    nCertification := 0;    // not certificated..
+//    ConnState := csIdPasswd;
+    nGateSocket := ginfo.GateSocket;
+    SocData := '';
+//    ConnectTime := GetTickCount;
+    dwLatestCmdTime := GetTickCount;
+//    BoServerRun := FALSE;
+  end;
+  ginfo.UserList.Add(puinfo);
+
+  ChangeByDefaultKey();
+  msg := MakeDefaultMsg(SM_SEND_PUBLICKEY, 0, GetSavedKey xor $F0E0, $F0E0, 0);
+  SendSocket(puinfo.nGateSocket, puinfo.szUserHandle, EncodeMessage(msg));
+  ChangeBySavedKey();
+{$IFDEF DEBUG}
+  MainOutMessage(CDBG, Format('OPEN GATE_USER: %d', [ginfo.UserList.Count]));
+{$ENDIF}
+end;
+
+procedure TCLoginGate.ReceiveCloseUser(uhandle: string; ginfo: PTLoginGate);
+var
+  i: integer;
+  p: PTUserInfo;
+begin
+  for i := ginfo.UserList.Count - 1 downto 0 do begin
+    if PTUserInfo(ginfo.UserList[i]).szUserHandle = uhandle then begin
+//      if CbViewLog.Checked then MainOutMessage(0, 'Close : ' + PTUserInfo(ginfo.UserList[i]).UserAddr);
+      p := PTUserInfo(ginfo.UserList[i]);
+      if not p.bSelServerOk then  //º≠πˆº±≈√¿ª «œ¡ˆæ ¿∫ √§∑Œ ¡¢º”¡æ∑·µ» ∞ÊøÏ
+        DelCertUser(p.nCertification);
+      Dispose(p);
+      ginfo.UserList.Delete(i);
+{$IFDEF DEBUG}
+      MainOutMessage(CDBG, Format('CLOSE GATE_USER: %d', [ginfo.UserList.Count]));
+{$ENDIF}
+      //p := PTUserInfo (ginfo.UserList[i]);
+      //if p.ConnState = csIdPasswd then
+      //   p.ConnState := csTrySelChr;
+      break;
+    end;
+  end;
+end;
+
+procedure TCLoginGate.ReceiveSendData(uhandle: string; ginfo: PTLoginGate; data: string);
+var
+  i: integer;
+begin
+  for i := 0 to ginfo.UserList.Count - 1 do begin
+    if PTUserInfo(ginfo.UserList[i]).szUserHandle = uhandle then begin
+      if Length(PTUserInfo(ginfo.UserList[i]).SocData) < 4096 then begin
+        PTUserInfo(ginfo.UserList[i]).SocData := PTUserInfo(ginfo.UserList[i]).SocData + data;
+      end;
+      break;
+    end;
+  end;
+end;
+
+function TCLoginGate.DecodeMessages(data: string; pu: PTUserInfo): Boolean;
+var
+  msg: TDefaultMessage;
+  cport, serverindex, certify: integer;
+  head, body, idstr, newaddress: string;
+   //logobj: TObject;
+begin
+  try
+    head := Copy(data, 1, DEFBLOCKSIZE);
+    body := Copy(data, DEFBLOCKSIZE + 1, Length(data) - DEFBLOCKSIZE);
+    msg := DecodeMessage(head);
+
+    case msg.Ident of
+      CM_PROTOCOL:
+        begin
+          {Version := msg.Recog;
+          UpdateDate := msg.Series; }
+          if pu.szID = '' then begin
+            KickOffSocket(pu);
+          end
+          else if msg.Recog < VERSION_NUMBER then begin
+            SendResponse(pu, SM_VERSION_FAIL, 0, 0, 0, 0);
+          end
+          else begin
+            SendResponse(pu, SM_VERSION_AVAILABLE, 0, 0, 0, 0);
+            pu.nClientVersion := msg.Recog;
+            pu.bVersionAccept := TRUE;
+          end;
+        end;
+
+      CM_IDPASSWORD:
+        begin
+          LoginGetIdPasswd(pu, body, msg);
+        end;
+
+      CM_SELECTSERVER:
+        begin
+          if not pu.bSelServerOk then  //«—π¯∏∏ º±≈√, («ÿƒø∞¯∞›πÊ¡ˆ)
+            LoginGetSelectServer(pu, body);
+        end;
+
+      CM_ADDNEWUSER:
+        if BoEnableMakeID then begin
+          if GetTickCount - pu.dwLatestCmdTime > 5 * 1000 then begin
+            pu.dwLatestCmdTime := GetTickCount;
+            LoginGetNewUser(pu, body);
+          end
+          else
+            MainOutMessage(0, '[Hacker Attack] ADDNEWACCOUNT ' + pu.szID + '/' + pu.szAddr);
+        end;
+
+      CM_UPDATEUSER:
+        begin
+          if GetTickCount - pu.dwLatestCmdTime > 5 * 1000 then begin
+            pu.dwLatestCmdTime := GetTickCount;
+            LoginGetUpdateUser(pu, body);
+          end
+          else
+            MainOutMessage(0, '[Hacker Attack] UPDATEUSER ' + pu.szID + '/' + pu.szAddr);
+        end;
+
+      CM_CHANGEPASSWORD:
+        begin
+          if pu.szID = '' then begin
+            if GetTickCount - pu.dwLatestCmdTime > 5 * 1000 then begin
+              pu.dwLatestCmdTime := GetTickCount;
+              LoginChangePasswd(pu, body);
+            end
+            else
+              MainOutMessage(0, '[Hacker Attack] CHANGEPASSWORD ' + pu.szID + '/' + pu.szAddr);
+          end
+          else begin
+            //¡ﬂ∫π ¡¢º”
+            pu.szID := '';
+          end;
+        end;
+    end;
+  except
+    MainOutMessage(CERR, 'Exception DecodeLogMessages ' + IntToStr(msg.Ident));
+  end;
+  Result := TRUE;
+end;
+
+procedure TCLoginGate.AddCertUser(pUser: PTUserInfo);
+var
+  pCert: PTCertUser;
+  st: SYSTEMTIME;
+  nCurrentTime: Integer;
+  iRemaindId, iRemaindIp: Integer;
+begin
+  New(pCert);
+  // GetSystemTime(st);
+  GetLocalTime(st);
+  nCurrentTime := GetDay(st.wYear, st.wMonth, st.wDay);
+
+  FillChar(pCert^, SizeOf(TCertUser), #0);
+
+  pCert.szLoginID := pUser.szID;
+  pCert.szAddr := pUser.szAddr;
+
+//  iRemaindId := _MAX(pUser.dwValidUntil, pUser.dwMValidUntil) - nCurrentTime;
+//  iRemaindIp := _MAX(pUser.dwIpValidUntil, pUser.dwIpMValidUntil) - nCurrentTime;
+
+  iRemaindId := pUser.dwValidUntil - nCurrentTime;
+  iRemaindIp := pUser.dwIpValidUntil - nCurrentTime;
+
+  pCert.nIDHour := pUser.dwSeconds{ + pUser.dwMSeconds};
+	//««ææπÊ¿∫ -50Ω√∞£±Ó¡ˆ «„øÎ«—¥Ÿ
+  pCert.nIPHour := pUser.dwIpSeconds; //    + 180000;	//+ pUser.dwIpMSeconds
+	// ≥Ø¬•¥¬ ∏∂¡ˆ∏∑≥Ø + 1¿œ¿ª «ÿ¡ÿ¥Ÿ. 2003-09-05 PDS
+  pCert.nIPDay := iRemaindIp + 1; //pUser.dwIpValidUntil - nCurrentTime;
+  pCert.nIDDay := iRemaindId + 1; //pUser.dwValidUntil   - nCurrentTime;
+
+  pUser.nAvailableType := 5;
+	 // 2003/02/06
+//  if (pCert.nIDHour > 0) then pUser.nAvailableType := 2;
+//	if (pUser.dwSeconds > 0) then pUser.nAvailableType := 2;
+//	if (pUser.dwMSeconds> 0) then pUser.nAvailableType := 6;
+
+  if (pCert.nIDHour > 0) then
+    pUser.nAvailableType := 2;
+  if (pCert.nIPHour > 0) then
+    pUser.nAvailableType := 4;
+  if (pCert.nIPDay > 0) then
+    pUser.nAvailableType := 3;
+  if (pCert.nIDDay > 0) then
+    pUser.nAvailableType := 1;
+
+  pCert.nCertification := pUser.nCertification;
+  pCert.nOpenTime := GetTickCount;
+//  pCert.nAccountCheckTime := GetTickCount;
+  pCert.nAvailableType := pUser.nAvailableType;
+  pCert.bClosing := FALSE;
+
+  pUser.dwOpenTime := pCert.nOpenTime;
+
+  m_csListCert.Add(pCert);
+end;
+
+//procedure TCLoginGate.ModifyCertify(cert: integer; svname: string; freemode: Boolean);
+//var
+//  i: integer;
+//begin
+//  for i := 0 to m_csListCert.Count - 1 do begin
+//    if PTCertUser(m_csListCert[i]).nCertification = cert then begin
+//      PTCertUser(m_csListCert[i]).szServerName := svname;
+//      PTCertUser(m_csListCert[i]).bFreeMode := freemode;
+//      break;
+//    end;
+//  end;
+//end;
+
+procedure TCLoginGate.DelCertUser(cert: integer);
+var
+  i: integer;
+begin
+  for i := m_csListCert.Count - 1 downto 0 do begin
+    if PTCertUser(m_csListCert[i]).nCertification = cert then begin
+      Dispose(PTCertUser(m_csListCert[i]));
+      m_csListCert.Delete(i);
+      break;
+    end;
+  end;
+end;
+
+function TCLoginGate.IsValidCertification(cert: integer): Boolean;
+var
+  i: integer;
+begin
+  Result := FALSE;
+  for i := 0 to m_csListCert.Count - 1 do begin
+    if PTCertUser(m_csListCert[i]).nCertification = cert then begin
+      if not PTCertUser(m_csListCert[i]).bClosing then
+        Result := TRUE;
+      break;
+    end;
+  end;
+end;
+
+function TCLoginGate.GetDoubbleConnection(uid: string): PTCertUser;
+var
+  i: integer;
+begin
+  Result := nil;
+  for i := 0 to m_csListCert.Count - 1 do begin
+    if PTCertUser(m_csListCert[i]).szLoginID = uid then begin
+      Result := PTCertUser(m_csListCert[i]);
+      break;
+    end;
+  end;
+end;
+
+procedure TCLoginGate.LoginGetIdPasswd(pUser: PTUserInfo; body: string; msg:
+  TDefaultMessage);
+var
+  idx, runport, ididx, ipidx, idaval, ipaval: integer;
+  str, uid, passwd, runaddr: string;
+  nPacketRecog: integer;
+  DefMsg: TDefaultMessage;
+  bNeedUpdate, boAvailableSsn, ipmode: Boolean;
+  ue: TUserEntryInfo;
+  szQuery: string;
+  szMessage: string;
+  pRec: TADOQuery;
+  st: SYSTEMTIME;
+  nCurrentTime: longword;
+  nVersion: Integer;
+  szDBPW: string;
+  nPCBangIndex, nPCBangMaxCount, nPCBangCurrent: Integer;
+  RemainDays, RemainM2Days, RemainIpDays, RemainHours, RemainIpHours: LongInt;
+  psCertUser: PTCertUser;
+  cFinished: string;
+begin
+  if IsNotInServiceMode and (not IsValidGmAddr(pUser.szAddr)) then begin
+    SendResponse(pUser, SM_NOT_IN_SERVICE, 0, 0, 0, 0);
+    exit;
+  end;
+
+  if not FSQLIDDB.Open then begin
+    SendResponse(pUser, SM_NOT_IN_SERVICE, 0, 0, 0, 0);
+    exit;
+  end;
+
+  str := DecodeString(body);
+  passwd := GetValidStr3(str, uid, ['/']);
+  pUser.szID := uid;
+  pUser.nClientVersion := msg.Recog;
+
+   {
+		success
+		 0	’˝≥£
+		-1	√‹¬Î¥ÌŒÛ
+		-2	√‹¬Î ß∞‹5¥Œ∫Û≤ªµΩ10∑÷÷”
+		-3	”–œ‡Õ¨µƒID
+		-4
+		-5	’ ∫≈Õ£÷π◊¥Ã¨
+		-6	√ª”–ID
+		-7  ¥´∆Ê2µƒID.
+		-8  ‘ –ÌµƒœÓƒø ˝¡ø≥¨π˝
+		-9	…Ì∑›÷§∫≈¬Î¥ÌŒÛ
+	}
+  nPacketRecog := 0;
+  bNeedUpdate := FALSE;
+  boAvailableSsn := FALSE;   //ø√πŸ∏£∞Ì 15ºº¿ÃªÛ¿Œ¡ˆ ¿˙¿Â«œ¥¬ ∫Øºˆ
+   //cFinished := '';
+   // GetSystemTime(&st);
+  GetLocalTime(st);
+  nCurrentTime := GetDay(st.wYear, st.wMonth, st.wDay);
+
+//  szQuery := Format('SELECT FLD_VALIDUNTIL, FLD_SECONDS, FLD_PASSWORD, FLD_PASSFAILCOUNT, FLD_PASSFAILTIME, FLD_SECEDE'
+//    + ',FLD_USERNAME, FLD_PSSNO, FLD_PHONE, FLD_EMAIL, FLD_QUIZ1, FLD_ANSWER1' +
+//    ' FROM TBL_ACCOUNT A,TBL_ACCOUNTADD B WHERE A.FLD_LOGINID=N''%s'' AND A.FLD_LOGINID = B.FLD_LOGINID', [uid]);
+
+//  szQuery := Format('SELECT * FROM TBL_ACCOUNT WHERE FLD_LOGINID=N''%s''', [uid]);
+
+  szQuery := Format('SELECT * FROM TBL_ACCOUNT A,TBL_ACCOUNTADD B WHERE A.FLD_LOGINID=N''%s'' AND A.FLD_LOGINID = B.FLD_LOGINID', [uid]);
+{$IFDEF DEBUG}
+  MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+
+  pUser.dwValidFrom := 0;
+  pUser.dwValidUntil := 0;
+  pUser.dwSeconds := 0;
+  pUser.dwStopUntil := 0;
+  pUser.dwIpValidFrom := 0;
+  pUser.dwIpValidUntil := 0;
+  pUser.dwIpSeconds := 0;	//TWN -200000;
+
+   //∑Œ±◊¿Œ æ∆¿Ãµ √º≈©
+  FSQLIDDB.UseDB(tAccount);
+  pRec := FSQLIDDB.OpenQuery(szQuery);
+  if (pRec = nil) or (pRec.RecordCount < 1) then begin
+    nPacketRecog := -6;
+    pRec := nil;
+    SendResponse(pUser, SM_PASSWD_FAIL, nPacketRecog, 0, 0, 0);
+      {$IFDEF DEBUG}
+    MainOutMessage(0, '[LoginGate/ Send] SM_PASSWD_FAIL : ' + inttostr(nPacketRecog));
+      {$ENDIF}
+  end
+  else begin
+    pUser.nPassFailCount :=  pRec.FieldByName('FLD_PASSFAILCOUNT').AsInteger;
+    pUser.nPassFailTime :=  pRec.FieldByName('FLD_PASSFAILTIME').AsInteger;
+
+    cFinished := pRec.FieldByName('FLD_SECEDE').AsString;
+    if (cFinished = 'Y') then begin
+      nPacketRecog := -6;
+{$IFDEF DEBUG}
+      MainOutMessage(0, Format('%s:Closed User', [pUser.szID]));
+{$ENDIF}
+    end;
+
+
+	  	//15ººπÃ∏∏ π◊ ¡÷πŒπ¯»£ √º≈© √ﬂ∞°µ»∫Œ∫–
+		  //-----------------------------------------------------
+    pUser.szSsno := Trim(pRec.FieldByName('FLD_SSNO').AsString);
+
+    if not CheckValidatePID(pUser.szSsno) then begin
+//			nPacketRecog := -9;
+      boAvailableSsn := false;
+{$IFDEF DEBUG}
+      MainOutMessage(0, Format('%s is not correst ssn', [pUser.szID]));
+{$ENDIF}
+    end
+    else begin
+//			if (isOlderthen15(pc.UserSsno)) then
+      boAvailableSsn := true//			else
+//				boAvailableSsn := false;
+    end;
+	  		  	//-----------------------------------------------------
+		pUser.nParentCheck	:= StrToIntDef(pRec.FieldByName('FLD_PCHECK').AsString, 0);
+		if pUser.nParentCheck = 3 then begin
+
+			nPacketRecog := -10;
+{$IFDEF DEBUG}
+			MainOutMessage( 0, Format('%s:ParentCheck is 3', [pUser.szID]));
+{$ENDIF}
+    end;
+
+    pUser.dwValidFrom := GetTimeInfo(pRec.FieldByName('FLD_VALIDFROM').AsString);
+    pUser.dwValidUntil := GetTimeInfo(pRec.FieldByName('FLD_VALIDUNTIL').AsString);
+    pUser.dwSeconds := pRec.FieldByName('FLD_SECONDS').AsInteger;
+    pUser.dwStopUntil := GetTimeInfo( pRec.FieldByName('FLD_STOPUNTIL').AsString );
+
+     // π´Àæ IP »∑»œ
+    if IsValidGmAddr(pUser.szAddr) then
+    begin
+      pUser.dwStopUntil := 0;
+//      pUser.dwMStopUntil := 0;
+    end;
+
+    pUser.dwMakeTime := GetTimeInfo( pRec.FieldByName('FLD_MAKETIME').AsString );
+    nVersion := StrToIntDef( pRec.FieldByName('FLD_VER').AsString, 0);
+    szDBPW := pRec.FieldByName('FLD_PASSWORD').AsString;
+
+    FillChar(ue, sizeof(TUserEntryInfo), #0);
+    ue.LoginId := uid;
+    ue.Password := passwd;
+    ue.UserName := Trim(pRec.FieldByName('FLD_USERNAME').AsString);
+    ue.SSNo := Trim(pRec.FieldByName('FLD_SSNO').AsString);
+    ue.Phone := Trim(pRec.FieldByName('FLD_PHONE').AsString);
+    ue.Quiz := Trim(pRec.FieldByName('FLD_QUIZ1').AsString);
+    ue.Answer := Trim(pRec.FieldByName('FLD_ANSWER1').AsString);
+    ue.EMail := Trim(pRec.FieldByName('FLD_EMAIL').AsString);
+
+    pRec.Close;
+
+	  //Õ£÷π∆⁄º‰ºÏ≤È
+    if ( (pUser.dwStopUntil > nCurrentTime ){ or( pUser.dwMStopUntil > nCurrentTime ) }) then
+      nPacketRecog := -5
+    else begin
+      //ºÏ≤È√‹¬Î¥ÌŒÛµƒ ±º‰∫Õ¥Œ ˝
+      if ( pUser.nPassFailCount >= 3 ) or ( GetTickCount - pUser.nPassFailTime < 60000 ) then
+      begin
+        nPacketRecog := -2;
+        pUser.nPassFailCount := 0;
+        //pu.PassFailTime := GetTickCount();
+      end	else
+      begin
+
+        passwd := Trim(passwd);
+        szDBPW := Trim(szDBPW);
+
+        if (passwd <> szDBPW) then begin
+          nPacketRecog := -1;
+          pUser.nPassFailCount := pUser.nPassFailCount + 1;
+          if (pUser.nPassFailCount >= 3) then
+            pUser.nPassFailTime := GetTickCount;
+        end
+        else begin
+          pUser.nPassFailCount := 0;
+          pUser.nPassFailTime := 0;
+//          if (ue.UserName = '') or (ue.Quiz = '') then
+//            bNeedUpdate := TRUE;
+        end;
+      end;
+      szQuery := Format('UPDATE TBL_ACCOUNT SET FLD_PASSFAILCOUNT = %d, FLD_PASSFAILTIME = %d ' +
+                        'WHERE FLD_LOGINID=N''%s''',
+                        [pUser.nPassFailCount, pUser.nPassFailTime, pUser.szID] );
+{$IFDEF DEBUG}
+      MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+      FSQLIDDB.ExeCuteSQL ( szQuery );
+    end;
+
+    //  «∑Ò÷ÿ∏¥¡¨Ω”
+    if (nPacketRecog = 0) then begin
+      psCertUser := GetDoubbleConnection(uid);
+      if psCertUser <> nil then begin
+
+        nPacketRecog := -3;
+          (*	FILE *fp = fopen( "d:\\Admission.txt", "ab" );
+				  	fprintf( fp, "CLoginGate::OnIdPassword\r\n" );
+				  	fclose( fp );*)
+
+        SendCancelAdmissionUser(psCertUser);
+        psCertUser.bClosing := TRUE;
+        if (not psCertUser.bClosing) then
+          psCertUser.nOpenTime := GetTickCount;
+      end;
+    end;
+
+//    if bNeedUpdate then begin
+//      DefMsg := MakeDefaultMsg(SM_NEEDUPDATE_ACCOUNT, 0, 0, 0, 0);
+//      SendSocket(pUser.CSocket, pUser.UserHandle, EncodeMessage(DefMsg) +
+//        EncodeBuffer(@ue, sizeof(TUserEntryInfo)));
+//    end;
+
+    //if nVersion = 0 then success := -7;
+    // Õ¯∞…
+    if (nPacketRecog = 0) then begin
+      pUser.bSelServerOK := false;
+      pUser.nCertification := GetCertification;
+      nPCBangIndex := 0;
+      nPCBangMaxCount := 0;
+      nPCBangCurrent := 0;
+
+//		 	szQuery := Format('SELECT * FROM TBL_IP A, TBL_PCROOM B WHERE A.FLD_PCROOMID = B.FLD_PCROOMID AND A.FLD_IP = ''%s''', [pUser.UserAddr] );
+      szQuery := Format('SELECT FLD_VALIDFROM,FLD_VALIDUNTIL,FLD_REMAINEDTIME,'
+        + 'A.FLD_PCROOMID FROM TBL_IP A, TBL_PCROOM B WHERE A.FLD_PCROOMID = B.FLD_PCROOMID AND A.FLD_IP = ''%s''',
+        [pUser.szAddr]);
+		  	{$IFDEF DEBUG}
+      MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+		  	{$ENDIF}
+
+      pRec := nil;  //º”…œ’‚æ‰£¨≤ª¥¶¿ÌMANAGE ˝æ›ø‚  rainee
+{        FSQLIDDB.UseDB (tManage);
+        pRec := FSQLIDDB.OpenQuery (szQuery);      }//rainee ◊¢ Õ
+      if (pRec <> nil) then begin
+        if (pRec.RecordCount > 0) then begin
+	//				SetLog( 0, '[SQL Execute OK] Fetch....');
+				  	//∞‘¿”πÊ ¡§æ◊∞¸∑√
+          pUser.dwIpValidFrom := GetTimeInfo(pRec.FieldByName('FLD_VALIDFROM').AsString);
+          pUser.dwIpValidUntil := GetTimeInfo(pRec.FieldByName('FLD_VALIDUNTIL').AsString);
+
+//				  	pUser.dwIpSeconds	:= pRec.FieldByName('FLD_REMAINEDTIME').AsInteger;
+//				  	nPCBangIndex			:= pRec.FieldByName('FLD_PCROOMID').AsInteger;
+          nPCBangMaxCount := 0;	// TWN pRec.FieldByName('PCRoomStatus_IPCount').AsInteger;
+          nPCBangCurrent := 0;	// TWN pRec.FieldByName('PCRoomStatus_UsingIPCount').AsInteger;
+
+				  	(*
+				  	szQuery := Format('SELECT * FROM TBL_USINGIP WHERE FLD_USINGIP = ''%s'' AND FLD_GAMETYPE = ''%s''', [pUser.UserAddr, GAMETYPE]);
+	#ifdef _DEBUG
+				  	SetLog( 0, '[SQL QUERY] ' + szQuery);
+	#endif
+				  	CRecordset *pRec2 = pConnPC->CreateRecordset();
+				  	if ( pRec2->Execute( szQuery ) && pRec2->Fetch() )
+				  	{
+						// ªÁøÎ¡ﬂ¿∏∑Œ µ«æÓ ¿÷¥Ÿ∏È ∞∞¿∫ ∞‘¿”¿Œ ∞ÊøÏ KICK √≥∏Æ, æ∆¥œ∏È TBL_DUPIPø° ±‚∑œ
+						if(strcmp(GetLoginServer()->m_szGameType, pRec2->Get( "FLD_GAMETYPE" )) ==0)
+						{
+							GetLoginServer()->m_csListCert.Lock();
+							sCertUser *psCertUser = GetLoginServer()->m_listCert.SearchKey( pRec2->Get( "FLD_LOGINID" ) );
+
+							if (psCertUser)
+							{
+								nPacketRecog = -3;
+								//	FILE *fp = fopen( "d:\\Admission.txt", "ab" );
+								//	fprintf( fp, "CLoginGate::OnIdPassword\r\n" );
+								//	fclose( fp );
+
+								GetLoginServer()->SendCancelAdmissionUser( psCertUser );
+								psCertUser->bClosing = true;
+								if (!psCertUser->bClosing)
+									psCertUser->nOpenTime = GetTickCount();
+						  	}
+						  	GetLoginServer()->m_csListCert.Unlock();
+						  	pConnPC->DestroyRecordset( pRec2 );
+					  	}
+					  	// ∞∞¿∫ ∞‘¿”¿Ã æ∆¥œπ«∑Œ µ∫Òø° ±‚∑œ«œø© ≈±¿ª ø‰√ª
+					  	else
+					  	{
+						  	pConnPC->DestroyRecordset( pRec2 );
+						  	// Write TBL_DUPIP
+						  	sprintf( szQuery, "INSERT INTO TBL_DUPIP (FLD_IP, FLD_GAMETYPE, FLD_PCBANG, FLD_ISOK, FLD_REQUEST) VALUES ('%s', 'MIR3', %d, 0, GetDate())", pUser->szAddr, nPCBangIndex );
+	#ifdef _DEBUG
+						  	GetApp()->SetLog( 0, "[SQL QUERY] %s", szQuery);
+	#endif
+						  	pRec2 = pConnPC->CreateRecordset();
+						  	pRec2->Execute( szQuery );
+						  	pConnPC->DestroyRecordset( pRec2 );
+					  	}
+				  	}
+				  	//2. «ˆ¿Á ªÁøÎ IP∞≥ºˆ∞° MAX∞πºˆ∫∏¥Ÿ ¿€¿∫¡ˆ »Æ¿Œ
+				  	//¿€¿∫ ∞ÊøÏ OK, TBL_USINGIPø° IP√ﬂ∞°
+				  	//≈©∞≈≥™ ∞∞¿∫ ∞ÊøÏ FAIL, «ˆ¿Á ªÁøÎ IP∞πºˆ∞° ∏π¥Ÿ∞Ì ∏Æ≈œƒ⁄µÂ ∫∏≥ø
+				  	if ( nPacketRecog == 0 )
+				  	{
+					  	if( nPCBangCurrent >= nPCBangMaxCount )
+					  	{
+						  	nPacketRecog = -8;
+					  	}
+					  	else
+					  	{
+						  	// Write TBL_USINGIP
+						  	sprintf( szQuery, "INSERT INTO TBL_USINGIP (FLD_PCBANG, FLD_USINGIP, FLD_GAMETYPE, FLD_FROM, FLD_SERVER, FLD_LOGINID ) VALUES (%d, '%s', '%s', GetDate(), '%d', '%s')", nPCBangIndex, pUser->szAddr, GetLoginServer()->m_szGameType, pUser->nServerID, pUser->szID );
+	#ifdef _DEBUG
+						  	GetApp()->SetLog( 0, "[SQL QUERY] %s", szQuery);
+	#endif
+						  	pRec2 = pConnPC->CreateRecordset();
+						  	pRec2->Execute( szQuery );
+						  	pConnPC->DestroyRecordset( pRec2 );
+						  	// ªÁøÎ¡ﬂ¿Œ IP Count ¡ı∞°
+						  	nPCBangCurrent++;
+						  	sprintf( szQuery, "UPDATE MR3_PCRoomStatusTable SET PCRoomStatus_UsingIPCount = %d WHERE PCRoomStatus_PCRoomIndex = %d", nPCBangCurrent, nPCBangIndex );
+	#ifdef _DEBUG
+						  	GetApp()->SetLog( 0, "[SQL QUERY] %s", szQuery);
+	#endif
+						  	pRec2 = pConnPC->CreateRecordset();
+						  	pRec2->Execute( szQuery );
+						  	pConnPC->DestroyRecordset( pRec2 );
+					  	}
+				  	}
+				  	*)
+          pRec.Close;
+        end;
+        pRec := nil;
+      end;
+
+      pUser.nPayMode := 0;
+
+      //nPaymode => 0 : ÃÂ—È∞Ê, 1 :  ’∑—, 2 : √‚∑—£®¥¥Ω® ±º‰£©
+      //Õ≥“ª∂®∂Ó”Î∑Ò»∑»œ
+      //œ‡”¶∂®∂Ó
+      //∂®¡ø
+      // TWN
+      if (nCurrentTime <= pUser.dwValidUntil) or		//∞≥¿Œ		≈Î«’	¡§æ◊ø° «ÿ¥Á«œ¥¬∞ÊøÏ.
+        (nCurrentTime <= pUser.dwIpValidUntil) or		//∞‘¿”πÊ	≈Î«’	¡§æ◊ø° «ÿ¥Á«œ¥¬ ∞ÊøÏ
+        (pUser.dwSeconds > 0) or						//∞≥¿Œ		≈Î«’	¡§∑Æø° «ÿ¥Á«œ¥¬ ∞ÊøÏ
+        (pUser.dwIpSeconds > 0) then			//∞‘¿”πÊ 0Ω√∞£ ∫∏¡§
+      begin
+        pUser.nPayMode := 1;
+        (* // TWN
+        // ∞≥¿Œ ∫∏¡§
+        if(pUser.dwValidUntil ==0)
+          pUser.dwValidUntil = nCurrentTime;
+        else if(pUser.dwValidUntil ==nCurrentTime)
+          pUser.dwValidUntil++;
+
+        if(pUser.dwMValidUntil ==0)
+          pUser.dwMValidUntil = nCurrentTime;
+        else if(pUser.dwMValidUntil ==nCurrentTime)
+          pUser.dwMValidUntil++;
+        // ««ææπÊ ∫∏¡§
+        if(pUser.dwIpValidUntil ==0)
+          pUser.dwIpValidUntil = nCurrentTime;
+        else if(pUser.dwIpValidUntil ==nCurrentTime)
+          pUser.dwIpValidUntil++;
+
+        if(pUser.dwIpMValidUntil ==0)
+          pUser.dwIpMValidUntil = nCurrentTime;
+        else if(pUser.dwIpMValidUntil ==nCurrentTime)
+          pUser.dwIpMValidUntil++;
+        *)
+        RemainDays := 0;
+//        RemainM2Days := 0;
+        RemainIpDays := 0;
+        RemainHours := 0;
+        RemainIpHours := 0;
+
+        RemainDays := pUser.dwValidUntil - nCurrentTime; // ∏∂¡ˆ∏∑≥Ø¿Ã 1¿œ 1¿ª ¥ı«ÿæﬂ µ ..
+        RemainIpDays := pUser.dwIpValidUntil - nCurrentTime;
+        if (RemainDays = 1) and (pUser.dwSeconds = 0) then
+        begin
+          szQuery := Format('UPDATE TBL_ACCOUNT SET ' + ' FLD_SECONDS = ''%d''' + ' WHERE FLD_LOGINID=N''%s''', [86400, pUser.szID]);
+          FSQLIDDB.UseDB(tAccount);
+          with FSQLIDDB.SqlDB do
+          begin
+            Close;
+            SQL.Text := szQuery;
+            try
+              ExecSQL;
+            except
+              exit;
+            end;
+          end;
+          pUser.dwSeconds := 86400;
+          RemainDays := 0;
+        end
+        else if RemainDays <= 0 then
+        begin
+          szQuery := Format('UPDATE TBL_ACCOUNT SET ' + ' FLD_SECONDS = ''%d''' + ' WHERE FLD_LOGINID=N''%s''', [0, pUser.szID]);
+          FSQLIDDB.UseDB(tAccount);
+          with FSQLIDDB.SqlDB do
+          begin
+            Close;
+            SQL.Text := szQuery;
+            try
+              ExecSQL;
+            except
+              exit;
+            end;
+          end;
+          pUser.dwSeconds := 0;
+        end;
+        if RemainDays = 1 then
+          if pUser.dwSeconds <> 0 then
+            RemainDays := 0;
+
+        RemainHours := pUser.dwSeconds div 3600; //pUser.dwSeconds;	// TWN (pUser.dwSeconds + 1) / 3600;
+        RemainIpHours := (pUser.dwIpSeconds + 1) div 3600;
+
+        if (RemainDays < 0) then
+          RemainDays := 0;
+        if (RemainIpDays < 0) then
+          RemainIpDays := 0;
+        if (RemainHours < 0) then
+          RemainHours := 0;
+        if (RemainIpHours < 0) then
+          RemainIpHours := 0;
+
+        (* // TWN
+        //-50Ω√∞£ ∫∏¡§   -50Ω√∞£ = 50 * 3600 = 180,000
+        if (pUser.dwIpSeconds > -180000) and (RemainIpHours = 0) then
+        begin
+          RemainIpHours := 1;
+        end;
+        *)
+			  	//∆≤∏∞ ¡÷πŒπ¯»£ ∂«¥¬ 15ººπÃ∏∏¿Œ∞ÊøÏ √ﬂ∞°∑Œ ∏ﬁºº¡ˆ ∫∏≥ø
+			  	// SM_PASSOK_WRONGSSN = 534
+        if (not boAvailableSsn) then begin
+					//SendResponse( pu, SM_PASSOK_WRONGSSN,0,0,0,0);
+        end;
+
+        SendResponse(pUser, SM_PASSOK_SELECTSERVER,
+                     MAKELONG(WORD(RemainDays),
+                     WORD(RemainHours)),
+                     RemainIpDays, RemainIpHours,
+                     0);
+
+//			  	SetLog( 0, Format('[SQL QUERY] %.2x %.2x %.2x %.2x (%.4x) ',
+//				  	  	  [WORD(RemainDays),
+//						  	  pc.dwSeconds,
+//							    RemainIpDays,
+//						  	  pc.dwIpSeconds,
+//						  	  MAKELONG(WORD(RemainDays), WORD(pc.dwSeconds))])
+//					  		);
+      end
+      else begin
+        if (not boAvailableSsn) then begin
+					//SendResponse( pu, SM_PASSOK_WRONGSSN,0,0,0,0);
+        end;
+        pUser.nPayMode := 0;
+        SendResponse(pUser, SM_PASSOK_SELECTSERVER, 0, 0, 0, 0);
+      end;
+
+{$IFDEF DEBUG}
+      MainOutMessage(0, '[LoginGate/Send] SM_PASSOK_SELECTSERVER : ' + pUser.szID);
+{$ENDIF}
+
+      AddCertUser(pUser);
+      WriteConLog(pUser.szID, pUser.szAddr);
+
+
+			//∑Œ±◊¿ŒΩ√ æ∆¿Ãµ√º≈©»ƒ ∏ﬁºº¡ˆ ∫∏≥ª±‚
+			if CheckBadAccount(pUser.szID) then
+			begin
+			  szMessage := Format('%d-%d-%d %d:%d %d ¡¢º”æ∆¿Ãµ %s∞°(¿Ã)  %sø°º≠ ¡¢º”¿ª Ω√µµ«ﬂΩ¿¥œ¥Ÿ.[%s]',
+        [st.wYear,st.wMonth,st.wDay, st.wHour, st.wMinute, st.wSecond, pUser.szID, pUser.szAddr, m_szGameType]);
+//				GetLoginServer()->m_udpSender.SendMessages(message);
+      end;
+
+    end
+    else begin
+      SendResponse(pUser, SM_PASSWD_FAIL, nPacketRecog, 0, 0, 0);
+{$IFDEF DEBUG}
+      MainOutMessage(0, '[LoginGate/Send] SM_PASSWD_FAIL : ' + IntToStr(nPacketRecog));
+{$ENDIF}
+    end;
+  end;
+
+  if pRec <> nil then
+    pRec.Close;
+end;
+
+function TCLoginGate.SendPasswordSuccess(svname: string; pc: PTUserInfo): Boolean;
+var
+  st: SYSTEMTIME;
+  nCurrentTime: LongWord;
+begin
+  Result := FALSE;
+  //GetSystemTime(&st);
+  GetLocalTime(st);
+  nCurrentTime := GetDay(st.wYear, st.wMonth, st.wDay);
+(*
+  	pUser.AvailableType := 5;
+
+	 if ( pUser.dwSeconds + pUser.dwMSeconds  > 0 ) then pUser.AvailableType := 2;
+	 if ( pUser.dwIpSeconds + pUser.dwIpMSeconds > 0 ) then pUser.AvailableType := 4;
+	 if (((nCurrentTime > pUser.dwValidFrom ) and (nCurrentTime < pUser.dwValidUntil)) or
+      ((nCurrentTime > pUser.dwMValidFrom ) and (nCurrentTime < pUser.dwMValidUntil))) then
+      pUser.AvailableType := 1;
+   if (((nCurrentTime > pUser.dwIpMValidFrom ) and (nCurrentTime < pUser.dwIpMValidUntil)) or
+	  	((nCurrentTime > pUser.dwIpValidFrom ) and (nCurrentTime < pUser.dwIpValidUntil))) then
+	  	pUser.AvailableType := 3;
+*)
+  Result := CGameServer.SendNamedServerMsg(svname, ISM_PASSWDSUCCESS, pc.szID +
+    char($a) + IntToStr(pc.nCertification) + char($a) + IntToStr(pc.nPayMode) +
+    char($a) + IntToStr(pc.nAvailableType) + char($a) + pc.szAddr + char($a) +
+    IntToStr(pc.nClientVersion));
+end;
+
+procedure TCLoginGate.LoginGetSelectServer(pu: PTUserInfo; body: string);
+var
+  svname: string;
+  i: integer;
+  pSelectGate: PTTblSelectGateIP;
+  pSelectServerInfo, pServerInfo: PTGameServerInfo;
+  __CNT1, __CNT2: Integer;
+begin
+  svname := DecodeString(body);
+  if (pu.szID <> '') and (svname <> '') and IsValidCertification(pu.nCertification) then begin
+    pu.bSelServerOk := TRUE; //º≠πˆ º±≈√¿Ã º∫∞¯¿˚¿”.
+    pu.bFreeMode := FALSE;
+
+    {//SelChrº≠πˆ(DBServer)ø°µµ id+certificaion¿ª ∫∏≥ªæﬂ «—¥Ÿ.
+    //...+ uid + '/' +
+    //PayMode : 0(π´∑·√º«Ë∆«) 1(¡§ΩƒªÁøÎ¿⁄)
+    availabletype := 5;
+    if puser.IDHour > 0 then availabletype := 2;
+    if puser.IPHour > 0 then availabletype := 4;  //pcπÊ¿∫ -Ω√∞£¿ª ¡ÿ¥Ÿ.
+    if puser.IPDay > 0 then availabletype := 3;
+    if puser.IDDay > 0 then availabletype := 1;}
+
+//    if KoreanVersion then begin
+//      if (svname = '∞¯¿€º≠πˆ') or (svname = 'BongWangServer') or (svname = '«ÿ≈¬º≠πˆ') then begin
+//        if Now < CalcDay(pu.AccountMakeDate, 24) then begin
+//          pu.nPayMode := 2;    //π´∑·ªÁøÎ¿⁄
+//          pu.bFreeMode := TRUE;  //≤˜±‚¡ˆ æ ∞‘ «œ∑¡∞Ì
+//        end;
+//      end;
+//    end;
+
+    // —°÷–µƒ∑˛ŒÒ∆˜ seek
+    for i := 0 to m_listServerInfo.Count - 1 do begin
+      pServerInfo := PTGameServerInfo(m_listServerInfo[i]);
+      if pServerInfo.szName = svname then begin
+        pSelectServerInfo := pServerInfo;
+        pSelectGate := GetSelectGate(pServerInfo);
+        if pServerInfo.bFreeMode = 0 then
+          pu.bFreeMode := TRUE;
+        Break;
+      end;
+    end;
+
+    if (pSelectGate = nil) or (pSelectServerInfo.nMaxUserCount < CGameServer.RecalUserCount
+      (svname)) then begin
+      DelCertUser(pu.nCertification);
+      SendResponse(pu, SM_STARTFAIL, 0, 0, 0, 0);
+      exit;
+    end;
+
+    for i := 0 to m_csListCert.Count - 1 do begin
+      if PTCertUser(m_csListCert[i]).nCertification = pu.nCertification then begin
+        PTCertUser(m_csListCert[i]).szServerName := svname;
+        PTCertUser(m_csListCert[i]).bFreeMode := pu.bFreeMode;
+        break;
+      end;
+    end;
+//    ModifyCertify(pu.nCertification, svname, pu.bFreeMode);
+
+    m_listGameServer.Lock;
+      // EXLOG
+    __CNT1 := 0;
+    __CNT2 := 0;
+    for i := 0 to m_listGameServer.Count - 1 do begin
+      if PTGameServer(m_listGameServer[i]).ServerName = svname then begin
+        if not SendPasswordSuccess(svname, pu) then begin
+{$IFDEF DEBUG}
+          MainOutMessage(0, '[SendPasswordFail]');
+{$ENDIF}
+          Inc(__CNT2);
+        end;
+        Inc(__CNT1);
+      end;
+    end;
+    m_listGameServer.Unlock;
+   (*	FILE *fp = fopen( "d:\\Admission.txt", "ab" );
+	    fprintf( fp, "==> Result: %d %d\r\n\r\n", __CNT1, __CNT2 );
+	    fclose( fp );*)
+    //
+    // ≥…π¶œ˚œ¢ send
+    //
+    SendResponse(pu, SM_SELECTSERVER_OK, pu.nCertification, 0, 0, 0, pSelectGate.szIP +
+                 '/' + IntToStr(pSelectGate.Port) + '/' + IntToStr(pu.nCertification));
+  end
+  else
+    KickOffSocket(pu);
+end;
+
+procedure TCLoginGate.LoginGetNewUser(pu: PTUserInfo; body: string);
+var
+  ue: TUserEntryInfo;
+  ua: TUserEntryAddInfo;
+  idx, size1, success: integer;
+  uestr, uastr: string;
+  bovalid: Boolean;
+  pRec: TADOQuery;
+  szQuery: string;
+begin
+  if not FSQLIDDB.Open then begin
+    SendResponse(pu, SM_NOT_IN_SERVICE, 0, 0, 0, 0);
+    exit;
+  end;
+  success := -1;
+  FillChar(ue, sizeof(TUserEntryInfo), #0);
+  FillChar(ua, sizeof(TUserEntryAddInfo), #0);
+  size1 := UpInt(sizeof(TUserEntryInfo) * 4 / 3);
+  bovalid := FALSE;
+
+  uestr := Copy(body, 1, size1);
+  uastr := Copy(body, size1 + 1, Length(body));
+  if (uestr <> '') and (uastr <> '') then begin
+    DecodeBuffer(uestr, @ue, sizeof(TUserEntryInfo));
+    DecodeBuffer(uastr, @ua, sizeof(TUserEntryAddInfo));
+    if IsValidFileName(ue.LoginId) then
+      bovalid := TRUE;
+
+    if bovalid then begin
+      szQuery := Format('SELECT FLD_LOGINID FROM TBL_ACCOUNT WHERE FLD_LOGINID=N''%s''',
+                        [ue.LoginId]);
+{$IFDEF DEBUG}
+		  MainOutMessage( 0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+      FSQLIDDB.UseDB(tAccount);
+      pRec := FSQLIDDB.OpenQuery(szQuery);
+      if (pRec <> nil) and (pRec.RecordCount > 0) then begin
+        success := 0; //¿ÃπÃ ¡∏¿Á«‘
+        pRec.Close;
+      end
+      else begin
+            // TBL_ACCOUNT
+        szQuery := Format('INSERT INTO TBL_ACCOUNT(FLD_LOGINID, FLD_PASSWORD, FLD_MAKETIME)' +
+                          ' VALUES(''%s'', ''%s'', GetDate())', [ue.LoginId, ue.Password]);
+{$IFDEF DEBUG}
+        MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+        FSQLIDDB.ExeCuteSQL(szQuery);
+
+            // TBL_ACCOUNTADD
+        szQuery := Format('INSERT INTO TBL_ACCOUNTADD(FLD_LOGINID, FLD_USERNAME'
+                          + ', FLD_SSNO, FLD_BIRTHDAY, FLD_EMAIL, FLD_PHONE' +
+                          ', FLD_MOBILEPHONE, FLD_QUIZ1, FLD_ANSWER1, FLD_QUIZ2, FLD_ANSWER2)' +
+                          ' VALUES(''%s'', ''%s'', ''%s'', ''%s'', ''%s'', ''%s'', ''%s'', ''%s'', ''%s'', ''%s'', ''%s'' )',
+          [ue.LoginId, ue.UserName, ue.SSNo, ua.Birthday, ue.EMail, ue.Phone, ua.MobilePhone,
+          ue.Quiz, ue.Answer, ua.Quiz2, ua.Answer2]);
+{$IFDEF DEBUG}
+        MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+        if FSQLIDDB.ExeCuteSQL(szQuery) > 0 then
+          success := 1; //º∫∞¯
+      end;
+      pRec := nil;
+
+    end; // else
+      //Memo1.Lines.Add ('[AddNewUser Fail] ue.LoginId = nil');
+  end
+  else
+    MainOutMessage(0, '[AddNewUser Fail] ' + uestr + '/' + uastr);
+
+  if success = 1 then begin
+//    WriteLog ('new', ue, ua);
+    SendResponse(pu, SM_NEWID_SUCCESS, 0, 0, 0, 0);
+  end
+  else begin
+    SendResponse(pu, SM_NEWID_FAIL, success, 0, 0, 0);
+  end;
+end;
+
+procedure TCLoginGate.LoginGetUpdateUser(pu: PTUserInfo; body: string);
+var
+  ue: TUserEntryInfo;
+  ua: TUserEntryAddInfo;
+  idx, size1, success: integer;
+  uestr, uastr: string;
+  bovalid: Boolean;
+  pRec: TADOQuery;
+  szQuery: string;
+begin
+  if not FSQLIDDB.Open then begin
+    SendResponse(pu, SM_NOT_IN_SERVICE, 0, 0, 0, 0);
+    exit;
+  end;
+
+  FillChar(ue, sizeof(TUserEntryInfo), #0);
+  FillChar(ua, sizeof(TUserEntryAddInfo), #0);
+  size1 := UpInt(sizeof(TUserEntryInfo) * 4 / 3);
+  uestr := Copy(body, 1, size1);
+  uastr := Copy(body, size1 + 1, Length(body));
+  DecodeBuffer(uestr, @ue, sizeof(TUserEntryInfo));
+  DecodeBuffer(uastr, @ua, sizeof(TUserEntryAddInfo));
+  success := -1;
+  bovalid := FALSE;
+
+  if IsValidUserName(ue.LoginId) then
+    bovalid := TRUE;
+
+  if (pu.szID = ue.LoginId) and bovalid then begin
+    szQuery := Format('SELECT A.FLD_LOGINID FROM TBL_ACCOUNT A, TBL_ACCOUNTADD B' +
+                      ' WHERE A.FLD_LOGINID = N''%s'' AND A.FLD_LOGINID = B.FLD_LOGINID',
+                      [ue.LoginId]);
+{$IFDEF DEBUG}
+		  // SetLog( 0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+    FSQLIDDB.UseDB(tAccount);
+    pRec := FSQLIDDB.OpenQuery(szQuery);
+    if (pRec <> nil) and (pRec.RecordCount > 0) then begin
+      pRec.Close;
+
+         // TBL_ACCOUNT
+      szQuery := Format('UPDATE TBL_ACCOUNT SET FLD_PASSWORD = ''%s''' +
+        ' WHERE FLD_LOGINID=N''%s''', [ue.Password, ue.LoginId]);
+{$IFDEF DEBUG}
+      MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+      FSQLIDDB.ExeCuteSQL(szQuery);
+
+         // TBL_ACCOUNTADD
+      szQuery := Format('UPDATE TBL_ACCOUNTADD SET ' +
+        ' FLD_USERNAME = ''%s'', FLD_SSNO = ''%s'', FLD_BIRTHDAY = ''%s'',' +
+        ' FLD_EMAIL = ''%s'', FLD_PHONE = ''%s'', FLD_MOBILEPHONE = ''%s'',' +
+        ' FLD_QUIZ1 = ''%s'', FLD_ANSWER1 = ''%s'', FLD_QUIZ2 = ''%s'',' +
+        ' FLD_ANSWER2 = ''%s''' + ' WHERE FLD_LOGINID=N''%s''',
+        [ue.UserName, ue.SSNo, ua.Birthday, ue.EMail, ue.Phone, ua.MobilePhone,
+        ue.Quiz, ue.Answer, ua.Quiz2, ua.Answer2, ue.LoginId]);
+{$IFDEF DEBUG}
+      MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+      if FSQLIDDB.ExeCuteSQL(szQuery) > 0 then
+        success := 1; //≥…π¶
+    end
+    else begin
+      success := 0; // ß∞‹
+    end;
+    pRec := nil;
+  end;
+  if success = 1 then begin
+    WriteLog ('upg', ue, ua);
+    SendResponse(pu, SM_UPDATEID_SUCCESS, 0, 0, 0, 0);
+  end
+  else begin
+    SendResponse(pu, SM_UPDATEID_FAIL, success, 0, 0, 0);
+  end;
+end;
+
+// usrid / passwd / new passwd
+// Result
+procedure TCLoginGate.LoginChangePasswd(pu: PTUserInfo; body: string);
+var
+  idx: integer;
+  str, uid, passwd, newpass: string;
+  success: integer;
+  ue: TUserEntryInfo;
+  ua: TUserEntryAddInfo;
+  pRec: TADOQuery;
+  szQuery: string;
+  PassWdStr: string;
+  PassWdFailCount: Integer;
+  PassWdFailTime: LongWord;
+begin
+  if not FSQLIDDB.Open then begin
+    SendResponse(pu, SM_NOT_IN_SERVICE, 0, 0, 0, 0);
+    exit;
+  end;
+
+  str := DecodeString(body);
+  str := GetValidStr3(str, uid, [#9]);
+  newpass := GetValidStr3(str, passwd, [#9]);
+  success := 0;
+
+  if (Length(newpass) >= 3) then begin
+    szQuery := Format('SELECT FLD_LOGINID,FLD_PASSWORD,FLD_PASSFAILCOUNT,' +
+                      'FLD_PASSFAILTIME FROM TBL_ACCOUNT WHERE FLD_LOGINID=N''%s''',
+                      [uid]);
+{$IFDEF DEBUG}
+    MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+    FSQLIDDB.UseDB(tAccount);
+    pRec := FSQLIDDB.OpenQuery(szQuery);
+    if (pRec <> nil) and (pRec.RecordCount > 0) then begin
+      PassWdStr := Trim(pRec.FieldByName('FLD_PASSWORD').AsString);
+      PassWdFailCount := pRec.FieldByName('FLD_PASSFAILCOUNT').AsInteger;
+      PassWdFailTime := pRec.FieldByName('FLD_PASSFAILTIME').AsInteger;
+      if (PassWdFailCount >= 3) or (GetTickCount - PassWdFailTime > 3 * 60 * 1000) then begin
+        if passwd = PassWdStr then begin
+          PassWdFailCount := 0;
+          PassWdStr := newpass;
+          success := 1; //≥…π¶
+        end
+        else begin
+          PassWdFailCount := PassWdFailCount + 1;
+          PassWdFailTime := GetTickCount;
+          success := -1; // ß∞‹
+        end;
+      end
+      else begin
+        success := -2;
+        if GetTickCount < PassWdFailTime then begin
+          PassWdFailTime := GetTickCount;
+        end;
+      end;
+      pRec.Close;
+
+      szQuery := Format('UPDATE TBL_ACCOUNT SET FLD_PASSWORD = ''%s'',' + ' FLD_PASSFAILCOUNT = %d, FLD_PASSFAILTIME = %d' +' WHERE FLD_LOGINID=N''%s''',
+                        [PassWdStr, PassWdFailCount, PassWdFailTime, uid]);
+{$IFDEF DEBUG}
+      MainOutMessage(0, '[SQL QUERY] ' + szQuery);
+{$ENDIF}
+      FSQLIDDB.ExeCuteSQL(szQuery);
+    end;
+    pRec := nil;
+  end;
+
+  if success = 1 then begin
+    SendResponse(pu, SM_CHGPASSWD_SUCCESS, 0, 0, 0, 0);
+    FillChar(ue, sizeof(TUserEntryInfo), #0);
+    FillChar(ua, sizeof(TUserEntryAddInfo), #0);
+    ue.LoginId := uid;
+    ue.Password := passwd;
+    ue.UserName := '-> "' + newpass + '"';
+    ue.SSNo := pu.szAddr;
+    WriteLog ('chg', ue, ua);
+  end
+  else
+    SendResponse(pu, SM_CHGPASSWD_FAIL, success, 0, 0, 0);
+end;
+
+end.

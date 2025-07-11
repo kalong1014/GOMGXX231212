@@ -1,0 +1,410 @@
+unit NetGameServer;
+
+interface
+
+uses
+  Windows, SysUtils, ScktComp, Grobal2, ADODB, DateUtils;
+
+type
+  TCGameServer = class
+    procedure Connect(Sender: TObject; Socket: TCustomWinSocket);
+    procedure Disconnect(Sender: TObject; Socket: TCustomWinSocket);
+    procedure Error(Sender: TObject; Socket: TCustomWinSocket; ErrorEvent: TErrorEvent; var ErrorCode: Integer);
+    procedure Read(Sender: TObject; Socket: TCustomWinSocket);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    GameServerSocket: TServerSocket;
+    constructor Create;
+    destructor Destroy; override;
+    procedure SendInterServerMsg(msg: word; body: string);
+    function SendNamedServerMsg(svname: string; msg: word; body: string): Boolean;
+    procedure SendServerMsg(socket: TCustomWinSocket; msg: word; body: string);
+    function ConnectionReadyOk: Boolean;
+    function GetTotalUserCount: integer;
+    procedure ArrangeNameServerList(index: integer);
+    function RecalUserCount(svname: string): Integer;
+  end;
+
+var
+  CGameServer: TCGameServer;
+
+implementation
+
+uses
+  LoginSvrWnd, LSShare, HUtil32, EDCode, SQLIDDB;
+
+constructor TCGameServer.Create;
+begin
+  GameServerSocket := TServerSocket.Create(nil);
+  GameServerSocket.OnClientConnect := Connect;
+  GameServerSocket.OnClientDisconnect := Disconnect;
+  GameServerSocket.OnClientError := Error;
+  GameServerSocket.OnClientRead := Read;
+end;
+
+destructor TCGameServer.Destroy;
+begin
+  GameServerSocket.Free;
+  inherited;
+end;
+
+procedure TCGameServer.Connect(Sender: TObject; Socket: TCustomWinSocket);
+var
+  p: PTGameServer;
+begin
+  if IsValidGateAddr(Socket.RemoteAddress) then begin
+    m_listGameServer.Lock;
+    try
+      new(p);
+      FillChar(p^, sizeof(TGameServer), #0);
+      p.SocStr := '';
+      p.Socket := Socket;
+      m_listGameServer.Add(p);
+      MainOutMessage(0, Format('[GameServer/Conn] GameServer connected. (%s):(%d)',
+                    [Socket.RemoteAddress, Socket.RemotePort]));
+    finally
+      m_listGameServer.UnLock;
+    end;
+  end
+  else begin
+      //FrmMain.Memo1.Lines.Add ('Invalid address connection tried.. [MasSoc] ' + Socket.RemoteAddress);
+    MainOutMessage(CERR, 'Unindentified GameServer has tried connection.');
+    Socket.Close;
+  end;
+end;
+
+procedure TCGameServer.Disconnect(Sender: TObject; Socket: TCustomWinSocket);
+var
+  i: integer;
+begin
+  m_listGameServer.Lock;
+  try
+    for i := m_listGameServer.Count - 1 downto 0 do begin
+      if PTGameServer(m_listGameServer[i]).Socket = Socket then begin
+        MainOutMessage(CERR, Format('GameServer(or ISM_Server) disconnected.[%s:%d]',
+                                    [Socket.RemoteAddress, Socket.RemotePort]));
+        Dispose(PTGameServer(m_listGameServer[i]));
+        m_listGameServer.Delete(i);
+        break;
+      end;
+    end;
+  finally
+    m_listGameServer.UnLock;
+  end;
+end;
+
+procedure TCGameServer.Error(Sender: TObject; Socket: TCustomWinSocket; ErrorEvent: TErrorEvent; var ErrorCode: Integer);
+begin
+  ErrorCode := 0;
+  Socket.Close;
+end;
+
+procedure TCGameServer.Read(Sender: TObject; Socket: TCustomWinSocket);
+var
+  i, ident: integer;
+  Bufstr, str, data, uid, uaddr, svName, szIndex, szCount: string;
+  p: PTGameServer;
+  szQuery: string;
+  pRec: TADOQuery;
+  RemainDays, RemainHours, RemainMiaoka, dwValidUntil, dwSeconds, dwMiaoka: LongInt;
+  st: SYSTEMTIME;
+  nCurrentTime: longword;
+  DateTime: TDateTime;
+  nSECONDS: integer;
+begin
+  m_listGameServer.Lock;
+  try
+    for i := 0 to m_listGameServer.Count - 1 do begin
+      p := PTGameServer(m_listGameServer[i]);
+      if p.Socket = Socket then begin
+        p.SocStr := p.SocStr + Socket.ReceiveText;
+        Bufstr := p.SocStr;
+        while Pos(')', Bufstr) > 0 do begin
+          Bufstr := ArrestStringEx(Bufstr, '(', ')', str);
+          if str <> '' then begin
+            str := GetValidStr3(str, data, ['/']);
+            ident := Str_ToInt(data, -1);
+            case ident of
+              ISM_USERCLOSED:
+                begin
+                  str := GetValidStr3(str, uid, ['/']);
+                  CertifyCloseUser(uid, Str_ToInt(str, 0));
+                  {$IFDEF DEBUG}
+                  MainOutMessage(0, Format('[GameServer] %s was disconnected', [uid]));
+                  {$ENDIF}
+                end;
+  //            ISM_SHIFTVENTURESERVER:
+  //              begin
+  //                SendInterServerMsg(ISM_SHIFTVENTURESERVER, str);
+  //              end;
+              ISM_USERCOUNT:
+                begin
+                  str := GetValidStr3(str, svName, ['/']);
+                  str := GetValidStr3(str, szIndex, ['/']);
+                  str := GetValidStr3(str, szCount, ['/']);
+                  {$IFDEF DEBUG}
+                  //MainOutMessage(0, Format('[OnUserCount] %s(%s)=%s', [svname, data, str]) );
+                  {$ENDIF}
+                  with p^ do begin
+                    ServerName := svName;
+                    ServerIndex := Str_ToInt(szIndex, 0);
+                    CurUserCount := Str_ToInt(szCount, 0);
+                    CheckTime := GetTickCount;
+                    if CurUserCount > MaxUserCount then
+                      MaxUserCount := CurUserCount;
+                  end;
+                  ArrangeNameServerList(i); //重排服务器列表
+                  TotalUserCount := GetTotalUserCount;
+                  if TotalUserCount > MaxTotalUserCount then
+                    MaxTotalUserCount := TotalUserCount;
+                  SendInterServerMsg(ISM_TOTALUSERCOUNT, IntToStr(TotalUserCount));
+                end;
+              ISM_GAMETIMEOFTIMECARDUSER:
+                begin
+                  str := GetValidStr3(str, uid, ['/']);
+                  GameTimeOfTimeUser(uid, Str_ToInt(str, 0));
+                end;
+              ISM_CHECKTIMEACCOUNT:
+                begin
+                  str := GetValidStr3(str, uid, ['/']);
+                  CheckTimeAccount(uid);
+                end;
+              ISM_REQUEST_PUBLICKEY: //接收M2获取KEY信号
+                begin
+                  MainOutMessage(0, Format('[GameServer/Conn] ISM_REQUEST_PUBLICKEY:(%d)', [GetPublicKey]));
+                  SendInterServerMsg(ISM_SEND_PUBLICKEY, IntToStr(GetPublicKey));
+                end;
+              ISM_RECHARGEDAYADD:
+                begin
+                  str := GetValidStr3(str, uid, ['/']);
+                  str := GetValidStr3(str, szCount, ['/']);
+                  GetLocalTime(st);
+                  DateTime := SystemTimeToDateTime(st);
+                  DateTime := IncDay(DateTime, Str_ToInt(szCount, 0));
+                  nSECONDS := 0;
+                  if Str_ToInt(szCount, 0) = 1 then
+                    nSECONDS := 84600;
+                  szQuery := Format('UPDATE TBL_ACCOUNT SET ' + ' FLD_VALIDUNTIL = ''%s'',' + ' FLD_SECONDS = %d' + ' WHERE FLD_LOGINID=N''%s''', [FormatDateTime('yyyy/mm/dd hh:nn:ss', DateTime), nSECONDS, uid]);
+                  FSQLIDDB.UseDB(tAccount);
+                  with FSQLIDDB.SqlDB do
+                  begin
+                    Close;
+                    SQL.Text := szQuery;
+                    try
+                      ExecSQL;
+                    except
+                      exit;
+                    end;
+                  end;
+                end;
+              ISM_RECHARGEHOURSADD:
+                begin
+                  str := GetValidStr3(str, uid, ['/']);
+                  str := GetValidStr3(str, szCount, ['/']);
+                  szQuery := Format('UPDATE TBL_ACCOUNT SET ' + ' FLD_MIAOKA = ''%d''' + ' WHERE FLD_LOGINID=N''%s''', [Str_ToInt(szCount, 0), uid]);
+                  FSQLIDDB.UseDB(tAccount);
+                  with FSQLIDDB.SqlDB do
+                  begin
+                    Close;
+                    SQL.Text := szQuery;
+                    try
+                      ExecSQL;
+                    except
+                      exit;
+                    end;
+                  end;
+                end;
+              ISM_RECHARGEINFO:
+                begin
+                  str := GetValidStr3(str, uid, ['/']);
+                  if not FSQLIDDB.Open then exit;
+                  begin
+                    FSQLIDDB.UseDB(tAccount);
+                    szQuery := Format('SELECT * FROM TBL_ACCOUNT WHERE FLD_LOGINID=''%s''', [uid]);
+                    pRec := FSQLIDDB.OpenQuery(szQuery);
+                    if pRec <> nil then
+                    begin
+                      if pRec.RecordCount > 0 then
+                      begin
+                        pRec.First;
+                        while (not pRec.EOF) do
+                        begin
+                          dwValidUntil := GetTimeInfo(pRec.FieldByName('FLD_VALIDUNTIL').AsString);
+                          dwSeconds := pRec.FieldByName('FLD_SECONDS').AsInteger;
+                          dwMiaoka := pRec.FieldByName('FLD_MIAOKA').AsInteger;
+                          pRec.Next;
+                        end;
+                        pRec.Close;
+                      end;
+                    end;
+                  end;
+                  GetLocalTime(st);
+                  nCurrentTime := GetDay(st.wYear, st.wMonth, st.wDay);
+                  RemainDays := dwValidUntil - nCurrentTime;
+                  RemainHours := dwSeconds;
+                  RemainMiaoka := dwMiaoka;
+                  if (RemainDays < 0) then
+                    RemainDays := 0;
+
+                  if (RemainHours < 0) then
+                    RemainHours := 0;
+
+                  if (RemainMiaoka < 0) then
+                    RemainMiaoka := 0;
+                  str := uid + char($a) + IntToStr(RemainDays) + char($a) + IntToStr(RemainHours) + char($a) + IntToStr(RemainMiaoka);
+                  SendInterServerMsg(ISM_RECHARGEINFO, str);
+                end;
+            end;
+          end;
+        end;
+        p.SocStr := Bufstr;
+      end;
+    end;
+  finally
+    m_listGameServer.UnLock;
+  end;
+end;
+
+function TCGameServer.GetTotalUserCount: integer;
+var
+  i: integer;
+begin
+  m_listGameServer.Lock;
+  try
+    Result := 0;
+    for i := 0 to m_listGameServer.Count - 1 do
+      Result := Result + PTGameServer(m_listGameServer[i]).CurUserCount;
+  finally
+    m_listGameServer.UnLock;
+  end;
+end;
+
+function TCGameServer.RecalUserCount(svname: string): Integer;
+var
+  i, count: integer;
+begin
+  count := 0;
+  m_listGameServer.Lock;
+  try
+    for i := 0 to m_listGameServer.Count - 1 do begin
+      if PTGameServer(m_listGameServer[i]).ServerName = svname then begin
+        count := count + PTGameServer(m_listGameServer[i]).CurUserCount;
+      end;
+    end;
+    Result := count;
+  finally
+    m_listGameServer.UnLock;
+  end;
+end;
+
+procedure TCGameServer.SendInterServerMsg(msg: word; body: string);
+var
+  str: string;
+  i: integer;
+begin
+  str := '(' + IntToStr(msg) + '/' + body + ')';
+  m_listGameServer.Lock;
+  try
+    for i := 0 to m_listGameServer.Count - 1 do begin
+      if PTGameServer(m_listGameServer[i]).Socket.Connected then
+        PTGameServer(m_listGameServer[i]).Socket.SendText(str);
+    end;
+  finally
+    m_listGameServer.UnLock;
+  end;
+end;
+
+function TCGameServer.SendNamedServerMsg(svname: string; msg: word; body: string): Boolean;
+var
+  i: integer;
+  str, shrname: string;
+begin
+  Result := FALSE;
+   //shrname := GetServerShortName (svname);
+  shrname := svname;
+  str := '(' + IntToStr(msg) + '/' + body + ')';
+  m_listGameServer.Lock;
+  try
+    for i := 0 to m_listGameServer.Count - 1 do begin
+      if (PTGameServer(m_listGameServer[i]).Socket.Connected) and ((PTGameServer(m_listGameServer
+        [i]).ServerName = shrname) or (shrname = '')) then begin
+        if PTGameServer(m_listGameServer[i]).Socket.Connected then begin
+          PTGameServer(m_listGameServer[i]).Socket.SendText(str);
+          Result := TRUE;
+        end;
+      end;
+    end;
+  finally
+    m_listGameServer.UnLock;
+  end;
+  (*	FILE *fp = fopen( "d:\\Admission.txt", "ab" );
+	fprintf( fp, "[%s] [%s:%d] %s\r\n", pUser->szID, IP(), Port(), pPacket->m_pPacket );
+	fclose( fp );*)
+end;
+
+procedure TCGameServer.SendServerMsg(socket: TCustomWinSocket; msg: word; body: string);
+var
+  str: string;
+  i: integer;
+begin
+  str := '(' + IntToStr(msg) + '/' + body + ')';
+  socket.SendText(str);
+end;
+
+function TCGameServer.ConnectionReadyOk: Boolean;
+var
+  i, n: integer;
+begin
+  Result := FALSE;
+  if m_listGameServer.Count >= ReadyServerCount then
+    Result := TRUE;
+end;
+
+procedure TCGameServer.ArrangeNameServerList(index: integer);
+var
+  i, k, j, n: integer;
+  ms: PTGameServer;
+begin
+  m_listGameServer.Lock;
+  try
+    if index >= m_listGameServer.Count then exit;
+    ms := PTGameServer(m_listGameServer[index]);
+    m_listGameServer.Delete(index);
+
+    for i := 0 to m_listGameServer.Count - 1 do begin
+      if PTGameServer(m_listGameServer[i]).ServerName = ms.ServerName then begin
+        if ms.ServerIndex > PTGameServer(m_listGameServer[i]).ServerIndex then
+          m_listGameServer.Insert(i, ms)
+        else begin
+          n := i + 1;
+          for k := n to m_listGameServer.Count - 1 do begin
+            if PTGameServer(m_listGameServer[k]).ServerName = ms.ServerName then begin
+              if ms.ServerIndex > PTGameServer(m_listGameServer[k]).ServerIndex then begin
+                m_listGameServer.Insert(k, ms);
+                for j := k + 1 to m_listGameServer.Count - 1 do begin
+                  if (PTGameServer(m_listGameServer[j]).ServerName = ms.ServerName)
+                    and (PTGameServer(m_listGameServer[j]).ServerIndex = ms.ServerIndex)
+                    then begin
+                    m_listGameServer.Delete(j);
+                    break;
+                  end;
+                end;
+                exit;
+              end;
+              n := k + 1; //ServerList.Insert (k+1, ms);
+            end;
+          end;
+          m_listGameServer.Insert(n, ms);
+        end;
+        exit;
+      end;
+    end;
+    m_listGameServer.Add(ms);
+  finally
+    m_listGameServer.UnLock;
+  end;
+end;
+
+end.

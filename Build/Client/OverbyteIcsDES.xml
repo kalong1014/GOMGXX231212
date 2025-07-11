@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="OverbyteIcsDES" platform="Win32">
+  <const name="IcsDESVersion" type="Integer" file="OverbyteIcsDES.pas" line="65">
+    <value>
+      $64
+    </value>
+  </const>
+  <variable name="CopyRight" type="string" visibility="public" file="OverbyteIcsDES.pas" line="66" />
+  <array name="TArrayOf8Bytes" low="0" high="7">
+    <element type="Byte" />
+  </array>
+  <pointer name="PArrayOf8Bytes" type="TArrayOf8Bytes" indircnt="1" file="OverbyteIcsDES.pas" line="70" />
+  <procedure name="DES" visibility="public" file="OverbyteIcsDES.pas" line="291">
+    <parameters>
+      <parameter name="Input" type="TArrayOf8Bytes" paramflags="const" />
+      <parameter name="Output" type="TArrayOf8Bytes" paramflags="var" />
+      <parameter name="Key" type="TArrayOf8Bytes" paramflags="const" />
+      <parameter name="Encrypt" type="Boolean" />
+    </parameters>
+  </procedure>
+</namespace>

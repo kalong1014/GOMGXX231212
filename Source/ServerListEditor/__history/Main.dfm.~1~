@@ -1,0 +1,2038 @@
+object FrmServerList: TFrmServerList
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsDialog
+  Caption = #30331#38470#22120#21015#34920#21046#20316#65288#25480#26435#29256#65289
+  ClientHeight = 561
+  ClientWidth = 771
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object PageControl: TcxPageControl
+    AlignWithMargins = True
+    Left = 8
+    Top = 159
+    Width = 755
+    Height = 394
+    Margins.Left = 8
+    Margins.Top = 4
+    Margins.Right = 8
+    Margins.Bottom = 8
+    Align = alClient
+    TabOrder = 0
+    Properties.ActivePage = TabSheetServerList
+    Properties.CustomButtons.Buttons = <>
+    Properties.ShowFrame = True
+    Properties.Style = 10
+    ClientRectBottom = 393
+    ClientRectLeft = 1
+    ClientRectRight = 754
+    ClientRectTop = 19
+    object TabSheetServerList: TcxTabSheet
+      Caption = #20998#21306#21015#34920
+      ImageIndex = 0
+      object lvServers: TcxListView
+        AlignWithMargins = True
+        Left = 8
+        Top = 30
+        Width = 737
+        Height = 336
+        Margins.Left = 8
+        Margins.Right = 8
+        Margins.Bottom = 8
+        Align = alClient
+        Checkboxes = True
+        Columns = <
+          item
+            Caption = #20998#32452
+            Width = 90
+          end
+          item
+            AutoSize = True
+            Caption = #21517#31216
+          end
+          item
+            Caption = #26174#31034#21517#31216
+            Width = 150
+          end
+          item
+            Caption = 'IP/'#22495#21517
+            Width = 150
+          end
+          item
+            Caption = #31471#21475
+            Width = 55
+          end
+          item
+            Caption = #23553#21253#23494#30721
+            Width = 95
+          end>
+        ReadOnly = True
+        RowSelect = True
+        Style.BorderStyle = cbsFlat
+        Style.LookAndFeel.Kind = lfFlat
+        Style.LookAndFeel.NativeStyle = True
+        StyleDisabled.LookAndFeel.Kind = lfFlat
+        StyleDisabled.LookAndFeel.NativeStyle = True
+        StyleFocused.LookAndFeel.Kind = lfFlat
+        StyleFocused.LookAndFeel.NativeStyle = True
+        StyleHot.LookAndFeel.Kind = lfFlat
+        StyleHot.LookAndFeel.NativeStyle = True
+        TabOrder = 0
+        ViewStyle = vsReport
+        OnDblClick = lvServersDblClick
+        OnSelectItem = lvServersSelectItem
+      end
+      object dxBarDockControl1: TdxBarDockControl
+        Left = 0
+        Top = 0
+        Width = 753
+        Height = 27
+        Align = dalTop
+        BarManager = BarManager
+      end
+    end
+    object TabSheetUpdateList: TcxTabSheet
+      Caption = #34917#19969#26356#26032#21015#34920
+      ImageIndex = 1
+      object lvUpdates: TcxListView
+        AlignWithMargins = True
+        Left = 8
+        Top = 30
+        Width = 737
+        Height = 336
+        Margins.Left = 8
+        Margins.Right = 8
+        Margins.Bottom = 8
+        Align = alClient
+        Checkboxes = True
+        Columns = <
+          item
+            AutoSize = True
+            Caption = #22320#22336
+          end
+          item
+            Caption = #26159#21542#21387#32553
+            Width = 60
+          end
+          item
+            Caption = #23433#35013#36335#24452
+            Width = 100
+          end
+          item
+            Caption = #25991#20214#21517#31216
+            Width = 100
+          end
+          item
+            Caption = 'MD5'#20540
+            Width = 100
+          end
+          item
+            Caption = #19979#36733#26041#24335
+            Width = 75
+          end
+          item
+            Caption = #20248#20808#32423
+            Width = 100
+          end>
+        ReadOnly = True
+        RowSelect = True
+        Style.BorderStyle = cbsFlat
+        Style.LookAndFeel.Kind = lfFlat
+        Style.LookAndFeel.NativeStyle = True
+        StyleDisabled.LookAndFeel.Kind = lfFlat
+        StyleDisabled.LookAndFeel.NativeStyle = True
+        StyleFocused.LookAndFeel.Kind = lfFlat
+        StyleFocused.LookAndFeel.NativeStyle = True
+        StyleHot.LookAndFeel.Kind = lfFlat
+        StyleHot.LookAndFeel.NativeStyle = True
+        TabOrder = 0
+        ViewStyle = vsReport
+        OnChange = lvUpdatesChange
+        OnClick = lvUpdatesClick
+        OnDblClick = lvUpdatesDblClick
+        OnSelectItem = lvUpdatesSelectItem
+      end
+      object dxBarDockControl2: TdxBarDockControl
+        Left = 0
+        Top = 0
+        Width = 753
+        Height = 27
+        Align = dalTop
+        BarManager = BarManager
+      end
+    end
+    object TabSheetDataSecurity: TcxTabSheet
+      Caption = #32032#26448#23494#30721
+      ImageIndex = 6
+      object lvSecurityFiles: TcxListView
+        AlignWithMargins = True
+        Left = 8
+        Top = 30
+        Width = 737
+        Height = 336
+        Margins.Left = 8
+        Margins.Right = 8
+        Margins.Bottom = 8
+        Align = alClient
+        Columns = <
+          item
+            AutoSize = True
+            Caption = 'Data'#25991#20214
+          end
+          item
+            Caption = #23494#30721
+            Width = 150
+          end>
+        ReadOnly = True
+        RowSelect = True
+        Style.BorderStyle = cbsFlat
+        Style.LookAndFeel.Kind = lfFlat
+        Style.LookAndFeel.NativeStyle = True
+        StyleDisabled.LookAndFeel.Kind = lfFlat
+        StyleDisabled.LookAndFeel.NativeStyle = True
+        StyleFocused.LookAndFeel.Kind = lfFlat
+        StyleFocused.LookAndFeel.NativeStyle = True
+        StyleHot.LookAndFeel.Kind = lfFlat
+        StyleHot.LookAndFeel.NativeStyle = True
+        TabOrder = 0
+        ViewStyle = vsReport
+        OnDblClick = lvUpdatesDblClick
+        OnSelectItem = lvUpdatesSelectItem
+      end
+      object dxBarDockControl3: TdxBarDockControl
+        Left = 0
+        Top = 0
+        Width = 753
+        Height = 27
+        Align = dalTop
+        BarManager = BarManager
+      end
+    end
+    object TabSheetClientSettings: TcxTabSheet
+      Caption = #23458#25143#31471#25511#21046
+      ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
+      object LabelDefSize: TLabel
+        Left = 16
+        Top = 93
+        Width = 73
+        Height = 13
+        AutoSize = False
+        Caption = #40664#35748#20998#36776#29575
+      end
+      object Label1: TLabel
+        Left = 16
+        Top = 126
+        Width = 129
+        Height = 13
+        AutoSize = False
+        Caption = #21487#25171#24320#23458#25143#31471#26368#22823#25968#37327
+      end
+      object Label2: TLabel
+        Left = 8
+        Top = 212
+        Width = 71
+        Height = 13
+        Caption = 'Client.dat'#26356#21517
+      end
+      object Label3: TLabel
+        Left = 297
+        Top = 212
+        Width = 92
+        Height = 13
+        Caption = '('#21830#19994#30331#24405#22120#26377#25928')'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clRed
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object CheckFullScreen: TcxCheckBox
+        Left = 8
+        Top = 8
+        Caption = #20840#23631
+        Properties.OnChange = CheckFullScreenPropertiesChange
+        Style.BorderStyle = ebsFlat
+        TabOrder = 0
+      end
+      object CheckDo3D: TcxCheckBox
+        Left = 8
+        Top = 35
+        Caption = '3D'#21152#36895
+        Properties.OnChange = CheckFullScreenPropertiesChange
+        Style.BorderStyle = ebsFlat
+        TabOrder = 1
+      end
+      object CheckVBlank: TcxCheckBox
+        Left = 8
+        Top = 62
+        Caption = #22402#30452#21516#27493
+        Properties.OnChange = CheckFullScreenPropertiesChange
+        Style.BorderStyle = ebsFlat
+        TabOrder = 2
+      end
+      object CombDisplaySize: TcxComboBox
+        Left = 82
+        Top = 89
+        Properties.DropDownListStyle = lsFixedList
+        Properties.Items.Strings = (
+          #26080
+          '1024X768'
+          '800X600')
+        Properties.OnChange = CombDisplaySizePropertiesChange
+        Style.BorderStyle = ebsFlat
+        TabOrder = 3
+        Text = '1024X768'
+        Width = 121
+      end
+      object EditMaxClient: TcxSpinEdit
+        Left = 151
+        Top = 122
+        Properties.MaxValue = 30.000000000000000000
+        Properties.MinValue = 1.000000000000000000
+        Properties.OnChange = EditLoginZIPPropertiesChange
+        Style.BorderStyle = ebsFlat
+        TabOrder = 4
+        Value = 1
+        Width = 52
+      end
+      object EditShortCut: TcxCheckBox
+        Left = 8
+        Top = 176
+        Caption = #20801#35768#21019#24314#24555#25463#26041#24335
+        Properties.OnChange = EditShortCutPropertiesChange
+        Style.BorderStyle = ebsFlat
+        TabOrder = 5
+      end
+      object EditClientExeName: TcxTextEdit
+        Left = 143
+        Top = 209
+        Properties.OnChange = EditClientExeNamePropertiesChange
+        Style.LookAndFeel.Kind = lfFlat
+        StyleDisabled.LookAndFeel.Kind = lfFlat
+        StyleFocused.LookAndFeel.Kind = lfFlat
+        StyleHot.LookAndFeel.Kind = lfFlat
+        TabOrder = 6
+        Text = 'Client.dat'
+        OnKeyPress = EditClientExeNameKeyPress
+        Width = 148
+      end
+    end
+    object TabSheetMini: TcxTabSheet
+      Caption = #24494#31471#25511#21046
+      ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
+      object LabelMiniPwd: TLabel
+        Left = 8
+        Top = 39
+        Width = 101
+        Height = 13
+        AutoSize = False
+        Caption = #24494#31471#36164#28304#19979#36733#23494#30721
+      end
+      object LabelMiniList: TLabel
+        Left = 8
+        Top = 62
+        Width = 118
+        Height = 13
+        AutoSize = False
+        Caption = #24494#31471#36164#28304#26381#21153#22120#21015#34920
+      end
+      object LabelMiniInfo1: TLabel
+        Left = 127
+        Top = 165
+        Width = 374
+        Height = 13
+        AutoSize = False
+        Caption = #27880#65306#24494#31471#26381#21153#22120#22320#22336#12290#26684#24335#20026#65306'IP/'#22495#21517':'#31471#21475#65292#22914'http://127.0.0.1:8080'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clRed
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object LabelMiniInfo2: TLabel
+        Left = 150
+        Top = 182
+        Width = 585
+        Height = 13
+        AutoSize = False
+        Caption = #36164#28304#26381#21153#22120#21487#20197#20026#22810#20010#65292#21015#34920#20013#27599#19968#34892#22635#20889#19968#20010#26381#21153#22120#22320#22336#65288#36164#28304#26381#21153#22120#21487#20301#20110#19981#21516#26426#22120#21644#19981#21516#32593#32476#29615#22659#65289
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clRed
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object CheckMiniResSrv: TcxCheckBox
+        Left = 8
+        Top = 8
+        Caption = #21551#29992#24494#31471
+        Properties.OnChange = CheckMiniResSrvPropertiesChange
+        Style.BorderStyle = ebsFlat
+        TabOrder = 0
+      end
+      object EditMiniPwd: TcxTextEdit
+        Left = 127
+        Top = 35
+        Hint = #26412#23494#30721#38656#35201#21644#24494#31471#26381#21153#22120#23494#30721#19968#33268#65292#21487#26377#25928#38450#27490#36164#28304#34987#20854#20182#23458#25143#31471#19979#36733
+        ParentShowHint = False
+        Properties.EchoMode = eemPassword
+        Properties.PasswordChar = '*'
+        Properties.OnChange = CheckMiniResSrvPropertiesChange
+        ShowHint = True
+        Style.BorderStyle = ebsFlat
+        TabOrder = 1
+        TextHint = #26412#23494#30721#38656#35201#21644#24494#31471#26381#21153#22120#23494#30721#19968#33268#65292#21487#26377#25928#38450#27490#36164#28304#34987#20854#20182#23458#25143#31471#19979#36733
+        Width = 608
+      end
+      object EditLinkMiniURL: TcxMemo
+        Left = 127
+        Top = 62
+        Properties.ScrollBars = ssBoth
+        Properties.OnChange = EditLinkMiniURLPropertiesChange
+        Style.BorderStyle = ebsFlat
+        TabOrder = 2
+        Height = 99
+        Width = 608
+      end
+    end
+    object TabSheetLoginUpdate: TcxTabSheet
+      Caption = #30331#38470#22120#35774#32622
+      ImageIndex = 4
+      object GroupBox2: TGroupBox
+        Left = 8
+        Top = 8
+        Width = 735
+        Height = 163
+        Caption = #30331#24405#22120#26356#26032#35774#32622
+        TabOrder = 0
+        object LabelLoginName: TLabel
+          Left = 8
+          Top = 55
+          Width = 48
+          Height = 13
+          Caption = #25991#20214#21517#31216
+        end
+        object EditLoginURL: TcxHyperLinkEdit
+          Left = 78
+          Top = 24
+          Hint = #25351#23450#30331#38470#22120#19979#36733#22320#22336
+          Properties.OnChange = EditLoginURLPropertiesChange
+          Style.BorderStyle = ebsFlat
+          Style.LookAndFeel.NativeStyle = True
+          StyleDisabled.LookAndFeel.NativeStyle = True
+          StyleFocused.LookAndFeel.NativeStyle = True
+          StyleHot.LookAndFeel.NativeStyle = True
+          TabOrder = 0
+          TextHint = #25351#23450#30331#38470#22120#19979#36733#22320#22336
+          Width = 331
+        end
+        object EditLoginFile: TcxButtonEdit
+          Left = 78
+          Top = 51
+          Hint = #36873#25321#30331#38470#22120#25991#20214#21462#20986#25991#20214#21517#21450'MD5'#32534#30721
+          Properties.Buttons = <
+            item
+              Default = True
+              Kind = bkEllipsis
+            end>
+          Properties.ReadOnly = False
+          Properties.OnButtonClick = EditLoginFilePropertiesButtonClick
+          Properties.OnChange = EditLoginFilePropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 1
+          Text = 'EditLoginFile'
+          TextHint = #36873#25321#30331#38470#22120#25991#20214#21462#20986#25991#20214#21517#21450'MD5'#32534#30721
+          Width = 331
+        end
+        object EditLoginMD5: TcxTextEdit
+          Left = 78
+          Top = 78
+          Properties.OnChange = EditLoginMD5PropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 2
+          Text = 'EditLoginMD5'
+          Width = 331
+        end
+        object EditLoginDownType: TcxComboBox
+          Left = 78
+          Top = 105
+          Properties.DropDownListStyle = lsFixedList
+          Properties.Items.Strings = (
+            'HTTP'
+            #30334#24230#32593#30424
+            '360'#32593#30424
+            'FTP'
+            #30334#24230#30456#20876)
+          Properties.OnChange = EditLoginDownTypePropertiesChange
+          Style.BorderStyle = ebsFlat
+          Style.LookAndFeel.NativeStyle = True
+          StyleDisabled.LookAndFeel.NativeStyle = True
+          StyleFocused.LookAndFeel.NativeStyle = True
+          StyleHot.LookAndFeel.NativeStyle = True
+          TabOrder = 3
+          Width = 331
+        end
+        object EditLoginZIP: TcxCheckBox
+          Left = 8
+          Top = 132
+          Hint = #25351#23450#19979#36733#30340#25991#20214#26159#21542#20026'RAR'#26684#24335
+          AutoSize = False
+          Caption = #26159#21542#21387#32553
+          Properties.Alignment = taRightJustify
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          Style.LookAndFeel.NativeStyle = True
+          StyleDisabled.LookAndFeel.NativeStyle = True
+          StyleFocused.LookAndFeel.NativeStyle = True
+          StyleHot.LookAndFeel.NativeStyle = True
+          TabOrder = 4
+          Height = 21
+          Width = 88
+        end
+        object LabelLoginDownType: TcxLabel
+          Left = 8
+          Top = 107
+          AutoSize = False
+          Caption = #19979#36733#26041#24335
+          Height = 17
+          Width = 52
+        end
+        object LabelLoginMD5: TcxLabel
+          Left = 8
+          Top = 80
+          AutoSize = False
+          Caption = 'MD5'#32534#30721
+          Height = 17
+          Width = 49
+        end
+        object LabelLoginURL: TcxLabel
+          Left = 8
+          Top = 26
+          AutoSize = False
+          Caption = #19979#36733#22320#22336
+          Height = 17
+          Width = 52
+        end
+      end
+      object GroupBox3: TGroupBox
+        Left = 8
+        Top = 177
+        Width = 735
+        Height = 188
+        Caption = #36134#21495#27880#20876
+        TabOrder = 1
+        object EditRegIDLetterNum: TcxCheckBox
+          Left = 8
+          Top = 16
+          Caption = #36134#21495#24517#39035#21253#21547#23383#27597#21644#25968#23383
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 0
+        end
+        object EditRegIDFirstLetter: TcxCheckBox
+          Left = 8
+          Top = 40
+          Caption = #36134#21495#31532#19968#20301#24517#39035#26159#23383#27597
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 1
+        end
+        object EditRegIDShowName: TcxCheckBox
+          Left = 216
+          Top = 16
+          Caption = #26174#31034#22995#21517#23383#27573
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 2
+        end
+        object EditRegIDNameReq: TcxCheckBox
+          Left = 359
+          Top = 16
+          Caption = #22995#21517#23383#27573#24517#39035#36755#20837
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 3
+        end
+        object EditRegIDShowBirth: TcxCheckBox
+          Left = 216
+          Top = 40
+          Caption = #26174#31034#29983#26085#23383#27573
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 4
+        end
+        object EditRegIDBirthReq: TcxCheckBox
+          Left = 359
+          Top = 40
+          Caption = #29983#26085#23383#27573#24517#39035#36755#20837
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 5
+        end
+        object EditRegIDShowQS: TcxCheckBox
+          Left = 216
+          Top = 64
+          Caption = #26174#31034#38382#31572#39033#23383#27573
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 6
+        end
+        object EditRegIDQSReq: TcxCheckBox
+          Left = 359
+          Top = 64
+          Caption = #38382#31572#39033#23383#27573#24517#39035#36755#20837
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 7
+        end
+        object EditRegIDShowMail: TcxCheckBox
+          Left = 216
+          Top = 88
+          Caption = #26174#31034#37038#31665#22320#22336#23383#27573
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 8
+        end
+        object EditRegIDMailReq: TcxCheckBox
+          Left = 359
+          Top = 88
+          Caption = #37038#31665#22320#22336#23383#27573#24517#39035#36755#20837
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 9
+        end
+        object EditRegIDShowQQ: TcxCheckBox
+          Left = 216
+          Top = 112
+          Caption = #26174#31034'QQ'#23383#27573
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 10
+        end
+        object EditRegIDQQReq: TcxCheckBox
+          Left = 359
+          Top = 112
+          Caption = 'QQ'#23383#27573#24517#39035#36755#20837
+          Enabled = False
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 11
+        end
+        object EditRegIDShowID: TcxCheckBox
+          Left = 216
+          Top = 136
+          Caption = #26174#31034#36523#20221#35777#21495#30721#23383#27573
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 12
+        end
+        object EditRegIDIDReq: TcxCheckBox
+          Left = 359
+          Top = 136
+          Caption = #36523#20221#35777#21495#30721#23383#27573#24517#39035#36755#20837
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 13
+        end
+        object EditRegIDShowMobile: TcxCheckBox
+          Left = 216
+          Top = 159
+          Caption = #26174#31034#25163#26426#21495#30721#23383#27573
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 14
+        end
+        object EditRegIDMobileReq: TcxCheckBox
+          Left = 359
+          Top = 159
+          Caption = #25163#26426#21495#30721#23383#27573#24517#39035#36755#20837
+          Properties.OnChange = EditLoginZIPPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 15
+        end
+      end
+    end
+    object TabSheetClientStyle: TcxTabSheet
+      Caption = #21015#34920#25480#26435#35774#32622
+      ImageIndex = 5
+      object GroupBoxLisence: TGroupBox
+        Left = 8
+        Top = 9
+        Width = 249
+        Height = 96
+        Caption = #25480#26435#20449#24687
+        TabOrder = 0
+        object DateEditLisence: TcxDateEdit
+          Left = 76
+          Top = 47
+          Properties.InputKind = ikRegExpr
+          Properties.MaxDate = 73050.000000000000000000
+          Properties.Nullstring = '1999-01-01'
+          Properties.ReadOnly = False
+          Properties.OnChange = CheckMiniResSrvPropertiesChange
+          TabOrder = 0
+          Width = 121
+        end
+        object cxLabel1: TcxLabel
+          Left = 12
+          Top = 49
+          AutoSize = False
+          Caption = #21040#26399#26102#38388
+          Height = 17
+          Width = 52
+        end
+        object CheckBoxUseLisence: TcxCheckBox
+          Left = 8
+          Top = 20
+          Caption = #21551#29992#25480#26435
+          Properties.OnChange = CheckMiniResSrvPropertiesChange
+          Style.BorderStyle = ebsFlat
+          TabOrder = 2
+        end
+      end
+    end
+  end
+  object Panel: TPanel
+    AlignWithMargins = True
+    Left = 8
+    Top = 26
+    Width = 755
+    Height = 125
+    Margins.Left = 8
+    Margins.Top = 0
+    Margins.Right = 8
+    Margins.Bottom = 4
+    Align = alTop
+    BevelOuter = bvNone
+    Caption = 'Panel'
+    ShowCaption = False
+    TabOrder = 5
+    object LabelHomeUrl: TcxLabel
+      Left = 0
+      Top = 10
+      Caption = #20027#39029#32593#22336
+    end
+    object LabelContactUrl: TcxLabel
+      Left = 0
+      Top = 34
+      Caption = #32852#31995#26041#24335#32593#22336
+    end
+    object LabelPayUrl: TcxLabel
+      Left = 0
+      Top = 58
+      Caption = #20805#20540#32593#22336
+    end
+    object LabelInnerUrl: TcxLabel
+      Left = 0
+      Top = 82
+      Caption = #30331#38470#22120#20869#23884#32593#39029#22320#22336
+    end
+    object heHome: TcxHyperLinkEdit
+      Left = 129
+      Top = 8
+      ParentShowHint = False
+      Properties.OnChange = heHomePropertiesChange
+      ShowHint = True
+      Style.BorderStyle = ebsFlat
+      Style.LookAndFeel.Kind = lfFlat
+      Style.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.Kind = lfFlat
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.Kind = lfFlat
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.Kind = lfFlat
+      StyleHot.LookAndFeel.NativeStyle = True
+      TabOrder = 0
+      Width = 626
+    end
+    object heContact: TcxHyperLinkEdit
+      Left = 129
+      Top = 32
+      ParentShowHint = False
+      Properties.OnChange = heHomePropertiesChange
+      ShowHint = True
+      Style.BorderStyle = ebsFlat
+      Style.LookAndFeel.Kind = lfFlat
+      Style.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.Kind = lfFlat
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.Kind = lfFlat
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.Kind = lfFlat
+      StyleHot.LookAndFeel.NativeStyle = True
+      TabOrder = 1
+      Width = 626
+    end
+    object hePayUrl: TcxHyperLinkEdit
+      Left = 129
+      Top = 56
+      ParentShowHint = False
+      Properties.OnChange = heHomePropertiesChange
+      ShowHint = True
+      Style.BorderStyle = ebsFlat
+      Style.LookAndFeel.Kind = lfFlat
+      Style.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.Kind = lfFlat
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.Kind = lfFlat
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.Kind = lfFlat
+      StyleHot.LookAndFeel.NativeStyle = True
+      TabOrder = 2
+      Width = 626
+    end
+    object heLogin: TcxHyperLinkEdit
+      Left = 129
+      Top = 80
+      ParentShowHint = False
+      Properties.OnChange = heHomePropertiesChange
+      ShowHint = True
+      Style.BorderStyle = ebsFlat
+      Style.LookAndFeel.Kind = lfFlat
+      Style.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.Kind = lfFlat
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.Kind = lfFlat
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.Kind = lfFlat
+      StyleHot.LookAndFeel.NativeStyle = True
+      TabOrder = 3
+      Width = 626
+    end
+    object LabelResDir: TcxLabel
+      Left = 0
+      Top = 106
+      Caption = #36164#28304#25991#20214#22841#21517#31216
+    end
+    object edtDir: TcxTextEdit
+      Left = 129
+      Top = 104
+      ParentShowHint = False
+      Properties.OnChange = heHomePropertiesChange
+      ShowHint = True
+      Style.BorderStyle = ebsFlat
+      Style.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.NativeStyle = True
+      TabOrder = 4
+      TextHint = #22312#23458#25143#31471#19987#23646#36164#28304#25991#20214#20648#23384#20301#32622#65292#40664#35748#20026#8220'Resource\'#8221
+      Width = 626
+    end
+  end
+  object BarManager: TdxBarManager
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Microsoft YaHei UI'
+    Font.Style = []
+    Categories.Strings = (
+      'Default')
+    Categories.ItemsVisibles = (
+      2)
+    Categories.Visibles = (
+      True)
+    LookAndFeel.NativeStyle = True
+    PopupMenuLinks = <>
+    Style = bmsFlat
+    UseF10ForMenu = False
+    UseSystemFont = True
+    Left = 472
+    Top = 64
+    DockControlHeights = (
+      0
+      0
+      26
+      0)
+    object ToolBar: TdxBar
+      AllowClose = False
+      AllowCustomizing = False
+      AllowQuickCustomizing = False
+      AllowReset = False
+      Caption = #24037#20855#26639
+      CaptionButtons = <>
+      DockedDockingStyle = dsTop
+      DockedLeft = 0
+      DockedTop = 0
+      DockingStyle = dsTop
+      FloatLeft = 1289
+      FloatTop = 203
+      FloatClientWidth = 75
+      FloatClientHeight = 178
+      ItemLinks = <
+        item
+          Visible = True
+          ItemName = 'BtnNew'
+        end
+        item
+          Visible = True
+          ItemName = 'BtnOpen'
+        end
+        item
+          Visible = True
+          ItemName = 'BtnSave'
+        end
+        item
+          BeginGroup = True
+          Visible = True
+          ItemName = 'BtnClose'
+        end>
+      OneOnRow = True
+      Row = 0
+      UseOwnFont = False
+      Visible = True
+      WholeRow = True
+    end
+    object BarManagerBar1: TdxBar
+      AllowClose = False
+      AllowCustomizing = False
+      AllowQuickCustomizing = False
+      AllowReset = False
+      Caption = 'Custom 1'
+      CaptionButtons = <>
+      DockControl = dxBarDockControl1
+      DockedDockControl = dxBarDockControl1
+      DockedLeft = 0
+      DockedTop = 0
+      FloatLeft = 795
+      FloatTop = 8
+      FloatClientWidth = 0
+      FloatClientHeight = 0
+      ItemLinks = <
+        item
+          Visible = True
+          ItemName = 'BtnSLAdd'
+        end
+        item
+          Visible = True
+          ItemName = 'BtnSLDel'
+        end
+        item
+          Visible = True
+          ItemName = 'BtnSLEdit'
+        end
+        item
+          BeginGroup = True
+          Visible = True
+          ItemName = 'BtnSLMoveUp'
+        end
+        item
+          Visible = True
+          ItemName = 'BtnSLMoveDown'
+        end>
+      OneOnRow = True
+      Row = 0
+      UseOwnFont = False
+      Visible = True
+      WholeRow = True
+    end
+    object BarManagerBar2: TdxBar
+      AllowClose = False
+      AllowCustomizing = False
+      AllowQuickCustomizing = False
+      AllowReset = False
+      Caption = 'Custom 2'
+      CaptionButtons = <>
+      DockControl = dxBarDockControl2
+      DockedDockControl = dxBarDockControl2
+      DockedLeft = 0
+      DockedTop = 0
+      FloatLeft = 795
+      FloatTop = 8
+      FloatClientWidth = 0
+      FloatClientHeight = 0
+      ItemLinks = <
+        item
+          Visible = True
+          ItemName = 'BtnULAdd'
+        end
+        item
+          Visible = True
+          ItemName = 'BtnULDel'
+        end
+        item
+          Visible = True
+          ItemName = 'BtnULEdit'
+        end
+        item
+          BeginGroup = True
+          Visible = True
+          ItemName = 'BtnULMoveUp'
+        end
+        item
+          Visible = True
+          ItemName = 'BtnULMoveDown'
+        end
+        item
+          BeginGroup = True
+          Visible = True
+          ItemName = 'BtnULTestDown'
+        end>
+      OneOnRow = True
+      Row = 0
+      UseOwnFont = False
+      Visible = True
+      WholeRow = True
+    end
+    object BarManagerBar3: TdxBar
+      AllowClose = False
+      AllowCustomizing = False
+      AllowQuickCustomizing = False
+      AllowReset = False
+      Caption = 'Custom 3'
+      CaptionButtons = <>
+      DockControl = dxBarDockControl3
+      DockedDockControl = dxBarDockControl3
+      DockedLeft = 0
+      DockedTop = 0
+      FloatLeft = 795
+      FloatTop = 8
+      FloatClientWidth = 0
+      FloatClientHeight = 0
+      ItemLinks = <
+        item
+          Visible = True
+          ItemName = 'BtnSEAdd'
+        end
+        item
+          Visible = True
+          ItemName = 'BtnSEDel'
+        end
+        item
+          Visible = True
+          ItemName = 'BtnSEEdit'
+        end
+        item
+          BeginGroup = True
+          Visible = True
+          ItemName = 'BtnSEMoveUp'
+        end
+        item
+          Visible = True
+          ItemName = 'BtnSEMoveDown'
+        end>
+      OneOnRow = True
+      Row = 0
+      UseOwnFont = False
+      Visible = True
+      WholeRow = True
+    end
+    object BtnOpen: TdxBarButton
+      Caption = #25171#24320
+      Category = 0
+      Hint = #25171#24320
+      Visible = ivAlways
+      Glyph.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        1800000000000003000000000000000000000000000000000000FF00FF0274AC
+        0274AC0274AC0274AC0274AC0274AC0274AC0274AC0274AC0274AC0274AC0274
+        AC0274ACFF00FFFF00FF0274AC48BCF60274AC8CD8FA4BBFF74ABFF64ABFF74A
+        BFF74ABFF64ABFF74ABFF64BBFF62398CC97E0F20274ACFF00FF0274AC4FC4F7
+        0274AC92DDFB54C7F854C7F753C7F854C7F754C7F854C7F854C7F853C7F7279D
+        CE9DE3F20274ACFF00FF0274AC57CAF80274AC99E3FB5ED1FA5ED1FA5ED1FA5E
+        D1FA5ED1FA5FD1FA5ED1F85ED1F82CA1CEA3E9F30274ACFF00FF0274AC5ED3FA
+        0274ACA1E9FC69DCFA2C9D6703690804740A2C9C675ED0E269DCFA6ADDFB2FA6
+        CFA9EEF30274ACFF00FF0274AC67D9F70274ABA7EFFC74E5FB74E5FB39AC7E05
+        7F0B04800B157F2E70E2F674E5FB33A9CFACF0F40274ACFF00FF0274AC6FE3FA
+        0274ABFFFFFFBAF4FEB8F4FEBAF4FE58B27E05860D047E0A1E812DB8F4FE83C9
+        E0D4F7FA0274ACFF00FF0274AC7AEBFE0274AC0274AC0274AC0274AC0274AC02
+        6C7005830C06910D03681102709A0274AC0274AC0274ACFF00FF0274AC83F2FE
+        82F3FE82F3FE83F2FC83F3FE82F3FE5BC7B00A80140A9A14047B0B49B591036F
+        A7FF00FFFF00FFFF00FF0274ACFEFEFE89FAFF89FAFE89FAFE8AF8FE8AFAFE6C
+        D9C90F871F13A926098E122D9754036FA7FF00FFFF00FFFF00FFFF00FF0274AC
+        FEFEFE8FFEFF046B0B046B0B046B0B046B0B15932A1FB53812A123046B0B046B
+        0B046B0B046B0BFF00FFFF00FFFF00FF0274AC0274AC027399046B0B107D1D36
+        CE6032C95A27BC471DB03614A527098713046B0BFF00FFFF00FFFF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FF046B0B1D993541DE7535CC5D2BC24D1AA732046B
+        0BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF04
+        6B0B27AC4546E37A35CA5C046B0BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FFFF00FFFF00FF046B0B2DB851046B0BFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+        00FFFF00FF046B0BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+      OnClick = BtnOpenClick
+    end
+    object dxBarButton2: TdxBarButton
+      Caption = #20445#23384
+      Category = 0
+      Hint = #20445#23384
+      Visible = ivAlways
+    end
+    object BtnSave: TdxBarButton
+      Caption = #20445#23384
+      Category = 0
+      Enabled = False
+      Hint = #20445#23384
+      Visible = ivAlways
+      Glyph.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        1800000000000003000000000000000000000000000000000000FF00FFFF00FF
+        FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+        FFFF00FFFF00FFFF00FFFF00FFFF00FF7F2B287F2B28A18283A18283A18283A1
+        8283A18283A18283A182837A1C1C7F2B28FF00FFFF00FFFF00FFFF00FF7F2B28
+        CA4D4DB64545DDD4D5791617791617DCE0E0D7DADECED5D7BDBABD76100F9A2D
+        2D7F2B28FF00FFFF00FFFF00FF7F2B28C24A4BB14444E2D9D9791617791617D9
+        D8DAD9DEE1D3D9DCC1BDC1761111982D2D7F2B28FF00FFFF00FFFF00FF7F2B28
+        C24A4AB04242E6DCDC791617791617D5D3D5D8DEE1D7DDE0C6C2C5700F0F962C
+        2C7F2B28FF00FFFF00FFFF00FF7F2B28C24A4AB04141EADEDEE7DDDDDDD4D5D7
+        D3D5D5D7D9D7D8DACAC2C57E17179E31317F2B28FF00FFFF00FFFF00FF7F2B28
+        BF4748B84545BA4C4CBD5757BB5756B64E4EB44949BD5251BB4B4CB54242BF4A
+        4A7F2B28FF00FFFF00FFFF00FF7F2B28A33B39B1605DC68684CB918FCC9190CC
+        908FCB8988C98988CB9391CC9696BD4B4C7F2B28FF00FFFF00FFFF00FF7F2B28
+        BD4B4CF7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7BD4B
+        4C7F2B28FF00FFFF00FFFF00FF7F2B28BD4B4CF7F7F7F7F7F7F7F7F7F7F7F7F7
+        F7F7F7F7F7F7F7F7F7F7F7F7F7F7BD4B4C7F2B28FF00FFFF00FFFF00FF7F2B28
+        BD4B4CF7F7F7BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFF7F7F7BD4B
+        4C7F2B28FF00FFFF00FFFF00FF7F2B28BD4B4CF7F7F7F7F7F7F7F7F7F7F7F7F7
+        F7F7F7F7F7F7F7F7F7F7F7F7F7F7BD4B4C7F2B28FF00FFFF00FFFF00FF7F2B28
+        BD4B4CF7F7F7BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFF7F7F7BD4B
+        4C7F2B28FF00FFFF00FFFF00FF7F2B28BD4B4CF7F7F7F7F7F7F7F7F7F7F7F7F7
+        F7F7F7F7F7F7F7F7F7F7F7F7F7F7BD4B4C7F2B28FF00FFFF00FFFF00FFFF00FF
+        7F2B28F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F7F77F2B
+        28FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+        00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+      OnClick = BtnSaveClick
+    end
+    object BtnClose: TdxBarButton
+      Caption = #20851#38381
+      Category = 0
+      Hint = #20851#38381
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF00C76A6D00CC6E7100D0727500FBDDDE0069333400D2686900D06A
+        6B00D56D6E00DE737400DA727300D7707100D56F7000E0777800DF777800DB75
+        7600DA747500C3686900C66A6B00DF797A00E57D7E00E07A7B00E37D7E00D374
+        7600E9818200E57F8000EA828300E6808100F0878800EE868700F58C8D00F48C
+        8D00F28B8C00DC7F8000FA919200F9909200F48E8F00F8929300F9939400FE97
+        9800FD979800FC969700FF999A00E3888900FF9A9B00FE999A00FF9B9C00EB8F
+        9000E78C8D00E98E8F00FF9D9E00FF9FA000DA888A00D7868700D8888A00EC96
+        9700FEA2A300F0999A00B0717200FCAFB000FABCBD00F9C5C600FDDCDD00B966
+        6600BB686800E0858500DA8888009A666600FBF0D200FDF3D400FFF5D800FDFC
+        DA00FDFCDC00FFFFDD00FFFFDE00FFFFDF00FFFFE000ECFDD400B8E1AC006BDC
+        89003DC2640042C468005DD5800039C5650046D4730024CB600029CC630029CB
+        630030CD67002FCA640033CB670019CB5B0020CA5E0025CF6300000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020202020202
+        0245070202020202020202020202454541420702020202020202020245451409
+        081307454545454545020202450B0D0E0A03073A3D3E3F3F45020202450F1112
+        0C0407555F585D3F4502020245161715100507535A5C573F45020202451C1B18
+        1D190752595B5E3F45020202451E1A39063807505154563F4502020245201F3B
+        403607484E4C4F3F4502020245242622212307474D4B4E3F4502020245292827
+        254307474D4B4D3F4502020245302A2B292D07474D4B4D3F4502020245352E2C
+        2E3207474D4B4D3F450202024545332F343107464A494A3F450202020202453C
+        3744074545454545450202020202020245450702020202020202}
+      OnClick = BtnCloseClick
+    end
+    object BtnNew: TdxBarButton
+      Caption = #26032#24314
+      Category = 0
+      Hint = #26032#24314
+      Visible = ivAlways
+      Glyph.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        1800000000000003000000000000000000000000000000000000FF00FFFF00FF
+        A46769A46769A46769A46769A46769A46769A46769A46769A46769A46769A467
+        69A46769A46769FF00FFFF00FFFF00FFB79184FEE9C7F4DAB5F3D5AAF2D0A0EF
+        CB96EFC68BEDC182EBC17FEBC180EBC180F2C782A46769FF00FFFF00FFFF00FF
+        B79187FCEACEF3DABCF2D5B1F0D0A7EECB9EEDC793EDC28BE9BD81E9BD7FE9BD
+        7FEFC481A46769FF00FFFF00FFFF00FFB7938AFEEFDAF6E0C6F2DABCF2D5B2EF
+        D0A9EECB9EEDC796EBC28CE9BD82E9BD7FEFC481A46769FF00FFFF00FFFF00FF
+        BA978FFFF4E5F7E5CFF4E0C5F3DABBF2D5B1F0D0A6EECB9EEDC795EBC28AEABF
+        81EFC480A46769FF00FFFF00FFFF00FFC09E95FFFBF0F8EADCF6E3CFF4E0C6F2
+        D9BCF2D5B1F0D0A9EDCB9EEDC695EBC28AEFC583A46769FF00FFFF00FFFF00FF
+        C6A49AFFFFFCFAF0E6F8EADAF7E5CFF4E0C5F2DABAF2D5B1F0D0A7EECB9DEBC7
+        93F2C98CA46769FF00FFFF00FFFF00FFCBA99EFFFFFFFEF7F2FAEFE6F8EAD9F7
+        E3CFF6E0C5F2DABBF2D4B1F0D0A7EECC9EF3CE97A46769FF00FFFF00FFFF00FF
+        CFAC9FFFFFFFFFFEFCFCF6F0FAEFE6F7EADAF6E3CFF4E0C5F3D9BBF3D4B0F0D0
+        A6F6D3A0A46769FF00FFFF00FFFF00FFD4B0A1FFFFFFFFFFFFFFFEFCFEF7F0FA
+        EFE5F8EAD9F7E5CEF6DEC4F3D9B8F4D8B1EBCFA4A46769FF00FFFF00FFFF00FF
+        D9B5A1FFFFFFFFFFFFFFFFFFFFFEFCFCF7F0FAEFE5F8E9D9F8E7D1FBEACEDECE
+        B4B6AA93A46769FF00FFFF00FFFF00FFDDB7A4FFFFFFFFFFFFFFFFFFFFFFFFFF
+        FEFCFCF6EFFCF3E6EDD8C9B68A7BA17B6F9C7667A46769FF00FFFF00FFFF00FF
+        E2BCA5FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFBFFFEF7DAC1BAAD735BE19E
+        55E68F31B56D4DFF00FFFF00FFFF00FFE6BFA7FFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFDCC7C5B88265F8B55CBF7A5CFF00FFFF00FFFF00FFFF00FF
+        E4BCA4FBF4F0FBF4EFFAF3EFFAF3EFF8F2EFF7F2EFF7F2EFD8C2C0B77F62C183
+        6CFF00FFFF00FFFF00FFFF00FFFF00FFE8C4ADEBCBB7EBCBB7EACBB7EACAB6EA
+        CAB6EACAB6EACAB6E3C2B1A56B5FFF00FFFF00FFFF00FFFF00FF}
+      OnClick = BtnNewClick
+    end
+    object BtnSLAdd: TdxBarButton
+      Caption = #22686#21152
+      Category = 0
+      Enabled = False
+      Hint = #22686#21152
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF009B390B009C3A0D009B3A0C009C3B0D00CC670100D06A0000DD88
+        2E00EBA45A00FFCF9200307C1A002C7E1A00307F1C0030801D002F811E002F83
+        20002E8622002E8723002C8D28002D8C28002C8F2A002C912B002C942F002C92
+        2D002B9630000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020207020202
+        06060606060202020202020207070708060B0A09060202020202020207020202
+        0306040506020202020202020702020202020202020202020202020207020202
+        06060606060202020202020207070707060B0A09060202020202020207020202
+        0306040506020202020202020702020202020202020202020202020207020202
+        06060606060202020202020207070707060B0A09060202020202020207020202
+        0306040506020D0C02020606060606020202020202020E0F0202060B0A090602
+        0202020210141716130E0306040506020202020210151A18120E020202020202
+        0202020202021919020202020202020202020202020211110202}
+      PaintStyle = psCaptionGlyph
+      UnclickAfterDoing = False
+      OnClick = BtnSLAddClick
+    end
+    object BtnSLDel: TdxBarButton
+      Caption = #21024#38500
+      Category = 0
+      Enabled = False
+      Hint = #21024#38500
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF00832304008423050084240500C24F0000BD4C0000D36E1A00E58E
+        4000FFC179000000B50000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020207020202
+        05050505050202020202020207070706050A0908050202020202020207020202
+        0305040305020202020202020702020202020202020202020202020207020202
+        05050505050202020202020207070707050A0908050202020202020207020202
+        0305040305020202020202020702020202020202020202020202020207020202
+        05050505050202020202020207070707050A0908050202020202020207020202
+        0305040305020202020205050505050202020202020B0B020B0B050A09080502
+        02020202020B0B0B0B0B0305040305020202020202020B0B0B02020202020202
+        02020202020B0B0B0B0B02020202020202020202020B0B020B0B}
+      PaintStyle = psCaptionGlyph
+      UnclickAfterDoing = False
+      OnClick = BtnSLDelClick
+    end
+    object BtnSLEdit: TdxBarButton
+      Caption = #32534#36753
+      Category = 0
+      Enabled = False
+      Hint = #32534#36753
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF007C7078008D787F0085787C00A3878C00B7818300B47F8100A877
+        79008F676900956D6F007D555600996E6F009D6C6C00A47272009D6D6D009E6E
+        6E00C68E8E00C8929200C48F8F00C38E8E00C18D8D00A1767600AC808000D6A2
+        A200DAA6A600D9A5A500D8A4A400E9B5B500E8B5B500ECB9B900965F5D009E74
+        7300A3797800EEB7B500F3BCBB00E5A6A300B2787300E1D0CE00E4D4D200B481
+        7600B8857A00AA7A71007959530076575100BA8E850073564F0077595200E3CF
+        C90049464500CF9B8600FAF5F300DAC5BC00CB9A8200F9F5F300DCA88700E0CF
+        C500FCF7F400FBF6F300E3B18E00E8D9CE00FEF9F500FDF8F400FCF7F300EDBD
+        9200F0E4D900FBF3EC00FAEFE400FBF3EB00FEF9F400FDF8F300FFFEFD00FAEF
+        E300DCA76A00F8E7D300B0A59800F9EBDA00F2E5D600FBF4EC00BFA889009D8B
+        7300D1BCA000E4CFB400F4E1C900F4EBDF00FDF9F400E4C39300E4C59900D0B4
+        8D00AF997800DAC09A00A794790093836B00CDB79800AE9C8200FEF3E300FFF7
+        EB00FDF6EC00F3D19900EECC9700EDCB9600E9C89600DCBD8D00D9BC8C00C5AC
+        8600BAA3800095856C00FDEFD900EECD950066625B00FFFEFC00FFFCF400FFFE
+        F900FFFFFD00A5B3B1005160610019ADCC000FCAF40010A5CF003392B300469C
+        BA003872860000A4E60004A8E600097CA8001B617D0029799A00373C3E001855
+        6F00077DCD00585C60000936C900204ADD00092CC300021EAA004860F1000318
+        AE000416AA00192DC4003E4BDB00000099000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020202020202
+        0202020202020202020207070707070707070707070707020202076C5453525E
+        5B58666564630702020229604B3280745F50595765630702020229614D4C7E7D
+        816E5C69676D070202022E70444E7A7F040B2C516A68080202022E724F497303
+        25130F2D6B5A0902020236013E435505231A15112F5D0D0202023601483F4342
+        221D1B1410300A0202023801014846453D211E1C160E0C020202380101014856
+        4539171F1912208302023C0101010148476235182406787575023C0101010101
+        6F71312B2679767B878D4101010101010101282A4A777C848689413A403B3B34
+        3737272A33028288858A4138383838383838382A0202028C8B02}
+      PaintStyle = psCaptionGlyph
+      UnclickAfterDoing = False
+      OnClick = BtnSLEditClick
+    end
+    object BtnSLMoveUp: TdxBarButton
+      Caption = 'New Button'
+      Category = 0
+      Enabled = False
+      Hint = 'New Button'
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF00F6600000E95B0000BB490000B6470000B4460000B1450000AF44
+        0000AC430000AA420000A7410000953A0000893500007B300000772E0000752D
+        00005F250000511F00004B1D0000491C0000FF640000FB630000F8620000F05E
+        0000EE5D0000EB5C0000E65A0000E3590000E1580000D9550000D7540000D453
+        0000CF520000CC500000CA4F0000C74E0000C54D0000C04B0000B8480000A541
+        0000A03F00009E3E00008434000080320000702C00006E2B0000592300005722
+        00004F1F0000471C0000451B00003616000033140000FF670100C44F0100FF6A
+        0400AC470300FF6B0500AC4A0500FF6E0800FF700A00E6670B00FF750F00FF78
+        1300BB591000B2571100FF7D1900FF801E00FF832300FFF8F300FF872800FF88
+        2900FF892B00BA682500FC913800FC923A00C0723000FF974100C0723100FF98
+        4200C0733200FC974200FB9E4F00FFAD6700FFFAF600FFA55800FFB26F00FFB5
+        7400D59A6600FFBA7D00E2A67000FFBB7F00EAAF7900EFB47E00D9A77A00FFC5
+        9100FFC69300F3BD8C00FED1A700FFD3AA00E9C9AB00E7CAAF00FFF6EE00E1BA
+        9500F7CEA600FFD5AD00FFDAB700E7C9AB00E7C9AC00FFE2C600FBE7D400F4E7
+        DA00FFF3E700FEFBF800FFFAF400FBF7F200FFFEFC0000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020202020236
+        3431313335020202020202020215152D290B0B0C2C13130202020202302F0908
+        0B290B0B09082E35020202300F26280B296701500C0B082E130202302123050B
+        0C6E01520C0C0B081302122A1B23080A0C6D01500C0C0C092C3412201B21423A
+        0A6601500C433C0A2B3410031818705F1D6A014B4E75690B0B320E4139177201
+        5865015A7101600A0B310E494519537476567673015C382829140E4555161A4D
+        470101015E2226050D14021C62511E1B4C680163222427251102021C4A6C4F18
+        0454643F1F2120071102020226516F5D48403B3D3D37242E020202020245455B
+        6B61595746202002020202020202021E3E444117060202020202}
+      UnclickAfterDoing = False
+      OnClick = BtnSLMoveUpClick
+    end
+    object BtnSLMoveDown: TdxBarButton
+      Caption = 'New Button'
+      Category = 0
+      Enabled = False
+      Hint = 'New Button'
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF00F6600000E95B0000BB490000B6470000B4460000B1450000AF44
+        0000AC430000AA420000A9420000A7410000953A0000893500007B300000772E
+        0000752D00005F250000511F00004B1D0000491C0000FF640000FB630000F862
+        0000F05E0000EE5D0000EB5C0000E65A0000E1580000D9550000D7540000D453
+        0000CF510000CC500000CA4F0000C74E0000C54D0000C04B0000B8480000A541
+        0000A03F00009E3E00008434000080320000702C00006E2B0000592300005722
+        00004F1F0000471C0000451B00003616000033140000FF670100A9440100FB67
+        0300FF6A0400FF6B0500C6540500FF6E0800FF700A00FF750F00FB741000AF50
+        0B00FF781300CA601100FF7D1900FF801E00FF832300FF872800FF882900FF89
+        2B00BF6A2500EB843100E7833200E1803100D77D3100C0723000FF974100FF98
+        4200C2773800C67A3A00FFAD6700FCF7F300CC824200FFA55800CA884F00FFB5
+        7400F2AD6F00D1986600FFBA7D00FFBB7E00FFBB7F00D5A07000D9A67900D9A7
+        7A00FFC59100FFC69300FFD1A600FED3AB00FED5AF00F7CFAA00FEF2E700DEB4
+        8C00E1BA9500FFD5AD00FED4AC00FCD3AB00FFDAB700E6C6A700FFE2C600F4E7
+        DA00FAF4EE00FCF8F400FEFBF800FFEAD400FBF7F200FCFAF600FEFEFC000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020202020236
+        3431313335020202020202020216162D290B0B0D2C14140202020202302F0908
+        0B290B0B09082E35020202301026280B29586F410D0B082E140202302123050B
+        527201690C0D0B081402132A1C23085355010101600C0D092C3413201C215673
+        78777874015F380A2B341103191968015A67015B7101610B0B320F423A18755D
+        1764014A4F766A0A0B310F48451A4039186D014E26433C2829150F4554171B18
+        1865014D222226050E15021D63511E1C186C014C222427251202021D496E5019
+        0466014B1F212007120202022651705E473F3B3D3D37242E020202020245455C
+        6B62595746202002020202020202021E3E444218060202020202}
+      UnclickAfterDoing = False
+      OnClick = BtnSLMoveDownClick
+    end
+    object BtnULAdd: TdxBarButton
+      Caption = #22686#21152
+      Category = 0
+      Enabled = False
+      Hint = #22686#21152
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF009B390B009C3A0D009B3A0C009C3B0D00CC670100D06A0000DD88
+        2E00EBA45A00FFCF9200307C1A002C7E1A00307F1C0030801D002F811E002F83
+        20002E8622002E8723002C8D28002D8C28002C8F2A002C912B002C942F002C92
+        2D002B9630000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020207020202
+        06060606060202020202020207070708060B0A09060202020202020207020202
+        0306040506020202020202020702020202020202020202020202020207020202
+        06060606060202020202020207070707060B0A09060202020202020207020202
+        0306040506020202020202020702020202020202020202020202020207020202
+        06060606060202020202020207070707060B0A09060202020202020207020202
+        0306040506020D0C02020606060606020202020202020E0F0202060B0A090602
+        0202020210141716130E0306040506020202020210151A18120E020202020202
+        0202020202021919020202020202020202020202020211110202}
+      PaintStyle = psCaptionGlyph
+      UnclickAfterDoing = False
+      OnClick = BtnULAddClick
+    end
+    object BtnULDel: TdxBarButton
+      Caption = #21024#38500
+      Category = 0
+      Enabled = False
+      Hint = #21024#38500
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF00832304008423050084240500C24F0000BD4C0000D36E1A00E58E
+        4000FFC179000000B50000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020207020202
+        05050505050202020202020207070706050A0908050202020202020207020202
+        0305040305020202020202020702020202020202020202020202020207020202
+        05050505050202020202020207070707050A0908050202020202020207020202
+        0305040305020202020202020702020202020202020202020202020207020202
+        05050505050202020202020207070707050A0908050202020202020207020202
+        0305040305020202020205050505050202020202020B0B020B0B050A09080502
+        02020202020B0B0B0B0B0305040305020202020202020B0B0B02020202020202
+        02020202020B0B0B0B0B02020202020202020202020B0B020B0B}
+      PaintStyle = psCaptionGlyph
+      UnclickAfterDoing = False
+      OnClick = BtnULDelClick
+    end
+    object BtnULEdit: TdxBarButton
+      Caption = #32534#36753
+      Category = 0
+      Enabled = False
+      Hint = #32534#36753
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF007C7078008D787F0085787C00A3878C00B7818300B47F8100A877
+        79008F676900956D6F007D555600996E6F009D6C6C00A47272009D6D6D009E6E
+        6E00C68E8E00C8929200C48F8F00C38E8E00C18D8D00A1767600AC808000D6A2
+        A200DAA6A600D9A5A500D8A4A400E9B5B500E8B5B500ECB9B900965F5D009E74
+        7300A3797800EEB7B500F3BCBB00E5A6A300B2787300E1D0CE00E4D4D200B481
+        7600B8857A00AA7A71007959530076575100BA8E850073564F0077595200E3CF
+        C90049464500CF9B8600FAF5F300DAC5BC00CB9A8200F9F5F300DCA88700E0CF
+        C500FCF7F400FBF6F300E3B18E00E8D9CE00FEF9F500FDF8F400FCF7F300EDBD
+        9200F0E4D900FBF3EC00FAEFE400FBF3EB00FEF9F400FDF8F300FFFEFD00FAEF
+        E300DCA76A00F8E7D300B0A59800F9EBDA00F2E5D600FBF4EC00BFA889009D8B
+        7300D1BCA000E4CFB400F4E1C900F4EBDF00FDF9F400E4C39300E4C59900D0B4
+        8D00AF997800DAC09A00A794790093836B00CDB79800AE9C8200FEF3E300FFF7
+        EB00FDF6EC00F3D19900EECC9700EDCB9600E9C89600DCBD8D00D9BC8C00C5AC
+        8600BAA3800095856C00FDEFD900EECD950066625B00FFFEFC00FFFCF400FFFE
+        F900FFFFFD00A5B3B1005160610019ADCC000FCAF40010A5CF003392B300469C
+        BA003872860000A4E60004A8E600097CA8001B617D0029799A00373C3E001855
+        6F00077DCD00585C60000936C900204ADD00092CC300021EAA004860F1000318
+        AE000416AA00192DC4003E4BDB00000099000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020202020202
+        0202020202020202020207070707070707070707070707020202076C5453525E
+        5B58666564630702020229604B3280745F50595765630702020229614D4C7E7D
+        816E5C69676D070202022E70444E7A7F040B2C516A68080202022E724F497303
+        25130F2D6B5A0902020236013E435505231A15112F5D0D0202023601483F4342
+        221D1B1410300A0202023801014846453D211E1C160E0C020202380101014856
+        4539171F1912208302023C0101010148476235182406787575023C0101010101
+        6F71312B2679767B878D4101010101010101282A4A777C848689413A403B3B34
+        3737272A33028288858A4138383838383838382A0202028C8B02}
+      PaintStyle = psCaptionGlyph
+      UnclickAfterDoing = False
+      OnClick = BtnULEditClick
+    end
+    object BtnULMoveUp: TdxBarButton
+      Caption = 'New Button'
+      Category = 0
+      Enabled = False
+      Hint = 'New Button'
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF00F6600000E95B0000BB490000B6470000B4460000B1450000AF44
+        0000AC430000AA420000A7410000953A0000893500007B300000772E0000752D
+        00005F250000511F00004B1D0000491C0000FF640000FB630000F8620000F05E
+        0000EE5D0000EB5C0000E65A0000E3590000E1580000D9550000D7540000D453
+        0000CF520000CC500000CA4F0000C74E0000C54D0000C04B0000B8480000A541
+        0000A03F00009E3E00008434000080320000702C00006E2B0000592300005722
+        00004F1F0000471C0000451B00003616000033140000FF670100C44F0100FF6A
+        0400AC470300FF6B0500AC4A0500FF6E0800FF700A00E6670B00FF750F00FF78
+        1300BB591000B2571100FF7D1900FF801E00FF832300FFF8F300FF872800FF88
+        2900FF892B00BA682500FC913800FC923A00C0723000FF974100C0723100FF98
+        4200C0733200FC974200FB9E4F00FFAD6700FFFAF600FFA55800FFB26F00FFB5
+        7400D59A6600FFBA7D00E2A67000FFBB7F00EAAF7900EFB47E00D9A77A00FFC5
+        9100FFC69300F3BD8C00FED1A700FFD3AA00E9C9AB00E7CAAF00FFF6EE00E1BA
+        9500F7CEA600FFD5AD00FFDAB700E7C9AB00E7C9AC00FFE2C600FBE7D400F4E7
+        DA00FFF3E700FEFBF800FFFAF400FBF7F200FFFEFC0000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020202020236
+        3431313335020202020202020215152D290B0B0C2C13130202020202302F0908
+        0B290B0B09082E35020202300F26280B296701500C0B082E130202302123050B
+        0C6E01520C0C0B081302122A1B23080A0C6D01500C0C0C092C3412201B21423A
+        0A6601500C433C0A2B3410031818705F1D6A014B4E75690B0B320E4139177201
+        5865015A7101600A0B310E494519537476567673015C382829140E4555161A4D
+        470101015E2226050D14021C62511E1B4C680163222427251102021C4A6C4F18
+        0454643F1F2120071102020226516F5D48403B3D3D37242E020202020245455B
+        6B61595746202002020202020202021E3E444117060202020202}
+      UnclickAfterDoing = False
+      OnClick = BtnULMoveUpClick
+    end
+    object BtnULMoveDown: TdxBarButton
+      Caption = 'New Button'
+      Category = 0
+      Enabled = False
+      Hint = 'New Button'
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF00F6600000E95B0000BB490000B6470000B4460000B1450000AF44
+        0000AC430000AA420000A9420000A7410000953A0000893500007B300000772E
+        0000752D00005F250000511F00004B1D0000491C0000FF640000FB630000F862
+        0000F05E0000EE5D0000EB5C0000E65A0000E1580000D9550000D7540000D453
+        0000CF510000CC500000CA4F0000C74E0000C54D0000C04B0000B8480000A541
+        0000A03F00009E3E00008434000080320000702C00006E2B0000592300005722
+        00004F1F0000471C0000451B00003616000033140000FF670100A9440100FB67
+        0300FF6A0400FF6B0500C6540500FF6E0800FF700A00FF750F00FB741000AF50
+        0B00FF781300CA601100FF7D1900FF801E00FF832300FF872800FF882900FF89
+        2B00BF6A2500EB843100E7833200E1803100D77D3100C0723000FF974100FF98
+        4200C2773800C67A3A00FFAD6700FCF7F300CC824200FFA55800CA884F00FFB5
+        7400F2AD6F00D1986600FFBA7D00FFBB7E00FFBB7F00D5A07000D9A67900D9A7
+        7A00FFC59100FFC69300FFD1A600FED3AB00FED5AF00F7CFAA00FEF2E700DEB4
+        8C00E1BA9500FFD5AD00FED4AC00FCD3AB00FFDAB700E6C6A700FFE2C600F4E7
+        DA00FAF4EE00FCF8F400FEFBF800FFEAD400FBF7F200FCFAF600FEFEFC000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020202020236
+        3431313335020202020202020216162D290B0B0D2C14140202020202302F0908
+        0B290B0B09082E35020202301026280B29586F410D0B082E140202302123050B
+        527201690C0D0B081402132A1C23085355010101600C0D092C3413201C215673
+        78777874015F380A2B341103191968015A67015B7101610B0B320F423A18755D
+        1764014A4F766A0A0B310F48451A4039186D014E26433C2829150F4554171B18
+        1865014D222226050E15021D63511E1C186C014C222427251202021D496E5019
+        0466014B1F212007120202022651705E473F3B3D3D37242E020202020245455C
+        6B62595746202002020202020202021E3E444218060202020202}
+      UnclickAfterDoing = False
+      OnClick = BtnULMoveDownClick
+    end
+    object BtnULTestDown: TdxBarButton
+      Caption = #27979#35797#19979#36733
+      Category = 0
+      Enabled = False
+      Hint = #27979#35797#19979#36733
+      Visible = ivAlways
+      Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000020F10000E82A000006CC000000D10000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000250500007F0F00020E0FF00003060000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000002020000048600000547000000F10000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000710000051900007D2F000000C20000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000044040000EC3F00008D0FF00003840000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000091882A04070FFFF0000F0FF0006A8E0000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000E43D2F090B0FFFF0008F0FF0000B6D0000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000C3AC3D0B0C0FFFF4070FFFF0005B4C0000000000000
+        000000000000000000000000000030160C3082461DA0684726D0805030FF5032
+        1DA020140C40000000001E2A4E6026409CD00E34D2F000103840000000000000
+        00000000004000000000200F0820E1703BF0D08030FF708830FFE07030FFB058
+        30FF704529E028190F5000000010000000700000000000000000000000000000
+        0050000000D0000000008C4B1DA0FF7840FFE0A040FF30A840FFB08030FFFF60
+        30FF906830FF482D1B9000000010000000F00000005000000000000000700000
+        00D00000001000000000D07030FFFF9040FF508840FF30C040FFFF8840FFD078
+        30FF40A820FF59701DF00000000000000010000000D000000060000000F00000
+        00700000000000000000B66937E050A850FF30C050FF50C050FFFF6840FF60B0
+        30FF20C010FF59701DF0000000000000000000000060000000F0000000200000
+        00E00000006000000000688840D040C850FF40E060FF70F090FFE0B070FFFFA0
+        40FF60C820FF366712900000000000000050000000E000000020000000000000
+        0030000000B0000000001E1F153070A850FF60D870FF80FFA0FF80FFB0FF80A8
+        20FF59B41DF00C19042000000000000000B00000003000000000000000000000
+        000000000020000000000000000021241B30587942B070B850FFA09050FF5A4C
+        3690122506300000000000000000000000200000000000000000}
+      PaintStyle = psCaptionGlyph
+      UnclickAfterDoing = False
+      OnClick = BtnULTestDownClick
+    end
+    object BtnSEAdd: TdxBarButton
+      Caption = #22686#21152
+      Category = 0
+      Enabled = False
+      Hint = #22686#21152
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF009B390B009C3A0D009B3A0C009C3B0D00CC670100D06A0000DD88
+        2E00EBA45A00FFCF9200307C1A002C7E1A00307F1C0030801D002F811E002F83
+        20002E8622002E8723002C8D28002D8C28002C8F2A002C912B002C942F002C92
+        2D002B9630000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020207020202
+        06060606060202020202020207070708060B0A09060202020202020207020202
+        0306040506020202020202020702020202020202020202020202020207020202
+        06060606060202020202020207070707060B0A09060202020202020207020202
+        0306040506020202020202020702020202020202020202020202020207020202
+        06060606060202020202020207070707060B0A09060202020202020207020202
+        0306040506020D0C02020606060606020202020202020E0F0202060B0A090602
+        0202020210141716130E0306040506020202020210151A18120E020202020202
+        0202020202021919020202020202020202020202020211110202}
+      PaintStyle = psCaptionGlyph
+      UnclickAfterDoing = False
+      OnClick = BtnSEAddClick
+    end
+    object BtnSEMoveDown: TdxBarButton
+      Caption = 'New Button'
+      Category = 0
+      Enabled = False
+      Hint = 'New Button'
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF00F6600000E95B0000BB490000B6470000B4460000B1450000AF44
+        0000AC430000AA420000A9420000A7410000953A0000893500007B300000772E
+        0000752D00005F250000511F00004B1D0000491C0000FF640000FB630000F862
+        0000F05E0000EE5D0000EB5C0000E65A0000E1580000D9550000D7540000D453
+        0000CF510000CC500000CA4F0000C74E0000C54D0000C04B0000B8480000A541
+        0000A03F00009E3E00008434000080320000702C00006E2B0000592300005722
+        00004F1F0000471C0000451B00003616000033140000FF670100A9440100FB67
+        0300FF6A0400FF6B0500C6540500FF6E0800FF700A00FF750F00FB741000AF50
+        0B00FF781300CA601100FF7D1900FF801E00FF832300FF872800FF882900FF89
+        2B00BF6A2500EB843100E7833200E1803100D77D3100C0723000FF974100FF98
+        4200C2773800C67A3A00FFAD6700FCF7F300CC824200FFA55800CA884F00FFB5
+        7400F2AD6F00D1986600FFBA7D00FFBB7E00FFBB7F00D5A07000D9A67900D9A7
+        7A00FFC59100FFC69300FFD1A600FED3AB00FED5AF00F7CFAA00FEF2E700DEB4
+        8C00E1BA9500FFD5AD00FED4AC00FCD3AB00FFDAB700E6C6A700FFE2C600F4E7
+        DA00FAF4EE00FCF8F400FEFBF800FFEAD400FBF7F200FCFAF600FEFEFC000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020202020236
+        3431313335020202020202020216162D290B0B0D2C14140202020202302F0908
+        0B290B0B09082E35020202301026280B29586F410D0B082E140202302123050B
+        527201690C0D0B081402132A1C23085355010101600C0D092C3413201C215673
+        78777874015F380A2B341103191968015A67015B7101610B0B320F423A18755D
+        1764014A4F766A0A0B310F48451A4039186D014E26433C2829150F4554171B18
+        1865014D222226050E15021D63511E1C186C014C222427251202021D496E5019
+        0466014B1F212007120202022651705E473F3B3D3D37242E020202020245455C
+        6B62595746202002020202020202021E3E444218060202020202}
+      UnclickAfterDoing = False
+      OnClick = BtnSEMoveDownClick
+    end
+    object BtnSEDel: TdxBarButton
+      Caption = #21024#38500
+      Category = 0
+      Enabled = False
+      Hint = #21024#38500
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF00832304008423050084240500C24F0000BD4C0000D36E1A00E58E
+        4000FFC179000000B50000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020207020202
+        05050505050202020202020207070706050A0908050202020202020207020202
+        0305040305020202020202020702020202020202020202020202020207020202
+        05050505050202020202020207070707050A0908050202020202020207020202
+        0305040305020202020202020702020202020202020202020202020207020202
+        05050505050202020202020207070707050A0908050202020202020207020202
+        0305040305020202020205050505050202020202020B0B020B0B050A09080502
+        02020202020B0B0B0B0B0305040305020202020202020B0B0B02020202020202
+        02020202020B0B0B0B0B02020202020202020202020B0B020B0B}
+      PaintStyle = psCaptionGlyph
+      UnclickAfterDoing = False
+      OnClick = BtnSEDelClick
+    end
+    object BtnSEEdit: TdxBarButton
+      Caption = #32534#36753
+      Category = 0
+      Enabled = False
+      Hint = #32534#36753
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF007C7078008D787F0085787C00A3878C00B7818300B47F8100A877
+        79008F676900956D6F007D555600996E6F009D6C6C00A47272009D6D6D009E6E
+        6E00C68E8E00C8929200C48F8F00C38E8E00C18D8D00A1767600AC808000D6A2
+        A200DAA6A600D9A5A500D8A4A400E9B5B500E8B5B500ECB9B900965F5D009E74
+        7300A3797800EEB7B500F3BCBB00E5A6A300B2787300E1D0CE00E4D4D200B481
+        7600B8857A00AA7A71007959530076575100BA8E850073564F0077595200E3CF
+        C90049464500CF9B8600FAF5F300DAC5BC00CB9A8200F9F5F300DCA88700E0CF
+        C500FCF7F400FBF6F300E3B18E00E8D9CE00FEF9F500FDF8F400FCF7F300EDBD
+        9200F0E4D900FBF3EC00FAEFE400FBF3EB00FEF9F400FDF8F300FFFEFD00FAEF
+        E300DCA76A00F8E7D300B0A59800F9EBDA00F2E5D600FBF4EC00BFA889009D8B
+        7300D1BCA000E4CFB400F4E1C900F4EBDF00FDF9F400E4C39300E4C59900D0B4
+        8D00AF997800DAC09A00A794790093836B00CDB79800AE9C8200FEF3E300FFF7
+        EB00FDF6EC00F3D19900EECC9700EDCB9600E9C89600DCBD8D00D9BC8C00C5AC
+        8600BAA3800095856C00FDEFD900EECD950066625B00FFFEFC00FFFCF400FFFE
+        F900FFFFFD00A5B3B1005160610019ADCC000FCAF40010A5CF003392B300469C
+        BA003872860000A4E60004A8E600097CA8001B617D0029799A00373C3E001855
+        6F00077DCD00585C60000936C900204ADD00092CC300021EAA004860F1000318
+        AE000416AA00192DC4003E4BDB00000099000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020202020202
+        0202020202020202020207070707070707070707070707020202076C5453525E
+        5B58666564630702020229604B3280745F50595765630702020229614D4C7E7D
+        816E5C69676D070202022E70444E7A7F040B2C516A68080202022E724F497303
+        25130F2D6B5A0902020236013E435505231A15112F5D0D0202023601483F4342
+        221D1B1410300A0202023801014846453D211E1C160E0C020202380101014856
+        4539171F1912208302023C0101010148476235182406787575023C0101010101
+        6F71312B2679767B878D4101010101010101282A4A777C848689413A403B3B34
+        3737272A33028288858A4138383838383838382A0202028C8B02}
+      PaintStyle = psCaptionGlyph
+      UnclickAfterDoing = False
+      OnClick = BtnSEEditClick
+    end
+    object BtnSEMoveUp: TdxBarButton
+      Caption = 'New Button'
+      Category = 0
+      Enabled = False
+      Hint = 'New Button'
+      Visible = ivAlways
+      Glyph.Data = {
+        36050000424D3605000000000000360400002800000010000000100000000100
+        080000000000000100000000000000000000000100000000000000000000FFFF
+        FF00FF00FF00F6600000E95B0000BB490000B6470000B4460000B1450000AF44
+        0000AC430000AA420000A7410000953A0000893500007B300000772E0000752D
+        00005F250000511F00004B1D0000491C0000FF640000FB630000F8620000F05E
+        0000EE5D0000EB5C0000E65A0000E3590000E1580000D9550000D7540000D453
+        0000CF520000CC500000CA4F0000C74E0000C54D0000C04B0000B8480000A541
+        0000A03F00009E3E00008434000080320000702C00006E2B0000592300005722
+        00004F1F0000471C0000451B00003616000033140000FF670100C44F0100FF6A
+        0400AC470300FF6B0500AC4A0500FF6E0800FF700A00E6670B00FF750F00FF78
+        1300BB591000B2571100FF7D1900FF801E00FF832300FFF8F300FF872800FF88
+        2900FF892B00BA682500FC913800FC923A00C0723000FF974100C0723100FF98
+        4200C0733200FC974200FB9E4F00FFAD6700FFFAF600FFA55800FFB26F00FFB5
+        7400D59A6600FFBA7D00E2A67000FFBB7F00EAAF7900EFB47E00D9A77A00FFC5
+        9100FFC69300F3BD8C00FED1A700FFD3AA00E9C9AB00E7CAAF00FFF6EE00E1BA
+        9500F7CEA600FFD5AD00FFDAB700E7C9AB00E7C9AC00FFE2C600FBE7D400F4E7
+        DA00FFF3E700FEFBF800FFFAF400FBF7F200FFFEFC0000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000020202020236
+        3431313335020202020202020215152D290B0B0C2C13130202020202302F0908
+        0B290B0B09082E35020202300F26280B296701500C0B082E130202302123050B
+        0C6E01520C0C0B081302122A1B23080A0C6D01500C0C0C092C3412201B21423A
+        0A6601500C433C0A2B3410031818705F1D6A014B4E75690B0B320E4139177201
+        5865015A7101600A0B310E494519537476567673015C382829140E4555161A4D
+        470101015E2226050D14021C62511E1B4C680163222427251102021C4A6C4F18
+        0454643F1F2120071102020226516F5D48403B3D3D37242E020202020245455B
+        6B61595746202002020202020202021E3E444117060202020202}
+      UnclickAfterDoing = False
+      OnClick = BtnSEMoveUpClick
+    end
+  end
+end

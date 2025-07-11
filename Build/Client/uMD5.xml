@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<namespace name="uMD5" platform="Win32">
+  <function name="MD5String" visibility="public" file="uMD5.pas" line="13">
+    <parameters>
+      <parameter name="AContent" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+  <function name="MD5File" visibility="public" file="uMD5.pas" line="18">
+    <parameters>
+      <parameter name="AFileName" type="string" paramflags="const" />
+      <retval type="string" />
+    </parameters>
+  </function>
+</namespace>

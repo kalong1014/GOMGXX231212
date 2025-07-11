@@ -1,0 +1,110 @@
+object FrmSetting: TFrmSetting
+  Left = 0
+  Top = 0
+  BorderStyle = bsToolWindow
+  Caption = #28216#25103#35774#32622
+  ClientHeight = 112
+  ClientWidth = 261
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDefault
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object LabelDisplaySize: TLabel
+    Left = 8
+    Top = 18
+    Width = 36
+    Height = 13
+    Caption = #20998#36776#29575
+  end
+  object Bevel1: TBevel
+    Left = 11
+    Top = 72
+    Width = 242
+    Height = 2
+  end
+  object LabHomePath: TLabel
+    Left = 416
+    Top = 103
+    Width = 129
+    Height = 13
+    AutoSize = False
+    Caption = #37325#26032#35774#32622#20256#22855#30446#24405
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsUnderline]
+    ParentFont = False
+    OnClick = LabHomePathClick
+    OnMouseEnter = LabHomePathMouseEnter
+    OnMouseLeave = LabHomePathMouseLeave
+  end
+  object chkWindow: TCheckBox
+    Left = 72
+    Top = 41
+    Width = 97
+    Height = 17
+    Caption = #31383#21475#27169#24335
+    Checked = True
+    State = cbChecked
+    TabOrder = 0
+  end
+  object cbbScreenSize: TComboBox
+    Left = 72
+    Top = 14
+    Width = 178
+    Height = 21
+    Style = csDropDownList
+    TabOrder = 1
+  end
+  object BitBtn1: TBitBtn
+    Left = 97
+    Top = 80
+    Width = 75
+    Height = 25
+    Caption = #30830#23450
+    Default = True
+    DoubleBuffered = True
+    ModalResult = 1
+    ParentDoubleBuffered = False
+    TabOrder = 4
+  end
+  object BitBtn2: TBitBtn
+    Left = 178
+    Top = 80
+    Width = 75
+    Height = 25
+    Cancel = True
+    Caption = #21462#28040
+    DoubleBuffered = True
+    ModalResult = 2
+    ParentDoubleBuffered = False
+    TabOrder = 5
+  end
+  object chkVBlank: TCheckBox
+    Left = 416
+    Top = 57
+    Width = 97
+    Height = 17
+    Caption = #22402#30452#21516#27493
+    Checked = True
+    State = cbChecked
+    TabOrder = 2
+  end
+  object chk3D: TCheckBox
+    Left = 416
+    Top = 80
+    Width = 97
+    Height = 17
+    Caption = '3D'#30828#20214#21152#36895
+    TabOrder = 3
+  end
+end

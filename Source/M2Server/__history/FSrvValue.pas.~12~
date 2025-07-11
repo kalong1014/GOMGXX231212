@@ -1,0 +1,760 @@
+unit FSrvValue;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons, Spin, HUtil32,
+  ExtCtrls, ComCtrls;
+
+type
+  TFrmServerValue = class(TForm)
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    EHum: TSpinEdit;
+    EMon: TSpinEdit;
+    EZen: TSpinEdit;
+    ESoc: TSpinEdit;
+    ENpc: TSpinEdit;
+    BitBtn1: TBitBtn;
+    Label6: TLabel;
+    EDec: TSpinEdit;
+    Label7: TLabel;
+    Label8: TLabel;
+    ECheckBlock: TSpinEdit;
+    ESendBlock: TSpinEdit;
+    Label9: TLabel;
+    EAvailableBlock: TSpinEdit;
+    Label10: TLabel;
+    EGateLoad: TSpinEdit;
+    CbViewHack: TCheckBox;
+    CkViewAdmfail: TCheckBox;
+    CheckBox21: TCheckBox;
+    Edit3: TEdit;
+    CheckBox22: TCheckBox;
+    Edit4: TEdit;
+    Label19: TLabel;
+    Label20: TLabel;
+    CheckBoxExpErience: TCheckBox;
+    Label21: TLabel;
+    EditExpErienceMap: TEdit;
+    Label22: TLabel;
+    EditExpErienceLevel: TEdit;
+    Label32: TLabel;
+    PageControl1: TPageControl;
+    TabSheet1: TTabSheet;
+    TabSheet2: TTabSheet;
+    PageControl2: TPageControl;
+    TabSheet3: TTabSheet;
+    TabSheet4: TTabSheet;
+    TabSheet5: TTabSheet;
+    TabSheet6: TTabSheet;
+    PageControl3: TPageControl;
+    TabSheet7: TTabSheet;
+    TabSheet8: TTabSheet;
+    TabSheet9: TTabSheet;
+    PageControl4: TPageControl;
+    TabSheet10: TTabSheet;
+    Label25: TLabel;
+    SpinEdityouhuojilv: TSpinEdit;
+    Label26: TLabel;
+    SpinEdityouhuoxueliang: TSpinEdit;
+    Label23: TLabel;
+    SpinEditBbpb: TSpinEdit;
+    CheckBbpbsiwang: TCheckBox;
+    TabSheet11: TTabSheet;
+    lbl7: TLabel;
+    sebingpaoxiao: TSpinEdit;
+    PageControl5: TPageControl;
+    TabSheet12: TTabSheet;
+    TabSheet13: TTabSheet;
+    Label24: TLabel;
+    SpinEditliehuoweili: TSpinEdit;
+    Label27: TLabel;
+    SpinEditcishaweili: TSpinEdit;
+    lbl14: TLabel;
+    Label61: TLabel;
+    Label62: TLabel;
+    Label63: TLabel;
+    Powerfulblessingoil: TScrollBar;
+    PPowerfulblessingoil: TScrollBar;
+    WPowerfulblessingoil: TScrollBar;
+    EPowerfulblessingoil: TScrollBar;
+    sPowerfulblessingoil: TEdit;
+    sPPowerfulblessingoil: TEdit;
+    sWPowerfulblessingoil: TEdit;
+    sEPowerfulblessingoil: TEdit;
+    Label64: TLabel;
+    Label38: TLabel;
+    SpinEditerjizhufu: TSpinEdit;
+    Label39: TLabel;
+    SpinEditerjidianshu: TSpinEdit;
+    Label40: TLabel;
+    SpinEditsanjizhufu: TSpinEdit;
+    Label42: TLabel;
+    SpinEditsanjidianshu: TSpinEdit;
+    Label41: TLabel;
+    SpinEditzhufuzuzhou: TSpinEdit;
+    PageControl6: TPageControl;
+    TabSheet14: TTabSheet;
+    Label12: TLabel;
+    EditBadNameMap: TEdit;
+    Label13: TLabel;
+    SpinEditBadNameMapX: TSpinEdit;
+    Label14: TLabel;
+    SpinEditBadNameMapY: TSpinEdit;
+    lbl11: TLabel;
+    lbl12: TLabel;
+    seWeapongoldcoin: TSpinEdit;
+    Weapontime: TSpinEdit;
+    lbl13: TLabel;
+    Label35: TLabel;
+    SpinEditwqsjgj: TSpinEdit;
+    Label36: TLabel;
+    SpinEditwqsjmf: TSpinEdit;
+    Label37: TLabel;
+    SpinEditwqsjds: TSpinEdit;
+    TabSheet15: TTabSheet;
+    lbl2: TLabel;
+    SpinEditbaishidengji: TSpinEdit;
+    lbl3: TLabel;
+    SpinEditchushidengji: TSpinEdit;
+    lbl4: TLabel;
+    SpinEditchushi1: TSpinEdit;
+    lbl5: TLabel;
+    SpinEditchushi2: TSpinEdit;
+    lbl6: TLabel;
+    SpinEditshitucanshu: TSpinEdit;
+    TabSheet16: TTabSheet;
+    PageControl7: TPageControl;
+    TabSheet17: TTabSheet;
+    Label45: TLabel;
+    SpinEditxingyunxlds: TSpinEdit;
+    Label30: TLabel;
+    SpinEditxingyunxl: TSpinEdit;
+    Label59: TLabel;
+    SpinEditjpzonggailv: TSpinEdit;
+    Label31: TLabel;
+    SpinEditjipingailv: TSpinEdit;
+    Label43: TLabel;
+    SpinEditjipindianshu: TSpinEdit;
+    Label44: TLabel;
+    SpinEditdianshugailv: TSpinEdit;
+    TabSheet18: TTabSheet;
+    CheckBox2: TCheckBox;
+    CheckBox14: TCheckBox;
+    CheckBox9: TCheckBox;
+    CheckBox11: TCheckBox;
+    CheckBox25: TCheckBox;
+    CheckBox17: TCheckBox;
+    CheckBox8: TCheckBox;
+    cb_BagWeight: TCheckBox;
+    CheckBox13: TCheckBox;
+    CheckBox10: TCheckBox;
+    Checkzuduihp: TCheckBox;
+    CheckBox24: TCheckBox;
+    CheckBox20: TCheckBox;
+    CheckBox7: TCheckBox;
+    CheckBox5: TCheckBox;
+    CheckBox26: TCheckBox;
+    CheckBox15: TCheckBox;
+    CheckBoxMirShowNumber: TCheckBox;
+    CheckBox23: TCheckBox;
+    CheckBox6: TCheckBox;
+    CheckBox31: TCheckBox;
+    CheckBox30: TCheckBox;
+    CheckBox4: TCheckBox;
+    CheckBox19: TCheckBox;
+    CheckBoxMirShowHp: TCheckBox;
+    CheckBox3: TCheckBox;
+    CheckBox29: TCheckBox;
+    CheckBox16: TCheckBox;
+    CheckBox12: TCheckBox;
+    CheckBoxDark: TCheckBox;
+    CheckBox18: TCheckBox;
+    CheckBoxfuguHP: TCheckBox;
+    CheckBox27: TCheckBox;
+    CheckBox28: TCheckBox;
+    TabSheet19: TTabSheet;
+    Label54: TLabel;
+    SpinEditsiwangbaolv: TSpinEdit;
+    Label56: TLabel;
+    SpinEdithongmingbaolv: TSpinEdit;
+    Label57: TLabel;
+    SpinEditbeibaobaolv: TSpinEdit;
+    TabSheet20: TTabSheet;
+    Label34: TLabel;
+    SpinEditsdfanwei: TSpinEdit;
+    TabSheet21: TTabSheet;
+    Label33: TLabel;
+    SpinEditzbchijiu: TSpinEdit;
+    PageControl8: TPageControl;
+    TabSheet22: TTabSheet;
+    Label28: TLabel;
+    SpinEditlvduweili: TSpinEdit;
+    Label29: TLabel;
+    SpinEdithongduweili: TSpinEdit;
+    TabSheet23: TTabSheet;
+    Label51: TLabel;
+    SpinEditwakuang1: TSpinEdit;
+    Label52: TLabel;
+    SpinEditwakuang2: TSpinEdit;
+    TabSheet24: TTabSheet;
+    Label53: TLabel;
+    SpinEditPkzhi: TSpinEdit;
+    TabSheet25: TTabSheet;
+    CheckBox1: TCheckBox;
+    SpinEdit1: TSpinEdit;
+    CheckBoxExpDouble: TCheckBox;
+    SpinEditExpDouble: TSpinEdit;
+    RadioGroup1: TRadioGroup;
+    Label15: TLabel;
+    Label17: TLabel;
+    lbl1: TLabel;
+    SpinEdit2: TSpinEdit;
+    Edit1: TEdit;
+    SpinEditMsgFColor: TSpinEdit;
+    SpinEditMsgBColor: TSpinEdit;
+    RadioGroup2: TRadioGroup;
+    Label16: TLabel;
+    Label18: TLabel;
+    Label11: TLabel;
+    SpinEdit3: TSpinEdit;
+    Edit2: TEdit;
+    SpinEditMsgDFColor: TSpinEdit;
+    SpinEditMsgDBColor: TSpinEdit;
+    TabSheet26: TTabSheet;
+    GroupBox1: TGroupBox;
+    MONLEVELTIAOJIE: TSpinEdit;
+    Label46: TLabel;
+    seMONJISHU: TSpinEdit;
+    Label47: TLabel;
+    seMONSUIJIZHI: TSpinEdit;
+    Label48: TLabel;
+    Label49: TLabel;
+    Label50: TLabel;
+    tshuofumingzhong: TTabSheet;
+    seHFJL: TSpinEdit;
+    Label55: TLabel;
+    TabSheet27: TTabSheet;
+    YinYangDharmaring: TSpinEdit;
+    Label58: TLabel;
+    YinYangDharmaring1: TSpinEdit;
+    Label60: TLabel;
+    YinYangDharmaring2: TSpinEdit;
+    Label65: TLabel;
+    Label66: TLabel;
+    TabSheet28: TTabSheet;
+    seCurse: TSpinEdit;
+    Label67: TLabel;
+    seCurse1: TSpinEdit;
+    Label68: TLabel;
+    seCurse2: TSpinEdit;
+    Label69: TLabel;
+    seCurse3: TSpinEdit;
+    Label70: TLabel;
+    TabSheet29: TTabSheet;
+    TabSheet30: TTabSheet;
+    seTIEBUSHAN: TSpinEdit;
+    Label71: TLabel;
+    Bloodbreakingcrazykilling: TSpinEdit;
+    Label72: TLabel;
+    Label73: TLabel;
+    Label74: TLabel;
+    CheckBoxHighLevelKillMonFixExp: TCheckBox;
+    TabSheet31: TTabSheet;
+    seGALECHOP: TSpinEdit;
+    Label75: TLabel;
+    GroupBox2: TGroupBox;
+    SpinEditpaobusudu: TSpinEdit;
+    Label76: TLabel;
+    MAGICSPEED: TSpinEdit;
+    Label77: TLabel;
+    ATTACKSPEED: TSpinEdit;
+    Label78: TLabel;
+    GroupBox3: TGroupBox;
+    Taoistbabycontrol: TCheckBox;
+    Taoistbabyattackpower: TSpinEdit;
+    Magebabycontrol: TCheckBox;
+    Magebabyattack: TSpinEdit;
+    MageFoundation: TLabel;
+    MagebabyFoundation: TSpinEdit;
+    LIMITLESSQi: TTabSheet;
+    LIMITLESSQiswitch: TCheckBox;
+    chksigedu: TCheckBox;
+    Deatheject: TCheckBox;
+    grp1: TGroupBox;
+    Allowablelevel: TCheckBox;
+    ExtraLowLevel1: TSpinEdit;
+    ExtraHighquantity: TSpinEdit;
+    lbl8: TLabel;
+    lbl9: TLabel;
+    Wemade: TGroupBox;
+    WemadeGoldEvent: TCheckBox;
+    WemadeItemEvent: TCheckBox;
+    ExtraMoneyPer: TSpinEdit;
+    ExtraItemPer: TSpinEdit;
+    lbl10: TLabel;
+    lbl15: TLabel;
+    lbl16: TLabel;
+    lbl17: TLabel;
+    NoviceguildEXP: TCheckBox;
+    NoviceguildEXPSZ: TSpinEdit;
+    lbl18: TLabel;
+    CheckBox32: TCheckBox;
+    procedure EHumKeyPress(Sender: TObject; var Key: Char);
+    procedure CheckBoxfuguHPClick(Sender: TObject);
+    procedure CheckBoxMirShowNumberClick(Sender: TObject);
+    procedure CheckBoxMirShowHpClick(Sender: TObject);
+    procedure PowerfulblessingoilChange(Sender: TObject);
+    procedure PPowerfulblessingoilChange(Sender: TObject);
+    procedure WPowerfulblessingoilChange(Sender: TObject);
+    procedure EPowerfulblessingoilChange(Sender: TObject);
+    procedure CheckBox17Click(Sender: TObject);
+  private
+  public
+    function Execute: Boolean;
+  end;
+
+var
+  FrmServerValue: TFrmServerValue;
+
+implementation
+
+uses
+  svMain, UsrEngn, M2Share;
+
+{$R *.DFM}
+
+function TFrmServerValue.Execute: Boolean;
+begin
+  Result := FALSE;
+  EHum.Value := HumLimitTime;
+  EMon.Value := MonLimitTime;
+  EZen.Value := ZenLimitTime;
+  ESoc.Value := SocLimitTime;
+  EDec.Value := DecLimitTime;
+  ENpc.Value := NpcLimitTime;
+  SpinEditMsgFColor.Value := g_nMsgFColor;
+  SpinEditMsgBColor.Value := g_nMsgBColor;
+  SpinEditMsgDFColor.Value := g_nMsgDFColor;
+  SpinEditMsgDBColor.Value := g_nMsgDBColor;
+
+  EditBadNameMap.Text := BADMANHOMEMAP;
+  SpinEditBadNameMapX.Value := BADMANSTARTX;
+  SpinEditBadNameMapY.Value := BADMANSTARTY;
+  SpinEditBbpb.Value := Bbpb;
+  SpinEdityouhuojilv.Value := youhuojilv;
+  SpinEdityouhuoxueliang.Value := youhuoxueliang;
+  SpinEditliehuoweili.Value := huoweili;
+  sebingpaoxiao.Value := bingpaoxiao;
+  SpinEditcishaweili.Value := cishaweili;
+  SpinEditlvduweili.Value := lvduweili;
+  SpinEdithongduweili.Value := hongduweili;
+  SpinEditzbchijiu.Value := zbchijiu;
+  SpinEditsdfanwei.Value := sdfanwei;
+  SpinEditwqsjgj.Value := wqsjgj;
+  SpinEditwqsjmf.Value := wqsjmf;
+  SpinEditwqsjds.Value := wqsjds;
+  SpinEditerjizhufu.Value := erjizhufu;
+  SpinEditerjidianshu.Value := erjidianshu;
+  SpinEditsanjizhufu.Value := sanjizhufu;
+  SpinEditsanjidianshu.Value := sanjidianshu;
+  SpinEditzhufuzuzhou.Value := zhufuzuzhou;
+  SpinEditbaishidengji.Value := baishidengji;
+  SpinEditchushidengji.Value := chushidengji;
+  SpinEditpaobusudu.Value := g_bopaobusudu;
+  MAGICSPEED.Value := g_MAGICSPEED;
+  ATTACKSPEED.Value := g_ATTACKSPEED;
+  Powerfulblessingoil.Position := g_Powerfulblessingoil;
+  PPowerfulblessingoil.Position := g_PPowerfulblessingoil;
+  WPowerfulblessingoil.Position := g_WPowerfulblessingoil;
+  EPowerfulblessingoil.Position := g_EPowerfulblessingoil;
+  SpinEditchushi1.Value := chushi1;
+  SpinEditchushi2.Value := chushi2;
+  SpinEditshitucanshu.Value := shitucanshu;
+  SpinEditxingyunxl.Value := xingyunxl;
+  SpinEditjipingailv.Value := jipingailv;
+  SpinEditjpzonggailv.Value := jpzonggailv;
+  SpinEditjipindianshu.Value := jipindianshu;
+  SpinEditdianshugailv.Value := dianshugailv;
+  SpinEditxingyunxlds.Value := xingyunxlds;
+  SpinEditwakuang1.Value := wakuang1;
+  SpinEditwakuang2.Value := wakuang2;
+  SpinEditPkzhi.Value := Pkzhi;
+  SpinEditsiwangbaolv.Value := siwangbaolv;
+  SpinEdithongmingbaolv.Value := hongmingbaolv;
+  SpinEditbeibaobaolv.Value := beibaobaolv;
+  MONLEVELTIAOJIE.Value := g_MONLEVELTIAOJIE;
+  seMONJISHU.Value := g_seMONJISHU;
+  seMONSUIJIZHI.Value := g_seMONSUIJIZHI;
+  YinYangDharmaring.Value := g_YinYangDharmaring;
+  YinYangDharmaring1.Value := g_YinYangDharmaring1;
+  YinYangDharmaring2.Value := g_YinYangDharmaring2;
+  seCurse.Value := g_seCurse;
+  seCurse1.Value := g_seCurse1;
+  seCurse2.Value := g_seCurse2;
+  seCurse3.Value := g_seCurse3;
+  seTIEBUSHAN.Value := g_seTIEBUSHAN;
+  Bloodbreakingcrazykilling.Value := g_Bloodbreakingcrazykilling;
+  seGALECHOP.Value := g_seGALECHOP;
+  Taoistbabyattackpower.Value :=  g_Taoistbabyattackpower;
+  Magebabyattack.Value :=  g_Magebabyattack;
+  MagebabyFoundation.Value :=  g_MagebabyFoundation;
+
+
+  ESendBlock.Value := SENDBLOCK;
+  ECheckBlock.Value := SENDCHECKBLOCK;
+  EAvailableBlock.Value := SENDAVAILABLEBLOCK;
+  EGateLoad.Value := GATELOAD;
+  CbViewHack.Checked := BoViewHackCode;
+  CkViewAdmfail.Checked := BoViewAdmissionFail;
+  CheckBoxfuguHP.Checked := g_bofuguHP;
+  Checkzuduihp.Checked := g_bozuduihp;
+  seHFJL.Value := HFJL;
+   //摆摊
+  CheckBox1.Checked := bo摆摊;
+  CheckBox2.Checked := bosafe摆摊;
+  SpinEdit1.Value := int摆摊等级;
+  cb_BagWeight.Checked := g_WeightSet = 1;
+   //摆摊
+  CheckBox3.Checked := boMirNg;
+  CheckBoxExpDouble.Checked := boExpDouble;
+  SpinEditExpDouble.Value := g_nExpDouble;
+  CheckBoxDark.Checked := g_boMirDark;
+  CheckBoxMirShowHp.Checked := g_boMirShowHp;
+  CheckBoxMirShowNumber.Checked := g_boMirShowNumber;
+  chksigedu.Checked := g_bochksigedu;
+
+  CheckBox4.Checked := g_bo免助跑;
+  CheckBox5.Checked := g_bo稳如泰山;
+   CheckBox6.Checked := g_bo技能备注;
+    CheckBox7.Checked := g_bo物品窗口;
+     CheckBox8.Checked := g_bo主界面;
+  CheckBox9.Checked := g_bo锁定人物;
+  CheckBox10.Checked := g_bo锁定怪物;
+  CheckBox11.Checked := g_bo极品蓝字;
+
+  CheckBox12.Checked := g_bo私聊等级;
+  CheckBoxHighLevelKillMonFixExp.Checked := g_boHighLevelKillMonFixExp;
+
+  CheckBox13.Checked := g_bo自动换符;
+  CheckBox14.Checked := g_bo自动换毒;
+
+  CheckBox15.Checked := g_bo地图雷达;
+  CheckBox16.Checked := g_bo悬浮信息;
+  CheckBox17.Checked := g_bo人物四格;
+  CheckBox18.Checked := g_bo大地图开关;
+  CheckBox19.Checked := g_bo小地图迷宫入口显示;
+  CheckBox20.Checked := g_boHelp;
+
+  CheckBox21.Checked := g_boHostpot;
+  CheckBox22.Checked := g_boQuestions;
+  CheckBox23.Checked := g_boChinese;
+  CheckBox24.Checked := g_boWhisperWin;
+  CheckBox25.Checked := g_boRelationWin;
+
+  CheckBox26.Checked := g_SuperPoisonMagic;
+  CheckBox27.Checked := g_boMirShop;
+  CheckBox28.Checked := g_bosjcd;
+  CheckBox29.Checked := g_bozdfy;
+  CheckBox30.Checked := g_bo绝对泰山;
+  CheckBox31.Checked := g_bo刀刀刺杀;
+  CheckBox32.Checked := g_bo战斗退出;
+  Deatheject.Checked := g_Deatheject;
+  Edit3.Text := g_boHostpotWeb;
+  Edit4.Text := g_boQuestionsWeb;
+
+  RadioGroup1.ItemIndex := g_AllMsgType;
+  SpinEdit2.Value :=g_AllMsgmomey;
+  ExtraLowLevel1.Value :=g_ExtraLowLevel1;
+  ExtraMoneyPer.Value :=g_ExtraMoneyPer;
+  ExtraItemPer.Value :=g_ExtraItemPer;
+  NoviceguildEXPSZ.Value :=g_NoviceguildEXPSZ;
+  ExtraHighquantity.Value :=g_ExtraHighquantity;
+  RadioGroup2.ItemIndex := g_TopAllMsgType;
+  SpinEdit3.Value :=g_TopAllMsgmomey;
+  seWeapongoldcoin.Value :=g_seWeapongoldcoin;
+  Weapontime.Value :=g_Weapontime;
+
+  Edit1.Text := g_AllMsgStr;
+  Edit2.Text := g_TopAllMsgStr;
+
+  CheckBoxExpErience.Checked := boSecondCardSystem;
+  EditExpErienceMap.Text := g_sRechargingMap;
+  EditExpErienceLevel.Text := IntToStr(g_nExpErienceLevel);
+  CheckBbpbsiwang.Checked := boBbpbsiwang;
+  Taoistbabycontrol.Checked := g_Taoistbabycontrol;
+  Magebabycontrol.Checked := g_Magebabycontrol;
+  LIMITLESSQiswitch.Checked := g_LIMITLESSQiswitch;
+  Allowablelevel.Checked := g_Allowablelevel;
+  WemadeGoldEvent.Checked := g_WemadeGoldEvent;
+  WemadeItemEvent.Checked := g_WemadeItemEvent;
+  NoviceguildEXP.Checked := g_NoviceguildEXP;
+
+  if ShowModal = mrOk then
+  begin
+    HumLimitTime := _MIN(150, EHum.Value);
+    MonLimitTime := _MIN(150, EMon.Value);
+    ZenLimitTime := _MIN(150, EZen.Value);
+    SocLimitTime := _MIN(150, ESoc.Value);
+    DecLimitTime := _MIN(150, EDec.Value);
+    NpcLimitTime := _MIN(150, ENpc.Value);
+
+    g_nMsgFColor := SpinEditMsgFColor.Value;
+    g_nMsgBColor := SpinEditMsgBColor.Value;
+    g_nMsgDFColor := SpinEditMsgDFColor.Value;
+    g_nMsgDBColor := SpinEditMsgDBColor.Value;
+
+    BADMANHOMEMAP := Trim(EditBadNameMap.Text);
+    BADMANSTARTX := SpinEditBadNameMapX.Value;
+    BADMANSTARTY := SpinEditBadNameMapY.Value;
+
+    Bbpb := SpinEditBbpb.Value;
+    youhuojilv := SpinEdityouhuojilv.Value;
+    youhuoxueliang := SpinEdityouhuoxueliang.Value;
+    huoweili := SpinEditliehuoweili.Value;
+    bingpaoxiao := sebingpaoxiao.Value;
+    cishaweili := SpinEditcishaweili.Value;
+    lvduweili := SpinEditlvduweili.Value;
+    hongduweili := SpinEdithongduweili.Value;
+    zbchijiu := SpinEditzbchijiu.Value;
+    g_bopaobusudu := SpinEditpaobusudu.Value;
+    g_MAGICSPEED := MAGICSPEED.Value;
+    g_ATTACKSPEED := ATTACKSPEED.Value;
+    sdfanwei := SpinEditsdfanwei.Value;
+    wqsjgj := SpinEditwqsjgj.Value;
+    wqsjmf := SpinEditwqsjmf.Value;
+    wqsjds := SpinEditwqsjds.Value;
+    erjizhufu := SpinEditerjizhufu.Value;
+    erjidianshu := SpinEditerjidianshu.Value;
+    sanjizhufu := SpinEditsanjizhufu.Value;
+    sanjidianshu := SpinEditsanjidianshu.Value;
+    zhufuzuzhou := SpinEditzhufuzuzhou.Value;
+    baishidengji := SpinEditbaishidengji.Value;
+    chushidengji := SpinEditchushidengji.Value;
+    g_Powerfulblessingoil := Powerfulblessingoil.Position;
+    g_PPowerfulblessingoil := PPowerfulblessingoil.Position;
+    g_WPowerfulblessingoil := WPowerfulblessingoil.Position;
+    g_EPowerfulblessingoil := EPowerfulblessingoil.Position;
+    chushi1 := SpinEditchushi1.Value;
+    chushi2 := SpinEditchushi2.Value;
+    shitucanshu := SpinEditshitucanshu.Value;
+    xingyunxl := SpinEditxingyunxl.Value;
+    jipingailv := SpinEditjipingailv.Value;
+    jpzonggailv := SpinEditjpzonggailv.Value;
+    jipindianshu := SpinEditjipindianshu.Value;
+    dianshugailv := SpinEditdianshugailv.Value;
+    xingyunxlds := SpinEditxingyunxlds.Value;
+    wakuang1 := SpinEditwakuang1.Value;
+    wakuang2 := SpinEditwakuang2.Value;
+    Pkzhi := SpinEditPkzhi.Value;
+    siwangbaolv := SpinEditsiwangbaolv.Value;
+    hongmingbaolv := SpinEdithongmingbaolv.Value;
+    beibaobaolv := SpinEditbeibaobaolv.Value;
+    g_MONLEVELTIAOJIE := MONLEVELTIAOJIE.Value;
+    g_seMONJISHU := seMONJISHU.Value;
+    g_seMONSUIJIZHI := seMONSUIJIZHI.Value;
+    HFJL := seHFJL.Value;
+    g_YinYangDharmaring := YinYangDharmaring.Value;
+    g_YinYangDharmaring1 := YinYangDharmaring1.Value;
+    g_YinYangDharmaring2 := YinYangDharmaring2.Value;
+    g_seCurse := seCurse.Value;
+    g_seCurse1 := seCurse1.Value;
+    g_seCurse2 := seCurse2.Value;
+    g_seCurse3 := seCurse3.Value;
+    g_seTIEBUSHAN := seTIEBUSHAN.Value;
+    g_Bloodbreakingcrazykilling := Bloodbreakingcrazykilling.Value;
+    g_seGALECHOP := seGALECHOP.Value;
+    g_Taoistbabyattackpower := Taoistbabyattackpower.Value;
+    g_Magebabyattack := Magebabyattack.Value;
+    g_MagebabyFoundation := MagebabyFoundation.Value;
+
+    SENDBLOCK := _MAX(10, ESendBlock.Value);
+    SENDCHECKBLOCK := _MAX(10, ECheckBlock.Value);
+    SENDAVAILABLEBLOCK := _MAX(10, EAvailableBlock.Value);
+    GATELOAD := EGateLoad.Value;
+    BoViewHackCode := CbViewHack.Checked;
+    BoViewAdmissionFail := CkViewAdmFail.Checked;
+      //-摆摊
+    bosafe摆摊 := CheckBox2.Checked;
+    bo摆摊 := CheckBox1.Checked;
+    int摆摊等级 := SpinEdit1.Value;
+    g_WeightSet := Byte(cb_BagWeight.Checked);
+    g_bofuguHP := CheckBoxfuguHP.Checked;
+    g_bozuduihp := Checkzuduihp.Checked;
+      //摆摊
+    boMirNg := CheckBox3.Checked;
+    boExpDouble := CheckBoxExpDouble.Checked;
+    g_nExpDouble := SpinEditExpDouble.Value;
+    g_boMirDark := CheckBoxDark.Checked;
+    g_boMirShowHp := CheckBoxMirShowHp.Checked;
+    g_boMirShowNumber := CheckBoxMirShowNumber.Checked;
+    g_bochksigedu := chksigedu.Checked;
+
+    g_bo免助跑 := CheckBox4.Checked;
+    g_bo稳如泰山 := CheckBox5.Checked;
+    g_bo技能备注 := CheckBox6.Checked;
+    g_bo物品窗口 := CheckBox7.Checked;
+    g_bo主界面 := CheckBox8.Checked;
+    g_bo锁定人物 := CheckBox9.Checked;
+    g_bo锁定怪物  := CheckBox10.Checked;
+    g_bo极品蓝字 := CheckBox11.Checked;
+    g_bo私聊等级 := CheckBox12.Checked;
+    g_boHighLevelKillMonFixExp := CheckBoxHighLevelKillMonFixExp.Checked;
+
+    g_bo自动换符 := CheckBox13.Checked;
+    g_bo自动换毒 := CheckBox14.Checked;
+
+    g_bo地图雷达 := CheckBox15.Checked;
+    g_bo悬浮信息 := CheckBox16.Checked;
+    g_bo人物四格 := CheckBox17.Checked;
+    g_bo大地图开关 := CheckBox18.Checked;
+    g_bo小地图迷宫入口显示 := CheckBox19.Checked;
+    g_boHelp := CheckBox20.Checked;
+
+    g_boHostpot := CheckBox21.Checked;
+    g_boQuestions := CheckBox22.Checked;
+    g_boChinese := CheckBox23.Checked;
+    g_boWhisperWin := CheckBox24.Checked;
+    g_boRelationWin := CheckBox25.Checked;
+
+    g_SuperPoisonMagic := CheckBox26.Checked;
+    g_boMirShop  := CheckBox27.Checked;
+    g_bosjcd := CheckBox28.Checked;
+    g_bozdfy := CheckBox29.Checked;
+    g_bo绝对泰山 := CheckBox30.Checked;
+    g_bo刀刀刺杀 := CheckBox31.Checked;
+    g_bo战斗退出 := CheckBox32.Checked;
+    g_boHostpotWeb:= Trim(Edit3.Text);
+    g_boQuestionsWeb:= Trim(Edit4.Text);
+    g_Deatheject := Deatheject.Checked;
+    g_AllMsgType := RadioGroup1.ItemIndex;
+    g_AllMsgmomey := SpinEdit2.Value;
+    g_ExtraLowLevel1 := ExtraLowLevel1.Value;
+    g_ExtraMoneyPer := ExtraMoneyPer.Value;
+    g_ExtraItemPer := ExtraItemPer.Value;
+    g_NoviceguildEXPSZ := NoviceguildEXPSZ.Value;
+    g_ExtraHighquantity := ExtraHighquantity.Value;
+    g_TopAllMsgType := RadioGroup2.ItemIndex;
+    g_TopAllMsgmomey := SpinEdit3.Value;
+
+    g_seWeapongoldcoin := seWeapongoldcoin.Value;
+    g_Weapontime := Weapontime.Value;
+
+    g_AllMsgStr:= Trim(Edit1.Text);
+    g_TopAllMsgStr:= Trim(Edit2.Text);
+
+    boSecondCardSystem := CheckBoxExpErience.Checked;
+    g_sRechargingMap := Trim(EditExpErienceMap.Text);
+    g_nExpErienceLevel := StrToIntDef(EditExpErienceLevel.Text, 7);
+    boBbpbsiwang := CheckBbpbsiwang.Checked;
+    g_Taoistbabycontrol := Taoistbabycontrol.Checked;
+    g_Magebabycontrol := Magebabycontrol.Checked;
+    g_LIMITLESSQiswitch := LIMITLESSQiswitch.Checked;
+    g_Allowablelevel := Allowablelevel.Checked;
+    g_WemadeGoldEvent := WemadeGoldEvent.Checked;
+    g_WemadeItemEvent := WemadeItemEvent.Checked;
+    g_NoviceguildEXP := NoviceguildEXP.Checked;
+    UserEngine.RefAllUserConfig('');
+    Result := TRUE;
+  end;
+end;
+
+procedure TFrmServerValue.PowerfulblessingoilChange(Sender: TObject);
+var
+nInteger:Integer;
+begin
+   nInteger:=Powerfulblessingoil.Position;
+   sPowerfulblessingoil.Text:=IntToStr(nInteger);
+   g_Powerfulblessingoil:=nInteger;
+end;
+procedure TFrmServerValue.PPowerfulblessingoilChange(Sender: TObject);
+var
+nInteger:Integer;
+begin
+   nInteger:=PPowerfulblessingoil.Position;
+   sPPowerfulblessingoil.Text:=IntToStr(nInteger);
+   g_PPowerfulblessingoil:=nInteger;
+end;
+procedure TFrmServerValue.WPowerfulblessingoilChange(Sender: TObject);
+var
+nInteger:Integer;
+begin
+   nInteger:=WPowerfulblessingoil.Position;
+   sWPowerfulblessingoil.Text:=IntToStr(nInteger);
+   g_WPowerfulblessingoil:=nInteger;
+end;
+procedure TFrmServerValue.EPowerfulblessingoilChange(Sender: TObject);
+var
+nInteger:Integer;
+begin
+   nInteger:=EPowerfulblessingoil.Position;
+   sEPowerfulblessingoil.Text:=IntToStr(nInteger);
+   g_EPowerfulblessingoil:=nInteger;
+end;
+
+procedure TFrmServerValue.CheckBox17Click(Sender: TObject);
+begin
+ if CheckBox17.Checked then
+ begin
+   chksigedu.Enabled := True;
+  end
+  else
+  begin
+    chksigedu.Enabled := False;
+    chksigedu.Checked := False;
+  end;
+end;
+
+procedure TFrmServerValue.CheckBoxfuguHPClick(Sender: TObject);
+begin
+  if CheckBoxfuguHP.Checked then
+  begin
+    CheckBoxMirShowNumber.Enabled := False;
+    CheckBoxMirShowHp.Enabled := False;
+  end
+  else
+  begin
+    //CheckBoxMirShowNumber.Enabled := True;
+    CheckBoxMirShowHp.Enabled := True;
+  end;
+end;
+
+procedure TFrmServerValue.CheckBoxMirShowHpClick(Sender: TObject);
+begin
+  if CheckBoxMirShowHp.Checked then
+  begin
+    CheckBoxfuguHP.Enabled := False;
+    CheckBoxMirShowNumber.Enabled := True;
+  end
+  else
+  begin
+    CheckBoxfuguHP.Enabled := True;
+    CheckBoxMirShowNumber.Enabled := False;
+    CheckBoxMirShowNumber.Checked := False;
+  end;
+end;
+
+procedure TFrmServerValue.CheckBoxMirShowNumberClick(Sender: TObject);
+begin
+  if CheckBoxMirShowNumber.Checked then
+  begin
+    CheckBoxfuguHP.Enabled := False;
+  end
+  else
+  begin
+    CheckBoxfuguHP.Enabled := True;
+  end;
+end;
+
+procedure TFrmServerValue.EHumKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Sender is TSpinEdit then
+    TSpinEdit(Sender).Value := Str_ToInt(TSpinEdit(Sender).Text, 0);
+end;
+
+end.
+

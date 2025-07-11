@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899/12/30 00:00:00.000.110,=D:\blueNew\Source\LoginEx\Outputs\Login.vmp.exe</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.526,D:\blueNew\Source\LoginEx\Outputs\Login.vmp.exe=</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.663,=E:\未整理文件\移动硬盘\Mir2Development\Source\LoginEx\Outputs\Login.exe</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.552,=D:\blueNew\Source\LoginEx - 明文\Outputs\Login.exe</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.574,=D:\blueNew\Source\LoginEditor\M2LoginServerList.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.983,=D:\blueNew\Source\LoginEditor\M2LoginEditor.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.357,D:\blueNew\Source\LoginEditor\M2LoginEditor.pas=</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.045,=D:\blueNew\Source\LoginEditor\M2LoginEditor.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.153,D:\blueNew\Source\LoginEditor\Main.pas=</Transaction>
+  </Transactions>
+</BorlandProject>

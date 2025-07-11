@@ -1,0 +1,31 @@
+program LoginServer;
+
+{$IF CompilerVersion >= 21.0}
+{$WEAKLINKRTTI ON}
+{$RTTI EXPLICIT METHODS([]) PROPERTIES([]) FIELDS([])}
+{$IFEND}
+
+uses
+{$IFDEF DEBUG}
+  FastMM4,
+{$ENDIF}
+  Forms,
+  LoginSvrWnd in 'LoginSvrWnd.pas' {CLoginSvrWnd},
+  GeneralConfig in 'GeneralConfig.pas' {frmGeneralConfig},
+  LSShare in 'LSShare.pas',
+  SQLIDDB in 'SQLIDDB.pas',
+  NetCheckServer in 'NetCheckServer.pas',
+  NetGameServer in 'NetGameServer.pas',
+  NetLoginGate in 'NetLoginGate.pas',
+  EditUserInfo in 'Tools\EditUserInfo.pas' {FrmUserInfoEdit},
+  FrmFindId in 'Tools\FrmFindId.pas' {FrmFindUserId},
+  GrobalSession in 'Tools\GrobalSession.pas' {frmGrobalSession};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TCLoginSvrWnd, CLoginSvrWnd);
+  Application.Run;
+end.
